@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { TilesRenderer } from '3d-tiles-renderer';
 
 export class GoogleTilesManager {
   constructor({ scene, camera, renderer, onStatusChange }) {
@@ -85,6 +84,7 @@ export class GoogleTilesManager {
         this.group.clear();
       }
 
+      const { TilesRenderer } = await import('3d-tiles-renderer');
       const url = `https://tile.googleapis.com/v1/3dtiles/root.json?key=${this.apiKey}`;
 
       this.tilesRenderer = new TilesRenderer(url);

@@ -104,15 +104,8 @@ class JakartaApp {
       }
     });
 
-    // Auto-enable if API key already saved in localStorage or landmarks config
-    const savedApiKey = localStorage.getItem('google_3d_tiles_api_key') || GOOGLE_TILES_CONFIG.apiKey;
-    if (savedApiKey) {
-      this.googleTiles.enable(savedApiKey).then(() => {
-        this.city.setProceduralVisible(false);
-      }).catch(() => {
-        this.city.setProceduralVisible(true);
-      });
-    }
+    // Ensure our custom Three.js Jakarta 3D city is always visible on startup
+    this.city.setProceduralVisible(true);
 
     // Event listener from UI modal
     window.addEventListener('toggle-google-tiles', async (e) => {
