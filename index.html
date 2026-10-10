@@ -1,24 +1,39 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JAKARTA 3D VIEW — Digital Twin & Eksplorasi 3D Kota Jakarta</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏙️</text></svg>">
+  <title>JAKARTA 3D — Geospatial Digital Twin & Architecture View</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23f59e0b%22 stroke-width=%222%22><rect x=%223%22 y=%223%22 width=%2218%22 height=%2218%22 rx=%222%22/><path d=%22M9 3v18M15 3v18M3 9h18M3 15h18%22/></svg>">
   
-  <!-- Tailwind CSS via CDN -->
+  <!-- Taste-Skill Typography: Geist & Geist Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS via CDN with customized Taste-Skill configuration -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
+          fontFamily: {
+            sans: ['Geist', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+            mono: ['Geist Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+          },
           colors: {
-            brand: {
-              gold: '#fbbf24',
-              teal: '#0d9488',
-              blue: '#0284c7',
-              dark: '#030712'
+            surface: {
+              base: '#070a10',
+              panel: 'rgba(12, 17, 29, 0.78)',
+              hover: 'rgba(23, 32, 54, 0.85)',
+              border: 'rgba(255, 255, 255, 0.08)',
+              borderHover: 'rgba(255, 255, 255, 0.18)'
+            },
+            accent: {
+              DEFAULT: '#f59e0b',
+              light: '#fbbf24',
+              glow: 'rgba(245, 158, 11, 0.15)'
             }
           }
         }
@@ -42,8 +57,10 @@
       padding: 0;
       overflow: hidden;
       user-select: none;
-      background-color: #030712;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #070a10;
+      font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     #canvas-container {
@@ -56,46 +73,55 @@
       z-index: 1;
     }
 
-    /* Glassmorphism surfaces */
-    .glass-panel {
-      background: rgba(15, 23, 42, 0.78);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+    /* Calibrated Anti-Slop Glassmorphism */
+    .glass-surface {
+      background: rgba(10, 14, 23, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
     }
 
-    .glass-button {
-      background: rgba(30, 41, 59, 0.7);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    .glass-chip {
+      background: rgba(18, 24, 38, 0.65);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .glass-button:hover {
-      background: rgba(51, 65, 85, 0.9);
-      border-color: rgba(251, 191, 36, 0.4);
-      transform: translateY(-2px);
+    .glass-chip:hover {
+      background: rgba(28, 38, 60, 0.85);
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
+    }
+    .glass-chip:active {
+      transform: scale(0.98);
     }
 
+    /* Time preset active segmented indicator */
     .active-time {
-      background: rgba(251, 191, 36, 0.2) !important;
-      border-color: rgba(251, 191, 36, 0.8) !important;
+      background: rgba(245, 158, 11, 0.14) !important;
+      border-color: rgba(245, 158, 11, 0.5) !important;
       color: #fbbf24 !important;
+      box-shadow: inset 0 0 12px rgba(245, 158, 11, 0.1);
     }
 
-    /* Custom scrollbar */
+    /* Subtle custom scrollbar */
     ::-webkit-scrollbar {
-      width: 6px;
+      width: 4px;
     }
     ::-webkit-scrollbar-track {
-      background: rgba(15, 23, 42, 0.5);
+      background: transparent;
     }
     ::-webkit-scrollbar-thumb {
-      background: rgba(100, 116, 139, 0.5);
+      background: rgba(255, 255, 255, 0.15);
       border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
     }
   </style>
 </head>
-<body class="text-slate-100 antialiased">
+<body class="text-zinc-100 antialiased selection:bg-amber-500/20 selection:text-amber-300">
 
   <!-- 3D WebGL Canvas Viewport -->
   <div id="canvas-container"></div>
@@ -106,99 +132,139 @@
     <!-- Top Header Bar -->
     <header class="flex items-center justify-between pointer-events-auto">
       
-      <!-- Brand & Title -->
-      <div class="glass-panel px-4 py-3 rounded-2xl flex items-center gap-3.5 shadow-2xl">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-300 flex items-center justify-center text-slate-950 font-bold text-xl shadow-lg shadow-amber-500/20">
-          🏛️
+      <!-- Brand & Geospatial Metadata -->
+      <div class="glass-surface px-4 py-2.5 rounded-xl flex items-center gap-3.5">
+        <!-- Minimalist Architectural Monograph Icon -->
+        <div class="w-8 h-8 rounded-lg bg-zinc-900 border border-white/10 flex items-center justify-center text-amber-400 shadow-inner">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 21h18"/>
+            <path d="M6 21V7l6-4 6 4v14"/>
+            <path d="M10 9h4"/>
+            <path d="M10 13h4"/>
+            <path d="M10 17h4"/>
+          </svg>
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="font-extrabold tracking-wider text-base md:text-lg text-white">JAKARTA 3D VIEW</h1>
-            <span class="px-2 py-0.5 text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full">LIVE</span>
+            <h1 class="font-bold tracking-tight text-sm md:text-base text-zinc-100 font-sans">JAKARTA 3D VIEW</h1>
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1 animate-pulse"></span>
+              ONLINE
+            </span>
           </div>
-          <p class="text-xs text-slate-400 font-medium hidden sm:block">Digital Twin & Eksplorasi Arsitektur Sudirman-Thamrin</p>
+          <p class="text-[11px] text-zinc-400 font-mono tracking-wider">6°10'30" S · 106°49'38" E · WGS84</p>
         </div>
       </div>
 
       <!-- Center / Right Top Controls -->
-      <div class="flex items-center gap-2.5">
+      <div class="flex items-center gap-2">
         
-        <!-- Weather Tag -->
-        <div class="glass-panel hidden lg:flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs text-slate-300">
-          <span>🌤️</span>
-          <span class="font-semibold text-white">32°C</span>
-          <span class="text-slate-400">Jakarta Pusat • Cerah</span>
+        <!-- Live Environment Telemetry Badge -->
+        <div class="glass-surface hidden lg:flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-mono text-zinc-300">
+          <div class="flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+            </svg>
+            <span class="font-medium text-zinc-200">32°C</span>
+          </div>
+          <span class="text-zinc-600">|</span>
+          <span class="text-zinc-400 text-[11px]">TROPICAL · 1012 hPa</span>
         </div>
 
-        <!-- Time of Day Switcher -->
-        <div class="glass-panel p-1 rounded-xl flex items-center gap-1 shadow-xl">
-          <button data-time-preset="day" class="active-time px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition flex items-center gap-1.5" title="Mode Siang">
-            <span>☀️</span> <span class="hidden sm:inline">Siang</span>
+        <!-- Time of Day Segmented Controller -->
+        <div class="glass-surface p-1 rounded-xl flex items-center gap-1">
+          <button data-time-preset="day" class="active-time px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-300 hover:text-white transition flex items-center gap-1.5" title="Mode Siang">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+            </svg>
+            <span class="hidden sm:inline font-sans">Siang</span>
           </button>
-          <button data-time-preset="golden" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition flex items-center gap-1.5" title="Mode Senja / Golden Hour">
-            <span>🌅</span> <span class="hidden sm:inline">Senja</span>
+
+          <button data-time-preset="golden" class="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-300 hover:text-white transition flex items-center gap-1.5" title="Mode Senja / Golden Hour">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+              <path d="M17 18a5 5 0 0 0-10 0"/>
+              <path d="M12 2v7M4.22 10.22l1.42 1.42M18.36 11.64l1.42-1.42M1 18h22M12 18v4"/>
+            </svg>
+            <span class="hidden sm:inline font-sans">Senja</span>
           </button>
-          <button data-time-preset="night" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition flex items-center gap-1.5" title="Mode Malam (City Lights)">
-            <span>🌙</span> <span class="hidden sm:inline">Malam</span>
+
+          <button data-time-preset="night" class="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-300 hover:text-white transition flex items-center gap-1.5" title="Mode Malam">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+            </svg>
+            <span class="hidden sm:inline font-sans">Malam</span>
           </button>
         </div>
 
         <!-- Custom .GLB Slot / Import Button -->
-        <button id="open-import-btn" class="glass-button px-3.5 py-2 rounded-xl text-xs font-semibold text-amber-300 flex items-center gap-1.5 shadow-xl hover:text-amber-200">
-          <span>📦</span>
-          <span class="hidden md:inline">Tambah Model .GLB</span>
+        <button id="open-import-btn" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-amber-400 flex items-center gap-1.5 hover:text-amber-300">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+            <path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>
+          </svg>
+          <span class="hidden md:inline font-sans font-semibold">Model .GLB</span>
         </button>
 
       </div>
     </header>
 
-    <!-- Center Drag & Drop Notice (Subtle helper badge) -->
-    <div class="self-center glass-panel px-4 py-1.5 rounded-full text-xs text-slate-300 hidden md:flex items-center gap-2 shadow-lg opacity-85">
-      <span class="text-amber-400">💡 Tip:</span>
-      <span>Klik kiri tahan untuk putar pandangan • Scroll untuk zoom • Tarik file <b>.glb</b> ke layar untuk memasukkan model 3D sendiri</span>
+    <!-- Subdued HUD Telemetry Indicator (Bottom Left) -->
+    <div class="hidden lg:flex items-center gap-3 glass-surface px-3 py-1.5 rounded-lg text-[11px] font-mono text-zinc-400 self-start pointer-events-auto">
+      <span class="text-zinc-500">CORRIDOR</span>
+      <span class="text-zinc-200">SUDIRMAN · THAMRIN</span>
+      <span class="text-zinc-600">/</span>
+      <span class="text-zinc-500">ENGINE</span>
+      <span class="text-zinc-200">THREE.JS WEBGL</span>
     </div>
 
-    <!-- Bottom Cinematic Tour Dock -->
+    <!-- Bottom Tour Controller Dock -->
     <div class="w-full flex justify-center pb-2 pointer-events-auto">
-      <nav class="glass-panel p-2 rounded-2xl flex items-center gap-1.5 max-w-full overflow-x-auto shadow-2xl">
+      <nav class="glass-surface p-1.5 rounded-2xl flex items-center gap-1.5 max-w-full overflow-x-auto shadow-2xl">
         
-        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 hidden lg:inline">Tour Jakarta</span>
+        <div class="px-3 py-1 text-[10px] font-mono text-zinc-400 uppercase tracking-widest hidden lg:flex items-center gap-1.5 border-r border-white/5 mr-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+          NAVIGASI
+        </div>
         
-        <button data-tour-id="monas" class="glass-button px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-200 flex items-center gap-2 whitespace-nowrap">
-          <span>🏛️</span>
+        <button data-tour-id="monas" class="glass-chip px-3.5 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+          <span class="font-mono text-[10px] text-zinc-400">01</span>
           <span>Monas</span>
         </button>
 
-        <button data-tour-id="bundaran-hi" class="glass-button px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-200 flex items-center gap-2 whitespace-nowrap">
-          <span>⛲</span>
+        <button data-tour-id="bundaran-hi" class="glass-chip px-3.5 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+          <span class="font-mono text-[10px] text-zinc-400">02</span>
           <span>Bundaran HI</span>
         </button>
 
-        <button data-tour-id="wisma-46" class="glass-button px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-200 flex items-center gap-2 whitespace-nowrap">
-          <span>🏢</span>
+        <button data-tour-id="wisma-46" class="glass-chip px-3.5 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+          <span class="font-mono text-[10px] text-zinc-400">03</span>
           <span>Wisma 46</span>
         </button>
 
-        <button data-tour-id="menara-bca" class="glass-button px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-200 flex items-center gap-2 whitespace-nowrap">
-          <span>🏙️</span>
+        <button data-tour-id="menara-bca" class="glass-chip px-3.5 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+          <span class="font-mono text-[10px] text-zinc-400">04</span>
           <span>Menara BCA</span>
         </button>
 
-        <button data-tour-id="scbd-district" class="glass-button px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-200 flex items-center gap-2 whitespace-nowrap">
-          <span>💼</span>
+        <button data-tour-id="scbd-district" class="glass-chip px-3.5 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+          <span class="font-mono text-[10px] text-zinc-400">05</span>
           <span>SCBD</span>
         </button>
 
-        <button data-tour-id="gbk-senayan" class="glass-button px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-200 flex items-center gap-2 whitespace-nowrap">
-          <span>🏟️</span>
+        <button data-tour-id="gbk-senayan" class="glass-chip px-3.5 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-2 whitespace-nowrap">
+          <span class="font-mono text-[10px] text-zinc-400">06</span>
           <span>GBK Senayan</span>
         </button>
 
-        <div class="w-px h-6 bg-slate-700 mx-1"></div>
+        <div class="w-px h-5 bg-white/10 mx-1"></div>
 
-        <button data-tour-id="aerial" class="glass-button px-3 py-2 rounded-xl text-xs font-semibold text-amber-300 flex items-center gap-1.5 whitespace-nowrap hover:text-amber-200">
-          <span>🚁</span>
-          <span>Panorama 360°</span>
+        <button data-tour-id="aerial" class="glass-chip px-3.5 py-2 rounded-xl text-xs font-medium text-amber-400 flex items-center gap-1.5 whitespace-nowrap hover:text-amber-300">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="m4.93 4.93 4.24 4.24M14.83 9.17l4.24-4.24M14.83 14.83l4.24 4.24M9.17 14.83l-4.24 4.24"/>
+          </svg>
+          <span class="font-semibold">Panorama 360°</span>
         </button>
 
       </nav>
@@ -206,130 +272,142 @@
 
   </div>
 
-  <!-- Landmark Detail Slide-Over Drawer (Right side) -->
-  <aside id="detail-drawer" class="fixed top-0 right-0 h-full w-full max-w-md glass-panel z-30 translate-x-full transition-transform duration-300 ease-out p-6 overflow-y-auto flex flex-col justify-between shadow-2xl border-l border-white/10">
+  <!-- Architectural Dossier Drawer (Right Side) -->
+  <aside id="detail-drawer" class="fixed top-0 right-0 h-full w-full max-w-md glass-surface z-30 translate-x-full transition-transform duration-300 ease-out p-6 overflow-y-auto flex flex-col justify-between border-l border-white/10 shadow-2xl">
     <div>
-      <!-- Drawer Header -->
-      <div class="flex items-center justify-between pb-4 border-b border-slate-700/60">
-        <span id="drawer-category" class="px-2.5 py-1 text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-lg">
-          Landmark
-        </span>
-        <button id="drawer-close-btn" class="w-8 h-8 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
-          ✕
+      <!-- Drawer Header Bar -->
+      <div class="flex items-center justify-between pb-4 border-b border-white/10">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+          <span id="drawer-category" class="font-mono text-[11px] font-semibold tracking-wider text-amber-400 uppercase">
+            LANDMARK
+          </span>
+        </div>
+        <button id="drawer-close-btn" class="w-7 h-7 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-white flex items-center justify-center transition border border-white/5" title="Tutup">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
         </button>
       </div>
 
       <!-- Title & Tagline -->
       <div class="mt-5">
-        <h2 id="drawer-title" class="text-2xl font-black text-white leading-tight">Nama Bangunan</h2>
-        <p id="drawer-tagline" class="text-xs font-medium text-amber-400 mt-1">Tagline Arsitektur</p>
+        <h2 id="drawer-title" class="text-xl md:text-2xl font-extrabold text-white tracking-tight leading-tight">Nama Bangunan</h2>
+        <p id="drawer-tagline" class="text-xs font-medium text-zinc-400 mt-1 leading-relaxed">Tagline Arsitektur</p>
       </div>
 
-      <!-- Quick Metrics Grid -->
-      <div class="grid grid-cols-2 gap-2.5 my-5">
-        <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
-          <div class="text-[11px] text-slate-400">Tinggi Bangunan</div>
-          <div id="drawer-height" class="text-sm font-bold text-white mt-0.5">-</div>
+      <!-- Spatial Specs Grid (Geist Mono Metrics) -->
+      <div class="grid grid-cols-2 gap-2 my-5">
+        <div class="bg-zinc-900/60 p-3 rounded-xl border border-white/5">
+          <div class="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Ketinggian</div>
+          <div id="drawer-height" class="text-sm font-mono font-bold text-zinc-100 mt-0.5">-</div>
         </div>
-        <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
-          <div class="text-[11px] text-slate-400">Tahun Diresmikan</div>
-          <div id="drawer-year" class="text-sm font-bold text-white mt-0.5">-</div>
+        <div class="bg-zinc-900/60 p-3 rounded-xl border border-white/5">
+          <div class="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Tahun Selesai</div>
+          <div id="drawer-year" class="text-sm font-mono font-bold text-zinc-100 mt-0.5">-</div>
         </div>
-        <div class="col-span-2 bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
-          <div class="text-[11px] text-slate-400">Lokasi Koordinat</div>
-          <div id="drawer-location" class="text-xs font-semibold text-slate-200 mt-0.5">-</div>
+        <div class="col-span-2 bg-zinc-900/60 p-3 rounded-xl border border-white/5">
+          <div class="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Lokasi & Wilayah</div>
+          <div id="drawer-location" class="text-xs font-medium text-zinc-200 mt-0.5">-</div>
         </div>
       </div>
 
-      <!-- Description -->
+      <!-- Architectural Narrative -->
       <div class="mt-4">
-        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Deskripsi & Sejarah</h3>
-        <p id="drawer-desc" class="text-sm text-slate-300 leading-relaxed font-normal">
+        <h3 class="text-[11px] font-mono font-semibold text-zinc-400 uppercase tracking-wider mb-2">Deskripsi Arsitektur</h3>
+        <p id="drawer-desc" class="text-xs text-zinc-300 leading-relaxed font-normal">
           Deskripsi mendalam mengenai sejarah dan signifikansi arsitektur bangunan di Jakarta.
         </p>
       </div>
 
-      <!-- Highlights / Facts -->
+      <!-- Highlights / Key Facts -->
       <div class="mt-5">
-        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Fakta Menarik</h3>
-        <ul id="drawer-facts" class="text-xs text-slate-300 space-y-2">
-          <!-- Facts populated dynamically -->
+        <h3 class="text-[11px] font-mono font-semibold text-zinc-400 uppercase tracking-wider mb-2">Fakta Signifikan</h3>
+        <ul id="drawer-facts" class="text-xs text-zinc-300 space-y-2.5">
+          <!-- Populated dynamically via UIManager -->
         </ul>
       </div>
     </div>
 
     <!-- Drawer Action Footer -->
-    <div class="pt-6 mt-6 border-t border-slate-700/60">
-      <button id="drawer-focus-btn" class="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl shadow-lg shadow-amber-500/25 transition flex items-center justify-center gap-2">
-        <span>🎯</span>
-        <span>Arahkan Kamera ke Sini</span>
+    <div class="pt-5 mt-6 border-t border-white/10">
+      <button id="drawer-focus-btn" class="w-full py-3 bg-amber-500 hover:bg-amber-400 active:scale-[0.98] text-zinc-950 font-semibold rounded-xl text-xs tracking-wide transition flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+        </svg>
+        <span>PUSATKAN KAMERA KE BANGUNAN</span>
       </button>
     </div>
   </aside>
 
   <!-- Modal: Tambah Model .GLB Kustom Sendiri -->
-  <div id="import-modal" class="fixed inset-0 z-40 bg-black/75 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="glass-panel w-full max-w-lg rounded-2xl p-6 shadow-2xl border border-slate-700">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-700">
-        <div class="flex items-center gap-2">
-          <span class="text-xl">📦</span>
-          <h3 class="font-bold text-lg text-white">Tambah Model 3D Jakarta (.GLB)</h3>
+  <div id="import-modal" class="fixed inset-0 z-40 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="glass-surface w-full max-w-lg rounded-2xl p-6 border border-white/10 shadow-2xl">
+      <div class="flex items-center justify-between pb-3.5 border-b border-white/10">
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+              <path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>
+            </svg>
+          </div>
+          <h3 class="font-bold text-base text-zinc-100 font-sans">Integrasi Model 3D Jakarta (.GLB)</h3>
         </div>
-        <button id="close-import-btn" class="text-slate-400 hover:text-white text-lg">✕</button>
+        <button id="close-import-btn" class="w-7 h-7 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white flex items-center justify-center transition">
+          ✕
+        </button>
       </div>
 
-      <div class="mt-4 space-y-4 text-sm text-slate-300 leading-relaxed">
-        <p>
-          Anda dapat menambahkan model 3D bangunan nyata Jakarta apa saja ke dalam website ini secara <b>100% gratis</b> melalui 2 cara:
+      <div class="mt-4 space-y-3.5 text-xs text-zinc-300 leading-relaxed">
+        <p class="text-zinc-300">
+          Website ini mendukung pemuatan file model 3D nyata bangunan Jakarta secara <span class="text-amber-400 font-medium">100% gratis</span> tanpa batasan API:
         </p>
 
-        <!-- Cara 1: Instant Drag & Drop -->
-        <div class="p-3.5 rounded-xl bg-slate-800/70 border border-slate-700/60">
-          <h4 class="font-bold text-amber-300 text-xs uppercase tracking-wide flex items-center gap-1.5">
-            <span>⚡</span> Cara 1: Tarik & Lepas Langsung (Drag & Drop)
-          </h4>
-          <p class="text-xs text-slate-300 mt-1">
-            Cukup tarik file <b>.glb</b> atau <b>.gltf</b> dari komputer Anda dan lepas langsung ke jendela browser ini. Model akan langsung dirender seketika di dekat Bundaran HI!
+        <!-- Method 1: Instant Drag & Drop -->
+        <div class="p-3.5 rounded-xl bg-zinc-900/70 border border-white/5 space-y-1">
+          <div class="font-mono text-[11px] font-semibold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+            <span>METHOD 01</span> · DRAG & DROP SEKETIKA
+          </div>
+          <p class="text-zinc-300">
+            Tarik file <code class="text-amber-300 bg-zinc-950 px-1 py-0.5 rounded font-mono">.glb</code> dari komputer Anda dan lepaskan langsung ke jendela browser. Model langsung dirender di koridor Jakarta.
           </p>
         </div>
 
-        <!-- Cara 2: Simpan Permanen -->
-        <div class="p-3.5 rounded-xl bg-slate-800/70 border border-slate-700/60">
-          <h4 class="font-bold text-sky-300 text-xs uppercase tracking-wide flex items-center gap-1.5">
-            <span>💾</span> Cara 2: Simpan Permanen di Proyek
-          </h4>
-          <ol class="text-xs text-slate-300 mt-1 list-decimal list-inside space-y-1">
-            <li>Simpan file model 3D Anda di folder: <code class="text-amber-300 bg-slate-900 px-1 py-0.5 rounded">public/models/nama-gedung.glb</code></li>
-            <li>Buka file <code class="text-amber-300 bg-slate-900 px-1 py-0.5 rounded">src/config/landmarks.js</code></li>
-            <li>Tambahkan nama, posisi koordinat, dan ketinggiannya ke dalam daftar landmark.</li>
-          </ol>
+        <!-- Method 2: Permanent Storage -->
+        <div class="p-3.5 rounded-xl bg-zinc-900/70 border border-white/5 space-y-1">
+          <div class="font-mono text-[11px] font-semibold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
+            <span>METHOD 02</span> · SLOT DIREKTORI PERMANEN
+          </div>
+          <p class="text-zinc-300">
+            Simpan berkas pada folder <code class="text-sky-300 bg-zinc-950 px-1 py-0.5 rounded font-mono">public/models/nama-gedung.glb</code>, lalu daftarkan koordinatnya di <code class="text-sky-300 bg-zinc-950 px-1 py-0.5 rounded font-mono">src/config/landmarks.js</code>.
+          </p>
         </div>
 
-        <!-- Sumber Model 3D Gratis -->
-        <div class="p-3.5 rounded-xl bg-slate-800/70 border border-slate-700/60">
-          <h4 class="font-bold text-emerald-300 text-xs uppercase tracking-wide flex items-center gap-1.5">
-            <span>🌐</span> Sumber Model 3D Gratis Kota Jakarta
-          </h4>
-          <ul class="text-xs text-slate-300 mt-1 space-y-1">
-            <li>• <b>Sketchfab.com:</b> Cari "Jakarta building" atau "Monas" dengan filter <i>Free Download / CC-BY</i> format .GLB.</li>
-            <li>• <b>OpenStreetMap via BlenderGIS:</b> Ekstrak footprint gedung nyata Jakarta langsung dari GIS gratis dan ekspor ke .glb.</li>
-            <li>• <b>Poly Pizza / 3D Warehouse:</b> Ribuan aset arsitektur gratis siap pakai.</li>
+        <!-- Open Data Repositories -->
+        <div class="p-3.5 rounded-xl bg-zinc-900/70 border border-white/5 space-y-1.5">
+          <div class="font-mono text-[11px] font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+            <span>DATA SOURCE</span> · REPOSITORI GRATIS
+          </div>
+          <ul class="space-y-1 text-zinc-400">
+            <li><b class="text-zinc-200">Sketchfab:</b> Filter CC-BY (Gratis) format .GLB untuk gedung-gedung Jakarta.</li>
+            <li><b class="text-zinc-200">BlenderGIS:</b> Unduh koordinat dan tapak gedung 3D satelit OpenStreetMap Jakarta secara otomatis.</li>
           </ul>
         </div>
       </div>
 
       <div class="mt-6 flex justify-end">
-        <button onclick="document.getElementById('import-modal').classList.add('hidden')" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl text-xs transition">
-          Tutup & Mengerti
+        <button onclick="document.getElementById('import-modal').classList.add('hidden')" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 active:scale-[0.98] text-zinc-100 font-medium rounded-xl text-xs transition">
+          Mengerti & Tutup
         </button>
       </div>
     </div>
   </div>
 
   <!-- Toast Notification -->
-  <div id="toast-notification" class="fixed top-20 left-1/2 -translate-x-1/2 glass-panel px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 opacity-0 pointer-events-none transition-all duration-300 z-50 border border-amber-500/40">
-    <span class="text-lg">🎉</span>
-    <span id="toast-message" class="text-xs font-semibold text-white">Notifikasi</span>
+  <div id="toast-notification" class="fixed top-20 left-1/2 -translate-x-1/2 glass-surface px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2.5 opacity-0 pointer-events-none transition-all duration-300 z-50 border border-amber-500/30">
+    <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+    <span id="toast-message" class="text-xs font-mono font-medium text-zinc-200">Notifikasi</span>
   </div>
 
   <!-- Main JavaScript App Entry -->

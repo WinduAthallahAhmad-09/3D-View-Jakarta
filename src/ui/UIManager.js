@@ -99,7 +99,7 @@ export class UIManager {
 
     // Model dropped event listener
     window.addEventListener('model-imported', (e) => {
-      this.showToast(`Berhasil memuat model 3D: ${e.detail.name}! Model diletakkan di dekat Bundaran HI.`);
+      this.showToast(`Model 3D berhasil dimuat: ${e.detail.name} (ditempatkan di koridor pusat)`);
       if (e.detail.model?.userData?.landmarkData) {
         this.showLandmarkDetails(e.detail.model.userData.landmarkData);
       }
@@ -119,7 +119,7 @@ export class UIManager {
 
     if (this.drawerFacts && data.facts) {
       this.drawerFacts.innerHTML = data.facts
-        .map((f) => `<li class="flex items-start gap-2"><span class="text-amber-400 mt-1">✦</span><span>${f}</span></li>`)
+        .map((f) => `<li class="flex items-start gap-2.5 text-xs text-zinc-300"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0"></span><span class="leading-relaxed">${f}</span></li>`)
         .join('');
     }
 
