@@ -44,21 +44,21 @@ export class LightingManager {
    */
   setTimeOfDay(timePreset) {
     if (timePreset === 'day') {
-      // Tropis Cerah
-      this.sunLight.color.setHex(0xffffff);
-      this.sunLight.intensity = 1.7;
+      // Warm Architectural Studio Daylight (Minimalist-UI Harmony)
+      this.sunLight.color.setHex(0xfffdf9);
+      this.sunLight.intensity = 1.75;
       this.sunLight.position.set(220, 320, 150);
 
       this.ambientLight.color.setHex(0xffffff);
-      this.ambientLight.intensity = 0.55;
+      this.ambientLight.intensity = 0.65;
 
-      this.hemiLight.color.setHex(0xbae6fd);
-      this.hemiLight.groundColor.setHex(0x334155);
-      this.hemiLight.intensity = 0.6;
+      this.hemiLight.color.setHex(0xf7f6f3);
+      this.hemiLight.groundColor.setHex(0xd6d3cd);
+      this.hemiLight.intensity = 0.65;
 
-      this.scene.background = new THREE.Color(0x7dd3fc);
-      this.scene.fog.color.setHex(0xbae6fd);
-      this.scene.fog.density = 0.0005;
+      this.scene.background = new THREE.Color(0xf2f0ea);
+      this.scene.fog.color.setHex(0xf2f0ea);
+      this.scene.fog.density = 0.00048;
     } else if (timePreset === 'golden') {
       // Golden Hour / Senja Jakarta
       this.sunLight.color.setHex(0xf97316);

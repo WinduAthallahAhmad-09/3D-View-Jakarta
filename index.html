@@ -1,39 +1,44 @@
 <!DOCTYPE html>
-<html lang="id" class="dark">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JAKARTA 3D — Geospatial Digital Twin & Architecture View</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23f59e0b%22 stroke-width=%222%22><rect x=%223%22 y=%223%22 width=%2218%22 height=%2218%22 rx=%222%22/><path d=%22M9 3v18M15 3v18M3 9h18M3 15h18%22/></svg>">
+  <title>JAKARTA 3D — Atlas Tata Ruang & Arsitektur Pusat Kota</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23111111%22 stroke-width=%222%22><rect x=%223%22 y=%223%22 width=%2218%22 height=%2218%22 rx=%222%22/><path d=%22M9 3v18M15 3v18M3 9h18M3 15h18%22/></svg>">
   
-  <!-- Taste-Skill Typography: Geist & Geist Mono -->
+  <!-- Minimalist-UI Typography: Instrument Serif (Editorial Headings), Geist (Primary Sans), Geist Mono (Technical Meta) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
 
-  <!-- Tailwind CSS via CDN with customized Taste-Skill configuration -->
+  <!-- Tailwind CSS via CDN configured for Utilitarian Minimalism -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Geist', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-            mono: ['Geist Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+            sans: ['Geist', '-apple-system', 'BlinkMacSystemFont', 'Helvetica Neue', 'sans-serif'],
+            serif: ['Instrument Serif', 'Newsreader', 'Georgia', 'serif'],
+            mono: ['Geist Mono', 'SF Mono', 'JetBrains Mono', 'monospace']
           },
           colors: {
-            surface: {
-              base: '#070a10',
-              panel: 'rgba(12, 17, 29, 0.78)',
-              hover: 'rgba(23, 32, 54, 0.85)',
-              border: 'rgba(255, 255, 255, 0.08)',
-              borderHover: 'rgba(255, 255, 255, 0.18)'
-            },
-            accent: {
-              DEFAULT: '#f59e0b',
-              light: '#fbbf24',
-              glow: 'rgba(245, 158, 11, 0.15)'
+            canvas: '#F7F6F3',
+            surface: '#FFFFFF',
+            surfaceAlt: '#F9F9F8',
+            ink: '#111111',
+            body: '#2F3437',
+            muted: '#787774',
+            hairline: '#EAEAEA',
+            pastel: {
+              redBg: '#FDEBEC',
+              redText: '#9F2F2D',
+              blueBg: '#E1F3FE',
+              blueText: '#1F6C9F',
+              greenBg: '#EDF3EC',
+              greenText: '#346538',
+              yellowBg: '#FBF3DB',
+              yellowText: '#956400'
             }
           }
         }
@@ -54,322 +59,772 @@
   </script>
 
   <style>
+    :root {
+      --bg-canvas: #F7F6F3;
+      --bg-surface: #FFFFFF;
+      --text-ink: #111111;
+      --text-body: #2F3437;
+      --text-muted: #787774;
+      --border-hairline: #EAEAEA;
+    }
+
     body {
       margin: 0;
       padding: 0;
       overflow: hidden;
-      user-select: none;
-      background-color: #070a10;
-      font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-canvas);
+      color: var(--text-body);
+      font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      line-height: 1.6;
+    }
+
+    .editorial-heading {
+      font-family: 'Instrument Serif', 'Newsreader', serif;
+      letter-spacing: -0.03em;
+      line-height: 1.06;
+      color: #111111;
     }
 
     #canvas-container {
       width: 100vw;
       height: 100vh;
       display: block;
-      position: absolute;
+      position: fixed;
       top: 0;
       left: 0;
       z-index: 1;
     }
 
-    /* Calibrated Anti-Slop Glassmorphism */
-    .glass-surface {
-      background: rgba(10, 14, 23, 0.75);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    /* Utilitarian Minimalist Flat Surfaces */
+    .min-panel {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid #EAEAEA;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
     }
 
-    .glass-chip {
-      background: rgba(18, 24, 38, 0.65);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    .min-card {
+      background: #FFFFFF;
+      border: 1px solid #EAEAEA;
+      border-radius: 10px;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
     }
-    .glass-chip:hover {
-      background: rgba(28, 38, 60, 0.85);
-      border-color: rgba(255, 255, 255, 0.18);
-      transform: translateY(-1px);
+    .min-card:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      border-color: #D6D5D0;
     }
-    .glass-chip:active {
+
+    .min-btn-primary {
+      background: #111111;
+      color: #FFFFFF;
+      border-radius: 6px;
+      transition: background-color 0.15s ease, transform 0.15s ease;
+    }
+    .min-btn-primary:hover {
+      background: #333333;
+    }
+    .min-btn-primary:active {
       transform: scale(0.98);
     }
 
-    /* Time preset active segmented indicator */
-    .active-time {
-      background: rgba(245, 158, 11, 0.14) !important;
-      border-color: rgba(245, 158, 11, 0.5) !important;
-      color: #fbbf24 !important;
-      box-shadow: inset 0 0 12px rgba(245, 158, 11, 0.1);
+    .min-btn-secondary {
+      background: #FFFFFF;
+      color: #111111;
+      border: 1px solid #EAEAEA;
+      border-radius: 6px;
+      transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+    }
+    .min-btn-secondary:hover {
+      background: #F7F6F3;
+      border-color: #D4D3CE;
+    }
+    .min-btn-secondary:active {
+      transform: scale(0.98);
     }
 
-    /* Subtle custom scrollbar */
+    /* Active state for time/mode segmented buttons */
+    .active-time {
+      background: #111111 !important;
+      color: #FFFFFF !important;
+      border-color: #111111 !important;
+    }
+
+    /* Keystroke Micro-UI */
+    kbd.min-kbd {
+      border: 1px solid #EAEAEA;
+      border-radius: 4px;
+      background: #F7F6F3;
+      color: #2F3437;
+      font-family: 'Geist Mono', monospace;
+      font-size: 10px;
+      padding: 2px 6px;
+      line-height: 1.2;
+    }
+
+    /* Subtle architectural grid background for Homescreen */
+    .arch-grid-bg {
+      background-color: #F7F6F3;
+      background-image:
+        linear-gradient(to right, rgba(17, 17, 17, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(17, 17, 17, 0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    /* Scroll entry reveal animation */
+    .reveal-item {
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1), transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal-item.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Minimalist scrollbar */
     ::-webkit-scrollbar {
-      width: 4px;
+      width: 5px;
+      height: 5px;
     }
     ::-webkit-scrollbar-track {
       background: transparent;
     }
     ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 9999px;
+      background: #D8D7D2;
+      border-radius: 4px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.3);
+      background: #B8B7B2;
     }
   </style>
 </head>
-<body class="text-zinc-100 antialiased selection:bg-amber-500/20 selection:text-amber-300">
+<body class="selection:bg-[#FBF3DB] selection:text-[#956400]">
 
-  <!-- 3D WebGL Canvas Viewport -->
+  <!-- 3D WebGL Canvas Viewport (Always rendered underneath) -->
   <div id="canvas-container"></div>
 
-  <!-- Floating 3D Map Place Labels Container (Google Maps Reference Overlay) -->
-  <div id="map-labels-container" class="fixed inset-0 z-[5] pointer-events-none overflow-hidden"></div>
+  <!-- Floating 3D Map Place Labels Container -->
+  <div id="map-labels-container" class="fixed inset-0 z-[5] pointer-events-none overflow-hidden" style="display: none;"></div>
 
-  <!-- UI Overlay -->
-  <div id="ui-overlay" class="relative z-10 pointer-events-none w-screen h-screen flex flex-col justify-between p-4 md:p-6">
+  <!-- ===================================================================== -->
+  <!-- 1. EDITORIAL MINIMALIST HOMESCREEN OVERLAY                            -->
+  <!-- ===================================================================== -->
+  <div id="homescreen-overlay" class="fixed inset-0 z-30 overflow-y-auto arch-grid-bg transition-opacity duration-500">
+    
+    <!-- Sticky Top Editorial Bar -->
+    <header class="sticky top-0 z-40 bg-[#F7F6F3]/90 backdrop-blur-md border-b border-[#EAEAEA]">
+      <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-7 h-7 rounded-[6px] bg-[#111111] text-white flex items-center justify-center">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square">
+              <path d="M3 21h18M6 21V7l6-4 6 4v14M10 10h4M10 14h4M10 18h4"/>
+            </svg>
+          </div>
+          <span class="font-mono text-xs font-semibold tracking-tight text-[#111111]">JAKARTA 3D</span>
+          <span class="text-[#EAEAEA]">|</span>
+          <span class="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-[0.05em] bg-[#EDF3EC] text-[#346538] font-medium">
+            Atlas Spasial 2026
+          </span>
+        </div>
+
+        <nav class="hidden md:flex items-center gap-6 text-xs font-medium text-[#787774]">
+          <a href="#section-preview" class="hover:text-[#111111] transition-colors">Jendela 3D</a>
+          <a href="#section-bento" class="hover:text-[#111111] transition-colors">Morfologi Ruang</a>
+          <a href="#section-index" class="hover:text-[#111111] transition-colors">Indeks 23 Lokasi</a>
+          <a href="#section-faq" class="hover:text-[#111111] transition-colors">Spesifikasi</a>
+        </nav>
+
+        <div class="flex items-center gap-2.5">
+          <button id="nav-enter-3d-btn" class="min-btn-primary px-4 py-2 text-xs font-medium flex items-center gap-2">
+            <span>Buka Peta 3D</span>
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M13 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Editorial Document Container -->
+    <main class="max-w-5xl mx-auto px-6">
+      
+      <!-- HERO SECTION (Macro-whitespace py-20 md:py-28) -->
+      <section class="py-20 md:py-28 border-b border-[#EAEAEA]">
+        <div class="reveal-item">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FBF3DB] text-[#956400] text-[11px] font-mono uppercase tracking-[0.05em] mb-6">
+            <span>6°10'30" LS · 106°49'38" BT</span>
+            <span>—</span>
+            <span>JAKARTA PUSAT & SEGITIGA EMAS</span>
+          </div>
+
+          <h1 class="editorial-heading text-5xl sm:text-6xl md:text-7xl font-normal max-w-4xl">
+            Morfologi Ruang &amp; Arsitektur Pusat Kota Jakarta.
+          </h1>
+
+          <p class="mt-6 text-base md:text-lg text-[#2F3437] max-w-2xl leading-[1.65] font-normal">
+            Kajian visual tiga dimensi interaktif yang memetakan poros lurus Medan Merdeka — M.H. Thamrin, patahan sudut 23° Jalan Jenderal Sudirman di jembatan Dukuh Atas, struktur jalan radial kawasan cagar budaya Menteng, hingga koridor Segitiga Emas.
+          </p>
+
+          <!-- Primary CTA & Keystroke Bar -->
+          <div class="mt-9 flex flex-wrap items-center gap-3">
+            <button id="hero-enter-3d-btn" class="min-btn-primary px-6 py-3.5 text-xs font-medium flex items-center gap-3">
+              <span>Masuk ke Ruang Peta 3D</span>
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14M13 5l7 7-7 7"/>
+              </svg>
+            </button>
+
+            <button id="hero-aerial-btn" class="min-btn-secondary px-5 py-3.5 text-xs font-medium flex items-center gap-2">
+              <svg class="w-3.5 h-3.5 text-[#787774]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 0 1 0 18"/>
+              </svg>
+              <span>Tinjauan Udara Seluruh Kota</span>
+            </button>
+
+            <div class="hidden sm:flex items-center gap-2 ml-2 text-xs text-[#787774]">
+              <span>Pintasan:</span>
+              <kbd class="min-kbd">ENTER</kbd>
+              <span>untuk membuka peta</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Faux-OS Window Chrome Live 3D Viewport Preview -->
+        <div id="section-preview" class="mt-14 reveal-item">
+          <div class="bg-white border border-[#EAEAEA] rounded-[10px] overflow-hidden">
+            <!-- Faux-OS Top Bar -->
+            <div class="px-4 py-3 bg-[#F9F9F8] border-b border-[#EAEAEA] flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#E2E1DC] inline-block"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-[#E2E1DC] inline-block"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-[#E2E1DC] inline-block"></span>
+                <span class="ml-2 font-mono text-[11px] text-[#787774]">jakarta-pusat-topology.webgl — Three.js Real-Time Viewport</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-[0.05em] bg-[#E1F3FE] text-[#1F6C9F]">
+                  INTERAKTIF
+                </span>
+              </div>
+            </div>
+
+            <!-- Transparent Window Cutout Revealing Live 3D Scene + Quick Jump Bar -->
+            <div class="p-6 md:p-8 bg-white grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              <div class="lg:col-span-7 space-y-4">
+                <div class="font-mono text-[11px] uppercase tracking-[0.05em] text-[#787774]">
+                  KOORDINAT REFERENSI PETA
+                </div>
+                <h2 class="editorial-heading text-3xl md:text-4xl">
+                  Pilih Titik Fokus Eksplorasi Langsung
+                </h2>
+                <p class="text-xs md:text-sm text-[#787774] leading-relaxed">
+                  Seluruh bangunan, jalan arteri, jembatan layang, dan aliran sungai dibangun menggunakan koordinat topologi nyata Jakarta Pusat. Klik salah satu koridor di bawah untuk langsung menerbangkan kamera 3D ke titik tersebut:
+                </p>
+                <div class="flex flex-wrap gap-2 pt-1">
+                  <button data-home-jump="monas" class="min-btn-secondary px-3 py-1.5 text-xs font-medium flex items-center gap-1.5">
+                    <span class="font-mono text-[10px] text-[#787774]">01</span>
+                    <span>Monas &amp; Medan Merdeka</span>
+                  </button>
+                  <button data-home-jump="masjid-istiqlal" class="min-btn-secondary px-3 py-1.5 text-xs font-medium flex items-center gap-1.5">
+                    <span class="font-mono text-[10px] text-[#787774]">02</span>
+                    <span>Istiqlal &amp; Katedral</span>
+                  </button>
+                  <button data-home-jump="bundaran-hi" class="min-btn-secondary px-3 py-1.5 text-xs font-medium flex items-center gap-1.5">
+                    <span class="font-mono text-[10px] text-[#787774]">03</span>
+                    <span>Bundaran HI &amp; Thamrin</span>
+                  </button>
+                  <button data-home-jump="taman-suropati" class="min-btn-secondary px-3 py-1.5 text-xs font-medium flex items-center gap-1.5">
+                    <span class="font-mono text-[10px] text-[#787774]">04</span>
+                    <span>Taman Suropati Menteng</span>
+                  </button>
+                  <button data-home-jump="dukuh-atas" class="min-btn-secondary px-3 py-1.5 text-xs font-medium flex items-center gap-1.5">
+                    <span class="font-mono text-[10px] text-[#787774]">05</span>
+                    <span>Belokan 23° Dukuh Atas</span>
+                  </button>
+                  <button data-home-jump="simpang-semanggi" class="min-btn-secondary px-3 py-1.5 text-xs font-medium flex items-center gap-1.5">
+                    <span class="font-mono text-[10px] text-[#787774]">06</span>
+                    <span>Simpang Susun Semanggi</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Architectural Line Diagram of Central Jakarta Spine -->
+              <div class="lg:col-span-5 bg-[#F7F6F3] border border-[#EAEAEA] rounded-[8px] p-5 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-[11px] font-mono text-[#787774] pb-3 border-b border-[#EAEAEA]">
+                  <span>SKEMA POROS UTAMA</span>
+                  <span>SKALA 1 : 10.000</span>
+                </div>
+                <svg class="w-full h-44 my-2" viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Background Grid -->
+                  <path d="M0 45H320M0 90H320M0 135H320M80 0V180M160 0V180M240 0V180" stroke="#EAEAEA" stroke-width="1"/>
+                  <!-- Muted Pastel Accent Shapes -->
+                  <rect x="132" y="18" width="48" height="36" fill="#EDF3EC" stroke="#346538" stroke-width="1.2"/>
+                  <circle cx="152" cy="95" r="14" fill="#E1F3FE" stroke="#1F6C9F" stroke-width="1.2"/>
+                  <polygon points="152,122 225,112 195,168 124,168" fill="#FBF3DB" opacity="0.7"/>
+                  <!-- West Flood Canal Line -->
+                  <path d="M70 112 L152 122 L275 138" stroke="#1F6C9F" stroke-width="2.5" stroke-dasharray="4 3"/>
+                  <!-- Straight Thamrin (N-S 180 deg) -->
+                  <path d="M152 15 L152 122" stroke="#111111" stroke-width="2.5"/>
+                  <!-- 23-deg SSW Bend of Sudirman at Dukuh Atas -->
+                  <path d="M152 122 L116 172" stroke="#111111" stroke-width="2.5"/>
+                  <!-- Menteng Radial Imam Bonjol -> Suropati -->
+                  <path d="M152 95 L205 112 L255 116" stroke="#787774" stroke-width="1.5"/>
+                  <!-- Labels -->
+                  <text x="186" y="38" fill="#111111" font-family="Geist Mono, monospace" font-size="8">MONAS (0, -320)</text>
+                  <text x="172" y="93" fill="#111111" font-family="Geist Mono, monospace" font-size="8">BUNDARAN HI (0, 0)</text>
+                  <text x="160" y="135" fill="#9F2F2D" font-family="Geist Mono, monospace" font-size="8">DUKUH ATAS (203° SSW)</text>
+                  <text x="45" y="168" fill="#111111" font-family="Geist Mono, monospace" font-size="8">SEMANGGI &amp; SENAYAN</text>
+                </svg>
+                <div class="flex items-center justify-between text-[10px] font-mono text-[#787774] pt-2 border-t border-[#EAEAEA]">
+                  <span>THAMRIN: 180° U-S</span>
+                  <span>SUDIRMAN: 203° BD</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BENTO BOX FEATURE GRID SECTION (py-24) -->
+      <section id="section-bento" class="py-24 border-b border-[#EAEAEA]">
+        <div class="reveal-item mb-12">
+          <span class="px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-[0.05em] bg-[#E1F3FE] text-[#1F6C9F] font-medium">
+            Anatomi Tata Kota
+          </span>
+          <h2 class="editorial-heading text-4xl md:text-5xl mt-4">
+            Empat Karakter Geometri Jakarta Pusat
+          </h2>
+          <p class="mt-3 text-sm md:text-base text-[#787774] max-w-2xl">
+            Disusun berdasarkan observasi kartografi OpenStreetMap dan Google Maps pada skala 1:10.000.
+          </p>
+        </div>
+
+        <!-- Asymmetrical 12-Column Bento Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
+          
+          <!-- Bento Card 1 (7 Cols) -->
+          <div class="md:col-span-7 min-card p-7 md:p-9 flex flex-col justify-between reveal-item">
+            <div>
+              <div class="flex items-center justify-between mb-6">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-[0.05em] bg-[#E1F3FE] text-[#1F6C9F] font-medium">
+                  01 · Poros Arteri Utama
+                </span>
+                <span class="font-mono text-xs text-[#787774]">180° ➔ 203° SSW</span>
+              </div>
+              <h3 class="editorial-heading text-3xl mb-3">
+                Patahan Diagonal 23° Jalan Jenderal Sudirman di Dukuh Atas
+              </h3>
+              <p class="text-sm text-[#2F3437] leading-relaxed">
+                Dari Medan Merdeka Barat melewati Patung Kuda, Sarinah, hingga Bundaran HI sepanjang 3,46 kilometer, jalan raya membentang lurus sempurna dari Utara ke Selatan (180°). Namun tepat saat melintasi jembatan Kanal Banjir Barat di Dukuh Atas, Jalan Jenderal Sudirman berbelok 23° ke arah Barat Daya (203° SSW) menuju Simpang Susun Semanggi, SCBD, dan Senayan.
+              </p>
+            </div>
+            <div class="mt-8 pt-5 border-t border-[#EAEAEA] flex items-center justify-between">
+              <span class="font-mono text-[11px] text-[#787774]">KORIDOR: PATUNG KUDA — DUKUH ATAS — SENAYAN</span>
+              <button data-home-jump="dukuh-atas" class="text-xs font-mono font-medium text-[#111111] hover:underline flex items-center gap-1">
+                <span>Lihat di 3D</span>
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bento Card 2 (5 Cols) -->
+          <div class="md:col-span-5 min-card p-7 md:p-9 flex flex-col justify-between reveal-item">
+            <div>
+              <div class="flex items-center justify-between mb-6">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-[0.05em] bg-[#FBF3DB] text-[#956400] font-medium">
+                  02 · Medan Merdeka &amp; Kiblat
+                </span>
+                <span class="font-mono text-xs text-[#787774]">167° SSE &amp; 45°</span>
+              </div>
+              <h3 class="editorial-heading text-3xl mb-3">
+                Trapesium Asimetris Monas &amp; Rotasi Masjid Istiqlal
+              </h3>
+              <p class="text-sm text-[#2F3437] leading-relaxed">
+                Sisi timur Taman Monas (Jl. Medan Merdeka Timur &amp; Stasiun Gambir) miring 13° ke arah tenggara sehingga sisi selatan taman lebih lebar 230 meter dibanding sisi utaranya. Di sudut timur laut, bangunan Masjid Istiqlal berotasi 45° mengikuti arah Kiblat.
+              </p>
+            </div>
+            <div class="mt-8 pt-5 border-t border-[#EAEAEA] flex items-center justify-between">
+              <span class="font-mono text-[11px] text-[#787774]">GAMBIR · ISTIQLAL · KATEDRAL</span>
+              <button data-home-jump="monas" class="text-xs font-mono font-medium text-[#111111] hover:underline flex items-center gap-1">
+                <span>Lihat di 3D</span>
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bento Card 3 (5 Cols) -->
+          <div class="md:col-span-5 min-card p-7 md:p-9 flex flex-col justify-between reveal-item">
+            <div>
+              <div class="flex items-center justify-between mb-6">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-[0.05em] bg-[#EDF3EC] text-[#346538] font-medium">
+                  03 · Kota Taman 1920
+                </span>
+                <span class="font-mono text-xs text-[#787774]">MENTENG RADIAL</span>
+              </div>
+              <h3 class="editorial-heading text-3xl mb-3">
+                Boulevard Diagonal Menteng &amp; Taman Suropati
+              </h3>
+              <p class="text-sm text-[#2F3437] leading-relaxed">
+                Dari Bundaran HI, Jalan Imam Bonjol memancar miring 134° ke arah tenggara menuju Taman Suropati, bertemu dengan Jalan Pangeran Diponegoro dan Jalan Teuku Umar, sementara Jalan HOS Cokroaminoto membelah Menteng lurus ke selatan menjadi Jalan H.R. Rasuna Said (Kuningan).
+              </p>
+            </div>
+            <div class="mt-8 pt-5 border-t border-[#EAEAEA] flex items-center justify-between">
+              <span class="font-mono text-[11px] text-[#787774]">IMAM BONJOL · SUROPATI · KUNINGAN</span>
+              <button data-home-jump="taman-suropati" class="text-xs font-mono font-medium text-[#111111] hover:underline flex items-center gap-1">
+                <span>Lihat di 3D</span>
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bento Card 4 (7 Cols) -->
+          <div class="md:col-span-7 min-card p-7 md:p-9 flex flex-col justify-between reveal-item">
+            <div>
+              <div class="flex items-center justify-between mb-6">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-[0.05em] bg-[#FDEBEC] text-[#9F2F2D] font-medium">
+                  04 · Hidrologi &amp; Jalur Rel
+                </span>
+                <span class="font-mono text-xs text-[#787774]">KANAL &amp; VIADUK</span>
+              </div>
+              <h3 class="editorial-heading text-3xl mb-3">
+                Sabuk Kanal Banjir Barat, Sungai Ciliwung &amp; Rel Layang
+              </h3>
+              <p class="text-sm text-[#2F3437] leading-relaxed">
+                Kanal Banjir Barat mengalir pada sudut 284° WNW dari Pintu Air Manggarai melintasi bawah Dukuh Atas menuju Karet, lalu menekuk tajam 75° ke utara melewati Stasiun Tanah Abang. Di sisi timur, jalur kereta api layang menghubungkan Stasiun Gambir, Gondangdia, dan Cikini.
+              </p>
+            </div>
+            <div class="mt-8 pt-5 border-t border-[#EAEAEA] flex items-center justify-between">
+              <span class="font-mono text-[11px] text-[#787774]">MANGGARAI — DUKUH ATAS — TANAH ABANG</span>
+              <button data-home-jump="stasiun-gambir" class="text-xs font-mono font-medium text-[#111111] hover:underline flex items-center gap-1">
+                <span>Lihat di 3D</span>
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- FULL 23 LANDMARKS DIRECTORY SECTION (py-24) -->
+      <section id="section-index" class="py-24 border-b border-[#EAEAEA]">
+        <div class="reveal-item flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+          <div>
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-[0.05em] bg-[#EDF3EC] text-[#346538] font-medium">
+              Direktori Monumen &amp; Gedung
+            </span>
+            <h2 class="editorial-heading text-4xl md:text-5xl mt-4">
+              Indeks 23 Titik Arsitektur Jakarta
+            </h2>
+          </div>
+          <p class="text-xs font-mono text-[#787774]">
+            KLIK KARTU UNTUK TERBANG KE LOKASI DI PETA 3D
+          </p>
+        </div>
+
+        <!-- Dynamically Populated 23-Landmark Bento Grid via UIManager -->
+        <div id="homescreen-landmark-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Populated by UIManager.js -->
+        </div>
+      </section>
+
+      <!-- ACCORDION SPECIFICATIONS & CONTROLS SECTION (py-24) -->
+      <section id="section-faq" class="py-24">
+        <div class="reveal-item mb-10">
+          <span class="px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-[0.05em] bg-[#FBF3DB] text-[#956400] font-medium">
+            Dokumentasi Sistem
+          </span>
+          <h2 class="editorial-heading text-4xl md:text-5xl mt-4">
+            Panduan Navigasi &amp; Spesifikasi Teknis
+          </h2>
+        </div>
+
+        <!-- Minimalist Border-Bottom Accordions -->
+        <div class="border-t border-[#EAEAEA]">
+          
+          <div class="border-b border-[#EAEAEA] py-5">
+            <button type="button" data-accordion-btn class="w-full flex items-center justify-between text-left">
+              <span class="text-base font-medium text-[#111111]">01. Bagaimana cara menggerakkan kamera di ruang 3D?</span>
+              <span data-accordion-icon class="font-mono text-lg text-[#787774]">+</span>
+            </button>
+            <div class="mt-3 text-sm text-[#787774] space-y-2">
+              <p>Gunakan perangkat tetikus (mouse) atau trackpad dengan kombinasi berikut:</p>
+              <div class="flex flex-wrap gap-3 pt-1">
+                <span><kbd class="min-kbd">Klik Kiri + Geser</kbd> Rotasi Orbit 360°</span>
+                <span><kbd class="min-kbd">Klik Kanan + Geser</kbd> Geser Peta (Pan)</span>
+                <span><kbd class="min-kbd">Scroll Roda</kbd> Perbesar / Perkecil (Zoom)</span>
+                <span><kbd class="min-kbd">Klik Gedung / Pin</kbd> Buka Dossier Arsitektur</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="border-b border-[#EAEAEA] py-5">
+            <button type="button" data-accordion-btn class="w-full flex items-center justify-between text-left">
+              <span class="text-base font-medium text-[#111111]">02. Apakah saya bisa mengimpor file model 3D (.GLB) gedung sendiri?</span>
+              <span data-accordion-icon class="font-mono text-lg text-[#787774]">+</span>
+            </button>
+            <div class="hidden mt-3 text-sm text-[#787774]">
+              <p>Ya. Anda cukup menarik dan melepaskan (Drag &amp; Drop) berkas <kbd class="min-kbd">.glb</kbd> atau <kbd class="min-kbd">.gltf</kbd> langsung ke jendela browser kapan saja, atau menyimpannya secara permanen di direktori <kbd class="min-kbd">public/models/</kbd>.</p>
+            </div>
+          </div>
+
+          <div class="border-b border-[#EAEAEA] py-5">
+            <button type="button" data-accordion-btn class="w-full flex items-center justify-between text-left">
+              <span class="text-base font-medium text-[#111111]">03. Bagaimana pencahayaan waktu (Siang, Senja, Malam) bekerja?</span>
+              <span data-accordion-icon class="font-mono text-lg text-[#787774]">+</span>
+            </button>
+            <div class="hidden mt-3 text-sm text-[#787774]">
+              <p>Pada mode <b>Siang</b>, peta menggunakan pencahayaan maket arsitektur bersih bertema terang. Pada mode <b>Senja</b> dan <b>Malam</b>, lampu jalan PJU, sorot tugu Monas, dan ratusan jendela gedung pencakar langit akan menyala secara otomatis.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Minimalist Editorial Footer -->
+        <footer class="mt-20 pt-8 border-t border-[#EAEAEA] flex flex-col sm:flex-row items-center justify-between text-xs text-[#787774] gap-4">
+          <div class="flex items-center gap-2 font-mono">
+            <span class="text-[#111111] font-semibold">JAKARTA 3D VIEW</span>
+            <span>·</span>
+            <span>THREE.JS WEBGL DIGITAL TWIN</span>
+          </div>
+          <div class="font-mono text-[11px]">
+            REFERENSI: OPENSTREETMAP &amp; GOOGLE MAPS JAKARTA PUSAT
+          </div>
+        </footer>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 2. 3D MAP WORKSPACE HUD OVERLAY (Utilitarian Minimalist Theme)        -->
+  <!-- ===================================================================== -->
+  <div id="ui-overlay" class="relative z-10 pointer-events-none w-screen h-screen flex flex-col justify-between p-4 md:p-5 opacity-0 transition-opacity duration-300" style="display: none;">
     
     <!-- Top Header Bar -->
-    <header class="flex items-center justify-between pointer-events-auto">
+    <header class="flex items-center justify-between pointer-events-auto gap-2">
       
-      <!-- Brand & Geospatial Metadata -->
-      <div class="glass-surface px-4 py-2.5 rounded-xl flex items-center gap-3.5">
-        <!-- Minimalist Architectural Monograph Icon -->
-        <div class="w-8 h-8 rounded-lg bg-zinc-900 border border-white/10 flex items-center justify-center text-amber-400 shadow-inner">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 21h18"/>
-            <path d="M6 21V7l6-4 6 4v14"/>
-            <path d="M10 9h4"/>
-            <path d="M10 13h4"/>
-            <path d="M10 17h4"/>
+      <!-- Left: Back to Homescreen Button + Brand Metadata -->
+      <div class="flex items-center gap-2">
+        <button id="back-to-home-btn" class="min-panel px-3.5 py-2.5 rounded-[8px] text-xs font-medium text-[#111111] hover:bg-[#F7F6F3] transition flex items-center gap-2" title="Kembali ke Beranda Atlas">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M11 18l-6-6 6-6"/>
           </svg>
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="font-bold tracking-tight text-sm md:text-base text-zinc-100 font-sans">JAKARTA 3D VIEW</h1>
-            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1 animate-pulse"></span>
-              23 LOKASI
-            </span>
+          <span class="font-medium">Beranda</span>
+          <kbd class="min-kbd hidden sm:inline-block">ESC</kbd>
+        </button>
+
+        <div class="min-panel px-3.5 py-2 rounded-[8px] hidden sm:flex items-center gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-serif text-lg tracking-tight text-[#111111] leading-none">Jakarta Pusat 3D</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-[0.05em] bg-[#EDF3EC] text-[#346538] font-medium">
+                23 Lokasi
+              </span>
+            </div>
+            <p class="text-[10px] text-[#787774] font-mono tracking-wider mt-0.5">6°10'30" LS · 106°49'38" BT · SKALA 1:10.000</p>
           </div>
-          <p class="text-[11px] text-zinc-400 font-mono tracking-wider">6°10'30" S · 106°49'38" E · JAKARTA PUSAT & SEGITIGA EMAS</p>
         </div>
       </div>
 
-      <!-- Center / Right Top Controls -->
+      <!-- Right Controls -->
       <div class="flex items-center gap-2">
         
-        <!-- Live Environment Telemetry Badge -->
-        <div class="glass-surface hidden xl:flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-mono text-zinc-300">
-          <div class="flex items-center gap-1.5">
-            <svg class="w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
-            </svg>
-            <span class="font-medium text-zinc-200">32°C</span>
-          </div>
-          <span class="text-zinc-600">|</span>
-          <span class="text-zinc-400 text-[11px]">MONAS · MENTENG · THAMRIN · DUKUH ATAS · SUDIRMAN</span>
-        </div>
-
         <!-- 3D Map Labels Toggle Button -->
-        <button id="toggle-labels-btn" class="glass-chip active-time px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5" title="Tampilkan / Sembunyikan Label Peta 3D">
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-            <circle cx="12" cy="10" r="3"/>
+        <button id="toggle-labels-btn" class="min-btn-secondary active-time px-3 py-2 text-xs font-medium flex items-center gap-1.5" title="Tampilkan / Sembunyikan Label Pin Peta">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11Z"/>
+            <circle cx="12" cy="10" r="2.5"/>
           </svg>
-          <span class="hidden md:inline font-sans font-semibold">Label Peta</span>
+          <span class="hidden md:inline">Label Peta</span>
         </button>
 
         <!-- Time of Day Segmented Controller -->
-        <div class="glass-surface p-1 rounded-xl flex items-center gap-1">
-          <button data-time-preset="day" class="active-time px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-300 hover:text-white transition flex items-center gap-1.5" title="Mode Siang">
-            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+        <div class="min-panel p-1 rounded-[8px] flex items-center gap-1">
+          <button data-time-preset="day" class="active-time px-2.5 py-1.5 rounded-[5px] text-xs font-medium text-[#2F3437] hover:text-[#111111] transition flex items-center gap-1.5" title="Mode Siang (Maket Terang)">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="4"/>
               <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
             </svg>
-            <span class="hidden sm:inline font-sans">Siang</span>
+            <span class="hidden sm:inline">Siang</span>
           </button>
 
-          <button data-time-preset="golden" class="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-300 hover:text-white transition flex items-center gap-1.5" title="Mode Senja / Golden Hour">
-            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-              <path d="M17 18a5 5 0 0 0-10 0"/>
-              <path d="M12 2v7M4.22 10.22l1.42 1.42M18.36 11.64l1.42-1.42M1 18h22M12 18v4"/>
+          <button data-time-preset="golden" class="px-2.5 py-1.5 rounded-[5px] text-xs font-medium text-[#2F3437] hover:text-[#111111] transition flex items-center gap-1.5" title="Mode Senja">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 18a5 5 0 0 0-10 0M12 2v7M4.22 10.22l1.42 1.42M18.36 11.64l1.42-1.42M1 18h22"/>
             </svg>
-            <span class="hidden sm:inline font-sans">Senja</span>
+            <span class="hidden sm:inline">Senja</span>
           </button>
 
-          <button data-time-preset="night" class="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-300 hover:text-white transition flex items-center gap-1.5" title="Mode Malam">
-            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+          <button data-time-preset="night" class="px-2.5 py-1.5 rounded-[5px] text-xs font-medium text-[#2F3437] hover:text-[#111111] transition flex items-center gap-1.5" title="Mode Malam">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
             </svg>
-            <span class="hidden sm:inline font-sans">Malam</span>
+            <span class="hidden sm:inline">Malam</span>
           </button>
         </div>
 
-        <!-- Google 3D Tiles Activation Button -->
-        <button id="open-google-tiles-btn" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-sky-400 flex items-center gap-1.5 hover:text-sky-300">
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/>
+        <!-- Google 3D Tiles Button -->
+        <button id="open-google-tiles-btn" class="min-btn-secondary px-3 py-2 text-xs font-medium flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-[#1F6C9F]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 0 1 0 18"/>
           </svg>
-          <span class="hidden md:inline font-sans font-semibold">Satelit 3D</span>
-          <span id="google-tiles-badge" class="px-1.5 py-0.5 rounded text-[9px] font-mono font-medium bg-zinc-800 text-zinc-400 border border-white/5">PETA 3D JAKARTA</span>
+          <span class="hidden lg:inline">Satelit 3D</span>
+          <span id="google-tiles-badge" class="px-2 py-0.5 rounded-full text-[9px] font-mono uppercase tracking-[0.05em] bg-[#E1F3FE] text-[#1F6C9F]">PETA 3D</span>
         </button>
 
-        <!-- Custom .GLB Slot / Import Button -->
-        <button id="open-import-btn" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-amber-400 flex items-center gap-1.5 hover:text-amber-300">
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-            <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
-            <path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>
+        <!-- Custom .GLB Slot Button -->
+        <button id="open-import-btn" class="min-btn-secondary px-3 py-2 text-xs font-medium flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-[#956400]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/>
+            <path d="M3.3 7l8.7 5 8.7-5M12 22V12"/>
           </svg>
-          <span class="hidden md:inline font-sans font-semibold">Model .GLB</span>
+          <span class="hidden lg:inline">Impor .GLB</span>
         </button>
 
       </div>
     </header>
 
-    <!-- Subdued HUD Telemetry Indicator (Bottom Left) -->
-    <div class="hidden lg:flex items-center gap-3 glass-surface px-3 py-1.5 rounded-lg text-[11px] font-mono text-zinc-400 self-start pointer-events-auto">
-      <span class="text-zinc-500">TATA RUANG</span>
-      <span class="text-zinc-200">MEDAN MERDEKA · MENTENG · THAMRIN (180°) · SUDIRMAN (203° SSW) · SEGITIGA EMAS</span>
-    </div>
+    <!-- Bottom Navigation Dock (All 23 Real Central & South Jakarta Places) -->
+    <div class="w-full flex flex-col items-center gap-2 pb-1 pointer-events-auto">
+      
+      <!-- Subtle Telemetry Strip -->
+      <div class="hidden lg:flex items-center gap-3 min-panel px-3 py-1 rounded-[6px] text-[10px] font-mono text-[#787774]">
+        <span>POROS LURUS: <strong class="text-[#111111] font-medium">THAMRIN (180°)</strong></span>
+        <span>·</span>
+        <span>POROS DIAGONAL: <strong class="text-[#111111] font-medium">SUDIRMAN (203° SSW DI DUKUH ATAS)</strong></span>
+        <span>·</span>
+        <span>TIMUR: <strong class="text-[#111111] font-medium">MENTENG &amp; KUNINGAN</strong></span>
+      </div>
 
-    <!-- Bottom Tour Controller Dock (All 23 Real Central & South Jakarta Places) -->
-    <div class="w-full flex justify-center pb-2 pointer-events-auto">
-      <nav class="glass-surface p-1.5 rounded-2xl flex items-center gap-1.5 max-w-full overflow-x-auto shadow-2xl">
+      <!-- Scrollable 23-Location Bar -->
+      <nav class="min-panel p-1.5 rounded-[10px] flex items-center gap-1.5 max-w-full overflow-x-auto">
         
-        <div class="px-3 py-1 text-[10px] font-mono text-zinc-400 uppercase tracking-widest hidden lg:flex items-center gap-1.5 border-r border-white/5 mr-1 shrink-0">
-          <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-          PETA JAKARTA
-        </div>
-
-        <button data-tour-id="aerial" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-amber-400 flex items-center gap-1.5 whitespace-nowrap hover:text-amber-300 shrink-0">
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="m4.93 4.93 4.24 4.24M14.83 9.17l4.24-4.24M14.83 14.83l4.24 4.24M9.17 14.83l-4.24 4.24"/>
+        <button data-tour-id="aerial" class="min-btn-primary px-3 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 3v18M3 12h18"/>
           </svg>
-          <span class="font-semibold">Seluruh Kota</span>
+          <span>Seluruh Kota</span>
         </button>
 
-        <div class="w-px h-5 bg-white/10 mx-0.5 shrink-0"></div>
+        <div class="w-px h-5 bg-[#EAEAEA] mx-0.5 shrink-0"></div>
 
-        <button data-tour-id="istana-merdeka" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">01</span>
+        <button data-tour-id="istana-merdeka" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">01</span>
           <span>Istana Merdeka</span>
         </button>
 
-        <button data-tour-id="masjid-istiqlal" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">02</span>
+        <button data-tour-id="masjid-istiqlal" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">02</span>
           <span>Masjid Istiqlal</span>
         </button>
 
-        <button data-tour-id="gereja-katedral" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">03</span>
+        <button data-tour-id="gereja-katedral" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">03</span>
           <span>Katedral</span>
         </button>
 
-        <button data-tour-id="lapangan-banteng" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">04</span>
+        <button data-tour-id="lapangan-banteng" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">04</span>
           <span>Lapangan Banteng</span>
         </button>
 
-        <button data-tour-id="monas" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">05</span>
+        <button data-tour-id="monas" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">05</span>
           <span>Monas</span>
         </button>
 
-        <button data-tour-id="stasiun-gambir" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">06</span>
+        <button data-tour-id="stasiun-gambir" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">06</span>
           <span>Stasiun Gambir</span>
         </button>
 
-        <button data-tour-id="patung-kuda" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">07</span>
+        <button data-tour-id="patung-kuda" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">07</span>
           <span>Patung Kuda</span>
         </button>
 
-        <button data-tour-id="tugu-tani" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">08</span>
+        <button data-tour-id="tugu-tani" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">08</span>
           <span>Tugu Tani</span>
         </button>
 
-        <button data-tour-id="gedung-sarinah" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">09</span>
+        <button data-tour-id="gedung-sarinah" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">09</span>
           <span>Sarinah</span>
         </button>
 
-        <button data-tour-id="bundaran-hi" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">10</span>
+        <button data-tour-id="bundaran-hi" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">10</span>
           <span>Bundaran HI</span>
         </button>
 
-        <button data-tour-id="menara-bca" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">11</span>
+        <button data-tour-id="menara-bca" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">11</span>
           <span>Grand Indonesia</span>
         </button>
 
-        <button data-tour-id="autograph-tower" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">12</span>
+        <button data-tour-id="autograph-tower" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">12</span>
           <span>Autograph Tower</span>
         </button>
 
-        <button data-tour-id="taman-suropati" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">13</span>
-          <span>Taman Suropati Menteng</span>
+        <button data-tour-id="taman-suropati" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">13</span>
+          <span>Taman Suropati</span>
         </button>
 
-        <button data-tour-id="dukuh-atas" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">14</span>
+        <button data-tour-id="dukuh-atas" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">14</span>
           <span>Dukuh Atas Hub</span>
         </button>
 
-        <button data-tour-id="wisma-46" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">15</span>
+        <button data-tour-id="wisma-46" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">15</span>
           <span>Wisma 46</span>
         </button>
 
-        <button data-tour-id="sampoerna-strategic" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">16</span>
+        <button data-tour-id="sampoerna-strategic" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">16</span>
           <span>Sampoerna</span>
         </button>
 
-        <button data-tour-id="jpo-phinisi" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">17</span>
+        <button data-tour-id="jpo-phinisi" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">17</span>
           <span>JPO Phinisi</span>
         </button>
 
-        <button data-tour-id="simpang-semanggi" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">18</span>
+        <button data-tour-id="simpang-semanggi" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">18</span>
           <span>Simpang Semanggi</span>
         </button>
 
-        <button data-tour-id="gedung-dpr-mpr" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">19</span>
+        <button data-tour-id="gedung-dpr-mpr" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">19</span>
           <span>Gedung DPR/MPR</span>
         </button>
 
-        <button data-tour-id="mega-kuningan" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">20</span>
+        <button data-tour-id="mega-kuningan" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">20</span>
           <span>Mega Kuningan</span>
         </button>
 
-        <button data-tour-id="scbd-district" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">21</span>
+        <button data-tour-id="scbd-district" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">21</span>
           <span>SCBD</span>
         </button>
 
-        <button data-tour-id="gbk-senayan" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">22</span>
+        <button data-tour-id="gbk-senayan" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">22</span>
           <span>GBK Senayan</span>
         </button>
 
-        <button data-tour-id="bundaran-senayan" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">23</span>
+        <button data-tour-id="bundaran-senayan" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-[#787774]">23</span>
           <span>Bundaran Senayan</span>
         </button>
 
@@ -378,200 +833,166 @@
 
   </div>
 
-  <!-- Architectural Dossier Drawer (Right Side) -->
-  <aside id="detail-drawer" class="fixed top-0 right-0 h-full w-full max-w-md glass-surface z-30 translate-x-full transition-transform duration-300 ease-out p-6 overflow-y-auto flex flex-col justify-between border-l border-white/10 shadow-2xl">
+  <!-- ===================================================================== -->
+  <!-- 3. ARCHITECTURAL DOSSIER DRAWER (Utilitarian Editorial Sidebar)       -->
+  <!-- ===================================================================== -->
+  <aside id="detail-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-[#FFFFFF] z-30 translate-x-full transition-transform duration-300 ease-out p-7 overflow-y-auto flex flex-col justify-between border-l border-[#EAEAEA]">
     <div>
       <!-- Drawer Header Bar -->
-      <div class="flex items-center justify-between pb-4 border-b border-white/10">
-        <div class="flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-          <span id="drawer-category" class="font-mono text-[11px] font-semibold tracking-wider text-amber-400 uppercase">
-            LANDMARK
-          </span>
-        </div>
-        <button id="drawer-close-btn" class="w-7 h-7 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-white flex items-center justify-center transition border border-white/5" title="Tutup">
+      <div class="flex items-center justify-between pb-4 border-b border-[#EAEAEA]">
+        <span id="drawer-category" class="px-2.5 py-0.5 rounded-full font-mono text-[10px] font-medium tracking-[0.05em] bg-[#FBF3DB] text-[#956400] uppercase">
+          LANDMARK
+        </span>
+        <button id="drawer-close-btn" class="w-7 h-7 rounded-[6px] bg-[#F7F6F3] hover:bg-[#EAEAEA] text-[#2F3437] flex items-center justify-center transition border border-[#EAEAEA]" title="Tutup">
           <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 6 6 18M6 6l12 12"/>
           </svg>
         </button>
       </div>
 
-      <!-- Title & Tagline -->
-      <div class="mt-5">
-        <h2 id="drawer-title" class="text-xl md:text-2xl font-extrabold text-white tracking-tight leading-tight">Nama Bangunan</h2>
-        <p id="drawer-tagline" class="text-xs font-medium text-zinc-400 mt-1 leading-relaxed">Tagline Arsitektur</p>
+      <!-- Editorial Serif Title & Tagline -->
+      <div class="mt-6">
+        <h2 id="drawer-title" class="editorial-heading text-3xl md:text-4xl text-[#111111]">Nama Bangunan</h2>
+        <p id="drawer-tagline" class="text-xs font-medium text-[#787774] mt-2 leading-relaxed">Tagline Arsitektur</p>
       </div>
 
-      <!-- Spatial Specs Grid (Geist Mono Metrics) -->
-      <div class="grid grid-cols-2 gap-2 my-5">
-        <div class="bg-zinc-900/60 p-3 rounded-xl border border-white/5">
-          <div class="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Ketinggian</div>
-          <div id="drawer-height" class="text-sm font-mono font-bold text-zinc-100 mt-0.5">-</div>
+      <!-- Spatial Specs Bento Grid -->
+      <div class="grid grid-cols-2 gap-2.5 my-6">
+        <div class="bg-[#F9F9F8] p-3.5 rounded-[8px] border border-[#EAEAEA]">
+          <div class="text-[10px] font-mono text-[#787774] uppercase tracking-wider">Ketinggian</div>
+          <div id="drawer-height" class="text-sm font-mono font-semibold text-[#111111] mt-1">-</div>
         </div>
-        <div class="bg-zinc-900/60 p-3 rounded-xl border border-white/5">
-          <div class="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Tahun Selesai</div>
-          <div id="drawer-year" class="text-sm font-mono font-bold text-zinc-100 mt-0.5">-</div>
+        <div class="bg-[#F9F9F8] p-3.5 rounded-[8px] border border-[#EAEAEA]">
+          <div class="text-[10px] font-mono text-[#787774] uppercase tracking-wider">Tahun Selesai</div>
+          <div id="drawer-year" class="text-sm font-mono font-semibold text-[#111111] mt-1">-</div>
         </div>
-        <div class="col-span-2 bg-zinc-900/60 p-3 rounded-xl border border-white/5">
-          <div class="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Lokasi & Wilayah</div>
-          <div id="drawer-location" class="text-xs font-medium text-zinc-200 mt-0.5">-</div>
+        <div class="col-span-2 bg-[#F9F9F8] p-3.5 rounded-[8px] border border-[#EAEAEA]">
+          <div class="text-[10px] font-mono text-[#787774] uppercase tracking-wider">Lokasi &amp; Koridor</div>
+          <div id="drawer-location" class="text-xs font-medium text-[#2F3437] mt-1">-</div>
         </div>
       </div>
 
       <!-- Architectural Narrative -->
-      <div class="mt-4">
-        <h3 class="text-[11px] font-mono font-semibold text-zinc-400 uppercase tracking-wider mb-2">Deskripsi Arsitektur</h3>
-        <p id="drawer-desc" class="text-xs text-zinc-300 leading-relaxed font-normal">
+      <div class="mt-5">
+        <h3 class="text-[10px] font-mono font-semibold text-[#787774] uppercase tracking-[0.06em] mb-2">Catatan Arsitektur &amp; Tata Ruang</h3>
+        <p id="drawer-desc" class="text-xs md:text-sm text-[#2F3437] leading-[1.65] font-normal">
           Deskripsi mendalam mengenai sejarah dan signifikansi arsitektur bangunan di Jakarta.
         </p>
       </div>
 
       <!-- Highlights / Key Facts -->
-      <div class="mt-5">
-        <h3 class="text-[11px] font-mono font-semibold text-zinc-400 uppercase tracking-wider mb-2">Fakta Signifikan</h3>
-        <ul id="drawer-facts" class="text-xs text-zinc-300 space-y-2.5">
+      <div class="mt-6 pt-5 border-t border-[#EAEAEA]">
+        <h3 class="text-[10px] font-mono font-semibold text-[#787774] uppercase tracking-[0.06em] mb-3">Fakta Signifikan</h3>
+        <ul id="drawer-facts" class="text-xs text-[#2F3437] space-y-2.5">
           <!-- Populated dynamically via UIManager -->
         </ul>
       </div>
     </div>
 
     <!-- Drawer Action Footer -->
-    <div class="pt-5 mt-6 border-t border-white/10">
-      <button id="drawer-focus-btn" class="w-full py-3 bg-amber-500 hover:bg-amber-400 active:scale-[0.98] text-zinc-950 font-semibold rounded-xl text-xs tracking-wide transition flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20">
+    <div class="pt-5 mt-6 border-t border-[#EAEAEA]">
+      <button id="drawer-focus-btn" class="w-full py-3 min-btn-primary font-medium text-xs tracking-wide flex items-center justify-center gap-2">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>
         </svg>
-        <span>PUSATKAN KAMERA KE BANGUNAN</span>
+        <span>Pusatkan Kamera ke Bangunan</span>
       </button>
     </div>
   </aside>
 
   <!-- Modal: Tambah Model .GLB Kustom Sendiri -->
-  <div id="import-modal" class="fixed inset-0 z-40 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="glass-surface w-full max-w-lg rounded-2xl p-6 border border-white/10 shadow-2xl">
-      <div class="flex items-center justify-between pb-3.5 border-b border-white/10">
-        <div class="flex items-center gap-2.5">
-          <div class="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
-              <path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>
-            </svg>
-          </div>
-          <h3 class="font-bold text-base text-zinc-100 font-sans">Integrasi Model 3D Jakarta (.GLB)</h3>
+  <div id="import-modal" class="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-[10px] p-7 border border-[#EAEAEA]">
+      <div class="flex items-center justify-between pb-4 border-b border-[#EAEAEA]">
+        <div>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-[0.05em] bg-[#FBF3DB] text-[#956400]">Format .GLB / .GLTF</span>
+          <h3 class="editorial-heading text-2xl mt-1">Integrasi Model 3D Kustom</h3>
         </div>
-        <button id="close-import-btn" class="w-7 h-7 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white flex items-center justify-center transition">
-          ✕
+        <button id="close-import-btn" class="w-7 h-7 rounded-[6px] bg-[#F7F6F3] hover:bg-[#EAEAEA] text-[#2F3437] flex items-center justify-center transition border border-[#EAEAEA]">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
         </button>
       </div>
 
-      <div class="mt-4 space-y-3.5 text-xs text-zinc-300 leading-relaxed">
-        <p class="text-zinc-300">
-          Website ini mendukung pemuatan file model 3D nyata bangunan Jakarta secara <span class="text-amber-400 font-medium">100% gratis</span> tanpa batasan API:
-        </p>
-
-        <!-- Method 1: Instant Drag & Drop -->
-        <div class="p-3.5 rounded-xl bg-zinc-900/70 border border-white/5 space-y-1">
-          <div class="font-mono text-[11px] font-semibold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-            <span>METHOD 01</span> · DRAG & DROP SEKETIKA
+      <div class="mt-5 space-y-3.5 text-xs text-[#2F3437] leading-relaxed">
+        <div class="p-4 rounded-[8px] bg-[#F9F9F8] border border-[#EAEAEA] space-y-1">
+          <div class="font-mono text-[10px] font-semibold text-[#111111] uppercase tracking-wider">
+            METODE 01 · DRAG &amp; DROP LANGSUNG
           </div>
-          <p class="text-zinc-300">
-            Tarik file <code class="text-amber-300 bg-zinc-950 px-1 py-0.5 rounded font-mono">.glb</code> dari komputer Anda dan lepaskan langsung ke jendela browser. Model langsung dirender di koridor Jakarta.
+          <p class="text-[#787774]">
+            Tarik file <kbd class="min-kbd">.glb</kbd> dari komputer Anda dan lepaskan langsung ke layar peta 3D.
           </p>
         </div>
 
-        <!-- Method 2: Permanent Storage -->
-        <div class="p-3.5 rounded-xl bg-zinc-900/70 border border-white/5 space-y-1">
-          <div class="font-mono text-[11px] font-semibold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
-            <span>METHOD 02</span> · SLOT DIREKTORI PERMANEN
+        <div class="p-4 rounded-[8px] bg-[#F9F9F8] border border-[#EAEAEA] space-y-1">
+          <div class="font-mono text-[10px] font-semibold text-[#111111] uppercase tracking-wider">
+            METODE 02 · DIREKTORI PERMANEN
           </div>
-          <p class="text-zinc-300">
-            Simpan berkas pada folder <code class="text-sky-300 bg-zinc-950 px-1 py-0.5 rounded font-mono">public/models/nama-gedung.glb</code>, lalu daftarkan koordinatnya di <code class="text-sky-300 bg-zinc-950 px-1 py-0.5 rounded font-mono">src/config/landmarks.js</code>.
+          <p class="text-[#787774]">
+            Simpan berkas pada folder <kbd class="min-kbd">public/models/nama-gedung.glb</kbd> untuk dimuat otomatis.
           </p>
-        </div>
-
-        <!-- Open Data Repositories -->
-        <div class="p-3.5 rounded-xl bg-zinc-900/70 border border-white/5 space-y-1.5">
-          <div class="font-mono text-[11px] font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-            <span>DATA SOURCE</span> · REPOSITORI GRATIS
-          </div>
-          <ul class="space-y-1 text-zinc-400">
-            <li><b class="text-zinc-200">Sketchfab:</b> Filter CC-BY (Gratis) format .GLB untuk gedung-gedung Jakarta.</li>
-            <li><b class="text-zinc-200">BlenderGIS:</b> Unduh koordinat dan tapak gedung 3D satelit OpenStreetMap Jakarta secara otomatis.</li>
-          </ul>
         </div>
       </div>
 
       <div class="mt-6 flex justify-end">
-        <button onclick="document.getElementById('import-modal').classList.add('hidden')" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 active:scale-[0.98] text-zinc-100 font-medium rounded-xl text-xs transition">
-          Mengerti & Tutup
+        <button onclick="document.getElementById('import-modal').classList.add('hidden')" class="min-btn-primary px-4 py-2 text-xs font-medium">
+          Tutup Panduan
         </button>
       </div>
     </div>
   </div>
 
   <!-- Modal: Google Photorealistic 3D Tiles Setup -->
-  <div id="google-tiles-modal" class="fixed inset-0 z-40 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="glass-surface w-full max-w-lg rounded-2xl p-6 border border-white/10 shadow-2xl">
-      <div class="flex items-center justify-between pb-3.5 border-b border-white/10">
-        <div class="flex items-center gap-2.5">
-          <div class="w-7 h-7 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="font-bold text-base text-zinc-100 font-sans">Google Photorealistic 3D Tiles</h3>
-            <p class="text-[10px] text-zinc-400 font-mono">Stream Seluruh Kota Jakarta Asli dari Satelit Google Earth</p>
-          </div>
+  <div id="google-tiles-modal" class="fixed inset-0 z-50 bg-black/30 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-[10px] p-7 border border-[#EAEAEA]">
+      <div class="flex items-center justify-between pb-4 border-b border-[#EAEAEA]">
+        <div>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-[0.05em] bg-[#E1F3FE] text-[#1F6C9F]">Google Maps Platform</span>
+          <h3 class="editorial-heading text-2xl mt-1">Google Photorealistic 3D Tiles</h3>
         </div>
-        <button id="close-google-tiles-btn" class="w-7 h-7 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white flex items-center justify-center transition">
-          ✕
+        <button id="close-google-tiles-btn" class="w-7 h-7 rounded-[6px] bg-[#F7F6F3] hover:bg-[#EAEAEA] text-[#2F3437] flex items-center justify-center transition border border-[#EAEAEA]">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
         </button>
       </div>
 
-      <div class="mt-4 space-y-3.5 text-xs text-zinc-300 leading-relaxed">
-        <!-- Input Key Form -->
+      <div class="mt-5 space-y-4 text-xs text-[#2F3437] leading-relaxed">
         <div class="space-y-1.5">
-          <label class="block font-mono text-[11px] text-zinc-300 uppercase tracking-wider font-semibold">
-            Google Maps Platform API Key
+          <label class="block font-mono text-[10px] text-[#787774] uppercase tracking-wider font-semibold">
+            Google Maps Map Tiles API Key
           </label>
-          <input id="google-api-key-input" type="password" placeholder="AIzaSy..." class="w-full bg-zinc-950 border border-white/10 focus:border-sky-400 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 font-mono outline-none transition" />
-          <p class="text-[10px] text-zinc-500 font-mono">Tersimpan aman secara lokal di browser Anda (localStorage).</p>
+          <input id="google-api-key-input" type="password" placeholder="AIzaSy..." class="w-full bg-[#F9F9F8] border border-[#EAEAEA] focus:border-[#111111] rounded-[6px] px-3.5 py-2.5 text-xs text-[#111111] placeholder-[#787774] font-mono outline-none transition" />
         </div>
 
-        <!-- 4 Step Guide -->
-        <div class="p-3.5 rounded-xl bg-zinc-900/70 border border-white/5 space-y-2">
-          <div class="font-mono text-[11px] font-semibold text-sky-400 uppercase tracking-wider flex items-center justify-between">
-            <span>CARA MENDAPATKAN API KEY GRATIS</span>
-            <span class="text-emerald-400 text-[10px]">$200 CREDIT/BLN</span>
+        <div class="p-4 rounded-[8px] bg-[#F9F9F8] border border-[#EAEAEA] space-y-1.5">
+          <div class="font-mono text-[10px] font-semibold text-[#111111] uppercase tracking-wider">
+            PANDUAN AKTIVASI
           </div>
-          <ol class="space-y-1 text-zinc-300 list-decimal list-inside text-[11px]">
-            <li>Buka <a href="https://console.cloud.google.com/" target="_blank" class="text-sky-400 underline font-medium">Google Cloud Console</a> dan login akun Google.</li>
-            <li>Buat Proyek baru (misal: <i>Jakarta-3D</i>).</li>
-            <li>Di menu <b>APIs & Services</b>, cari dan aktifkan <b>Map Tiles API</b>.</li>
-            <li>Masuk ke <b>Credentials</b> ➔ <b>Create Credentials</b> ➔ <b>API Key</b>.</li>
-            <li>Salin API Key tersebut dan tempel ke kolom di atas.</li>
+          <ol class="space-y-1 text-[#787774] list-decimal list-inside text-[11px]">
+            <li>Buka Google Cloud Console dan aktifkan <b>Map Tiles API</b>.</li>
+            <li>Salin API Key ke kolom di atas untuk memuat fotogrametri satelit, atau gunakan <b>Mode Peta 3D Lokal</b> tanpa API Key.</li>
           </ol>
         </div>
       </div>
 
-      <div class="mt-6 flex items-center justify-between gap-3 border-t border-white/10 pt-4">
-        <button id="disable-google-tiles-btn" class="px-3.5 py-2 bg-zinc-800 hover:bg-zinc-700 active:scale-[0.98] text-zinc-300 font-medium rounded-xl text-xs transition">
-          Gunakan Mode Lokal
+      <div class="mt-6 flex items-center justify-between gap-3 border-t border-[#EAEAEA] pt-4">
+        <button id="disable-google-tiles-btn" class="min-btn-secondary px-3.5 py-2 text-xs font-medium">
+          Gunakan Peta 3D Lokal
         </button>
-        <button id="enable-google-tiles-btn" class="px-5 py-2 bg-sky-500 hover:bg-sky-400 active:scale-[0.98] text-zinc-950 font-bold rounded-xl text-xs tracking-wide transition shadow-lg shadow-sky-500/20">
-          AKTIFKAN GOOGLE 3D TILES
+        <button id="enable-google-tiles-btn" class="min-btn-primary px-5 py-2 text-xs font-medium">
+          Aktifkan Satelit 3D
         </button>
       </div>
     </div>
   </div>
 
   <!-- Toast Notification -->
-  <div id="toast-notification" class="fixed top-20 left-1/2 -translate-x-1/2 glass-surface px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2.5 opacity-0 pointer-events-none transition-all duration-300 z-50 border border-amber-500/30">
-    <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-    <span id="toast-message" class="text-xs font-mono font-medium text-zinc-200">Notifikasi</span>
+  <div id="toast-notification" class="fixed top-20 left-1/2 -translate-x-1/2 min-panel px-4 py-2.5 rounded-[8px] flex items-center gap-2.5 opacity-0 pointer-events-none transition-all duration-300 z-50">
+    <span class="w-2 h-2 rounded-full bg-[#111111]"></span>
+    <span id="toast-message" class="text-xs font-mono font-medium text-[#111111]">Notifikasi</span>
   </div>
 
   <!-- Main JavaScript App Entry -->

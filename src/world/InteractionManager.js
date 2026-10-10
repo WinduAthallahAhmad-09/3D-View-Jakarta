@@ -25,8 +25,14 @@ export class InteractionManager {
       const dy = Math.abs(e.clientY - this.pointerDownPos.y);
       if (dx > 5 || dy > 5) return;
 
-      // Don't trigger if clicked on UI elements
-      if (e.target.closest('#ui-overlay') || e.target.closest('button') || e.target.closest('.interactive-ui')) {
+      // Don't trigger if clicked on UI elements or Homescreen
+      if (
+        e.target.closest('#homescreen-overlay') ||
+        e.target.closest('#detail-drawer') ||
+        e.target.closest('#ui-overlay') ||
+        e.target.closest('button') ||
+        e.target.closest('.interactive-ui')
+      ) {
         return;
       }
 

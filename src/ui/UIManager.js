@@ -6,6 +6,10 @@ export class UIManager {
     this.onSelectPreset = onSelectPreset;
     this.onTimeChange = onTimeChange;
 
+    this.homescreen = document.getElementById('homescreen-overlay');
+    this.uiOverlay = document.getElementById('ui-overlay');
+    this.labelsContainer = document.getElementById('map-labels-container');
+
     this.drawer = document.getElementById('detail-drawer');
     this.drawerTitle = document.getElementById('drawer-title');
     this.drawerTagline = document.getElementById('drawer-tagline');
@@ -18,7 +22,8 @@ export class UIManager {
     this.drawerFocusBtn = document.getElementById('drawer-focus-btn');
     this.currentLandmark = null;
 
-    // 3D Map Labels state
+    // State
+    this.isHomeActive = true;
     this.labelsVisible = true;
     this.labelElements = [];
     this.tempVec = new THREE.Vector3();
@@ -27,6 +32,10 @@ export class UIManager {
   }
 
   init() {
+    this.populateHomescreenDirectory();
+    this.initScrollReveal();
+    this.initAccordions();
+    this.bindHomescreenEvents();
     this.initMapLabels();
     this.bindTourButtons();
     this.bindTimeButtons();
@@ -36,27 +45,214 @@ export class UIManager {
   }
 
   /**
-   * Create floating Google Maps-style 3D place labels for every Jakarta landmark
+   * Populate the 23-landmark directory on the Homescreen using minimalist-ui bento cards
+   */
+  populateHomescreenDirectory() {
+    const grid = document.getElementById('homescreen-landmark-grid');
+    if (!grid) return;
+
+    const pastelClasses = [
+      'bg-[#E1F3FE] text-[#1F6C9F]',
+      'bg-[#EDF3EC] text-[#346538]',
+      'bg-[#FBF3DB] text-[#956400]',
+      'bg-[#FDEBEC] text-[#9F2F2D]'
+    ];
+
+    grid.innerHTML = JAKARTA_LANDMARKS.map((item, idx) => {
+      const num = String(idx + 1).padStart(2, '0');
+      const badgeTone = pastelClasses[idx % pastelClasses.length];
+      return `
+        <button type="button" data-home-jump="${item.id}" class="min-card p-6 text-left flex flex-col justify-between group cursor-pointer reveal-item" style="transition-delay: ${(idx % 6) * 50}ms">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-4">
+              <span class="font-mono text-xs text-[#787774]">#${num}</span>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-[0.05em] ${badgeTone} font-medium">
+                ${item.category}
+              </span>
+            </div>
+            <h3 class="editorial-heading text-2xl text-[#111111] group-hover:underline">
+              ${item.name}
+            </h3>
+            <p class="mt-2 text-xs text-[#787774] line-clamp-2 leading-relaxed">
+              ${item.tagline}
+            </p>
+          </div>
+          <div class="mt-5 pt-3.5 border-t border-[#EAEAEA] flex items-center justify-between text-[11px] font-mono text-[#2F3437]">
+            <span>${item.height}</span>
+            <span class="text-[#111111] font-medium">Buka 3D →</span>
+          </div>
+        </button>
+      `;
+    }).join('');
+  }
+
+  /**
+   * IntersectionObserver for minimalist-ui subtle scroll entry animations
+   */
+  initScrollReveal() {
+    const items = document.querySelectorAll('.reveal-item');
+    if (!('IntersectionObserver' in window)) {
+      items.forEach((el) => el.classList.add('is-visible'));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { root: this.homescreen, threshold: 0.08 }
+    );
+
+    items.forEach((el) => observer.observe(el));
+  }
+
+  /**
+   * Minimalist border-bottom accordions with sharp + and - toggle state
+   */
+  initAccordions() {
+    const buttons = document.querySelectorAll('[data-accordion-btn]');
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const content = btn.nextElementSibling;
+        const icon = btn.querySelector('[data-accordion-icon]');
+        if (!content) return;
+
+        const isHidden = content.classList.contains('hidden');
+        content.classList.toggle('hidden', !isHidden);
+        if (icon) {
+          icon.textContent = isHidden ? '−' : '+';
+        }
+      });
+    });
+  }
+
+  /**
+   * Bind Homescreen -> 3D Workspace transitions and keyboard shortcuts
+   */
+  bindHomescreenEvents() {
+    const enterBtns = [
+      document.getElementById('nav-enter-3d-btn'),
+      document.getElementById('hero-enter-3d-btn')
+    ];
+    enterBtns.forEach((btn) => {
+      if (btn) {
+        btn.addEventListener('click', () => this.enter3DWorkspace('bundaran-hi'));
+      }
+    });
+
+    const aerialBtn = document.getElementById('hero-aerial-btn');
+    if (aerialBtn) {
+      aerialBtn.addEventListener('click', () => this.enter3DWorkspace('aerial'));
+    }
+
+    const backHomeBtn = document.getElementById('back-to-home-btn');
+    if (backHomeBtn) {
+      backHomeBtn.addEventListener('click', () => this.openHomescreen());
+    }
+
+    // Bind all [data-home-jump] cards and buttons
+    document.querySelectorAll('[data-home-jump]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-home-jump');
+        this.enter3DWorkspace(targetId);
+      });
+    });
+
+    // Keyboard shortcuts: ENTER to enter 3D map, ESC to close drawer or return to Homescreen
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && this.isHomeActive) {
+        if (document.activeElement?.tagName === 'INPUT') return;
+        this.enter3DWorkspace('bundaran-hi');
+      } else if (e.key === 'Escape' && !this.isHomeActive) {
+        if (this.currentLandmark) {
+          this.hideLandmarkDetails();
+        } else {
+          this.openHomescreen();
+        }
+      }
+    });
+  }
+
+  enter3DWorkspace(presetId = null) {
+    this.isHomeActive = false;
+
+    if (this.homescreen) {
+      this.homescreen.classList.add('opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        if (!this.isHomeActive) {
+          this.homescreen.style.display = 'none';
+        }
+      }, 450);
+    }
+
+    if (this.uiOverlay) {
+      this.uiOverlay.style.display = 'flex';
+      requestAnimationFrame(() => {
+        this.uiOverlay.classList.remove('opacity-0');
+      });
+    }
+
+    if (this.labelsContainer && this.labelsVisible) {
+      this.labelsContainer.style.display = 'block';
+    }
+
+    if (presetId) {
+      this.selectTourPreset(presetId);
+    }
+  }
+
+  openHomescreen() {
+    this.isHomeActive = true;
+    this.hideLandmarkDetails();
+
+    if (this.labelsContainer) {
+      this.labelsContainer.style.display = 'none';
+    }
+
+    if (this.uiOverlay) {
+      this.uiOverlay.classList.add('opacity-0');
+      setTimeout(() => {
+        if (this.isHomeActive) {
+          this.uiOverlay.style.display = 'none';
+        }
+      }, 300);
+    }
+
+    if (this.homescreen) {
+      this.homescreen.style.display = 'block';
+      requestAnimationFrame(() => {
+        this.homescreen.classList.remove('opacity-0', 'pointer-events-none');
+      });
+    }
+  }
+
+  /**
+   * Create Utilitarian Minimalist floating 3D place labels
    */
   initMapLabels() {
-    const container = document.getElementById('map-labels-container');
-    if (!container) return;
+    if (!this.labelsContainer) return;
 
-    container.innerHTML = '';
+    this.labelsContainer.innerHTML = '';
     this.labelElements = [];
 
-    JAKARTA_LANDMARKS.forEach((landmark) => {
+    JAKARTA_LANDMARKS.forEach((landmark, index) => {
+      const num = String(index + 1).padStart(2, '0');
       const el = document.createElement('button');
       el.type = 'button';
       el.className =
         'map-pin-label pointer-events-auto fixed top-0 left-0 -translate-x-1/2 -translate-y-full flex flex-col items-center group cursor-pointer transition-opacity duration-150';
 
       el.innerHTML = `
-        <div class="px-2 py-0.5 rounded-md bg-zinc-950/85 backdrop-blur-md border border-white/15 group-hover:border-amber-400/70 group-hover:bg-zinc-900 shadow-lg flex items-center gap-1.5 transition-all">
-          <span class="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
-          <span class="text-[10px] font-sans font-semibold text-zinc-100 group-hover:text-amber-300 whitespace-nowrap tracking-tight">${landmark.shortName || landmark.name}</span>
+        <div class="px-2 py-0.5 rounded-[5px] bg-white/95 border border-[#EAEAEA] group-hover:border-[#111111] group-hover:bg-[#111111] flex items-center gap-1.5 transition-colors">
+          <span class="font-mono text-[9px] text-[#787774] group-hover:text-[#EAEAEA]">${num}</span>
+          <span class="text-[10px] font-sans font-medium text-[#111111] group-hover:text-white whitespace-nowrap tracking-tight">${landmark.shortName || landmark.name}</span>
         </div>
-        <div class="w-px h-2.5 bg-gradient-to-b from-amber-400/70 to-transparent"></div>
+        <div class="w-px h-2.5 bg-[#111111]/40"></div>
       `;
 
       el.addEventListener('click', (e) => {
@@ -65,7 +261,7 @@ export class UIManager {
         this.onSelectPreset(landmark);
       });
 
-      container.appendChild(el);
+      this.labelsContainer.appendChild(el);
       this.labelElements.push({
         landmark,
         element: el,
@@ -81,7 +277,9 @@ export class UIManager {
     if (toggleBtn) {
       toggleBtn.addEventListener('click', () => {
         this.labelsVisible = !this.labelsVisible;
-        container.style.display = this.labelsVisible ? 'block' : 'none';
+        if (!this.isHomeActive) {
+          this.labelsContainer.style.display = this.labelsVisible ? 'block' : 'none';
+        }
         toggleBtn.classList.toggle('active-time', this.labelsVisible);
       });
     }
@@ -91,7 +289,7 @@ export class UIManager {
    * Project 3D world coordinates of each Jakarta place to 2D screen coordinates
    */
   updateMapLabels(camera) {
-    if (!this.labelsVisible || !this.labelElements.length) return;
+    if (this.isHomeActive || !this.labelsVisible || !this.labelElements.length) return;
 
     const widthHalf = window.innerWidth / 2;
     const heightHalf = window.innerHeight / 2;
@@ -101,7 +299,6 @@ export class UIManager {
       this.tempVec.copy(item.worldPos);
       this.tempVec.project(camera);
 
-      // Check if behind camera or far outside frustum
       if (this.tempVec.z > 1.0 || this.tempVec.z < -1.0) {
         item.element.style.opacity = '0';
         item.element.style.pointerEvents = 'none';
@@ -112,11 +309,11 @@ export class UIManager {
       const y = -(this.tempVec.y * heightHalf) + heightHalf;
 
       const dist = camera.position.distanceTo(item.worldPos);
-      if (dist > 1100) {
+      if (dist > 1150) {
         item.element.style.opacity = '0';
         item.element.style.pointerEvents = 'none';
       } else {
-        item.element.style.opacity = dist > 750 ? '0.65' : '1';
+        item.element.style.opacity = dist > 750 ? '0.68' : '1';
         item.element.style.pointerEvents = 'auto';
         item.element.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -100%)`;
       }
@@ -176,14 +373,14 @@ export class UIManager {
     const badge = document.getElementById('google-tiles-badge');
     if (badge) {
       if (info.status === 'active') {
-        badge.textContent = 'GOOGLE 3D ON';
-        badge.className = 'inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-amber-500/10 text-amber-400 border border-amber-500/30';
+        badge.textContent = 'SATELIT ON';
+        badge.className = 'px-2 py-0.5 rounded-full text-[9px] font-mono uppercase tracking-[0.05em] bg-[#EDF3EC] text-[#346538]';
       } else if (info.status === 'loading') {
-        badge.textContent = 'STREAMING...';
-        badge.className = 'inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-sky-500/10 text-sky-400 border border-sky-500/30';
+        badge.textContent = 'MEMUAT...';
+        badge.className = 'px-2 py-0.5 rounded-full text-[9px] font-mono uppercase tracking-[0.05em] bg-[#FBF3DB] text-[#956400]';
       } else {
-        badge.textContent = 'PETA 3D JAKARTA';
-        badge.className = 'inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-zinc-800 text-zinc-400 border border-white/5';
+        badge.textContent = 'PETA 3D';
+        badge.className = 'px-2 py-0.5 rounded-full text-[9px] font-mono uppercase tracking-[0.05em] bg-[#E1F3FE] text-[#1F6C9F]';
       }
     }
   }
@@ -200,9 +397,10 @@ export class UIManager {
 
   selectTourPreset(id) {
     if (id === 'aerial') {
+      this.hideLandmarkDetails();
       this.onSelectPreset({
-        cameraPosition: [360, 290, 380],
-        cameraTarget: [0, 0, 20]
+        cameraPosition: [340, 290, 360],
+        cameraTarget: [0, 0, 10]
       });
       return;
     }
@@ -258,9 +456,8 @@ export class UIManager {
       });
     }
 
-    // Model dropped event listener
     window.addEventListener('model-imported', (e) => {
-      this.showToast(`Model 3D berhasil dimuat: ${e.detail.name} (ditempatkan di koridor pusat)`);
+      this.showToast(`Model 3D berhasil dimuat: ${e.detail.name}`);
       if (e.detail.model?.userData?.landmarkData) {
         this.showLandmarkDetails(e.detail.model.userData.landmarkData);
       }
@@ -280,7 +477,7 @@ export class UIManager {
 
     if (this.drawerFacts && data.facts) {
       this.drawerFacts.innerHTML = data.facts
-        .map((f) => `<li class="flex items-start gap-2.5 text-xs text-zinc-300"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0"></span><span class="leading-relaxed">${f}</span></li>`)
+        .map((f) => `<li class="flex items-start gap-2.5 text-xs text-[#2F3437]"><span class="w-1.5 h-1.5 rounded-full bg-[#111111] mt-1.5 shrink-0"></span><span class="leading-relaxed">${f}</span></li>`)
         .join('');
     }
 
