@@ -163,6 +163,17 @@ export class UIManager {
       });
     });
 
+    // Smooth-scroll navbar links inside the #homescreen-overlay container
+    document.querySelectorAll('a[href^="#section-"]').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target && this.homescreen) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
     // Keyboard shortcuts: ENTER to enter 3D map, ESC to close drawer or return to Homescreen
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && this.isHomeActive) {

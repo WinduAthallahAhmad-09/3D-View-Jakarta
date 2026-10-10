@@ -165,7 +165,10 @@ class JakartaApp {
   }
 }
 
-// Start application when DOM is ready
-window.addEventListener('DOMContentLoaded', () => {
+// Start application immediately if DOM is already parsed, otherwise wait for DOMContentLoaded
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', () => new JakartaApp());
+} else {
   new JakartaApp();
-});
+}
+
