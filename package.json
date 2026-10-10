@@ -4,9 +4,7 @@
   "private": true,
   "description": "Interactive 3D View of Jakarta City with realistic landmarks and buildings",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "python -m http.server 8000"
   },
   "dependencies": {
     "three": "^0.160.0",
