@@ -45,41 +45,37 @@ export class UIManager {
   }
 
   /**
-   * Populate the 23-landmark directory on the Homescreen using minimalist-ui bento cards
+   * Populate the 23-landmark directory on the Homescreen using Cold Luxury & Dark Tech glass tiles
    */
   populateHomescreenDirectory() {
     const grid = document.getElementById('homescreen-landmark-grid');
     if (!grid) return;
 
-    const pastelClasses = [
-      'bg-[#E1F3FE] text-[#1F6C9F]',
-      'bg-[#EDF3EC] text-[#346538]',
-      'bg-[#FBF3DB] text-[#956400]',
-      'bg-[#FDEBEC] text-[#9F2F2D]'
-    ];
-
     grid.innerHTML = JAKARTA_LANDMARKS.map((item, idx) => {
       const num = String(idx + 1).padStart(2, '0');
-      const badgeTone = pastelClasses[idx % pastelClasses.length];
+      const coords = item.coordinates || '6.1950° S, 106.8230° E';
       return `
-        <button type="button" data-home-jump="${item.id}" class="min-card p-6 text-left flex flex-col justify-between group cursor-pointer reveal-item" style="transition-delay: ${(idx % 6) * 50}ms">
+        <button type="button" data-home-jump="${item.id}" class="glass-tile rounded-xl p-6 text-left flex flex-col justify-between group cursor-pointer reveal-item" style="transition-delay: ${(idx % 6) * 45}ms">
           <div>
             <div class="flex items-center justify-between gap-2 mb-4">
-              <span class="font-mono text-xs text-[#787774]">#${num}</span>
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-[0.05em] ${badgeTone} font-medium">
+              <span class="font-mono text-[11px] text-sky-400">NODE // ${num}</span>
+              <span class="px-2.5 py-0.5 rounded-md text-[10px] font-mono uppercase tracking-[0.12em] bg-sky-500/10 text-sky-400 border border-sky-400/20">
                 ${item.category}
               </span>
             </div>
-            <h3 class="editorial-heading text-2xl text-[#111111] group-hover:underline">
+            <h3 class="font-display font-bold tracking-tight text-xl text-zinc-100 group-hover:text-sky-400 transition-colors">
               ${item.name}
             </h3>
-            <p class="mt-2 text-xs text-[#787774] line-clamp-2 leading-relaxed">
+            <p class="mt-1.5 font-mono text-[11px] text-zinc-500">
+              ${coords}
+            </p>
+            <p class="mt-2.5 text-xs text-zinc-400 line-clamp-2 leading-relaxed">
               ${item.tagline}
             </p>
           </div>
-          <div class="mt-5 pt-3.5 border-t border-[#EAEAEA] flex items-center justify-between text-[11px] font-mono text-[#2F3437]">
-            <span>${item.height}</span>
-            <span class="text-[#111111] font-medium">Buka 3D →</span>
+          <div class="mt-5 pt-3.5 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-zinc-400">
+            <span>ELEV ${item.height}</span>
+            <span class="text-sky-400 group-hover:translate-x-0.5 transition-transform">FOKUS 3D →</span>
           </div>
         </button>
       `;
@@ -87,7 +83,7 @@ export class UIManager {
   }
 
   /**
-   * IntersectionObserver for minimalist-ui subtle scroll entry animations
+   * IntersectionObserver for smooth spatial reveal transitions
    */
   initScrollReveal() {
     const items = document.querySelectorAll('.reveal-item');
@@ -112,7 +108,7 @@ export class UIManager {
   }
 
   /**
-   * Minimalist border-bottom accordions with sharp + and - toggle state
+   * Accordions with sharp + and - toggle state
    */
   initAccordions() {
     const buttons = document.querySelectorAll('[data-accordion-btn]');
@@ -125,7 +121,7 @@ export class UIManager {
         const isHidden = content.classList.contains('hidden');
         content.classList.toggle('hidden', !isHidden);
         if (icon) {
-          icon.textContent = isHidden ? '−' : '+';
+          icon.textContent = isHidden ? '-' : '+';
         }
       });
     });
@@ -232,7 +228,7 @@ export class UIManager {
   }
 
   /**
-   * Create Utilitarian Minimalist floating 3D place labels
+   * Create Cold Luxury & Dark Tech floating 3D spatial place labels
    */
   initMapLabels() {
     if (!this.labelsContainer) return;
@@ -248,11 +244,11 @@ export class UIManager {
         'map-pin-label pointer-events-auto fixed top-0 left-0 -translate-x-1/2 -translate-y-full flex flex-col items-center group cursor-pointer transition-opacity duration-150';
 
       el.innerHTML = `
-        <div class="px-2 py-0.5 rounded-[5px] bg-white/95 border border-[#EAEAEA] group-hover:border-[#111111] group-hover:bg-[#111111] flex items-center gap-1.5 transition-colors">
-          <span class="font-mono text-[9px] text-[#787774] group-hover:text-[#EAEAEA]">${num}</span>
-          <span class="text-[10px] font-sans font-medium text-[#111111] group-hover:text-white whitespace-nowrap tracking-tight">${landmark.shortName || landmark.name}</span>
+        <div class="px-2 py-0.5 rounded-md bg-zinc-950/85 backdrop-blur-md border border-white/15 group-hover:border-sky-400/70 group-hover:bg-sky-500/20 flex items-center gap-1.5 transition-colors shadow-lg">
+          <span class="font-mono text-[9px] text-sky-400">${num}</span>
+          <span class="text-[10px] font-display font-medium text-zinc-100 group-hover:text-white whitespace-nowrap tracking-tight">${landmark.shortName || landmark.name}</span>
         </div>
-        <div class="w-px h-2.5 bg-[#111111]/40"></div>
+        <div class="w-px h-2.5 bg-sky-400/45"></div>
       `;
 
       el.addEventListener('click', (e) => {
@@ -374,13 +370,13 @@ export class UIManager {
     if (badge) {
       if (info.status === 'active') {
         badge.textContent = 'SATELIT ON';
-        badge.className = 'px-2 py-0.5 rounded-full text-[9px] font-mono uppercase tracking-[0.05em] bg-[#EDF3EC] text-[#346538]';
+        badge.className = 'px-2 py-0.5 rounded-md text-[9px] font-mono uppercase tracking-[0.12em] bg-sky-500/20 text-sky-300 border border-sky-400/35';
       } else if (info.status === 'loading') {
         badge.textContent = 'MEMUAT...';
-        badge.className = 'px-2 py-0.5 rounded-full text-[9px] font-mono uppercase tracking-[0.05em] bg-[#FBF3DB] text-[#956400]';
+        badge.className = 'px-2 py-0.5 rounded-md text-[9px] font-mono uppercase tracking-[0.12em] bg-zinc-800 text-zinc-300 border border-white/15';
       } else {
         badge.textContent = 'PETA 3D';
-        badge.className = 'px-2 py-0.5 rounded-full text-[9px] font-mono uppercase tracking-[0.05em] bg-[#E1F3FE] text-[#1F6C9F]';
+        badge.className = 'px-2 py-0.5 rounded-md text-[9px] font-mono uppercase tracking-[0.12em] bg-sky-500/15 text-sky-400 border border-sky-400/25';
       }
     }
   }
@@ -472,12 +468,15 @@ export class UIManager {
     if (this.drawerCategory) this.drawerCategory.textContent = data.category || 'Bangunan Jakarta';
     if (this.drawerHeight) this.drawerHeight.textContent = data.height || '-';
     if (this.drawerYear) this.drawerYear.textContent = data.year || '-';
-    if (this.drawerLocation) this.drawerLocation.textContent = data.location || 'DKI Jakarta';
+    if (this.drawerLocation) {
+      const coords = data.coordinates ? ` // ${data.coordinates}` : '';
+      this.drawerLocation.textContent = `${data.location || 'DKI Jakarta'}${coords}`;
+    }
     if (this.drawerDesc) this.drawerDesc.textContent = data.description || '';
 
     if (this.drawerFacts && data.facts) {
       this.drawerFacts.innerHTML = data.facts
-        .map((f) => `<li class="flex items-start gap-2.5 text-xs text-[#2F3437]"><span class="w-1.5 h-1.5 rounded-full bg-[#111111] mt-1.5 shrink-0"></span><span class="leading-relaxed">${f}</span></li>`)
+        .map((f) => `<li class="flex items-start gap-2.5 text-xs text-zinc-300"><span class="w-1.5 h-1.5 rounded-full bg-sky-400 mt-1.5 shrink-0"></span><span class="leading-relaxed">${f}</span></li>`)
         .join('');
     }
 

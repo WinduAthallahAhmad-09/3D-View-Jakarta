@@ -229,7 +229,7 @@ export const JAKARTA_LANDMARKS = [
     name: "Bundaran Hotel Indonesia (Bundaran HI)",
     shortName: "Bundaran HI",
     category: "Jantung Kota Jakarta",
-    tagline: "Patung Selamat Datang & Titik Simpul Thamrin – Sudirman – Menteng",
+    tagline: "Patung Selamat Datang & Titik Simpul Thamrin - Sudirman - Menteng",
     height: "30 meter",
     year: "1962",
     architect: "Henk Ngantung & Edhi Sunarso",
@@ -338,7 +338,7 @@ export const JAKARTA_LANDMARKS = [
   // =====================================================
   {
     id: "wisma-46",
-    name: "Wisma 46 — Kota BNI",
+    name: "Wisma 46 - Kota BNI",
     shortName: "Wisma 46",
     category: "Ikon Arsitektur Postmodern",
     tagline: "Siluet Puncak Pena Legendaris di Selatan Kanal Dukuh Atas",
@@ -354,7 +354,7 @@ export const JAKARTA_LANDMARKS = [
     cameraTarget: [-52, 75, 145],
     description: "Menara perkantoran setinggi 262 meter dengan puncak melengkung menyerupai mata pena atau layar phinisi. Berdiri tepat di sisi selatan Kanal Banjir Barat dan Stasiun BNI City pada awal segmen diagonal Jalan Jenderal Sudirman.",
     facts: [
-      "Pernah memegang rekor gedung tertinggi di Indonesia selama hampir 20 tahun (1996–2015)."
+      "Pernah memegang rekor gedung tertinggi di Indonesia selama hampir 20 tahun (1996-2015)."
     ]
   },
   {
@@ -362,7 +362,7 @@ export const JAKARTA_LANDMARKS = [
     name: "Sampoerna Strategic Square & Flyover Karet",
     shortName: "Sampoerna Strategic",
     category: "Arsitektur Neo-Klasik Kembar",
-    tagline: "Menara Kembar Berkubah di Persimpangan Sudirman – Prof. Dr. Satrio",
+    tagline: "Menara Kembar Berkubah di Persimpangan Sudirman - Prof. Dr. Satrio",
     height: "158 meter (32 lantai)",
     year: "1997",
     architect: "HOK (Hellmuth, Obata + Kassabaum)",
@@ -373,7 +373,7 @@ export const JAKARTA_LANDMARKS = [
     labelHeight: 112,
     cameraPosition: [-110, 68, 235],
     cameraTarget: [-38, 52, 205],
-    description: "Kompleks menara kembar bergaya Neo-Klasik dengan atap kubah berlapis kaca emas yang berdiri di titik pertemuan Jalan Jenderal Sudirman dan jalan layang Jl. Prof. Dr. Satrio (Casablanca – Karet).",
+    description: "Kompleks menara kembar bergaya Neo-Klasik dengan atap kubah berlapis kaca emas yang berdiri di titik pertemuan Jalan Jenderal Sudirman dan jalan layang Jl. Prof. Dr. Satrio (Casablanca - Karet).",
     facts: [
       "Tepat di depannya melintas Flyover Karet yang menghubungkan Tanah Abang/Mas Mansyur dengan Kuningan/Casablanca."
     ]
@@ -449,7 +449,7 @@ export const JAKARTA_LANDMARKS = [
     category: "Distrik Bisnis & Diplomatik",
     tagline: "Sisi Timur Segitiga Emas Jakarta (Gama Tower & Bakrie Tower)",
     height: "285,5 meter (Gama Tower)",
-    year: "1995–2016",
+    year: "1995-2016",
     architect: "Masterplan Segitiga Emas Kuningan",
     location: "Jl. H.R. Rasuna Said & Mega Kuningan, Jakarta Selatan",
     coordinates: { lat: -6.227512, lng: 106.826912 },
@@ -470,7 +470,7 @@ export const JAKARTA_LANDMARKS = [
     category: "Distrik Keuangan Modern",
     tagline: "Pusat Finansial, Bursa Efek Indonesia & Treasury Tower (279,5m)",
     height: "279,5 meter (Treasury Tower)",
-    year: "1992–Sekarang",
+    year: "1992-Sekarang",
     architect: "KPF, Pei Partnership & Nikken Sekkei",
     location: "Jl. Jend. Sudirman Kav. 52-53 (Tenggara Semanggi)",
     coordinates: { lat: -6.224812, lng: 106.809143 },
@@ -521,7 +521,7 @@ export const JAKARTA_LANDMARKS = [
     cameraTarget: [-190, 12, 475],
     description: "Bundaran air mancur di ujung selatan koridor diagonal Jalan Jenderal Sudirman sebelum memasuki Jalan Sisingamangaraja (Kebayoran Baru / Blok M). Di tengahnya berdiri Patung Pemuda Membangun yang dikelilingi Plaza Senayan, Senayan City, dan Ratu Plaza.",
     facts: [
-      "Menandai ujung selatan poros Medan Merdeka – Thamrin – Sudirman."
+      "Menandai ujung selatan poros Medan Merdeka - Thamrin - Sudirman."
     ]
   }
 ];
