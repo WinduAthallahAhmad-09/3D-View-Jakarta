@@ -4,6 +4,8 @@ import { LightingManager } from './world/Lighting.js';
 import { CameraController } from './world/CameraController.js';
 import { GLTFManager } from './world/GLTFManager.js';
 import { InteractionManager } from './world/InteractionManager.js';
+import { GoogleTilesManager } from './world/GoogleTilesManager.js';
+import { GOOGLE_TILES_CONFIG } from './config/landmarks.js';
 import { UIManager } from './ui/UIManager.js';
 
 class JakartaApp {
@@ -89,6 +91,47 @@ class JakartaApp {
         this.ui.showLandmarkDetails(landmarkData);
       }
     );
+
+    // 7. Google Photorealistic 3D Tiles System
+    this.googleTiles = new GoogleTilesManager({
+      scene: this.scene,
+      camera: this.camera,
+      renderer: this.renderer,
+      onStatusChange: (info) => {
+        if (this.ui) {
+          this.ui.updateGoogleTilesStatus(info);
+        }
+      }
+    });
+
+    // Auto-enable if API key already saved in localStorage or landmarks config
+    const savedApiKey = localStorage.getItem('google_3d_tiles_api_key') || GOOGLE_TILES_CONFIG.apiKey;
+    if (savedApiKey) {
+      this.googleTiles.enable(savedApiKey).then(() => {
+        this.city.setProceduralVisible(false);
+      }).catch(() => {
+        this.city.setProceduralVisible(true);
+      });
+    }
+
+    // Event listener from UI modal
+    window.addEventListener('toggle-google-tiles', async (e) => {
+      const { apiKey, enable } = e.detail;
+      if (enable && apiKey) {
+        try {
+          await this.googleTiles.enable(apiKey);
+          this.city.setProceduralVisible(false);
+          this.ui.showToast('Google Photorealistic 3D Tiles Aktif!');
+        } catch (err) {
+          this.city.setProceduralVisible(true);
+          this.ui.showToast('Gagal memuat Google Tiles: ' + (err.message || 'Error'));
+        }
+      } else {
+        this.googleTiles.disable();
+        this.city.setProceduralVisible(true);
+        this.ui.showToast('Kembali ke mode model lokal Three.js.');
+      }
+    });
   }
 
   initEvents() {
@@ -113,6 +156,11 @@ class JakartaApp {
     // Update smooth camera flight
     if (this.cameraController) {
       this.cameraController.update(delta);
+    }
+
+    // Update Google 3D Tiles stream
+    if (this.googleTiles) {
+      this.googleTiles.update();
     }
 
     this.renderer.render(this.scene, this.camera);

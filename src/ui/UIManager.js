@@ -25,6 +25,72 @@ export class UIManager {
     this.bindTimeButtons();
     this.bindDrawerEvents();
     this.bindImportEvents();
+    this.bindGoogleTilesEvents();
+  }
+
+  bindGoogleTilesEvents() {
+    const modal = document.getElementById('google-tiles-modal');
+    const openBtn = document.getElementById('open-google-tiles-btn');
+    const closeBtn = document.getElementById('close-google-tiles-btn');
+    const enableBtn = document.getElementById('enable-google-tiles-btn');
+    const disableBtn = document.getElementById('disable-google-tiles-btn');
+    const input = document.getElementById('google-api-key-input');
+
+    const savedKey = localStorage.getItem('google_3d_tiles_api_key') || '';
+    if (input && savedKey) {
+      input.value = savedKey;
+    }
+
+    if (openBtn && modal) {
+      openBtn.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+      });
+    }
+
+    if (closeBtn && modal) {
+      closeBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+      });
+    }
+
+    if (enableBtn) {
+      enableBtn.addEventListener('click', () => {
+        const key = input ? input.value.trim() : '';
+        if (!key) {
+          alert('Silakan masukkan Google Maps API Key terlebih dahulu.');
+          return;
+        }
+        window.dispatchEvent(
+          new CustomEvent('toggle-google-tiles', { detail: { apiKey: key, enable: true } })
+        );
+        if (modal) modal.classList.add('hidden');
+      });
+    }
+
+    if (disableBtn) {
+      disableBtn.addEventListener('click', () => {
+        window.dispatchEvent(
+          new CustomEvent('toggle-google-tiles', { detail: { enable: false } })
+        );
+        if (modal) modal.classList.add('hidden');
+      });
+    }
+  }
+
+  updateGoogleTilesStatus(info) {
+    const badge = document.getElementById('google-tiles-badge');
+    if (badge) {
+      if (info.status === 'active') {
+        badge.textContent = 'GOOGLE 3D ON';
+        badge.className = 'inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-amber-500/10 text-amber-400 border border-amber-500/30';
+      } else if (info.status === 'loading') {
+        badge.textContent = 'STREAMING...';
+        badge.className = 'inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-sky-500/10 text-sky-400 border border-sky-500/30';
+      } else {
+        badge.textContent = 'LOKAL 3D';
+        badge.className = 'inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-zinc-800 text-zinc-400 border border-white/5';
+      }
+    }
   }
 
   bindTourButtons() {

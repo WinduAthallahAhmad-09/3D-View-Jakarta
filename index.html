@@ -41,12 +41,14 @@
     }
   </script>
 
-  <!-- Modern Import Map for Three.js ES Modules -->
+  <!-- Modern Import Map for Three.js ES Modules & 3D Tiles -->
   <script type="importmap">
   {
     "imports": {
       "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-      "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+      "3d-tiles-renderer": "https://cdn.jsdelivr.net/npm/3d-tiles-renderer@0.5.3/build/index.js",
+      "3d-tiles-renderer/plugins": "https://cdn.jsdelivr.net/npm/3d-tiles-renderer@0.5.3/build/index.plugins.js"
     }
   }
   </script>
@@ -196,6 +198,16 @@
             <span class="hidden sm:inline font-sans">Malam</span>
           </button>
         </div>
+
+        <!-- Google 3D Tiles Activation Button -->
+        <button id="open-google-tiles-btn" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-sky-400 flex items-center gap-1.5 hover:text-sky-300">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/>
+          </svg>
+          <span class="hidden md:inline font-sans font-semibold">Google 3D</span>
+          <span id="google-tiles-badge" class="px-1.5 py-0.5 rounded text-[9px] font-mono font-medium bg-zinc-800 text-zinc-400 border border-white/5">LOKAL 3D</span>
+        </button>
 
         <!-- Custom .GLB Slot / Import Button -->
         <button id="open-import-btn" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-amber-400 flex items-center gap-1.5 hover:text-amber-300">
@@ -399,6 +411,64 @@
       <div class="mt-6 flex justify-end">
         <button onclick="document.getElementById('import-modal').classList.add('hidden')" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 active:scale-[0.98] text-zinc-100 font-medium rounded-xl text-xs transition">
           Mengerti & Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Google Photorealistic 3D Tiles Setup -->
+  <div id="google-tiles-modal" class="fixed inset-0 z-40 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="glass-surface w-full max-w-lg rounded-2xl p-6 border border-white/10 shadow-2xl">
+      <div class="flex items-center justify-between pb-3.5 border-b border-white/10">
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-bold text-base text-zinc-100 font-sans">Google Photorealistic 3D Tiles</h3>
+            <p class="text-[10px] text-zinc-400 font-mono">Stream Seluruh Kota Jakarta Asli dari Satelit Google Earth</p>
+          </div>
+        </div>
+        <button id="close-google-tiles-btn" class="w-7 h-7 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white flex items-center justify-center transition">
+          ✕
+        </button>
+      </div>
+
+      <div class="mt-4 space-y-3.5 text-xs text-zinc-300 leading-relaxed">
+        <!-- Input Key Form -->
+        <div class="space-y-1.5">
+          <label class="block font-mono text-[11px] text-zinc-300 uppercase tracking-wider font-semibold">
+            Google Maps Platform API Key
+          </label>
+          <input id="google-api-key-input" type="password" placeholder="AIzaSy..." class="w-full bg-zinc-950 border border-white/10 focus:border-sky-400 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 font-mono outline-none transition" />
+          <p class="text-[10px] text-zinc-500 font-mono">Tersimpan aman secara lokal di browser Anda (localStorage).</p>
+        </div>
+
+        <!-- 4 Step Guide -->
+        <div class="p-3.5 rounded-xl bg-zinc-900/70 border border-white/5 space-y-2">
+          <div class="font-mono text-[11px] font-semibold text-sky-400 uppercase tracking-wider flex items-center justify-between">
+            <span>CARA MENDAPATKAN API KEY GRATIS</span>
+            <span class="text-emerald-400 text-[10px]">$200 CREDIT/BLN</span>
+          </div>
+          <ol class="space-y-1 text-zinc-300 list-decimal list-inside text-[11px]">
+            <li>Buka <a href="https://console.cloud.google.com/" target="_blank" class="text-sky-400 underline font-medium">Google Cloud Console</a> dan login akun Google.</li>
+            <li>Buat Proyek baru (misal: <i>Jakarta-3D</i>).</li>
+            <li>Di menu <b>APIs & Services</b>, cari dan aktifkan <b>Map Tiles API</b>.</li>
+            <li>Masuk ke <b>Credentials</b> ➔ <b>Create Credentials</b> ➔ <b>API Key</b>.</li>
+            <li>Salin API Key tersebut dan tempel ke kolom di atas.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="mt-6 flex items-center justify-between gap-3 border-t border-white/10 pt-4">
+        <button id="disable-google-tiles-btn" class="px-3.5 py-2 bg-zinc-800 hover:bg-zinc-700 active:scale-[0.98] text-zinc-300 font-medium rounded-xl text-xs transition">
+          Gunakan Mode Lokal
+        </button>
+        <button id="enable-google-tiles-btn" class="px-5 py-2 bg-sky-500 hover:bg-sky-400 active:scale-[0.98] text-zinc-950 font-bold rounded-xl text-xs tracking-wide transition shadow-lg shadow-sky-500/20">
+          AKTIFKAN GOOGLE 3D TILES
         </button>
       </div>
     </div>

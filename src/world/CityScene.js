@@ -6,11 +6,19 @@ import { JAKARTA_LANDMARKS, CITY_CORRIDOR_CONFIG } from '../config/landmarks.js'
 export class CityScene {
   constructor(scene) {
     this.scene = scene;
+    this.proceduralGroup = new THREE.Group();
+    this.proceduralGroup.name = "procedural-city-group";
+    this.scene.add(this.proceduralGroup);
+
     this.interactiveObjects = [];
     this.vehicles = [];
     this.streetLights = [];
     this.nightMaterials = [];
     this.init();
+  }
+
+  setProceduralVisible(visible) {
+    this.proceduralGroup.visible = visible;
   }
 
   init() {
@@ -36,7 +44,7 @@ export class CityScene {
     const ground = new THREE.Mesh(groundGeo, groundMat);
     ground.receiveShadow = true;
     ground.position.y = -0.1;
-    this.scene.add(ground);
+    this.proceduralGroup.add(ground);
   }
 
   /**
@@ -56,7 +64,7 @@ export class CityScene {
     const road = new THREE.Mesh(roadGeo, roadMat);
     road.position.set(0, 0.02, 30);
     road.receiveShadow = true;
-    this.scene.add(road);
+    this.proceduralGroup.add(road);
 
     // Sidewalks on West and East sides
     const swWidth = CITY_CORRIDOR_CONFIG.sidewalkWidth;
@@ -71,7 +79,7 @@ export class CityScene {
     const westSw = new THREE.Mesh(westSwGeo, swMat);
     westSw.position.set(-(roadWidth + swWidth / 2), 0.15, 30);
     westSw.receiveShadow = true;
-    this.scene.add(westSw);
+    this.proceduralGroup.add(westSw);
 
     // East Sidewalk
     const eastSwGeo = new THREE.PlaneGeometry(swWidth, corridorLength);
@@ -79,7 +87,7 @@ export class CityScene {
     const eastSw = new THREE.Mesh(eastSwGeo, swMat);
     eastSw.position.set(roadWidth + swWidth / 2, 0.15, 30);
     eastSw.receiveShadow = true;
-    this.scene.add(eastSw);
+    this.proceduralGroup.add(eastSw);
 
     // Street Lamps (PJU) along corridor
     for (let z = -220; z <= 260; z += 35) {
@@ -119,7 +127,7 @@ export class CityScene {
     poleGroup.add(lampLight);
     this.streetLights.push(lampLight);
 
-    this.scene.add(poleGroup);
+    this.proceduralGroup.add(poleGroup);
   }
 
   /**
@@ -157,7 +165,7 @@ export class CityScene {
           }
         });
 
-        this.scene.add(model);
+        this.proceduralGroup.add(model);
       }
     });
   }
@@ -279,13 +287,13 @@ export class CityScene {
         isClickable: true
       };
       this.interactiveObjects.push(bldg);
-      this.scene.add(bldg);
+      this.proceduralGroup.add(bldg);
 
       // Rooftop HVAC unit
       const hvacGeo = new THREE.BoxGeometry(width * 0.4, 3, depth * 0.4);
       const hvac = new THREE.Mesh(hvacGeo, new THREE.MeshStandardMaterial({ color: 0x475569 }));
       hvac.position.set(xOffset, height + 1.5, z);
-      this.scene.add(hvac);
+      this.proceduralGroup.add(hvac);
     }
   }
 
@@ -318,7 +326,7 @@ export class CityScene {
     foliage.castShadow = true;
     group.add(foliage);
 
-    this.scene.add(group);
+    this.proceduralGroup.add(group);
   }
 
   /**
@@ -391,7 +399,7 @@ export class CityScene {
         vehicle.rotation.y = Math.PI;
       }
 
-      this.scene.add(vehicle);
+      this.proceduralGroup.add(vehicle);
 
       this.vehicles.push({
         mesh: vehicle,

@@ -130,3 +130,15 @@ export const CITY_CORRIDOR_CONFIG = {
   totalSkyscrapers: 80,
   trafficDensity: 36 // Mobil & bus animasi
 };
+
+export const GOOGLE_TILES_CONFIG = {
+  // Masukkan API Key Anda di sini jika tidak ingin memasukkan lewat form website
+  apiKey: "",
+  // Koordinat acuan WGS84 Monas Jakarta Pusat
+  center: {
+    lat: -6.175392,
+    lng: 106.827153,
+    elevation: 15.0
+  }
+};
+
