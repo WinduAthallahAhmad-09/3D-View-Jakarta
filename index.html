@@ -154,10 +154,10 @@
             <h1 class="font-bold tracking-tight text-sm md:text-base text-zinc-100 font-sans">JAKARTA 3D VIEW</h1>
             <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1 animate-pulse"></span>
-              19 LOKASI
+              23 LOKASI
             </span>
           </div>
-          <p class="text-[11px] text-zinc-400 font-mono tracking-wider">6°10'30" S · 106°49'38" E · GOOGLE MAPS REF</p>
+          <p class="text-[11px] text-zinc-400 font-mono tracking-wider">6°10'30" S · 106°49'38" E · JAKARTA PUSAT & SEGITIGA EMAS</p>
         </div>
       </div>
 
@@ -173,7 +173,7 @@
             <span class="font-medium text-zinc-200">32°C</span>
           </div>
           <span class="text-zinc-600">|</span>
-          <span class="text-zinc-400 text-[11px]">GAMBIR · THAMRIN · SUDIRMAN · KUNINGAN · SENAYAN</span>
+          <span class="text-zinc-400 text-[11px]">MONAS · MENTENG · THAMRIN · DUKUH ATAS · SUDIRMAN</span>
         </div>
 
         <!-- 3D Map Labels Toggle Button -->
@@ -235,14 +235,11 @@
 
     <!-- Subdued HUD Telemetry Indicator (Bottom Left) -->
     <div class="hidden lg:flex items-center gap-3 glass-surface px-3 py-1.5 rounded-lg text-[11px] font-mono text-zinc-400 self-start pointer-events-auto">
-      <span class="text-zinc-500">KORIDOR</span>
-      <span class="text-zinc-200">MEDAN MERDEKA · THAMRIN · SUDIRMAN · GATOT SUBROTO · KUNINGAN</span>
-      <span class="text-zinc-600">/</span>
-      <span class="text-zinc-500">SKALA</span>
-      <span class="text-zinc-200">GOOGLE MAPS TOPOLOGY</span>
+      <span class="text-zinc-500">TATA RUANG</span>
+      <span class="text-zinc-200">MEDAN MERDEKA · MENTENG · THAMRIN (180°) · SUDIRMAN (203° SSW) · SEGITIGA EMAS</span>
     </div>
 
-    <!-- Bottom Tour Controller Dock (All 19 Real Jakarta Places) -->
+    <!-- Bottom Tour Controller Dock (All 23 Real Central & South Jakarta Places) -->
     <div class="w-full flex justify-center pb-2 pointer-events-auto">
       <nav class="glass-surface p-1.5 rounded-2xl flex items-center gap-1.5 max-w-full overflow-x-auto shadow-2xl">
         
@@ -276,83 +273,103 @@
           <span>Katedral</span>
         </button>
 
-        <button data-tour-id="monas" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
+        <button data-tour-id="lapangan-banteng" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
           <span class="font-mono text-[10px] text-zinc-400">04</span>
+          <span>Lapangan Banteng</span>
+        </button>
+
+        <button data-tour-id="monas" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-zinc-400">05</span>
           <span>Monas</span>
         </button>
 
         <button data-tour-id="stasiun-gambir" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">05</span>
+          <span class="font-mono text-[10px] text-zinc-400">06</span>
           <span>Stasiun Gambir</span>
         </button>
 
         <button data-tour-id="patung-kuda" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">06</span>
+          <span class="font-mono text-[10px] text-zinc-400">07</span>
           <span>Patung Kuda</span>
         </button>
 
+        <button data-tour-id="tugu-tani" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-zinc-400">08</span>
+          <span>Tugu Tani</span>
+        </button>
+
         <button data-tour-id="gedung-sarinah" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">07</span>
+          <span class="font-mono text-[10px] text-zinc-400">09</span>
           <span>Sarinah</span>
         </button>
 
         <button data-tour-id="bundaran-hi" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">08</span>
+          <span class="font-mono text-[10px] text-zinc-400">10</span>
           <span>Bundaran HI</span>
         </button>
 
         <button data-tour-id="menara-bca" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">09</span>
+          <span class="font-mono text-[10px] text-zinc-400">11</span>
           <span>Grand Indonesia</span>
         </button>
 
         <button data-tour-id="autograph-tower" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">10</span>
+          <span class="font-mono text-[10px] text-zinc-400">12</span>
           <span>Autograph Tower</span>
         </button>
 
+        <button data-tour-id="taman-suropati" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-zinc-400">13</span>
+          <span>Taman Suropati Menteng</span>
+        </button>
+
+        <button data-tour-id="dukuh-atas" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
+          <span class="font-mono text-[10px] text-zinc-400">14</span>
+          <span>Dukuh Atas Hub</span>
+        </button>
+
         <button data-tour-id="wisma-46" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">11</span>
+          <span class="font-mono text-[10px] text-zinc-400">15</span>
           <span>Wisma 46</span>
         </button>
 
         <button data-tour-id="sampoerna-strategic" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">12</span>
+          <span class="font-mono text-[10px] text-zinc-400">16</span>
           <span>Sampoerna</span>
         </button>
 
         <button data-tour-id="jpo-phinisi" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">13</span>
+          <span class="font-mono text-[10px] text-zinc-400">17</span>
           <span>JPO Phinisi</span>
         </button>
 
         <button data-tour-id="simpang-semanggi" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">14</span>
+          <span class="font-mono text-[10px] text-zinc-400">18</span>
           <span>Simpang Semanggi</span>
         </button>
 
         <button data-tour-id="gedung-dpr-mpr" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">15</span>
+          <span class="font-mono text-[10px] text-zinc-400">19</span>
           <span>Gedung DPR/MPR</span>
         </button>
 
         <button data-tour-id="mega-kuningan" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">16</span>
+          <span class="font-mono text-[10px] text-zinc-400">20</span>
           <span>Mega Kuningan</span>
         </button>
 
         <button data-tour-id="scbd-district" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">17</span>
+          <span class="font-mono text-[10px] text-zinc-400">21</span>
           <span>SCBD</span>
         </button>
 
         <button data-tour-id="gbk-senayan" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">18</span>
+          <span class="font-mono text-[10px] text-zinc-400">22</span>
           <span>GBK Senayan</span>
         </button>
 
         <button data-tour-id="bundaran-senayan" class="glass-chip px-3 py-2 rounded-xl text-xs font-medium text-zinc-200 flex items-center gap-1.5 whitespace-nowrap shrink-0">
-          <span class="font-mono text-[10px] text-zinc-400">19</span>
+          <span class="font-mono text-[10px] text-zinc-400">23</span>
           <span>Bundaran Senayan</span>
         </button>
 

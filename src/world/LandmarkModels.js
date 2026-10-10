@@ -213,16 +213,32 @@ export class LandmarkModels {
     park.receiveShadow = true;
     group.add(park);
 
-    // Diagonal Cross Plaza Paths
-    [Math.PI / 4, -Math.PI / 4].forEach((angle) => {
+    // Diagonal Cross Plaza Paths & Orthogonal N/S/E/W Paths
+    [Math.PI / 4, -Math.PI / 4, 0, Math.PI / 2].forEach((angle) => {
       const path = new THREE.Mesh(
-        new THREE.BoxGeometry(14, 0.65, 210),
+        new THREE.BoxGeometry(11, 0.65, 195),
         new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.7 })
       );
       path.rotation.y = angle;
       path.position.y = 0.35;
       group.add(path);
     });
+
+    // Southern Reflecting Pool & Fountain (Monas Selatan)
+    const southPool = new THREE.Mesh(
+      new THREE.BoxGeometry(18, 0.8, 34),
+      new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.1, metalness: 0.85 })
+    );
+    southPool.position.set(0, 0.45, 58);
+    group.add(southPool);
+
+    // Western Dancing Fountain Plaza (Taman Air Mancur Menari Monas Barat)
+    const westFountain = new THREE.Mesh(
+      new THREE.CylinderGeometry(14, 14, 0.9, 24),
+      new THREE.MeshStandardMaterial({ color: 0x0ea5e9, roughness: 0.1, metalness: 0.85 })
+    );
+    westFountain.position.set(-55, 0.45, 0);
+    group.add(westFountain);
 
     // Inner Courtyard
     const basePlaza = new THREE.Mesh(
@@ -999,4 +1015,193 @@ export class LandmarkModels {
 
     return group;
   }
+
+  /**
+   * 19. Lapangan Banteng & Monumen Pembebasan Irian Barat
+   * Historic Weltevreden park (tilted ~28° CCW) with twin-pedestal monument, dual pools & Kemenkeu.
+   */
+  static createLapanganBanteng() {
+    const group = new THREE.Group();
+    const parkMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 });
+    const stoneMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.4 });
+    const waterMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.1, metalness: 0.85 });
+    const bronzeMat = new THREE.MeshStandardMaterial({ color: 0x78350f, metalness: 0.85, roughness: 0.25 });
+
+    // Rectangular Park Lawn
+    const lawn = new THREE.Mesh(new THREE.BoxGeometry(92, 0.5, 68), parkMat);
+    lawn.position.y = 0.25;
+    lawn.receiveShadow = true;
+    group.add(lawn);
+
+    // Semicircular Amphitheater & Twin Reflecting Pools
+    [-22, 22].forEach((xOff) => {
+      const pool = new THREE.Mesh(new THREE.BoxGeometry(24, 0.7, 18), waterMat);
+      pool.position.set(xOff, 0.4, 0);
+      group.add(pool);
+    });
+
+    // Twin Slanted Pedestal Towers of Monumen Pembebasan Irian Barat
+    [-3.2, 3.2].forEach((zOff) => {
+      const pillar = new THREE.Mesh(new THREE.BoxGeometry(2.4, 24, 1.8), stoneMat);
+      pillar.position.set(0, 12, zOff);
+      pillar.castShadow = true;
+      group.add(pillar);
+    });
+
+    // Top Platform & Bronze Figure Breaking Chains (35m)
+    const topDeck = new THREE.Mesh(new THREE.BoxGeometry(4.5, 1.5, 10), stoneMat);
+    topDeck.position.set(0, 24, 0);
+    group.add(topDeck);
+
+    const statue = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.2, 8.5, 8), bronzeMat);
+    statue.position.set(0, 29, 0);
+    statue.castShadow = true;
+    group.add(statue);
+
+    // Gedung Kementerian Keuangan (Istana Daendels / Gedung AA Maramis) on East Side
+    const kemenkeu = new THREE.Mesh(new THREE.BoxGeometry(18, 16, 52), stoneMat);
+    kemenkeu.position.set(58, 8, 0);
+    kemenkeu.castShadow = true;
+    group.add(kemenkeu);
+
+    return group;
+  }
+
+  /**
+   * 20. Tugu Tani (Patung Pahlawan)
+   * Triangular pedestal & Soviet-sculpted bronze statue of mother & freedom fighter at Kebon Sirih East.
+   */
+  static createTuguTani() {
+    const group = new THREE.Group();
+    const stoneMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.5 });
+    const bronzeMat = new THREE.MeshStandardMaterial({ color: 0x3f2e21, metalness: 0.85, roughness: 0.25 });
+
+    // Roundabout Garden Island
+    const island = new THREE.Mesh(
+      new THREE.CylinderGeometry(11, 12, 0.8, 24),
+      new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.8 })
+    );
+    island.position.y = 0.4;
+    group.add(island);
+
+    // Triangular Prism Pedestal
+    const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 3.2, 9, 3), stoneMat);
+    pedestal.position.y = 5;
+    pedestal.castShadow = true;
+    group.add(pedestal);
+
+    // Patung Pahlawan (Pejuang & Sang Ibu)
+    const hero = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.0, 6.5, 8), bronzeMat);
+    hero.position.set(0, 12.5, 0.4);
+    hero.castShadow = true;
+    group.add(hero);
+
+    const mother = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.85, 5.2, 8), bronzeMat);
+    mother.position.set(0, 11.8, -0.9);
+    group.add(mother);
+
+    return group;
+  }
+
+  /**
+   * 21. Taman Suropati, Taman Menteng & Situ Lembang (Jantung Garden City Menteng)
+   */
+  static createTamanSuropati() {
+    const group = new THREE.Group();
+    const grassMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 });
+    const pathMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.7 });
+    const waterMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.1, metalness: 0.85 });
+    const whiteColonialMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
+    const terracottaMat = new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.6 });
+
+    // Oval Park Lawn of Taman Suropati
+    const park = new THREE.Mesh(new THREE.CylinderGeometry(28, 28, 0.6, 36), grassMat);
+    park.scale.set(1.35, 1, 0.95);
+    park.position.y = 0.3;
+    park.receiveShadow = true;
+    group.add(park);
+
+    // Central Fountain Basin
+    const fountain = new THREE.Mesh(new THREE.CylinderGeometry(6, 6.5, 1.1, 24), waterMat);
+    fountain.position.y = 0.6;
+    group.add(fountain);
+
+    // 6 ASEAN Peace Sculptures around the park perimeter
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2;
+      const sculp = new THREE.Mesh(
+        new THREE.BoxGeometry(1.6, 4.2, 1.6),
+        new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.4 })
+      );
+      sculp.position.set(Math.cos(a) * 18, 2.4, Math.sin(a) * 14);
+      sculp.castShadow = true;
+      group.add(sculp);
+    }
+
+    // Gedung Bappenas (Historic Colonial Freemason / Adhuc Stat Building Facing North Side of Park)
+    const bappenas = new THREE.Mesh(new THREE.BoxGeometry(32, 11, 16), whiteColonialMat);
+    bappenas.position.set(0, 5.5, -34);
+    bappenas.castShadow = true;
+    group.add(bappenas);
+
+    const bappenasRoof = new THREE.Mesh(new THREE.ConeGeometry(20, 5.5, 4), terracottaMat);
+    bappenasRoof.rotation.y = Math.PI / 4;
+    bappenasRoof.scale.set(1.2, 1, 0.65);
+    bappenasRoof.position.set(0, 13.5, -34);
+    group.add(bappenasRoof);
+
+    // Danau Taman Situ Lembang (Oval Lake to the Northeast of Taman Suropati)
+    const situLembang = new THREE.Mesh(new THREE.CylinderGeometry(18, 18, 0.5, 28), waterMat);
+    situLembang.scale.set(1.4, 1, 0.85);
+    situLembang.position.set(48, 0.25, -24);
+    group.add(situLembang);
+
+    return group;
+  }
+
+  /**
+   * 22. Kawasan Transit Terpadu Dukuh Atas & BNI City
+   * The exact pivot point where straight Thamrin bends 23° SSW into Sudirman over the West Flood Canal.
+   */
+  static createDukuhAtas() {
+    const group = new THREE.Group();
+    const concreteMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.6 });
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.5, roughness: 0.3 });
+    const accentMat = new THREE.MeshStandardMaterial({
+      color: 0x0ea5e9,
+      emissive: 0x0284c7,
+      emissiveIntensity: 0.45
+    });
+
+    // Stasiun BNI City (KA Bandara) on West Side of Canal
+    const bniStation = new THREE.Mesh(new THREE.BoxGeometry(44, 11, 14), roofMat);
+    bniStation.position.set(-48, 5.5, -8);
+    bniStation.rotation.y = -0.24; // Parallel to 284° WNW canal
+    bniStation.castShadow = true;
+    group.add(bniStation);
+
+    // Stasiun KRL Sudirman on East Side of Bridge
+    const sudirmanStation = new THREE.Mesh(new THREE.BoxGeometry(48, 8, 12), concreteMat);
+    sudirmanStation.position.set(48, 4, 8);
+    sudirmanStation.rotation.y = -0.24;
+    group.add(sudirmanStation);
+
+    // JPM Dukuh Atas (Jembatan Penyeberangan Multiguna connecting LRT, KRL, MRT)
+    const skybridge = new THREE.Mesh(new THREE.BoxGeometry(75, 3.2, 6), accentMat);
+    skybridge.position.set(18, 9.5, 4);
+    skybridge.rotation.y = 0.25;
+    skybridge.castShadow = true;
+    group.add(skybridge);
+
+    // Skatepark & Terowongan Kendal Pedestrian Plaza Indicator
+    const plaza = new THREE.Mesh(
+      new THREE.BoxGeometry(16, 0.8, 22),
+      new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 })
+    );
+    plaza.position.set(26, 0.4, -18);
+    group.add(plaza);
+
+    return group;
+  }
 }
+
