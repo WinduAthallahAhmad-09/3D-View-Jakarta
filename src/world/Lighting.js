@@ -44,21 +44,21 @@ export class LightingManager {
    */
   setTimeOfDay(timePreset) {
     if (timePreset === 'day') {
-      // Cold Luxury & Dark Tech Spatial Daylight
-      this.sunLight.color.setHex(0xf8fafc);
-      this.sunLight.intensity = 1.9;
+      // Warm Architectural Studio Daylight (Minimalist-UI Harmony)
+      this.sunLight.color.setHex(0xfffdf9);
+      this.sunLight.intensity = 1.75;
       this.sunLight.position.set(220, 320, 150);
 
-      this.ambientLight.color.setHex(0xe2e8f0);
-      this.ambientLight.intensity = 0.52;
+      this.ambientLight.color.setHex(0xffffff);
+      this.ambientLight.intensity = 0.65;
 
-      this.hemiLight.color.setHex(0x38bdf8);
-      this.hemiLight.groundColor.setHex(0x090d16);
-      this.hemiLight.intensity = 0.55;
+      this.hemiLight.color.setHex(0xf7f6f3);
+      this.hemiLight.groundColor.setHex(0xd6d3cd);
+      this.hemiLight.intensity = 0.65;
 
-      this.scene.background = new THREE.Color(0x090d16);
-      this.scene.fog.color.setHex(0x090d16);
-      this.scene.fog.density = 0.00052;
+      this.scene.background = new THREE.Color(0xf2f0ea);
+      this.scene.fog.color.setHex(0xf2f0ea);
+      this.scene.fog.density = 0.00048;
     } else if (timePreset === 'golden') {
       // Golden Hour / Senja Jakarta
       this.sunLight.color.setHex(0xf97316);
