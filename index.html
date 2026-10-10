@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JAKARTA 3D VIEW — Digital Twin & Eksplorasi 3D Kota Jakarta</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏙️</text></svg>">
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              gold: '#fbbf24',
+              teal: '#0d9488',
+              blue: '#0284c7',
+              dark: '#030712'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Modern Import Map for Three.js ES Modules -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      user-select: none;
+      background-color: #030712;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    #canvas-container {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+    /* Glassmorphism surfaces */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .glass-button {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-button:hover {
+      background: rgba(51, 65, 85, 0.9);
+      border-color: rgba(251, 191, 36, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .active-time {
+      background: rgba(251, 191, 36, 0.2) !important;
+      border-color: rgba(251, 191, 36, 0.8) !important;
+      color: #fbbf24 !important;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.5);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.5);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="text-slate-100 antialiased">
+
+  <!-- 3D WebGL Canvas Viewport -->
+  <div id="canvas-container"></div>
+
+  <!-- UI Overlay -->
+  <div id="ui-overlay" class="relative z-10 pointer-events-none w-screen h-screen flex flex-col justify-between p-4 md:p-6">
+    
+    <!-- Top Header Bar -->
+    <header class="flex items-center justify-between pointer-events-auto">
+      
+      <!-- Brand & Title -->
+      <div class="glass-panel px-4 py-3 rounded-2xl flex items-center gap-3.5 shadow-2xl">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-300 flex items-center justify-center text-slate-950 font-bold text-xl shadow-lg shadow-amber-500/20">
+          🏛️
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-extrabold tracking-wider text-base md:text-lg text-white">JAKARTA 3D VIEW</h1>
+            <span class="px-2 py-0.5 text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full">LIVE</span>
+          </div>
+          <p class="text-xs text-slate-400 font-medium hidden sm:block">Digital Twin & Eksplorasi Arsitektur Sudirman-Thamrin</p>
+        </div>
+      </div>
+
+      <!-- Center / Right Top Controls -->
+      <div class="flex items-center gap-2.5">
+        
+        <!-- Weather Tag -->
+        <div class="glass-panel hidden lg:flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs text-slate-300">
+          <span>🌤️</span>
+          <span class="font-semibold text-white">32°C</span>
+          <span class="text-slate-400">Jakarta Pusat • Cerah</span>
+        </div>
+
+        <!-- Time of Day Switcher -->
+        <div class="glass-panel p-1 rounded-xl flex items-center gap-1 shadow-xl">
+          <button data-time-preset="day" class="active-time px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition flex items-center gap-1.5" title="Mode Siang">
+            <span>☀️</span> <span class="hidden sm:inline">Siang</span>
+          </button>
+          <button data-time-preset="golden" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition flex items-center gap-1.5" title="Mode Senja / Golden Hour">
+            <span>🌅</span> <span class="hidden sm:inline">Senja</span>
+          </button>
+          <button data-time-preset="night" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition flex items-center gap-1.5" title="Mode Malam (City Lights)">
+            <span>🌙</span> <span class="hidden sm:inline">Malam</span>
+          </button>
+        </div>
+
+        <!-- Custom .GLB Slot / Import Button -->
+        <button id="open-import-btn" class="glass-button px-3.5 py-2 rounded-xl text-xs font-semibold text-amber-300 flex items-center gap-1.5 shadow-xl hover:text-amber-200">
+          <span>📦</span>
+          <span class="hidden md:inline">Tambah Model .GLB</span>
+        </button>
+
+      </div>
+    </header>
+
+    <!-- Center Drag & Drop Notice (Subtle helper badge) -->
+    <div class="self-center glass-panel px-4 py-1.5 rounded-full text-xs text-slate-300 hidden md:flex items-center gap-2 shadow-lg opacity-85">
+      <span class="text-amber-400">💡 Tip:</span>
+      <span>Klik kiri tahan untuk putar pandangan • Scroll untuk zoom • Tarik file <b>.glb</b> ke layar untuk memasukkan model 3D sendiri</span>
+    </div>
+
+    <!-- Bottom Cinematic Tour Dock -->
+    <div class="w-full flex justify-center pb-2 pointer-events-auto">
+      <nav class="glass-panel p-2 rounded-2xl flex items-center gap-1.5 max-w-full overflow-x-auto shadow-2xl">
+        
+        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 hidden lg:inline">Tour Jakarta</span>
+        
+        <button data-tour-id="monas" class="glass-button px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-200 flex items-center gap-2 whitespace-nowrap">
+          <span>🏛️</span>
+          <span>Monas</span>
+        </button>
+
+        <button data-tour-id="bundaran-hi" class="glass-button px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-200 flex items-center gap-2 whitespace-nowrap">
+          <span>⛲</span>
+          <span>Bundaran HI</span>
+        </button>
+
+        <button data-tour-id="wisma-46" class="glass-button px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-200 flex items-center gap-2 whitespace-nowrap">
+          <span>🏢</span>
+          <span>Wisma 46</span>
+        </button>
+
+        <button data-tour-id="menara-bca" class="glass-button px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-200 flex items-center gap-2 whitespace-nowrap">
+          <span>🏙️</span>
+          <span>Menara BCA</span>
+        </button>
+
+        <button data-tour-id="scbd-district" class="glass-button px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-200 flex items-center gap-2 whitespace-nowrap">
+          <span>💼</span>
+          <span>SCBD</span>
+        </button>
+
+        <button data-tour-id="gbk-senayan" class="glass-button px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-200 flex items-center gap-2 whitespace-nowrap">
+          <span>🏟️</span>
+          <span>GBK Senayan</span>
+        </button>
+
+        <div class="w-px h-6 bg-slate-700 mx-1"></div>
+
+        <button data-tour-id="aerial" class="glass-button px-3 py-2 rounded-xl text-xs font-semibold text-amber-300 flex items-center gap-1.5 whitespace-nowrap hover:text-amber-200">
+          <span>🚁</span>
+          <span>Panorama 360°</span>
+        </button>
+
+      </nav>
+    </div>
+
+  </div>
+
+  <!-- Landmark Detail Slide-Over Drawer (Right side) -->
+  <aside id="detail-drawer" class="fixed top-0 right-0 h-full w-full max-w-md glass-panel z-30 translate-x-full transition-transform duration-300 ease-out p-6 overflow-y-auto flex flex-col justify-between shadow-2xl border-l border-white/10">
+    <div>
+      <!-- Drawer Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-slate-700/60">
+        <span id="drawer-category" class="px-2.5 py-1 text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-lg">
+          Landmark
+        </span>
+        <button id="drawer-close-btn" class="w-8 h-8 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          ✕
+        </button>
+      </div>
+
+      <!-- Title & Tagline -->
+      <div class="mt-5">
+        <h2 id="drawer-title" class="text-2xl font-black text-white leading-tight">Nama Bangunan</h2>
+        <p id="drawer-tagline" class="text-xs font-medium text-amber-400 mt-1">Tagline Arsitektur</p>
+      </div>
+
+      <!-- Quick Metrics Grid -->
+      <div class="grid grid-cols-2 gap-2.5 my-5">
+        <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
+          <div class="text-[11px] text-slate-400">Tinggi Bangunan</div>
+          <div id="drawer-height" class="text-sm font-bold text-white mt-0.5">-</div>
+        </div>
+        <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
+          <div class="text-[11px] text-slate-400">Tahun Diresmikan</div>
+          <div id="drawer-year" class="text-sm font-bold text-white mt-0.5">-</div>
+        </div>
+        <div class="col-span-2 bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
+          <div class="text-[11px] text-slate-400">Lokasi Koordinat</div>
+          <div id="drawer-location" class="text-xs font-semibold text-slate-200 mt-0.5">-</div>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="mt-4">
+        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Deskripsi & Sejarah</h3>
+        <p id="drawer-desc" class="text-sm text-slate-300 leading-relaxed font-normal">
+          Deskripsi mendalam mengenai sejarah dan signifikansi arsitektur bangunan di Jakarta.
+        </p>
+      </div>
+
+      <!-- Highlights / Facts -->
+      <div class="mt-5">
+        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Fakta Menarik</h3>
+        <ul id="drawer-facts" class="text-xs text-slate-300 space-y-2">
+          <!-- Facts populated dynamically -->
+        </ul>
+      </div>
+    </div>
+
+    <!-- Drawer Action Footer -->
+    <div class="pt-6 mt-6 border-t border-slate-700/60">
+      <button id="drawer-focus-btn" class="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl shadow-lg shadow-amber-500/25 transition flex items-center justify-center gap-2">
+        <span>🎯</span>
+        <span>Arahkan Kamera ke Sini</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Modal: Tambah Model .GLB Kustom Sendiri -->
+  <div id="import-modal" class="fixed inset-0 z-40 bg-black/75 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-lg rounded-2xl p-6 shadow-2xl border border-slate-700">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-700">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">📦</span>
+          <h3 class="font-bold text-lg text-white">Tambah Model 3D Jakarta (.GLB)</h3>
+        </div>
+        <button id="close-import-btn" class="text-slate-400 hover:text-white text-lg">✕</button>
+      </div>
+
+      <div class="mt-4 space-y-4 text-sm text-slate-300 leading-relaxed">
+        <p>
+          Anda dapat menambahkan model 3D bangunan nyata Jakarta apa saja ke dalam website ini secara <b>100% gratis</b> melalui 2 cara:
+        </p>
+
+        <!-- Cara 1: Instant Drag & Drop -->
+        <div class="p-3.5 rounded-xl bg-slate-800/70 border border-slate-700/60">
+          <h4 class="font-bold text-amber-300 text-xs uppercase tracking-wide flex items-center gap-1.5">
+            <span>⚡</span> Cara 1: Tarik & Lepas Langsung (Drag & Drop)
+          </h4>
+          <p class="text-xs text-slate-300 mt-1">
+            Cukup tarik file <b>.glb</b> atau <b>.gltf</b> dari komputer Anda dan lepas langsung ke jendela browser ini. Model akan langsung dirender seketika di dekat Bundaran HI!
+          </p>
+        </div>
+
+        <!-- Cara 2: Simpan Permanen -->
+        <div class="p-3.5 rounded-xl bg-slate-800/70 border border-slate-700/60">
+          <h4 class="font-bold text-sky-300 text-xs uppercase tracking-wide flex items-center gap-1.5">
+            <span>💾</span> Cara 2: Simpan Permanen di Proyek
+          </h4>
+          <ol class="text-xs text-slate-300 mt-1 list-decimal list-inside space-y-1">
+            <li>Simpan file model 3D Anda di folder: <code class="text-amber-300 bg-slate-900 px-1 py-0.5 rounded">public/models/nama-gedung.glb</code></li>
+            <li>Buka file <code class="text-amber-300 bg-slate-900 px-1 py-0.5 rounded">src/config/landmarks.js</code></li>
+            <li>Tambahkan nama, posisi koordinat, dan ketinggiannya ke dalam daftar landmark.</li>
+          </ol>
+        </div>
+
+        <!-- Sumber Model 3D Gratis -->
+        <div class="p-3.5 rounded-xl bg-slate-800/70 border border-slate-700/60">
+          <h4 class="font-bold text-emerald-300 text-xs uppercase tracking-wide flex items-center gap-1.5">
+            <span>🌐</span> Sumber Model 3D Gratis Kota Jakarta
+          </h4>
+          <ul class="text-xs text-slate-300 mt-1 space-y-1">
+            <li>• <b>Sketchfab.com:</b> Cari "Jakarta building" atau "Monas" dengan filter <i>Free Download / CC-BY</i> format .GLB.</li>
+            <li>• <b>OpenStreetMap via BlenderGIS:</b> Ekstrak footprint gedung nyata Jakarta langsung dari GIS gratis dan ekspor ke .glb.</li>
+            <li>• <b>Poly Pizza / 3D Warehouse:</b> Ribuan aset arsitektur gratis siap pakai.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end">
+        <button onclick="document.getElementById('import-modal').classList.add('hidden')" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl text-xs transition">
+          Tutup & Mengerti
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast-notification" class="fixed top-20 left-1/2 -translate-x-1/2 glass-panel px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 opacity-0 pointer-events-none transition-all duration-300 z-50 border border-amber-500/40">
+    <span class="text-lg">🎉</span>
+    <span id="toast-message" class="text-xs font-semibold text-white">Notifikasi</span>
+  </div>
+
+  <!-- Main JavaScript App Entry -->
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
