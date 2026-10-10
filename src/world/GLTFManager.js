@@ -9,6 +9,39 @@ export class GLTFManager {
     this.customModels = [];
 
     this.setupDragAndDrop();
+    this.checkAndLoadDefaultModel();
+  }
+
+  /**
+   * Auto-detect and load jakarta-full.glb if user places it into public/models/
+   */
+  async checkAndLoadDefaultModel() {
+    const candidateUrls = [
+      './public/models/jakarta-full.glb',
+      './models/jakarta-full.glb',
+      './public/models/jakarta-osm.glb'
+    ];
+
+    for (const url of candidateUrls) {
+      try {
+        const res = await fetch(url, { method: 'HEAD' });
+        if (res.ok) {
+          console.log(`[GLTFManager] Menemukan model kota: ${url}`);
+          await this.loadModel({
+            id: 'jakarta-full-osm',
+            name: 'Kawasan Kota Jakarta Nyata (OSM)',
+            url,
+            position: [0, 0, 0],
+            scale: [1, 1, 1],
+            category: 'Digital Twin Jakarta',
+            description: 'Model 3D kawasan nyata kota Jakarta yang diekstrak dari data OpenStreetMap.'
+          });
+          break;
+        }
+      } catch (err) {
+        // Ignored if file doesn't exist yet
+      }
+    }
   }
 
   /**
