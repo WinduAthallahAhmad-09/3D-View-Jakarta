@@ -11,7 +11,7 @@ export class CameraController {
     this.controls.dampingFactor = 0.05;
     this.controls.maxPolarAngle = Math.PI / 2 - 0.04; // Don't go below ground
     this.controls.minDistance = 10;
-    this.controls.maxDistance = 600;
+    this.controls.maxDistance = 1200;
 
     // Flight animation state
     this.isFlying = false;

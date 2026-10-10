@@ -24,9 +24,9 @@ export class LightingManager {
     this.sunLight.shadow.mapSize.width = 2048;
     this.sunLight.shadow.mapSize.height = 2048;
     this.sunLight.shadow.camera.near = 10;
-    this.sunLight.shadow.camera.far = 450;
+    this.sunLight.shadow.camera.far = 1200;
 
-    const d = 160;
+    const d = 480;
     this.sunLight.shadow.camera.left = -d;
     this.sunLight.shadow.camera.right = d;
     this.sunLight.shadow.camera.top = d;
@@ -36,7 +36,7 @@ export class LightingManager {
     this.scene.add(this.sunLight);
 
     // 3. Atmospheric Fog (Tropical Jakarta Haze)
-    this.scene.fog = new THREE.FogExp2(0x93c5fd, 0.0016);
+    this.scene.fog = new THREE.FogExp2(0x93c5fd, 0.00055);
   }
 
   /**
@@ -47,7 +47,7 @@ export class LightingManager {
       // Tropis Cerah
       this.sunLight.color.setHex(0xffffff);
       this.sunLight.intensity = 1.7;
-      this.sunLight.position.set(120, 180, 90);
+      this.sunLight.position.set(220, 320, 150);
 
       this.ambientLight.color.setHex(0xffffff);
       this.ambientLight.intensity = 0.55;
@@ -58,12 +58,12 @@ export class LightingManager {
 
       this.scene.background = new THREE.Color(0x7dd3fc);
       this.scene.fog.color.setHex(0xbae6fd);
-      this.scene.fog.density = 0.0014;
+      this.scene.fog.density = 0.0005;
     } else if (timePreset === 'golden') {
       // Golden Hour / Senja Jakarta
       this.sunLight.color.setHex(0xf97316);
       this.sunLight.intensity = 2.0;
-      this.sunLight.position.set(180, 45, 120);
+      this.sunLight.position.set(280, 95, 180);
 
       this.ambientLight.color.setHex(0xfde047);
       this.ambientLight.intensity = 0.35;
@@ -74,12 +74,12 @@ export class LightingManager {
 
       this.scene.background = new THREE.Color(0xc2410c);
       this.scene.fog.color.setHex(0x9a3412);
-      this.scene.fog.density = 0.0022;
+      this.scene.fog.density = 0.0008;
     } else if (timePreset === 'night') {
       // Malam Hari (City Lights)
       this.sunLight.color.setHex(0x38bdf8);
-      this.sunLight.intensity = 0.15;
-      this.sunLight.position.set(-60, 100, -80);
+      this.sunLight.intensity = 0.18;
+      this.sunLight.position.set(-100, 200, -120);
 
       this.ambientLight.color.setHex(0x0f172a);
       this.ambientLight.intensity = 0.18;

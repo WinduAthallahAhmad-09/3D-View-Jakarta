@@ -44,10 +44,10 @@ class JakartaApp {
       48,
       window.innerWidth / window.innerHeight,
       0.5,
-      1500
+      3000
     );
     // Initial view: Overlooking Bundaran HI & Sudirman skyline
-    this.camera.position.set(45, 38, 55);
+    this.camera.position.set(55, 45, 70);
   }
 
   initScene() {
@@ -161,6 +161,11 @@ class JakartaApp {
     // Update Google 3D Tiles stream
     if (this.googleTiles) {
       this.googleTiles.update();
+    }
+
+    // Project 3D map place labels to 2D viewport
+    if (this.ui) {
+      this.ui.updateMapLabels(this.camera);
     }
 
     this.renderer.render(this.scene, this.camera);
