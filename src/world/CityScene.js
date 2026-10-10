@@ -465,120 +465,248 @@ export class CityScene {
       return mat;
     });
 
-    // 1. Koridor Lurus Jl. M.H. Thamrin (Z = -195 s/d Z = +75)
-    for (let i = 0; i < 24; i++) {
-      const isWest = i % 2 === 0;
-      const x = isWest ? -(36 + (i % 3) * 18) : (36 + (i % 3) * 18);
-      const z = -195 + i * 11.5;
+    const lowRiseMat = new THREE.MeshStandardMaterial({
+      color: 0xe2e8f0,
+      roughness: 0.65,
+      metalness: 0.12
+    });
+    const midRiseMat = new THREE.MeshStandardMaterial({
+      color: 0xcbd5e1,
+      roughness: 0.45,
+      metalness: 0.32
+    });
 
-      if (this.isNearLandmark(x, z, 34)) continue;
-      const h = 48 + ((i * 19) % 85);
-      const mat = sharedMaterials[i % sharedMaterials.length];
-      this.spawnContextualBuilding(x, z, 18, h, 18, 0, mat, i, "Koridor Jl. M.H. Thamrin, Jakarta Pusat");
+    fetch('./src/data/jakarta_osm.json')
+      .then((res) => res.json())
+      .then((osm) => {
+        this.renderOSMLayers(osm, sharedMaterials, midRiseMat, lowRiseMat);
+      })
+      .catch((err) => {
+        console.warn('Failed to load jakarta_osm.json:', err);
+      });
+  }
+
+  buildMergedRibbonGeometry(ways, getWidth, getY) {
+    const positions = [];
+    for (let i = 0; i < ways.length; i++) {
+      const way = ways[i];
+      const pts = way.p;
+      if (!pts || pts.length < 2) continue;
+      const halfW = getWidth(way) * 0.5;
+      const y = getY(way);
+
+      for (let j = 0; j < pts.length - 1; j++) {
+        const x1 = pts[j][0];
+        const z1 = pts[j][1];
+        const x2 = pts[j + 1][0];
+        const z2 = pts[j + 1][1];
+        const dx = x2 - x1;
+        const dz = z2 - z1;
+        const len = Math.hypot(dx, dz);
+        if (len < 0.05) continue;
+
+        const nx = (-dz / len) * halfW;
+        const nz = (dx / len) * halfW;
+
+        const ax = x1 + nx, az = z1 + nz;
+        const bx = x1 - nx, bz = z1 - nz;
+        const cx = x2 + nx, cz = z2 + nz;
+        const dx2 = x2 - nx, dz2 = z2 - nz;
+
+        positions.push(
+          ax, y, az,
+          bx, y, bz,
+          cx, y, cz,
+          bx, y, bz,
+          dx2, y, dz2,
+          cx, y, cz
+        );
+      }
+    }
+    if (positions.length === 0) return null;
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geo.computeVertexNormals();
+    return geo;
+  }
+
+  renderOSMLayers(osm, sharedMaterials, midRiseMat, lowRiseMat) {
+    // 1. Real OpenStreetMap Parks & Green Spaces (165 parks)
+    const parkMat = new THREE.MeshStandardMaterial({
+      color: 0x14532d,
+      roughness: 0.9,
+      metalness: 0.05
+    });
+    if (osm.parks) {
+      osm.parks.forEach((park) => {
+        if (!park.p || park.p.length < 3) return;
+        const shape = new THREE.Shape();
+        shape.moveTo(park.p[0][0], -park.p[0][1]);
+        for (let i = 1; i < park.p.length; i++) {
+          shape.lineTo(park.p[i][0], -park.p[i][1]);
+        }
+        const geo = new THREE.ShapeGeometry(shape);
+        geo.rotateX(-Math.PI / 2);
+        const mesh = new THREE.Mesh(geo, parkMat);
+        mesh.position.y = 0.015;
+        mesh.receiveShadow = true;
+        this.proceduralGroup.add(mesh);
+      });
     }
 
-    // 2. Koridor Diagonal 23° SSW Jl. Jenderal Sudirman (Z = +115 s/d Z = +455)
-    for (let i = 0; i < 36; i++) {
-      const t = i / 35;
-      const zCenter = 115 + t * 340;
-      // Spine center shifts SW along X = -(zCenter - 90) * 0.42
-      const xCenter = -(zCenter - 90) * 0.42;
-      const isWest = i % 2 === 0;
-      const offset = isWest ? -(38 + (i % 3) * 18) : (38 + (i % 3) * 18);
-      const x = xCenter + offset;
-      const z = zCenter;
-
-      if (this.isNearLandmark(x, z, 38)) continue;
-      const h = 58 + ((i * 23) % 98);
-      const mat = sharedMaterials[(i + 1) % sharedMaterials.length];
-      this.spawnContextualBuilding(x, z, 20, h, 20, -0.40, mat, 30 + i, "Koridor Diagonal Jl. Jenderal Sudirman");
+    // 2. Real OpenStreetMap Water Bodies & Rivers/Canals
+    const waterMat = new THREE.MeshStandardMaterial({
+      color: 0x0369a1,
+      roughness: 0.15,
+      metalness: 0.85
+    });
+    if (osm.waterPolygons) {
+      osm.waterPolygons.forEach((wp) => {
+        if (!wp.p || wp.p.length < 3) return;
+        const shape = new THREE.Shape();
+        shape.moveTo(wp.p[0][0], -wp.p[0][1]);
+        for (let i = 1; i < wp.p.length; i++) {
+          shape.lineTo(wp.p[i][0], -wp.p[i][1]);
+        }
+        const geo = new THREE.ShapeGeometry(shape);
+        geo.rotateX(-Math.PI / 2);
+        const mesh = new THREE.Mesh(geo, waterMat);
+        mesh.position.y = 0.03;
+        this.proceduralGroup.add(mesh);
+      });
     }
 
-    // 3. Kawasan Cagar Budaya Menteng & Cikini (X = +68 s/d +260, Z = -90 s/d +95)
-    const mentengWallMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.65 });
-    const mentengRoofMat = new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.6 });
-
-    for (let mx = 72; mx <= 255; mx += 26) {
-      for (let mz = -85; mz <= 85; mz += 26) {
-        if (this.isNearLandmark(mx, mz, 36)) continue;
-        if (Math.abs(mx - 165) < 14) continue; // Rel kereta layang Gondangdia-Cikini
-
-        const w = 11 + (mx % 5);
-        const d = 11 + (mz % 5);
-        const h = 6.5 + ((mx + Math.abs(mz)) % 8);
-
-        const house = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mentengWallMat);
-        house.position.set(mx, h / 2, mz);
-        house.castShadow = true;
-        this.proceduralGroup.add(house);
-
-        const roof = new THREE.Mesh(new THREE.ConeGeometry(w * 0.78, 4.2, 4), mentengRoofMat);
-        roof.rotation.y = Math.PI / 4;
-        roof.position.set(mx, h + 2.1, mz);
-        this.proceduralGroup.add(roof);
+    if (osm.waterways && osm.waterways.length) {
+      const riverGeo = this.buildMergedRibbonGeometry(
+        osm.waterways,
+        (w) => (w.t === 'canal' ? 10.0 : 8.0),
+        () => 0.035
+      );
+      if (riverGeo) {
+        const riverMesh = new THREE.Mesh(riverGeo, waterMat);
+        this.proceduralGroup.add(riverMesh);
       }
     }
 
-    // 4. Kawasan Segitiga Emas Kuningan & Rasuna Said (X = +40 s/d +260, Z = +140 s/d +380)
-    for (let i = 0; i < 28; i++) {
-      const x = 45 + (i % 6) * 36;
-      const z = 145 + Math.floor(i / 6) * 48;
-      if (this.isNearLandmark(x, z, 42)) continue;
+    // 3. Real OpenStreetMap Jakarta Street Network (2,408 road ways)
+    if (osm.roads && osm.roads.length) {
+      const arterialWays = osm.roads.filter((r) =>
+        r.t === 'motorway' || r.t === 'trunk' || r.t === 'primary' || r.t === 'motorway_link' || r.t === 'trunk_link'
+      );
+      const localWays = osm.roads.filter((r) =>
+        r.t === 'secondary' || r.t === 'tertiary'
+      );
 
-      const h = 52 + ((i * 21) % 88);
-      const mat = sharedMaterials[(i + 2) % sharedMaterials.length];
-      this.spawnContextualBuilding(x, z, 20, h, 20, 0, mat, 100 + i, "Segitiga Emas Kuningan & Rasuna Said");
+      const arterialMat = new THREE.MeshStandardMaterial({
+        color: 0x1e293b,
+        roughness: 0.85,
+        metalness: 0.1
+      });
+      const localRoadMat = new THREE.MeshStandardMaterial({
+        color: 0x263244,
+        roughness: 0.9,
+        metalness: 0.06
+      });
+
+      const arterialGeo = this.buildMergedRibbonGeometry(
+        arterialWays,
+        (r) => (r.t === 'motorway' || r.t === 'trunk' ? 7.5 : 5.8),
+        (r) => (r.l ? 0.35 : 0.06)
+      );
+      if (arterialGeo) {
+        const mesh = new THREE.Mesh(arterialGeo, arterialMat);
+        mesh.receiveShadow = true;
+        this.proceduralGroup.add(mesh);
+      }
+
+      const localGeo = this.buildMergedRibbonGeometry(
+        localWays,
+        (r) => (r.t === 'secondary' ? 4.2 : 2.8),
+        () => 0.05
+      );
+      if (localGeo) {
+        const mesh = new THREE.Mesh(localGeo, localRoadMat);
+        mesh.receiveShadow = true;
+        this.proceduralGroup.add(mesh);
+      }
     }
 
-    // 5. Kawasan Tanah Abang, Kebon Kacang & Medan Merdeka Barat (X = -85 s/d -210, Z = -390 s/d +160)
-    for (let i = 0; i < 30; i++) {
-      const x = -(92 + (i % 4) * 32);
-      const z = -370 + Math.floor(i / 4) * 68;
-      if (this.isNearLandmark(x, z, 38)) continue;
-
-      const h = 28 + ((i * 17) % 58);
-      const mat = sharedMaterials[(i + 3) % sharedMaterials.length];
-      this.spawnContextualBuilding(x, z, 18, h, 18, 0, mat, 200 + i, "Kawasan Tanah Abang & Medan Merdeka Barat");
+    // 4. Real OpenStreetMap Railways (KRL, MRT, LRT, KA Antarkota)
+    if (osm.railways && osm.railways.length) {
+      const railMat = new THREE.MeshStandardMaterial({
+        color: 0x475569,
+        roughness: 0.6,
+        metalness: 0.4
+      });
+      const railGeo = this.buildMergedRibbonGeometry(
+        osm.railways,
+        () => 2.4,
+        (r) => (r.b ? 0.42 : 0.08)
+      );
+      if (railGeo) {
+        this.proceduralGroup.add(new THREE.Mesh(railGeo, railMat));
+      }
     }
-  }
 
-  isNearLandmark(x, z, minDist) {
-    for (const lm of JAKARTA_LANDMARKS) {
-      const dx = x - lm.position[0];
-      const dz = z - lm.position[2];
-      if (Math.sqrt(dx * dx + dz * dz) < minDist) return true;
+    // 5. Real OpenStreetMap 3D Building Footprints (1,641 authentic Jakarta buildings)
+    if (osm.buildings && osm.buildings.length) {
+      osm.buildings.forEach((b, idx) => {
+        const pts = b.p;
+        if (!pts || pts.length < 3) return;
+
+        const shape = new THREE.Shape();
+        shape.moveTo(pts[0][0], -pts[0][1]);
+        for (let i = 1; i < pts.length; i++) {
+          shape.lineTo(pts[i][0], -pts[i][1]);
+        }
+
+        const h = b.h || 12;
+        const geo = new THREE.ExtrudeGeometry(shape, {
+          depth: h,
+          bevelEnabled: false
+        });
+        geo.rotateX(-Math.PI / 2);
+
+        let mat;
+        if (h >= 24) {
+          mat = sharedMaterials[idx % sharedMaterials.length];
+        } else if (h >= 12) {
+          mat = midRiseMat;
+        } else {
+          mat = lowRiseMat;
+        }
+
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.castShadow = h >= 18;
+        mesh.receiveShadow = true;
+
+        const meters = b.hm || Math.round(h * 1.78);
+        const floors = Math.max(1, Math.round(meters / 3.8));
+        const bName = b.n || `Gedung Jakarta #${idx + 1}`;
+        const bStreet = b.s || 'Kawasan Inti DKI Jakarta';
+
+        mesh.userData = {
+          landmarkData: {
+            id: `osm-bldg-${idx}`,
+            name: bName,
+            category: b.n ? 'Data Gedung OpenStreetMap Jakarta' : 'Bangunan Perkotaan Jakarta',
+            tagline: `${bStreet} — Geometri Tapak Asli Peta Jakarta`,
+            height: `${meters} meter (~${floors} lantai)`,
+            year: 'Data OSM DKI Jakarta',
+            location: bStreet,
+            description: `Bangunan nyata di Jakarta (${bName}) yang diekstrak langsung dari koordinat poligon tapak bangunan OpenStreetMap DKI Jakarta.`,
+            facts: [
+              `Bentuk tapak poligon (${pts.length} titik sudut) sesuai koordinat GPS asli Jakarta.`,
+              `Estimasi elevasi struktur: ${meters} meter (~${floors} lantai).`
+            ]
+          },
+          isClickable: true
+        };
+
+        this.interactiveObjects.push(mesh);
+        this.proceduralGroup.add(mesh);
+      });
     }
-    return false;
-  }
-
-  spawnContextualBuilding(x, z, w, h, d, rotY, mat, index, areaName) {
-    const bldg = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
-    bldg.position.set(x, h / 2, z);
-    bldg.rotation.y = rotY;
-    bldg.castShadow = true;
-    bldg.receiveShadow = true;
-
-    bldg.userData = {
-      landmarkData: {
-        id: `bldg-${index}`,
-        name: `Gedung Koridor Jakarta #${index + 1}`,
-        category: "Gedung Komersial & Perkantoran",
-        tagline: areaName,
-        height: `${Math.round(h * 1.9)} meter (${Math.floor(h / 3.5)} lantai)`,
-        year: `${1996 + (index % 28)}`,
-        architect: "Arsitektur Metropolitan DKI Jakarta",
-        location: areaName,
-        description: `Gedung bertingkat bagian dari tata ruang kawasan ${areaName} yang mengacu pada kepadatan blok kota Jakarta Pusat & Selatan.`,
-        facts: [
-          "Terintegrasi dengan jaringan jalan arteri dan pedestrian Jakarta.",
-          "Menampilkan pencahayaan fasad kaca pada mode malam hari."
-        ]
-      },
-      isClickable: true
-    };
-
-    this.interactiveObjects.push(bldg);
-    this.proceduralGroup.add(bldg);
   }
 
   /**
