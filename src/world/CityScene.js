@@ -555,14 +555,14 @@ export class CityScene {
   }
 
   isInsideFountainOrMonument(x, z) {
-    // Bundaran HI fountain pool & inner roundabout island (0, 0)
-    if (x * x + z * z < 35 * 35) return true;
-    // Bundaran Patung Kuda fountain pool (0, -215)
-    if (x * x + (z + 215) * (z + 215) < 23 * 23) return true;
-    // Bundaran Senayan fountain pool (-190, 475)
-    if ((x + 190) * (x + 190) + (z - 475) * (z - 475) < 24 * 24) return true;
-    // Monas central plaza (0, -320)
-    if (Math.abs(x) < 80 && z > -405 && z < -235) return true;
+    // Bundaran HI central fountain pool (0, 0)
+    if (x * x + z * z < 15.5 * 15.5) return true;
+    // Bundaran Patung Kuda central fountain pool (-3, -215)
+    if ((x + 3) * (x + 3) + (z + 215) * (z + 215) < 15.5 * 15.5) return true;
+    // Bundaran Senayan central fountain pool (-316, 478)
+    if ((x + 316) * (x + 316) + (z - 478) * (z - 478) < 19.5 * 19.5) return true;
+    // Monas internal plaza east of Jl. Medan Merdeka Barat (x > 2 to +96, z = -332 to -220)
+    if (x > 2 && x < 96 && z > -332 && z < -220) return true;
     return false;
   }
 
