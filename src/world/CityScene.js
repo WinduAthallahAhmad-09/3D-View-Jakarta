@@ -73,63 +73,18 @@ export class CityScene {
   }
 
   /**
-   * Authentic Central Jakarta Waterways (mapped from OpenStreetMap):
-   * 1. Kanal Banjir Barat: Manggarai (+340, +175) -> Dukuh Atas (0, +90) -> Karet (-205, +38),
-   *    then bends 75° North past Stasiun Tanah Abang (-215, -180) -> Cideng/Tomang (-255, -380).
-   * 2. Waduk Melati & Kali Cideng: (-85, +52) flowing North behind Grand Indonesia & Sarinah.
-   * 3. Kali Ciliwung: Kwitang/Pejambon -> Masjid Istiqlal (+135, -420) -> bifurcates West along
-   *    Jl. Veteran/Juanda (north of Istana Negara) to Harmoni (-145, -510) & NE to Pasar Baru.
+   * Dukuh Atas Bridge over the real OpenStreetMap Kanal Banjir Barat waterway
+   * (All rivers, canals, and reservoirs are rendered directly from real OSM polygons/ways in renderOSMLayers)
    */
   buildWaterways() {
-    const waterMat = new THREE.MeshStandardMaterial({
-      color: 0x0369a1,
-      roughness: 0.14,
-      metalness: 0.86
-    });
     const bankMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 });
 
-    // 1A. Kanal Banjir Barat — Leg Timur ke Barat (Manggarai -> Dukuh Atas -> Karet Petamburan, 284° WNW)
-    this.addLinearStrip(360, 180, -205, 38, 22, 0.04, waterMat, false);
-
-    // 1B. Kanal Banjir Barat — Belokan Utara 75° (Petamburan -> Tanah Abang -> Cideng/Tomang)
-    this.addLinearStrip(-205, 38, -225, -240, 20, 0.04, waterMat, false);
-    this.addLinearStrip(-225, -240, -285, -460, 18, 0.04, waterMat, false);
-
-    // Jembatan Dukuh Atas (Sudirman - Thamrin melintasi Kanal Banjir Barat)
-    const dukuhAtasBridge = new THREE.Mesh(new THREE.BoxGeometry(52, 1.4, 30), bankMat);
-    dukuhAtasBridge.position.set(0, 0.45, 90);
+    // Jembatan Dukuh Atas (Sudirman - Thamrin melintasi Kanal Banjir Barat pada [-3, 100])
+    const dukuhAtasBridge = new THREE.Mesh(new THREE.BoxGeometry(36, 1.2, 26), bankMat);
+    dukuhAtasBridge.position.set(-3, 0.35, 100);
     this.proceduralGroup.add(dukuhAtasBridge);
-
-    // 2. Waduk Melati (Barat Daya Bundaran HI, di samping Thamrin Nine / Autograph Tower)
-    const wadukMelati = new THREE.Mesh(new THREE.CylinderGeometry(18, 18, 0.5, 24), waterMat);
-    wadukMelati.scale.set(1.3, 1, 0.9);
-    wadukMelati.position.set(-88, 0.05, 54);
-    this.proceduralGroup.add(wadukMelati);
-
-    // Aliran Kali Cideng di belakang Grand Indonesia & Sarinah (X = -75)
-    this.addLinearStrip(-88, 54, -75, -165, 6, 0.03, waterMat, false);
-
-    // 3. Sungai Ciliwung di Timur Laut (Pejambon -> Masjid Istiqlal -> Harmoni & Pasar Baru)
-    this.addLinearStrip(175, -180, 145, -420, 11, 0.04, waterMat, false);
-    // Cabang Barat (Jl. Veteran / Juanda di Utara Istana Negara menuju Harmoni)
-    this.addLinearStrip(145, -450, -145, -495, 12, 0.04, waterMat, false);
-    // Cabang Utara Gajah Mada - Hayam Wuruk dari Harmoni
-    this.addLinearStrip(-145, -495, -175, -620, 12, 0.04, waterMat, false);
-    // Cabang Timur Laut menuju Pasar Baru / Gunung Sahari
-    this.addLinearStrip(145, -420, 290, -520, 10, 0.04, waterMat, false);
   }
 
-  /**
-   * Authentic Central Jakarta & Golden Triangle Road Network:
-   * - Straight Spine: Medan Merdeka Barat -> Patung Kuda -> MH Thamrin -> Bundaran HI -> Dukuh Atas (X=0)
-   * - 23° SSW Diagonal Spine: Dukuh Atas (0, 90) -> Semanggi (-125, 310) -> Bundaran Senayan (-190, 475)
-   * - Asymmetric Trapezoidal Medan Merdeka Loop around Monas
-   * - Harmoni & Jl. Majapahit approach in NW
-   * - Kebon Sirih (to Tugu Tani), Wahid Hasyim (Sarinah), Jl. Sabang (H. Agus Salim)
-   * - Menteng Radial Boulevards: Jl. Imam Bonjol -> Taman Suropati -> Jl. Diponegoro, Jl. HOS Cokroaminoto -> Rasuna Said
-   * - Tanah Abang / KH Mas Mansyur -> Flyover Prof. Dr. Satrio (Casablanca)
-   * - Jl. Gatot Subroto & Tol Dalam Kota (NW-SE across Semanggi)
-   */
   /**
    * Helper to build a circular roundabout road ring with inner/outer curbs and lane markings
    */
@@ -146,7 +101,7 @@ export class CityScene {
     group.add(roadMesh);
 
     // Outer sidewalk ring
-    const outerSwGeo = new THREE.RingGeometry(outerR, outerR + 4.0, 64);
+    const outerSwGeo = new THREE.RingGeometry(outerR, outerR + 3.5, 64);
     outerSwGeo.rotateX(-Math.PI / 2);
     const outerSw = new THREE.Mesh(outerSwGeo, swMat);
     outerSw.position.y = 0.14;
@@ -177,175 +132,68 @@ export class CityScene {
     this.proceduralGroup.add(group);
   }
 
+  /**
+   * Roundabout rings, Karet Flyover structure, and street lighting synced to real OpenStreetMap roads
+   * (All street and highway ribbons are rendered directly from jakarta_osm.json in renderOSMLayers)
+   */
   buildRoadNetwork() {
-    const roadTex = TextureGenerator.createRoadTexture();
-    const primaryRoadMat = new THREE.MeshStandardMaterial({
-      map: roadTex,
-      roughness: 0.75,
-      metalness: 0.15
-    });
     const roundaboutAsphaltMat = new THREE.MeshStandardMaterial({
       color: 0x1e293b,
       roughness: 0.78,
       metalness: 0.12
-    });
-    const boulevardMat = new THREE.MeshStandardMaterial({
-      color: 0x243247,
-      roughness: 0.82
-    });
-    const localStreetMat = new THREE.MeshStandardMaterial({
-      color: 0x2d3d54,
-      roughness: 0.88
     });
     const swMat = new THREE.MeshStandardMaterial({
       map: TextureGenerator.createSidewalkTexture(),
       roughness: 0.8
     });
 
-    // =========================================================================
-    // 1. BUNDARAN HI (0, 0) & POROS LURUS JL. M.H. THAMRIN
-    //    Kolam Air Mancur radius 13.5 -> Jalan Bundaran radius 14.0 s/d 23.0 -> Trotoar luar s/d 26.0
-    //    Seluruh gedung keliling (Plaza Indonesia, Kempinski, Mandarin Oriental, Wisma Nusantara) berada di radius >= 28!
-    // =========================================================================
+    // 1. Tiga Bundaran Utama pada Koordinat Metrik Asli Peta Jakarta:
+    //    - Bundaran HI (0, 0)
+    //    - Bundaran Patung Kuda (-3, -215)
+    //    - Bundaran Senayan (-316, 478)
     this.addRoundaboutRing(0, 0, 14.0, 23.0, roundaboutAsphaltMat, swMat);
-    this.addRoundaboutRing(0, -215, 14.5, 22.5, roundaboutAsphaltMat, swMat);
-    this.addRoundaboutRing(-190, 475, 14.5, 23.5, roundaboutAsphaltMat, swMat);
+    this.addRoundaboutRing(-3, -215, 14.5, 22.0, roundaboutAsphaltMat, swMat);
+    this.addRoundaboutRing(-316, 478, 18.5, 26.0, roundaboutAsphaltMat, swMat);
 
-    // Segmen Utara Jl. M.H. Thamrin: dari selatan Bundaran Patung Kuda (Z=-192) ke utara Bundaran HI (Z=-22)
-    this.addLinearStrip(0, -192, 0, -22, 26, 0.06, primaryRoadMat);
-    this.addLinearStrip(-15.5, -192, -15.5, -22, 4.0, 0.14, swMat);
-    this.addLinearStrip(15.5, -192, 15.5, -22, 4.0, 0.14, swMat);
-
-    // Segmen Selatan Jl. M.H. Thamrin: dari selatan Bundaran HI (Z=+22) ke Jembatan Dukuh Atas (Z=+90)
-    this.addLinearStrip(0, 22, 0, 90, 26, 0.06, primaryRoadMat);
-    this.addLinearStrip(-15.5, 22, -15.5, 90, 4.0, 0.14, swMat);
-    this.addLinearStrip(15.5, 22, 15.5, 90, 4.0, 0.14, swMat);
-
-    // =========================================================================
-    // 2. POROS DIAGONAL 23° SSW JL. JENDERAL SUDIRMAN
-    //    Dari Jembatan Dukuh Atas (0, 90) -> Semanggi (-125, 310) -> berhenti di tepi Bundaran Senayan (-180, 454)
-    // =========================================================================
-    this.addLinearStrip(0, 90, -180, 454, 26, 0.06, primaryRoadMat);
-    this.addLinearStrip(-15.5, 96, -195, 459, 4.0, 0.14, swMat);
-    this.addLinearStrip(15.5, 84, -165, 449, 4.0, 0.14, swMat);
-
-    // =========================================================================
-    // 3. LINGKAR TRAPESIUM MEDAN MERDEKA (MONAS) & JL. MAJAPAHIT (HARMONI)
-    //    Mengelilingi Taman Monas (TIDAK menembus tengah Monas!)
-    // =========================================================================
-    // Jl. Medan Merdeka Barat (Sisi Barat Monas X=-95, lalu menyambung ke Bundaran Patung Kuda)
-    this.addLinearStrip(-95, -425, -95, -215, 22, 0.05, boulevardMat);
-    this.addLinearStrip(-95, -215, -22, -215, 22, 0.05, boulevardMat);
-    // Jl. Majapahit dari Sudut Barat Laut Monas menuju Simpang Harmoni (-145, -525)
-    this.addLinearStrip(-95, -425, -145, -525, 22, 0.05, boulevardMat);
-    // Jl. Medan Merdeka Utara (Depan Istana Merdeka)
-    this.addLinearStrip(-95, -425, 85, -425, 20, 0.05, boulevardMat);
-    // Jl. Medan Merdeka Selatan (Dari tepi timur Bundaran Patung Kuda X=+22 ke X=+130)
-    this.addLinearStrip(22, -215, 130, -215, 22, 0.05, boulevardMat);
-    // Jl. Medan Merdeka Timur (Miring 167° SSE dari X=+85 di Utara ke X=+130 di Selatan)
-    this.addLinearStrip(85, -425, 130, -215, 20, 0.05, boulevardMat);
-
-    // =========================================================================
-    // 4. JARINGAN JALAN JAKARTA PUSAT (KEBON SIRIH, WAHID HASYIM, SABANG, KEBON KACANG)
-    // =========================================================================
-    // Jl. Kebon Sirih (Barat-Timur dari Tanah Abang -> Thamrin -> Tugu Tani X=+155, Z=-165)
-    this.addLinearStrip(-185, -185, 0, -165, 16, 0.045, boulevardMat);
-    this.addLinearStrip(0, -165, 155, -165, 18, 0.045, boulevardMat);
-    // Jl. Kwitang Raya (Dari Tugu Tani ke Timur menuju Senen)
-    this.addLinearStrip(155, -165, 340, -165, 18, 0.045, boulevardMat);
-
-    // Jl. K.H. Wahid Hasyim (Barat-Timur lurus memotong Sarinah Z=-105, Sabang, hingga Gondangdia)
-    this.addLinearStrip(-185, -105, 195, -105, 16, 0.045, boulevardMat);
-
-    // Jl. Kebon Kacang Raya (Dari tepi barat Bundaran HI X=-22 menuju Grand Indonesia & Tanah Abang)
-    this.addLinearStrip(-22, 0, -165, 0, 14, 0.045, boulevardMat);
-
-    // Jl. H. Agus Salim / Jl. Sabang (Paralel Utara-Selatan di sebelah Timur Thamrin, X=+48)
-    this.addLinearStrip(48, -215, 48, -30, 12, 0.045, localStreetMat);
-    // Jl. Jaksa (Paralel di X=+82 antara Kebon Sirih & Wahid Hasyim)
-    this.addLinearStrip(82, -165, 82, -105, 10, 0.045, localStreetMat);
-
-    // Jalan sekitar Istiqlal, Katedral & Lapangan Banteng
-    this.addLinearStrip(85, -425, 295, -455, 15, 0.045, localStreetMat);
-    this.addLinearStrip(195, -455, 245, -340, 14, 0.045, localStreetMat);
-
-    // =========================================================================
-    // 5. BOULEVARD DIAGONAL GARDEN CITY MENTENG & SEGITIGA EMAS TIMUR (RASUNA SAID)
-    // =========================================================================
-    // Jl. Imam Bonjol: Mulai dari tepi luar tenggara Bundaran HI (18, 14) -> (75, 42) -> Taman Suropati (135, 52)
-    this.addLinearStrip(18, 14, 75, 42, 16, 0.05, boulevardMat);
-    this.addLinearStrip(75, 42, 135, 52, 16, 0.05, boulevardMat);
-    // Jl. Sutan Syahrir: Mulai dari tepi timur Bundaran HI (22, -6) menuju Menteng
-    this.addLinearStrip(22, -6, 95, -42, 13, 0.045, localStreetMat);
-    // Jl. Pangeran Diponegoro: Lanjut dari Taman Suropati (135, 52) ke Timur menuju Cikini / Salemba (340, 82)
-    this.addLinearStrip(135, 52, 340, 82, 20, 0.05, boulevardMat);
-
-    // Jl. Teuku Umar: Dari Taman Suropati (135, 52) menyerong NNE ke Tugu Tani (155, -165)
-    this.addLinearStrip(135, 52, 155, -165, 16, 0.05, boulevardMat);
-
-    // Jl. HOS Cokroaminoto (Menteng) -> menyeberangi Kanal -> Jl. H.R. Rasuna Said (Kuningan)
-    this.addLinearStrip(95, -105, 110, 110, 20, 0.05, boulevardMat);
-    this.addLinearStrip(110, 110, 175, 420, 26, 0.05, boulevardMat);
-
-    // =========================================================================
-    // 6. KORIDOR BARAT (TANAH ABANG / KH MAS MANSYUR) & FLYOVER PROF. DR. SATRIO
-    // =========================================================================
-    // Jl. Fachrudin -> Jl. K.H. Mas Mansyur (Barat Thamrin X=-155 menuju Karet X=-115, Z=+210)
-    this.addLinearStrip(-155, -220, -145, 45, 20, 0.045, boulevardMat);
-    this.addLinearStrip(-145, 45, -115, 215, 20, 0.045, boulevardMat);
-
-    // Jl. Prof. Dr. Satrio (Casablanca) & Flyover Karet melintasi Sudirman menuju Mega Kuningan
-    this.addLinearStrip(-115, 215, 185, 255, 22, 0.05, boulevardMat);
+    // 2. Struktur Jembatan Layang Flyover Karet (Jl. Prof. Dr. Satrio melintasi Jl. Jend. Sudirman di utara Sampoerna Strategic)
     const satrioFlyover = new THREE.Mesh(
-      new THREE.BoxGeometry(165, 1.4, 12),
+      new THREE.BoxGeometry(110, 1.2, 10),
       new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.6 })
     );
-    satrioFlyover.position.set(-15, 6.5, 228);
-    satrioFlyover.rotation.y = -0.13;
+    satrioFlyover.position.set(-82, 5.8, 294);
+    satrioFlyover.rotation.y = -0.32;
     satrioFlyover.castShadow = true;
     this.proceduralGroup.add(satrioFlyover);
 
-    // =========================================================================
-    // 7. POROS JL. GATOT SUBROTO & TOL DALAM KOTA (NW-SE MEMOTONG SEMANGGI)
-    // =========================================================================
-    this.addLinearStrip(-380, 195, 290, 495, 36, 0.06, boulevardMat);
-
-    // Median Kuning Jalan Tol Dalam Kota sepanjang Gatot Subroto
-    const dxG = 290 - (-380);
-    const dzG = 495 - 195;
-    const lenG = Math.sqrt(dxG * dxG + dzG * dzG);
-    const tollMedian = new THREE.Mesh(
-      new THREE.BoxGeometry(2.0, 0.9, lenG),
-      new THREE.MeshStandardMaterial({ color: 0xf59e0b })
-    );
-    tollMedian.position.set(-45, 0.45, 345);
-    tollMedian.rotation.y = Math.atan2(dxG, dzG);
-    this.proceduralGroup.add(tollMedian);
-
-    // Lampu Jalan PJU sepanjang Thamrin (di luar area Bundaran HI)
-    for (let z = -185; z <= 85; z += 38) {
-      if (Math.abs(z) < 42) continue;
-      this.createStreetLamp(-20, z, true);
-      this.createStreetLamp(20, z, false);
+    // 3. Lampu Jalan PJU sepanjang koridor lurus Jl. M.H. Thamrin & Jl. Medan Merdeka Barat
+    for (let z = -325; z <= 85; z += 38) {
+      if (Math.abs(z) < 32 || Math.abs(z + 215) < 28) continue;
+      this.createStreetLamp(-16.5, z, true);
+      this.createStreetLamp(16.5, z, false);
     }
   }
 
   /**
-   * Jalur Kereta Api Layang (Elevated Railway Viaduct):
-   * Membentang dari Utara (Juanda) -> Stasiun Gambir (+98, -305) -> Stasiun Gondangdia (+145, -105)
-   * -> Stasiun Cikini (+195, +65) -> Manggarai (+255, +185)
+   * Jalur Kereta Api Layang (Elevated Railway Viaduct) sesuai kurva asli OpenStreetMap:
+   * Juanda (105, -388) -> Stasiun Gambir (107, -259) -> Stasiun Gondangdia (140, -108)
+   * -> Stasiun Cikini (188, 65) -> Manggarai (225, 175)
    */
   buildElevatedRailway() {
     const viaductMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.65 });
     const railTrackMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.7 });
+    const pierMat = new THREE.MeshStandardMaterial({ color: 0x64748b });
 
-    // Points along the eastern elevated railway line
     const points = [
-      [72, -465],
-      [98, -305], // Stasiun Gambir
-      [142, -105], // Stasiun Gondangdia (crossing Wahid Hasyim)
-      [195, 65],   // Stasiun Cikini (crossing Diponegoro)
-      [255, 195]   // Menuju Manggarai
+      [105, -388],
+      [95, -330],
+      [99, -290],
+      [107, -259], // Stasiun Gambir
+      [116, -233],
+      [132, -147],
+      [140, -108], // Stasiun Gondangdia
+      [164, -22],
+      [188, 65],   // Stasiun Cikini
+      [225, 175]   // Menuju Manggarai
     ];
 
     for (let i = 0; i < points.length - 1; i++) {
@@ -356,25 +204,33 @@ export class CityScene {
       const len = Math.sqrt(dx * dx + dz * dz);
       const angle = Math.atan2(dx, dz);
 
-      const deck = new THREE.Mesh(new THREE.BoxGeometry(7.5, 1.8, len), viaductMat);
+      const deck = new THREE.Mesh(new THREE.BoxGeometry(7.2, 1.8, len + 1.5), viaductMat);
       deck.position.set((x1 + x2) / 2, 9.5, (z1 + z2) / 2);
       deck.rotation.y = angle;
       deck.castShadow = true;
       this.proceduralGroup.add(deck);
 
-      const track = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.3, len), railTrackMat);
+      const track = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.3, len + 1.5), railTrackMat);
       track.position.set((x1 + x2) / 2, 10.55, (z1 + z2) / 2);
       track.rotation.y = angle;
       this.proceduralGroup.add(track);
+
+      const steps = Math.max(1, Math.floor(len / 26));
+      for (let s = 0; s < steps; s++) {
+        const t = (s + 0.5) / steps;
+        const pier = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.3, 9.5, 8), pierMat);
+        pier.position.set(x1 + dx * t, 4.75, z1 + dz * t);
+        this.proceduralGroup.add(pier);
+      }
     }
 
-    // Stasiun Gondangdia & Stasiun Cikini elevated station roofs
+    // Atap Stasiun Layang Gondangdia & Cikini pada koordinat OSM aslinya
     [
-      { x: 142, z: -105, rot: 0.22 },
-      { x: 195, z: 65, rot: 0.30 }
+      { x: 140, z: -108, rot: 0.22 },
+      { x: 188, z: 65, rot: 0.28 }
     ].forEach((st) => {
       const stRoof = new THREE.Mesh(
-        new THREE.BoxGeometry(13, 3.5, 42),
+        new THREE.BoxGeometry(13, 3.5, 40),
         new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4 })
       );
       stRoof.position.set(st.x, 12.2, st.z);
@@ -670,7 +526,7 @@ export class CityScene {
     if (osm.waterways && osm.waterways.length) {
       const riverGeo = this.buildMergedRibbonGeometry(
         osm.waterways,
-        (w) => (w.t === 'canal' ? 10.0 : 8.0),
+        (w) => (w.t === 'canal' ? 14.5 : 10.5),
         () => 0.035,
         true
       );
@@ -680,7 +536,7 @@ export class CityScene {
       }
     }
 
-    // 3. Real OpenStreetMap Jakarta Street Network (All road tiers clearly visible across the city)
+    // 3. Real OpenStreetMap Jakarta Street Network (Single Source of Truth for all roads)
     if (osm.roads && osm.roads.length) {
       const arterialWays = osm.roads.filter((r) =>
         r.t === 'motorway' || r.t === 'trunk' || r.t === 'primary' || r.t === 'motorway_link' || r.t === 'trunk_link'
@@ -695,7 +551,7 @@ export class CityScene {
         side: THREE.DoubleSide
       });
       const arterialMat = new THREE.MeshStandardMaterial({
-        color: 0x26354a,
+        color: 0x1e293b,
         roughness: 0.78,
         metalness: 0.12,
         side: THREE.DoubleSide
@@ -706,11 +562,15 @@ export class CityScene {
         metalness: 0.08,
         side: THREE.DoubleSide
       });
+      const centerLineMat = new THREE.MeshBasicMaterial({
+        color: 0x94a3b8,
+        side: THREE.DoubleSide
+      });
 
       // Sidewalk/curb casing beneath arterial OSM roads
       const arterialCurbGeo = this.buildMergedRibbonGeometry(
         arterialWays,
-        (r) => (r.t === 'motorway' || r.t === 'trunk' ? 11.5 : 9.2),
+        (r) => (r.t === 'motorway' || r.t === 'trunk' ? 14.5 : 11.2),
         (r) => (r.l ? 0.33 : 0.048),
         true
       );
@@ -720,7 +580,7 @@ export class CityScene {
 
       const arterialGeo = this.buildMergedRibbonGeometry(
         arterialWays,
-        (r) => (r.t === 'motorway' || r.t === 'trunk' ? 9.5 : 7.4),
+        (r) => (r.t === 'motorway' || r.t === 'trunk' ? 12.0 : 9.2),
         (r) => (r.l ? 0.35 : 0.055),
         true
       );
@@ -730,9 +590,21 @@ export class CityScene {
         this.proceduralGroup.add(mesh);
       }
 
+      // Subtle center lane marking along major trunk/motorway corridors
+      const majorWays = arterialWays.filter((r) => r.t === 'motorway' || r.t === 'trunk');
+      const centerLineGeo = this.buildMergedRibbonGeometry(
+        majorWays,
+        () => 0.32,
+        (r) => (r.l ? 0.365 : 0.068),
+        true
+      );
+      if (centerLineGeo) {
+        this.proceduralGroup.add(new THREE.Mesh(centerLineGeo, centerLineMat));
+      }
+
       const localGeo = this.buildMergedRibbonGeometry(
         localWays,
-        (r) => (r.t === 'secondary' ? 6.0 : r.t === 'tertiary' ? 4.5 : 3.2),
+        (r) => (r.t === 'secondary' ? 6.6 : r.t === 'tertiary' ? 4.8 : 3.5),
         () => 0.05,
         true
       );
@@ -762,7 +634,7 @@ export class CityScene {
       }
     }
 
-    // 5. Real OpenStreetMap 3D Building Footprints (1,641 authentic Jakarta buildings)
+    // 5. Real OpenStreetMap 3D Building Footprints (1,566 authentic Jakarta buildings)
     if (osm.buildings && osm.buildings.length) {
       osm.buildings.forEach((b, idx) => {
         const pts = b.p;
@@ -824,31 +696,44 @@ export class CityScene {
   }
 
   /**
+   * Helper to get the true OSM centerline X coordinate of Jl. Jenderal Sudirman for a given Z (100..478)
+   */
+  getSudirmanCenterX(z) {
+    if (z <= 100) return -3;
+    if (z <= 190) return -3 - (z - 100) * 0.122;
+    if (z <= 272) return -14 - (z - 190) * 0.561;
+    if (z <= 350) return -60 - (z - 272) * 1.025;
+    return -140 - (z - 350) * 1.375;
+  }
+
+  /**
    * Lush tropical vegetation along Thamrin, Sudirman, Monas, and Menteng
    */
   buildStreetVegetation() {
     const foliageMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.75 });
     const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
 
-    // Trees along straight Thamrin spine (outside Bundaran HI roundabout)
-    for (let z = -188; z <= 82; z += 24) {
-      if (Math.abs(z) < 29) continue;
-      this.createTree(-16.5, z, foliageMat, trunkMat);
-      this.createTree(16.5, z, foliageMat, trunkMat);
+    // Trees along straight Thamrin & Medan Merdeka Barat spine (outside Bundaran HI & Patung Kuda)
+    for (let z = -325; z <= 82; z += 26) {
+      if (Math.abs(z) < 29 || Math.abs(z + 215) < 26) continue;
+      this.createTree(-15.5, z, foliageMat, trunkMat);
+      if (z > -205) {
+        this.createTree(15.5, z, foliageMat, trunkMat);
+      }
     }
 
-    // Trees along diagonal 23° SSW Sudirman spine
-    for (let z = 115; z <= 445; z += 26) {
-      if (Math.abs(z - 310) < 42) continue; // Semanggi
-      const xCenter = -(z - 90) * 0.42;
-      this.createTree(xCenter - 17, z, foliageMat, trunkMat);
-      this.createTree(xCenter + 17, z, foliageMat, trunkMat);
+    // Trees along true OpenStreetMap curve of Jl. Jenderal Sudirman
+    for (let z = 118; z <= 452; z += 28) {
+      if (Math.abs(z - 350) < 48) continue; // Skip Simpang Semanggi
+      const xCenter = this.getSudirmanCenterX(z);
+      this.createTree(xCenter - 16, z, foliageMat, trunkMat);
+      this.createTree(xCenter + 16, z, foliageMat, trunkMat);
     }
 
-    // Trees around Monas Park & Taman Rusa (SE Quadrant of Monas)
-    for (let x = -75; x <= 75; x += 22) {
-      this.createTree(x, -235, foliageMat, trunkMat);
-      this.createTree(x, -405, foliageMat, trunkMat);
+    // Trees along North & South edges of Lapangan Medan Merdeka (Monas Park, X = +10 to +92)
+    for (let x = 12; x <= 92; x += 20) {
+      this.createTree(x, -222, foliageMat, trunkMat);
+      this.createTree(x, -330, foliageMat, trunkMat);
     }
   }
 

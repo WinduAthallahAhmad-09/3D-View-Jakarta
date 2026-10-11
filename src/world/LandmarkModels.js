@@ -320,23 +320,6 @@ export class LandmarkModels {
     roof.position.set(0, 16, 0);
     group.add(roof);
 
-    // Elevated Railway Viaduct (membentang Utara-Selatan)
-    const viaduct = new THREE.Mesh(
-      new THREE.BoxGeometry(8, 2, 340),
-      new THREE.MeshStandardMaterial({ color: 0x475569 })
-    );
-    viaduct.position.set(10, 10, 0);
-    group.add(viaduct);
-
-    for (let z = -150; z <= 150; z += 25) {
-      const pier = new THREE.Mesh(
-        new THREE.CylinderGeometry(1.2, 1.4, 10, 8),
-        new THREE.MeshStandardMaterial({ color: 0x64748b })
-      );
-      pier.position.set(10, 5, z);
-      group.add(pier);
-    }
-
     return group;
   }
 
