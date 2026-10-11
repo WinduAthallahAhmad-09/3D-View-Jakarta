@@ -786,29 +786,45 @@ export class CityScene {
   }
 
   /**
-   * Multi-Corridor Animated Traffic following the real road angles and circling Bundaran HI:
-   * - North Thamrin (Patung Kuda to North Bundaran HI)
-   * - Circular Bundaran HI Roundabout (vehicles orbiting the fountain pool)
-   * - South Thamrin (South Bundaran HI to Dukuh Atas)
-   * - Diagonal 23° SSW Sudirman Corridor (Dukuh Atas -> Semanggi -> Bundaran Senayan)
-   * - Diagonal NW-SE Gatot Subroto Toll Road
+   * Multi-Corridor Animated Traffic following the exact OpenStreetMap road geometry:
+   * - Jl. Medan Merdeka Barat (North of Patung Kuda)
+   * - Jl. M.H. Thamrin (Patung Kuda <-> Bundaran HI <-> Dukuh Atas)
+   * - True 4-segment curve of Jl. Jenderal Sudirman (Dukuh Atas -> Setiabudi -> Karet -> Semanggi -> Senayan)
+   * - True Jl. Gatot Subroto corridor (NE of DPR/MPR -> Semanggi -> Kuningan)
+   * - True Jl. H.R. Rasuna Said corridor (Menteng/Setiabudi -> Mega Kuningan)
+   * - Circular Roundabout Traffic around Bundaran HI, Patung Kuda, & Bundaran Senayan
    */
   buildTraffic() {
     const colors = [0x0284c7, 0xf8fafc, 0x0f172a, 0x94a3b8, 0xef4444, 0xf59e0b];
 
     const routes = [
-      // Route 0A: North Thamrin (Patung Kuda Z=-188 to North Bundaran HI Z=-25)
-      { x1: -6.5, z1: -188, x2: -6.5, z2: -25, count: 10 },
-      { x1: 6.5, z1: -25, x2: 6.5, z2: -188, count: 10 },
-      // Route 0B: South Thamrin (South Bundaran HI Z=+25 to Dukuh Atas Z=+88)
-      { x1: -6.5, z1: 25, x2: -6.5, z2: 88, count: 5 },
-      { x1: 6.5, z1: 88, x2: 6.5, z2: 25, count: 5 },
-      // Route 1: Diagonal 23° SSW Sudirman (Dukuh Atas to Bundaran Senayan rim)
-      { x1: -6.5, z1: 92, x2: -184, z2: 448, count: 16 },
-      { x1: -172, z1: 448, x2: 6.5, z2: 92, count: 16 },
-      // Route 2: Gatot Subroto NW-SE Toll Corridor
-      { x1: -360, z1: 202, x2: 275, z2: 488, count: 12 },
-      { x1: 275, z1: 498, x2: -360, z2: 212, count: 12 }
+      // 1. Jl. Medan Merdeka Barat (North of Patung Kuda)
+      { x1: -6.0, z1: -330, x2: -6.0, z2: -240, count: 5 },
+      { x1: 1.0, z1: -240, x2: 1.0, z2: -330, count: 5 },
+      // 2. North Jl. M.H. Thamrin (Patung Kuda Z=-192 to Bundaran HI Z=-25)
+      { x1: -4.5, z1: -192, x2: -4.5, z2: -25, count: 9 },
+      { x1: 4.5, z1: -25, x2: 4.5, z2: -192, count: 9 },
+      // 3. South Jl. M.H. Thamrin (Bundaran HI Z=+25 to Dukuh Atas Z=+96)
+      { x1: -4.5, z1: 25, x2: -5.5, z2: 96, count: 5 },
+      { x1: 2.5, z1: 96, x2: 4.5, z2: 25, count: 5 },
+      // 4A. Jl. Jenderal Sudirman Segmen 1 (Dukuh Atas -> Setiabudi)
+      { x1: -6.5, z1: 102, x2: -17.5, z2: 190, count: 5 },
+      { x1: -10.5, z1: 190, x2: 0.5, z2: 102, count: 5 },
+      // 4B. Jl. Jenderal Sudirman Segmen 2 (Setiabudi -> JPO Phinisi Karet)
+      { x1: -17.5, z1: 190, x2: -63.5, z2: 272, count: 5 },
+      { x1: -56.5, z1: 272, x2: -10.5, z2: 190, count: 5 },
+      // 4C. Jl. Jenderal Sudirman Segmen 3 (Karet -> Simpang Semanggi)
+      { x1: -63.5, z1: 272, x2: -143.5, z2: 350, count: 5 },
+      { x1: -136.5, z1: 350, x2: -56.5, z2: 272, count: 5 },
+      // 4D. Jl. Jenderal Sudirman Segmen 4 (Simpang Semanggi -> Bundaran Senayan)
+      { x1: -143.5, z1: 350, x2: -301.0, z2: 458, count: 6 },
+      { x1: -293.0, z1: 458, x2: -136.5, z2: 350, count: 6 },
+      // 5. Jl. Gatot Subroto (Slipi / NE of DPR -> Semanggi -> Kuningan)
+      { x1: -302.0, z1: 152, x2: -60.0, z2: 474, count: 12 },
+      { x1: -52.0, z1: 470, x2: -294.0, z2: 148, count: 12 },
+      // 6. Jl. H.R. Rasuna Said (Setiabudi -> Mega Kuningan)
+      { x1: 93.0, z1: 192, x2: 139.0, z2: 475, count: 8 },
+      { x1: 145.0, z1: 475, x2: 99.0, z2: 192, count: 8 }
     ];
 
     let idx = 0;
@@ -844,27 +860,33 @@ export class CityScene {
       }
     });
 
-    // Circular Roundabout Traffic orbiting Bundaran HI fountain (radius 16.5 & 20.2)
-    [16.5, 20.2].forEach((radius, rIdx) => {
-      const count = 7;
-      for (let k = 0; k < count; k++) {
+    // Circular Roundabout Traffic orbiting Bundaran HI (0,0), Patung Kuda (-3,-215), & Bundaran Senayan (-316,478)
+    const roundabouts = [
+      { cx: 0, cz: 0, radius: 16.5, count: 6, speed: 0.45 },
+      { cx: 0, cz: 0, radius: 20.2, count: 6, speed: 0.52 },
+      { cx: -3, cz: -215, radius: 18.0, count: 5, speed: 0.48 },
+      { cx: -316, cz: 478, radius: 22.0, count: 5, speed: 0.44 }
+    ];
+
+    roundabouts.forEach((rb, rIdx) => {
+      for (let k = 0; k < rb.count; k++) {
         const isBus = k === 0 && rIdx === 0;
         const vehicle = this.createVehicleMesh(
           isBus,
           isBus ? 0x0284c7 : colors[(k + rIdx) % colors.length]
         );
-        const angle = (k / count) * Math.PI * 2;
-        vehicle.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
-        vehicle.rotation.y = -angle;
+        const angle = (k / rb.count) * Math.PI * 2;
+        vehicle.position.set(rb.cx + Math.cos(angle) * rb.radius, 0, rb.cz + Math.sin(angle) * rb.radius);
+        vehicle.rotation.y = Math.atan2(-Math.sin(angle), Math.cos(angle));
 
         this.vehicles.push({
           mesh: vehicle,
           isCircular: true,
-          cx: 0,
-          cz: 0,
-          radius,
+          cx: rb.cx,
+          cz: rb.cz,
+          radius: rb.radius,
           angle,
-          angularSpeed: 0.45 + (rIdx * 0.08)
+          angularSpeed: rb.speed
         });
 
         this.proceduralGroup.add(vehicle);
