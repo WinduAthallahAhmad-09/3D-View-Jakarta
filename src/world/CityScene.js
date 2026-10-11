@@ -130,6 +130,53 @@ export class CityScene {
    * - Tanah Abang / KH Mas Mansyur -> Flyover Prof. Dr. Satrio (Casablanca)
    * - Jl. Gatot Subroto & Tol Dalam Kota (NW-SE across Semanggi)
    */
+  /**
+   * Helper to build a circular roundabout road ring with inner/outer curbs and lane markings
+   */
+  addRoundaboutRing(cx, cz, innerR, outerR, roadMat, swMat) {
+    const group = new THREE.Group();
+    group.position.set(cx, 0, cz);
+
+    // Asphalt ring road around the fountain
+    const roadGeo = new THREE.RingGeometry(innerR, outerR, 64);
+    roadGeo.rotateX(-Math.PI / 2);
+    const roadMesh = new THREE.Mesh(roadGeo, roadMat);
+    roadMesh.position.y = 0.065;
+    roadMesh.receiveShadow = true;
+    group.add(roadMesh);
+
+    // Outer sidewalk ring
+    const outerSwGeo = new THREE.RingGeometry(outerR, outerR + 4.0, 64);
+    outerSwGeo.rotateX(-Math.PI / 2);
+    const outerSw = new THREE.Mesh(outerSwGeo, swMat);
+    outerSw.position.y = 0.14;
+    outerSw.receiveShadow = true;
+    group.add(outerSw);
+
+    // Inner curb ring hugging the fountain pool wall
+    const innerCurbGeo = new THREE.RingGeometry(Math.max(1, innerR - 1.2), innerR, 64);
+    innerCurbGeo.rotateX(-Math.PI / 2);
+    const innerCurb = new THREE.Mesh(
+      innerCurbGeo,
+      new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.6 })
+    );
+    innerCurb.position.y = 0.16;
+    group.add(innerCurb);
+
+    // Circular lane markings inside the roundabout
+    const laneMat = new THREE.MeshBasicMaterial({ color: 0xe2e8f0, side: THREE.DoubleSide });
+    [0.35, 0.68].forEach((t) => {
+      const r = innerR + (outerR - innerR) * t;
+      const laneGeo = new THREE.RingGeometry(r - 0.18, r + 0.18, 64);
+      laneGeo.rotateX(-Math.PI / 2);
+      const lane = new THREE.Mesh(laneGeo, laneMat);
+      lane.position.y = 0.08;
+      group.add(lane);
+    });
+
+    this.proceduralGroup.add(group);
+  }
+
   buildRoadNetwork() {
     const roadTex = TextureGenerator.createRoadTexture();
     const primaryRoadMat = new THREE.MeshStandardMaterial({
@@ -137,12 +184,17 @@ export class CityScene {
       roughness: 0.75,
       metalness: 0.15
     });
-    const boulevardMat = new THREE.MeshStandardMaterial({
+    const roundaboutAsphaltMat = new THREE.MeshStandardMaterial({
       color: 0x1e293b,
+      roughness: 0.78,
+      metalness: 0.12
+    });
+    const boulevardMat = new THREE.MeshStandardMaterial({
+      color: 0x243247,
       roughness: 0.82
     });
     const localStreetMat = new THREE.MeshStandardMaterial({
-      color: 0x172033,
+      color: 0x2d3d54,
       roughness: 0.88
     });
     const swMat = new THREE.MeshStandardMaterial({
@@ -151,82 +203,98 @@ export class CityScene {
     });
 
     // =========================================================================
-    // 1. POROS LURUS THAMRIN (Patung Kuda Z=-215 -> Bundaran HI Z=0 -> Dukuh Atas Z=+90)
+    // 1. BUNDARAN HI (0, 0) & POROS LURUS JL. M.H. THAMRIN
+    //    Jalan berhenti di tepi luar bundaran (radius 36) dan MELINGKARI air mancur!
     // =========================================================================
-    this.addLinearStrip(0, -215, 0, 92, 42, 0.06, primaryRoadMat);
-    this.addLinearStrip(-24, -215, -24, 92, 5.5, 0.14, swMat);
-    this.addLinearStrip(24, -215, 24, 92, 5.5, 0.14, swMat);
+    this.addRoundaboutRing(0, 0, 23.6, 38.5, roundaboutAsphaltMat, swMat);
+    this.addRoundaboutRing(0, -215, 15.2, 26.5, roundaboutAsphaltMat, swMat);
+    this.addRoundaboutRing(-190, 475, 15.5, 27.5, roundaboutAsphaltMat, swMat);
+
+    // Segmen Utara Jl. M.H. Thamrin: dari selatan Bundaran Patung Kuda (Z=-190) ke utara Bundaran HI (Z=-36)
+    this.addLinearStrip(0, -190, 0, -36, 36, 0.06, primaryRoadMat);
+    this.addLinearStrip(-21, -190, -21, -36, 5.0, 0.14, swMat);
+    this.addLinearStrip(21, -190, 21, -36, 5.0, 0.14, swMat);
+
+    // Segmen Selatan Jl. M.H. Thamrin: dari selatan Bundaran HI (Z=+36) ke Jembatan Dukuh Atas (Z=+90)
+    this.addLinearStrip(0, 36, 0, 90, 36, 0.06, primaryRoadMat);
+    this.addLinearStrip(-21, 36, -21, 90, 5.0, 0.14, swMat);
+    this.addLinearStrip(21, 36, 21, 90, 5.0, 0.14, swMat);
 
     // =========================================================================
     // 2. POROS DIAGONAL 23° SSW JL. JENDERAL SUDIRMAN
-    //    Membelok tepat di Jembatan Dukuh Atas (0, 90) -> Semanggi (-125, 310) -> Senayan (-195, 485)
+    //    Dari Jembatan Dukuh Atas (0, 90) -> Semanggi (-125, 310) -> berhenti di tepi Bundaran Senayan (-178, 452)
     // =========================================================================
-    this.addLinearStrip(0, 90, -198, 490, 42, 0.06, primaryRoadMat);
-    this.addLinearStrip(-23, 98, -221, 498, 5.5, 0.14, swMat);
-    this.addLinearStrip(23, 82, -175, 482, 5.5, 0.14, swMat);
+    this.addLinearStrip(0, 90, -178, 452, 36, 0.06, primaryRoadMat);
+    this.addLinearStrip(-20, 97, -198, 458, 5.0, 0.14, swMat);
+    this.addLinearStrip(20, 83, -158, 446, 5.0, 0.14, swMat);
 
     // =========================================================================
     // 3. LINGKAR TRAPESIUM MEDAN MERDEKA (MONAS) & JL. MAJAPAHIT (HARMONI)
+    //    Mengelilingi Taman Monas (TIDAK menembus tengah Monas!)
     // =========================================================================
-    // Jl. Medan Merdeka Barat (Lurus Utara-Selatan menyambung ke Patung Kuda)
-    this.addLinearStrip(0, -425, 0, -215, 32, 0.05, boulevardMat);
-    // Jl. Majapahit dari Sudut Barat Laut Monas menuju Simpang Harmoni (-145, -510)
-    this.addLinearStrip(-85, -425, -145, -525, 26, 0.05, boulevardMat);
+    // Jl. Medan Merdeka Barat (Sisi Barat Monas X=-95, lalu menyambung ke Bundaran Patung Kuda)
+    this.addLinearStrip(-95, -425, -95, -215, 24, 0.05, boulevardMat);
+    this.addLinearStrip(-95, -215, -24, -215, 24, 0.05, boulevardMat);
+    // Jl. Majapahit dari Sudut Barat Laut Monas menuju Simpang Harmoni (-145, -525)
+    this.addLinearStrip(-95, -425, -145, -525, 24, 0.05, boulevardMat);
     // Jl. Medan Merdeka Utara (Depan Istana Merdeka)
-    this.addLinearStrip(-95, -425, 85, -425, 24, 0.05, boulevardMat);
-    // Jl. Medan Merdeka Selatan (Lebih lebar karena sisi timur miring 13° SSE)
-    this.addLinearStrip(-95, -215, 130, -215, 26, 0.05, boulevardMat);
+    this.addLinearStrip(-95, -425, 85, -425, 22, 0.05, boulevardMat);
+    // Jl. Medan Merdeka Selatan (Dari tepi timur Bundaran Patung Kuda X=+24 ke X=+130)
+    this.addLinearStrip(24, -215, 130, -215, 24, 0.05, boulevardMat);
     // Jl. Medan Merdeka Timur (Miring 167° SSE dari X=+85 di Utara ke X=+130 di Selatan)
-    this.addLinearStrip(85, -425, 130, -215, 24, 0.05, boulevardMat);
-    // Sisi Barat Dalam Monas
-    this.addLinearStrip(-95, -425, -95, -215, 22, 0.05, boulevardMat);
+    this.addLinearStrip(85, -425, 130, -215, 22, 0.05, boulevardMat);
 
     // =========================================================================
-    // 4. JARINGAN JALAN JAKARTA PUSAT (KEBON SIRIH, WAHID HASYIM, SABANG, LAP. BANTENG)
+    // 4. JARINGAN JALAN JAKARTA PUSAT (KEBON SIRIH, WAHID HASYIM, SABANG, KEBON KACANG)
     // =========================================================================
     // Jl. Kebon Sirih (Barat-Timur dari Tanah Abang -> Thamrin -> Tugu Tani X=+155, Z=-165)
-    this.addLinearStrip(-185, -185, 0, -165, 20, 0.04, boulevardMat);
-    this.addLinearStrip(0, -165, 155, -165, 22, 0.04, boulevardMat);
+    this.addLinearStrip(-185, -185, 0, -165, 18, 0.045, boulevardMat);
+    this.addLinearStrip(0, -165, 155, -165, 20, 0.045, boulevardMat);
     // Jl. Kwitang Raya (Dari Tugu Tani ke Timur menuju Senen)
-    this.addLinearStrip(155, -165, 340, -165, 22, 0.04, boulevardMat);
+    this.addLinearStrip(155, -165, 340, -165, 20, 0.045, boulevardMat);
 
     // Jl. K.H. Wahid Hasyim (Barat-Timur lurus memotong Sarinah Z=-105, Sabang, hingga Gondangdia)
-    this.addLinearStrip(-155, -105, 195, -105, 20, 0.04, boulevardMat);
+    this.addLinearStrip(-185, -105, 195, -105, 18, 0.045, boulevardMat);
+
+    // Jl. Kebon Kacang Raya (Dari tepi barat Bundaran HI X=-37 menuju Grand Indonesia & Tanah Abang)
+    this.addLinearStrip(-37, 0, -165, 0, 16, 0.045, boulevardMat);
 
     // Jl. H. Agus Salim / Jl. Sabang (Paralel Utara-Selatan di sebelah Timur Thamrin, X=+48)
-    this.addLinearStrip(48, -215, 48, -45, 14, 0.04, localStreetMat);
+    this.addLinearStrip(48, -215, 48, -35, 13, 0.045, localStreetMat);
     // Jl. Jaksa (Paralel di X=+82 antara Kebon Sirih & Wahid Hasyim)
-    this.addLinearStrip(82, -165, 82, -105, 11, 0.04, localStreetMat);
+    this.addLinearStrip(82, -165, 82, -105, 10, 0.045, localStreetMat);
 
     // Jalan sekitar Istiqlal, Katedral & Lapangan Banteng
-    this.addLinearStrip(85, -425, 295, -455, 18, 0.04, localStreetMat);
-    this.addLinearStrip(195, -455, 245, -340, 16, 0.04, localStreetMat);
+    this.addLinearStrip(85, -425, 295, -455, 16, 0.045, localStreetMat);
+    this.addLinearStrip(195, -455, 245, -340, 15, 0.045, localStreetMat);
 
     // =========================================================================
     // 5. BOULEVARD DIAGONAL GARDEN CITY MENTENG & SEGITIGA EMAS TIMUR (RASUNA SAID)
     // =========================================================================
-    // Jl. Imam Bonjol: Memancar diagonal Tenggara (134° lalu 99°) dari Bundaran HI (0,0) ke Taman Suropati (135, 52)
-    this.addLinearStrip(0, 0, 75, 42, 20, 0.05, boulevardMat);
-    this.addLinearStrip(75, 42, 135, 52, 20, 0.05, boulevardMat);
+    // Jl. Imam Bonjol: Mulai dari tepi luar tenggara Bundaran HI (28, 22) -> (75, 42) -> Taman Suropati (135, 52)
+    this.addLinearStrip(28, 22, 75, 42, 18, 0.05, boulevardMat);
+    this.addLinearStrip(75, 42, 135, 52, 18, 0.05, boulevardMat);
+    // Jl. Sutan Syahrir: Mulai dari tepi timur Bundaran HI (35, -10) menuju Menteng
+    this.addLinearStrip(35, -10, 95, -42, 15, 0.045, localStreetMat);
     // Jl. Pangeran Diponegoro: Lanjut dari Taman Suropati (135, 52) ke Timur menuju Cikini / Salemba (340, 82)
-    this.addLinearStrip(135, 52, 340, 82, 22, 0.05, boulevardMat);
+    this.addLinearStrip(135, 52, 340, 82, 20, 0.05, boulevardMat);
 
     // Jl. Teuku Umar: Dari Taman Suropati (135, 52) menyerong NNE ke Tugu Tani (155, -165)
-    this.addLinearStrip(135, 52, 155, -165, 18, 0.05, boulevardMat);
+    this.addLinearStrip(135, 52, 155, -165, 16, 0.05, boulevardMat);
 
     // Jl. HOS Cokroaminoto (Menteng) -> menyeberangi Kanal -> Jl. H.R. Rasuna Said (Kuningan)
-    this.addLinearStrip(95, -105, 110, 110, 22, 0.05, boulevardMat);
-    this.addLinearStrip(110, 110, 175, 420, 30, 0.05, boulevardMat);
+    this.addLinearStrip(95, -105, 110, 110, 20, 0.05, boulevardMat);
+    this.addLinearStrip(110, 110, 175, 420, 26, 0.05, boulevardMat);
 
     // =========================================================================
     // 6. KORIDOR BARAT (TANAH ABANG / KH MAS MANSYUR) & FLYOVER PROF. DR. SATRIO
     // =========================================================================
     // Jl. Fachrudin -> Jl. K.H. Mas Mansyur (Barat Thamrin X=-155 menuju Karet X=-115, Z=+210)
-    this.addLinearStrip(-155, -220, -145, 45, 22, 0.04, boulevardMat);
-    this.addLinearStrip(-145, 45, -115, 215, 22, 0.04, boulevardMat);
+    this.addLinearStrip(-155, -220, -145, 45, 20, 0.045, boulevardMat);
+    this.addLinearStrip(-145, 45, -115, 215, 20, 0.045, boulevardMat);
 
     // Jl. Prof. Dr. Satrio (Casablanca) & Flyover Karet melintasi Sudirman menuju Mega Kuningan
-    this.addLinearStrip(-115, 215, 185, 255, 24, 0.05, boulevardMat);
+    this.addLinearStrip(-115, 215, 185, 255, 22, 0.05, boulevardMat);
     const satrioFlyover = new THREE.Mesh(
       new THREE.BoxGeometry(165, 1.4, 12),
       new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.6 })
@@ -238,27 +306,26 @@ export class CityScene {
 
     // =========================================================================
     // 7. POROS JL. GATOT SUBROTO & TOL DALAM KOTA (NW-SE MEMOTONG SEMANGGI)
-    //    Tegak lurus dengan Sudirman diagonal di Simpang Susun Semanggi (-125, 310)
     // =========================================================================
-    this.addLinearStrip(-380, 195, 290, 495, 42, 0.06, boulevardMat);
+    this.addLinearStrip(-380, 195, 290, 495, 36, 0.06, boulevardMat);
 
     // Median Kuning Jalan Tol Dalam Kota sepanjang Gatot Subroto
     const dxG = 290 - (-380);
     const dzG = 495 - 195;
     const lenG = Math.sqrt(dxG * dxG + dzG * dzG);
     const tollMedian = new THREE.Mesh(
-      new THREE.BoxGeometry(2.2, 0.9, lenG),
+      new THREE.BoxGeometry(2.0, 0.9, lenG),
       new THREE.MeshStandardMaterial({ color: 0xf59e0b })
     );
     tollMedian.position.set(-45, 0.45, 345);
     tollMedian.rotation.y = Math.atan2(dxG, dzG);
     this.proceduralGroup.add(tollMedian);
 
-    // Lampu Jalan PJU sepanjang Thamrin & Sudirman
-    for (let z = -205; z <= 85; z += 40) {
-      if (Math.abs(z) < 28) continue;
-      this.createStreetLamp(-22, z, true);
-      this.createStreetLamp(22, z, false);
+    // Lampu Jalan PJU sepanjang Thamrin (di luar area Bundaran HI)
+    for (let z = -185; z <= 85; z += 38) {
+      if (Math.abs(z) < 42) continue;
+      this.createStreetLamp(-20, z, true);
+      this.createStreetLamp(20, z, false);
     }
   }
 
@@ -486,7 +553,19 @@ export class CityScene {
       });
   }
 
-  buildMergedRibbonGeometry(ways, getWidth, getY) {
+  isInsideFountainOrMonument(x, z) {
+    // Bundaran HI fountain pool & inner roundabout island (0, 0)
+    if (x * x + z * z < 35 * 35) return true;
+    // Bundaran Patung Kuda fountain pool (0, -215)
+    if (x * x + (z + 215) * (z + 215) < 23 * 23) return true;
+    // Bundaran Senayan fountain pool (-190, 475)
+    if ((x + 190) * (x + 190) + (z - 475) * (z - 475) < 24 * 24) return true;
+    // Monas central plaza (0, -320)
+    if (Math.abs(x) < 80 && z > -405 && z < -235) return true;
+    return false;
+  }
+
+  buildMergedRibbonGeometry(ways, getWidth, getY, skipMonuments = false) {
     const positions = [];
     for (let i = 0; i < ways.length; i++) {
       const way = ways[i];
@@ -500,6 +579,14 @@ export class CityScene {
         const z1 = pts[j][1];
         const x2 = pts[j + 1][0];
         const z2 = pts[j + 1][1];
+        if (
+          skipMonuments &&
+          (this.isInsideFountainOrMonument(x1, z1) ||
+            this.isInsideFountainOrMonument(x2, z2) ||
+            this.isInsideFountainOrMonument((x1 + x2) * 0.5, (z1 + z2) * 0.5))
+        ) {
+          continue;
+        }
         const dx = x2 - x1;
         const dz = z2 - z1;
         const len = Math.hypot(dx, dz);
@@ -513,13 +600,14 @@ export class CityScene {
         const cx = x2 + nx, cz = z2 + nz;
         const dx2 = x2 - nx, dz2 = z2 - nz;
 
+        // Counter-clockwise winding in XZ so normal points +Y (upward toward camera)
         positions.push(
           ax, y, az,
-          bx, y, bz,
           cx, y, cz,
           bx, y, bz,
-          dx2, y, dz2,
-          cx, y, cz
+          bx, y, bz,
+          cx, y, cz,
+          dx2, y, dz2
         );
       }
     }
@@ -535,7 +623,8 @@ export class CityScene {
     const parkMat = new THREE.MeshStandardMaterial({
       color: 0x14532d,
       roughness: 0.9,
-      metalness: 0.05
+      metalness: 0.05,
+      side: THREE.DoubleSide
     });
     if (osm.parks) {
       osm.parks.forEach((park) => {
@@ -558,7 +647,8 @@ export class CityScene {
     const waterMat = new THREE.MeshStandardMaterial({
       color: 0x0369a1,
       roughness: 0.15,
-      metalness: 0.85
+      metalness: 0.85,
+      side: THREE.DoubleSide
     });
     if (osm.waterPolygons) {
       osm.waterPolygons.forEach((wp) => {
@@ -580,7 +670,8 @@ export class CityScene {
       const riverGeo = this.buildMergedRibbonGeometry(
         osm.waterways,
         (w) => (w.t === 'canal' ? 10.0 : 8.0),
-        () => 0.035
+        () => 0.035,
+        true
       );
       if (riverGeo) {
         const riverMesh = new THREE.Mesh(riverGeo, waterMat);
@@ -588,30 +679,49 @@ export class CityScene {
       }
     }
 
-    // 3. Real OpenStreetMap Jakarta Street Network (2,408 road ways)
+    // 3. Real OpenStreetMap Jakarta Street Network (All road tiers clearly visible across the city)
     if (osm.roads && osm.roads.length) {
       const arterialWays = osm.roads.filter((r) =>
         r.t === 'motorway' || r.t === 'trunk' || r.t === 'primary' || r.t === 'motorway_link' || r.t === 'trunk_link'
       );
       const localWays = osm.roads.filter((r) =>
-        r.t === 'secondary' || r.t === 'tertiary'
+        r.t === 'secondary' || r.t === 'tertiary' || r.t === 'residential' || r.t === 'unclassified'
       );
 
-      const arterialMat = new THREE.MeshStandardMaterial({
-        color: 0x1e293b,
+      const curbMat = new THREE.MeshStandardMaterial({
+        color: 0x475569,
         roughness: 0.85,
-        metalness: 0.1
+        side: THREE.DoubleSide
+      });
+      const arterialMat = new THREE.MeshStandardMaterial({
+        color: 0x26354a,
+        roughness: 0.78,
+        metalness: 0.12,
+        side: THREE.DoubleSide
       });
       const localRoadMat = new THREE.MeshStandardMaterial({
-        color: 0x263244,
-        roughness: 0.9,
-        metalness: 0.06
+        color: 0x334155,
+        roughness: 0.85,
+        metalness: 0.08,
+        side: THREE.DoubleSide
       });
+
+      // Sidewalk/curb casing beneath arterial OSM roads
+      const arterialCurbGeo = this.buildMergedRibbonGeometry(
+        arterialWays,
+        (r) => (r.t === 'motorway' || r.t === 'trunk' ? 11.5 : 9.2),
+        (r) => (r.l ? 0.33 : 0.048),
+        true
+      );
+      if (arterialCurbGeo) {
+        this.proceduralGroup.add(new THREE.Mesh(arterialCurbGeo, curbMat));
+      }
 
       const arterialGeo = this.buildMergedRibbonGeometry(
         arterialWays,
-        (r) => (r.t === 'motorway' || r.t === 'trunk' ? 7.5 : 5.8),
-        (r) => (r.l ? 0.35 : 0.06)
+        (r) => (r.t === 'motorway' || r.t === 'trunk' ? 9.5 : 7.4),
+        (r) => (r.l ? 0.35 : 0.055),
+        true
       );
       if (arterialGeo) {
         const mesh = new THREE.Mesh(arterialGeo, arterialMat);
@@ -621,8 +731,9 @@ export class CityScene {
 
       const localGeo = this.buildMergedRibbonGeometry(
         localWays,
-        (r) => (r.t === 'secondary' ? 4.2 : 2.8),
-        () => 0.05
+        (r) => (r.t === 'secondary' ? 6.0 : r.t === 'tertiary' ? 4.5 : 3.2),
+        () => 0.05,
+        true
       );
       if (localGeo) {
         const mesh = new THREE.Mesh(localGeo, localRoadMat);
@@ -634,14 +745,16 @@ export class CityScene {
     // 4. Real OpenStreetMap Railways (KRL, MRT, LRT, KA Antarkota)
     if (osm.railways && osm.railways.length) {
       const railMat = new THREE.MeshStandardMaterial({
-        color: 0x475569,
+        color: 0x64748b,
         roughness: 0.6,
-        metalness: 0.4
+        metalness: 0.4,
+        side: THREE.DoubleSide
       });
       const railGeo = this.buildMergedRibbonGeometry(
         osm.railways,
-        () => 2.4,
-        (r) => (r.b ? 0.42 : 0.08)
+        () => 2.8,
+        (r) => (r.b ? 0.42 : 0.08),
+        true
       );
       if (railGeo) {
         this.proceduralGroup.add(new THREE.Mesh(railGeo, railMat));
@@ -716,15 +829,15 @@ export class CityScene {
     const foliageMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.75 });
     const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
 
-    // Trees along straight Thamrin spine
-    for (let z = -200; z <= 75; z += 24) {
-      if (Math.abs(z) < 28) continue;
+    // Trees along straight Thamrin spine (outside Bundaran HI roundabout)
+    for (let z = -188; z <= 82; z += 24) {
+      if (Math.abs(z) < 42) continue;
       this.createTree(-24, z, foliageMat, trunkMat);
       this.createTree(24, z, foliageMat, trunkMat);
     }
 
     // Trees along diagonal 23° SSW Sudirman spine
-    for (let z = 115; z <= 460; z += 26) {
+    for (let z = 115; z <= 445; z += 26) {
       if (Math.abs(z - 310) < 42) continue; // Semanggi
       const xCenter = -(z - 90) * 0.42;
       this.createTree(xCenter - 24, z, foliageMat, trunkMat);
@@ -754,22 +867,59 @@ export class CityScene {
     this.proceduralGroup.add(group);
   }
 
+  createVehicleMesh(isBus, color) {
+    const vehicle = new THREE.Group();
+    const bodyGeo = isBus
+      ? new THREE.BoxGeometry(2.6, 2.6, 9.2)
+      : new THREE.BoxGeometry(2.0, 1.4, 4.2);
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color,
+      metalness: 0.6,
+      roughness: 0.3
+    });
+
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.position.y = isBus ? 1.4 : 0.8;
+    vehicle.add(body);
+
+    const hl = new THREE.Mesh(
+      new THREE.BoxGeometry(1.6, 0.25, 0.1),
+      new THREE.MeshBasicMaterial({ color: 0xffedd5 })
+    );
+    hl.position.set(0, 0.8, isBus ? 4.65 : 2.15);
+    vehicle.add(hl);
+
+    const tl = new THREE.Mesh(
+      new THREE.BoxGeometry(1.6, 0.25, 0.1),
+      new THREE.MeshBasicMaterial({ color: 0xef4444 })
+    );
+    tl.position.set(0, 0.8, -(isBus ? 4.65 : 2.15));
+    vehicle.add(tl);
+
+    return vehicle;
+  }
+
   /**
-   * Multi-Corridor Animated Traffic following the real road angles:
-   * - Straight Thamrin Corridor (North-South)
-   * - Diagonal 23° SSW Sudirman Corridor (Dukuh Atas -> Semanggi -> Senayan)
+   * Multi-Corridor Animated Traffic following the real road angles and circling Bundaran HI:
+   * - North Thamrin (Patung Kuda to North Bundaran HI)
+   * - Circular Bundaran HI Roundabout (vehicles orbiting the fountain pool)
+   * - South Thamrin (South Bundaran HI to Dukuh Atas)
+   * - Diagonal 23° SSW Sudirman Corridor (Dukuh Atas -> Semanggi -> Bundaran Senayan)
    * - Diagonal NW-SE Gatot Subroto Toll Road
    */
   buildTraffic() {
     const colors = [0x0284c7, 0xf8fafc, 0x0f172a, 0x94a3b8, 0xef4444, 0xf59e0b];
 
     const routes = [
-      // Route 0: Straight Thamrin (Patung Kuda to Dukuh Atas)
-      { x1: -8, z1: -210, x2: -8, z2: 88, count: 14 },
-      { x1: 8, z1: 88, x2: 8, z2: -210, count: 14 },
-      // Route 1: Diagonal 23° SSW Sudirman (Dukuh Atas to Bundaran Senayan)
-      { x1: -8, z1: 92, x2: -200, z2: 475, count: 16 },
-      { x1: -182, z1: 475, x2: 8, z2: 92, count: 16 },
+      // Route 0A: North Thamrin (Patung Kuda Z=-188 to North Bundaran HI Z=-38)
+      { x1: -8, z1: -188, x2: -8, z2: -38, count: 10 },
+      { x1: 8, z1: -38, x2: 8, z2: -188, count: 10 },
+      // Route 0B: South Thamrin (South Bundaran HI Z=+38 to Dukuh Atas Z=+88)
+      { x1: -8, z1: 38, x2: -8, z2: 88, count: 5 },
+      { x1: 8, z1: 88, x2: 8, z2: 38, count: 5 },
+      // Route 1: Diagonal 23° SSW Sudirman (Dukuh Atas to Bundaran Senayan rim)
+      { x1: -8, z1: 92, x2: -184, z2: 448, count: 16 },
+      { x1: -168, z1: 448, x2: 8, z2: 92, count: 16 },
       // Route 2: Gatot Subroto NW-SE Toll Corridor
       { x1: -360, z1: 202, x2: 275, z2: 488, count: 12 },
       { x1: 275, z1: 498, x2: -360, z2: 212, count: 12 }
@@ -783,34 +933,10 @@ export class CityScene {
 
       for (let j = 0; j < route.count; j++) {
         const isBus = idx % 6 === 0;
-        const vehicle = new THREE.Group();
-
-        const bodyGeo = isBus
-          ? new THREE.BoxGeometry(2.6, 2.6, 9.2)
-          : new THREE.BoxGeometry(2.0, 1.4, 4.2);
-        const bodyMat = new THREE.MeshStandardMaterial({
-          color: isBus ? 0x0284c7 : colors[idx % colors.length],
-          metalness: 0.6,
-          roughness: 0.3
-        });
-
-        const body = new THREE.Mesh(bodyGeo, bodyMat);
-        body.position.y = isBus ? 1.4 : 0.8;
-        vehicle.add(body);
-
-        const hl = new THREE.Mesh(
-          new THREE.BoxGeometry(1.6, 0.25, 0.1),
-          new THREE.MeshBasicMaterial({ color: 0xffedd5 })
+        const vehicle = this.createVehicleMesh(
+          isBus,
+          isBus ? 0x0284c7 : colors[idx % colors.length]
         );
-        hl.position.set(0, 0.8, isBus ? 4.65 : 2.15);
-        vehicle.add(hl);
-
-        const tl = new THREE.Mesh(
-          new THREE.BoxGeometry(1.6, 0.25, 0.1),
-          new THREE.MeshBasicMaterial({ color: 0xef4444 })
-        );
-        tl.position.set(0, 0.8, -(isBus ? 4.65 : 2.15));
-        vehicle.add(tl);
 
         const t = j / route.count;
         vehicle.position.set(route.x1 + dx * t, 0, route.z1 + dz * t);
@@ -818,26 +944,62 @@ export class CityScene {
 
         this.vehicles.push({
           mesh: vehicle,
+          isCircular: false,
           x1: route.x1,
           z1: route.z1,
           dx,
           dz,
           progress: t,
-          speed: (isBus ? 0.055 : 0.085) + (idx % 4) * 0.012
+          speed: (isBus ? 0.065 : 0.095) + (idx % 4) * 0.014
         });
 
         this.proceduralGroup.add(vehicle);
         idx++;
       }
     });
+
+    // Circular Roundabout Traffic orbiting Bundaran HI fountain (radius 27.5 & 33.5)
+    [27.5, 33.5].forEach((radius, rIdx) => {
+      const count = 8;
+      for (let k = 0; k < count; k++) {
+        const isBus = k === 0 && rIdx === 0;
+        const vehicle = this.createVehicleMesh(
+          isBus,
+          isBus ? 0x0284c7 : colors[(k + rIdx) % colors.length]
+        );
+        const angle = (k / count) * Math.PI * 2;
+        vehicle.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
+        vehicle.rotation.y = -angle;
+
+        this.vehicles.push({
+          mesh: vehicle,
+          isCircular: true,
+          cx: 0,
+          cz: 0,
+          radius,
+          angle,
+          angularSpeed: 0.42 + (rIdx * 0.08)
+        });
+
+        this.proceduralGroup.add(vehicle);
+      }
+    });
   }
 
   updateTraffic(delta) {
     this.vehicles.forEach((v) => {
-      v.progress += v.speed * delta;
-      if (v.progress > 1.0) v.progress -= 1.0;
-      v.mesh.position.x = v.x1 + v.dx * v.progress;
-      v.mesh.position.z = v.z1 + v.dz * v.progress;
+      if (v.isCircular) {
+        v.angle += v.angularSpeed * delta;
+        v.mesh.position.x = v.cx + Math.cos(v.angle) * v.radius;
+        v.mesh.position.z = v.cz + Math.sin(v.angle) * v.radius;
+        // Tangent direction for clockwise movement in XZ
+        v.mesh.rotation.y = Math.atan2(-Math.sin(v.angle), Math.cos(v.angle));
+      } else {
+        v.progress += v.speed * delta;
+        if (v.progress > 1.0) v.progress -= 1.0;
+        v.mesh.position.x = v.x1 + v.dx * v.progress;
+        v.mesh.position.z = v.z1 + v.dz * v.progress;
+      }
     });
   }
 
