@@ -446,21 +446,21 @@ export class LandmarkModels {
     const group = new THREE.Group();
 
     const basinWall = new THREE.Mesh(
-      new THREE.CylinderGeometry(23, 23.5, 1.4, 48),
+      new THREE.CylinderGeometry(13.5, 14.0, 1.4, 48),
       new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.5 })
     );
     basinWall.position.y = 0.7;
     group.add(basinWall);
 
     const water = new THREE.Mesh(
-      new THREE.CylinderGeometry(22.2, 22.2, 1.2, 48),
+      new THREE.CylinderGeometry(12.8, 12.8, 1.2, 48),
       new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.1, metalness: 0.85 })
     );
     water.position.y = 0.8;
     group.add(water);
 
-    for (let r = 6; r <= 18; r += 6) {
-      const ringGeo = new THREE.TorusGeometry(r, 0.16, 8, 36);
+    for (let r = 4; r <= 10.5; r += 3.2) {
+      const ringGeo = new THREE.TorusGeometry(r, 0.14, 8, 36);
       ringGeo.rotateX(Math.PI / 2);
       const ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
       ring.position.y = 1.45;
@@ -468,31 +468,21 @@ export class LandmarkModels {
     }
 
     const pillar = new THREE.Mesh(
-      new THREE.BoxGeometry(2.2, 20, 2.2),
+      new THREE.BoxGeometry(2.0, 19, 2.0),
       new THREE.MeshStandardMaterial({ color: 0x94a3b8 })
     );
-    pillar.position.y = 10;
+    pillar.position.y = 9.5;
     pillar.castShadow = true;
     group.add(pillar);
 
     const bronzeMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.25, metalness: 0.85 });
-    const maleBody = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 5, 8), bronzeMat);
-    maleBody.position.set(-0.8, 23.5, 0);
+    const maleBody = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.55, 4.8, 8), bronzeMat);
+    maleBody.position.set(-0.75, 22.2, 0);
     group.add(maleBody);
 
-    const femaleBody = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.55, 4.7, 8), bronzeMat);
-    femaleBody.position.set(0.8, 23.35, 0);
+    const femaleBody = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.5, 4.5, 8), bronzeMat);
+    femaleBody.position.set(0.75, 22.05, 0);
     group.add(femaleBody);
-
-    const roundRoadGeo = new THREE.RingGeometry(24, 38, 48);
-    roundRoadGeo.rotateX(-Math.PI / 2);
-    const roundRoad = new THREE.Mesh(
-      roundRoadGeo,
-      new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 })
-    );
-    roundRoad.position.y = 0.05;
-    roundRoad.receiveShadow = true;
-    group.add(roundRoad);
 
     return group;
   }

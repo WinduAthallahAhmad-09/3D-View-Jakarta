@@ -204,78 +204,79 @@ export class CityScene {
 
     // =========================================================================
     // 1. BUNDARAN HI (0, 0) & POROS LURUS JL. M.H. THAMRIN
-    //    Jalan berhenti di tepi luar bundaran (radius 36) dan MELINGKARI air mancur!
+    //    Kolam Air Mancur radius 13.5 -> Jalan Bundaran radius 14.0 s/d 23.0 -> Trotoar luar s/d 26.0
+    //    Seluruh gedung keliling (Plaza Indonesia, Kempinski, Mandarin Oriental, Wisma Nusantara) berada di radius >= 28!
     // =========================================================================
-    this.addRoundaboutRing(0, 0, 23.6, 38.5, roundaboutAsphaltMat, swMat);
-    this.addRoundaboutRing(0, -215, 15.2, 26.5, roundaboutAsphaltMat, swMat);
-    this.addRoundaboutRing(-190, 475, 15.5, 27.5, roundaboutAsphaltMat, swMat);
+    this.addRoundaboutRing(0, 0, 14.0, 23.0, roundaboutAsphaltMat, swMat);
+    this.addRoundaboutRing(0, -215, 14.5, 22.5, roundaboutAsphaltMat, swMat);
+    this.addRoundaboutRing(-190, 475, 14.5, 23.5, roundaboutAsphaltMat, swMat);
 
-    // Segmen Utara Jl. M.H. Thamrin: dari selatan Bundaran Patung Kuda (Z=-190) ke utara Bundaran HI (Z=-36)
-    this.addLinearStrip(0, -190, 0, -36, 36, 0.06, primaryRoadMat);
-    this.addLinearStrip(-21, -190, -21, -36, 5.0, 0.14, swMat);
-    this.addLinearStrip(21, -190, 21, -36, 5.0, 0.14, swMat);
+    // Segmen Utara Jl. M.H. Thamrin: dari selatan Bundaran Patung Kuda (Z=-192) ke utara Bundaran HI (Z=-22)
+    this.addLinearStrip(0, -192, 0, -22, 26, 0.06, primaryRoadMat);
+    this.addLinearStrip(-15.5, -192, -15.5, -22, 4.0, 0.14, swMat);
+    this.addLinearStrip(15.5, -192, 15.5, -22, 4.0, 0.14, swMat);
 
-    // Segmen Selatan Jl. M.H. Thamrin: dari selatan Bundaran HI (Z=+36) ke Jembatan Dukuh Atas (Z=+90)
-    this.addLinearStrip(0, 36, 0, 90, 36, 0.06, primaryRoadMat);
-    this.addLinearStrip(-21, 36, -21, 90, 5.0, 0.14, swMat);
-    this.addLinearStrip(21, 36, 21, 90, 5.0, 0.14, swMat);
+    // Segmen Selatan Jl. M.H. Thamrin: dari selatan Bundaran HI (Z=+22) ke Jembatan Dukuh Atas (Z=+90)
+    this.addLinearStrip(0, 22, 0, 90, 26, 0.06, primaryRoadMat);
+    this.addLinearStrip(-15.5, 22, -15.5, 90, 4.0, 0.14, swMat);
+    this.addLinearStrip(15.5, 22, 15.5, 90, 4.0, 0.14, swMat);
 
     // =========================================================================
     // 2. POROS DIAGONAL 23° SSW JL. JENDERAL SUDIRMAN
-    //    Dari Jembatan Dukuh Atas (0, 90) -> Semanggi (-125, 310) -> berhenti di tepi Bundaran Senayan (-178, 452)
+    //    Dari Jembatan Dukuh Atas (0, 90) -> Semanggi (-125, 310) -> berhenti di tepi Bundaran Senayan (-180, 454)
     // =========================================================================
-    this.addLinearStrip(0, 90, -178, 452, 36, 0.06, primaryRoadMat);
-    this.addLinearStrip(-20, 97, -198, 458, 5.0, 0.14, swMat);
-    this.addLinearStrip(20, 83, -158, 446, 5.0, 0.14, swMat);
+    this.addLinearStrip(0, 90, -180, 454, 26, 0.06, primaryRoadMat);
+    this.addLinearStrip(-15.5, 96, -195, 459, 4.0, 0.14, swMat);
+    this.addLinearStrip(15.5, 84, -165, 449, 4.0, 0.14, swMat);
 
     // =========================================================================
     // 3. LINGKAR TRAPESIUM MEDAN MERDEKA (MONAS) & JL. MAJAPAHIT (HARMONI)
     //    Mengelilingi Taman Monas (TIDAK menembus tengah Monas!)
     // =========================================================================
     // Jl. Medan Merdeka Barat (Sisi Barat Monas X=-95, lalu menyambung ke Bundaran Patung Kuda)
-    this.addLinearStrip(-95, -425, -95, -215, 24, 0.05, boulevardMat);
-    this.addLinearStrip(-95, -215, -24, -215, 24, 0.05, boulevardMat);
+    this.addLinearStrip(-95, -425, -95, -215, 22, 0.05, boulevardMat);
+    this.addLinearStrip(-95, -215, -22, -215, 22, 0.05, boulevardMat);
     // Jl. Majapahit dari Sudut Barat Laut Monas menuju Simpang Harmoni (-145, -525)
-    this.addLinearStrip(-95, -425, -145, -525, 24, 0.05, boulevardMat);
+    this.addLinearStrip(-95, -425, -145, -525, 22, 0.05, boulevardMat);
     // Jl. Medan Merdeka Utara (Depan Istana Merdeka)
-    this.addLinearStrip(-95, -425, 85, -425, 22, 0.05, boulevardMat);
-    // Jl. Medan Merdeka Selatan (Dari tepi timur Bundaran Patung Kuda X=+24 ke X=+130)
-    this.addLinearStrip(24, -215, 130, -215, 24, 0.05, boulevardMat);
+    this.addLinearStrip(-95, -425, 85, -425, 20, 0.05, boulevardMat);
+    // Jl. Medan Merdeka Selatan (Dari tepi timur Bundaran Patung Kuda X=+22 ke X=+130)
+    this.addLinearStrip(22, -215, 130, -215, 22, 0.05, boulevardMat);
     // Jl. Medan Merdeka Timur (Miring 167° SSE dari X=+85 di Utara ke X=+130 di Selatan)
-    this.addLinearStrip(85, -425, 130, -215, 22, 0.05, boulevardMat);
+    this.addLinearStrip(85, -425, 130, -215, 20, 0.05, boulevardMat);
 
     // =========================================================================
     // 4. JARINGAN JALAN JAKARTA PUSAT (KEBON SIRIH, WAHID HASYIM, SABANG, KEBON KACANG)
     // =========================================================================
     // Jl. Kebon Sirih (Barat-Timur dari Tanah Abang -> Thamrin -> Tugu Tani X=+155, Z=-165)
-    this.addLinearStrip(-185, -185, 0, -165, 18, 0.045, boulevardMat);
-    this.addLinearStrip(0, -165, 155, -165, 20, 0.045, boulevardMat);
+    this.addLinearStrip(-185, -185, 0, -165, 16, 0.045, boulevardMat);
+    this.addLinearStrip(0, -165, 155, -165, 18, 0.045, boulevardMat);
     // Jl. Kwitang Raya (Dari Tugu Tani ke Timur menuju Senen)
-    this.addLinearStrip(155, -165, 340, -165, 20, 0.045, boulevardMat);
+    this.addLinearStrip(155, -165, 340, -165, 18, 0.045, boulevardMat);
 
     // Jl. K.H. Wahid Hasyim (Barat-Timur lurus memotong Sarinah Z=-105, Sabang, hingga Gondangdia)
-    this.addLinearStrip(-185, -105, 195, -105, 18, 0.045, boulevardMat);
+    this.addLinearStrip(-185, -105, 195, -105, 16, 0.045, boulevardMat);
 
-    // Jl. Kebon Kacang Raya (Dari tepi barat Bundaran HI X=-37 menuju Grand Indonesia & Tanah Abang)
-    this.addLinearStrip(-37, 0, -165, 0, 16, 0.045, boulevardMat);
+    // Jl. Kebon Kacang Raya (Dari tepi barat Bundaran HI X=-22 menuju Grand Indonesia & Tanah Abang)
+    this.addLinearStrip(-22, 0, -165, 0, 14, 0.045, boulevardMat);
 
     // Jl. H. Agus Salim / Jl. Sabang (Paralel Utara-Selatan di sebelah Timur Thamrin, X=+48)
-    this.addLinearStrip(48, -215, 48, -35, 13, 0.045, localStreetMat);
+    this.addLinearStrip(48, -215, 48, -30, 12, 0.045, localStreetMat);
     // Jl. Jaksa (Paralel di X=+82 antara Kebon Sirih & Wahid Hasyim)
     this.addLinearStrip(82, -165, 82, -105, 10, 0.045, localStreetMat);
 
     // Jalan sekitar Istiqlal, Katedral & Lapangan Banteng
-    this.addLinearStrip(85, -425, 295, -455, 16, 0.045, localStreetMat);
-    this.addLinearStrip(195, -455, 245, -340, 15, 0.045, localStreetMat);
+    this.addLinearStrip(85, -425, 295, -455, 15, 0.045, localStreetMat);
+    this.addLinearStrip(195, -455, 245, -340, 14, 0.045, localStreetMat);
 
     // =========================================================================
     // 5. BOULEVARD DIAGONAL GARDEN CITY MENTENG & SEGITIGA EMAS TIMUR (RASUNA SAID)
     // =========================================================================
-    // Jl. Imam Bonjol: Mulai dari tepi luar tenggara Bundaran HI (28, 22) -> (75, 42) -> Taman Suropati (135, 52)
-    this.addLinearStrip(28, 22, 75, 42, 18, 0.05, boulevardMat);
-    this.addLinearStrip(75, 42, 135, 52, 18, 0.05, boulevardMat);
-    // Jl. Sutan Syahrir: Mulai dari tepi timur Bundaran HI (35, -10) menuju Menteng
-    this.addLinearStrip(35, -10, 95, -42, 15, 0.045, localStreetMat);
+    // Jl. Imam Bonjol: Mulai dari tepi luar tenggara Bundaran HI (18, 14) -> (75, 42) -> Taman Suropati (135, 52)
+    this.addLinearStrip(18, 14, 75, 42, 16, 0.05, boulevardMat);
+    this.addLinearStrip(75, 42, 135, 52, 16, 0.05, boulevardMat);
+    // Jl. Sutan Syahrir: Mulai dari tepi timur Bundaran HI (22, -6) menuju Menteng
+    this.addLinearStrip(22, -6, 95, -42, 13, 0.045, localStreetMat);
     // Jl. Pangeran Diponegoro: Lanjut dari Taman Suropati (135, 52) ke Timur menuju Cikini / Salemba (340, 82)
     this.addLinearStrip(135, 52, 340, 82, 20, 0.05, boulevardMat);
 
@@ -831,17 +832,17 @@ export class CityScene {
 
     // Trees along straight Thamrin spine (outside Bundaran HI roundabout)
     for (let z = -188; z <= 82; z += 24) {
-      if (Math.abs(z) < 42) continue;
-      this.createTree(-24, z, foliageMat, trunkMat);
-      this.createTree(24, z, foliageMat, trunkMat);
+      if (Math.abs(z) < 29) continue;
+      this.createTree(-16.5, z, foliageMat, trunkMat);
+      this.createTree(16.5, z, foliageMat, trunkMat);
     }
 
     // Trees along diagonal 23° SSW Sudirman spine
     for (let z = 115; z <= 445; z += 26) {
       if (Math.abs(z - 310) < 42) continue; // Semanggi
       const xCenter = -(z - 90) * 0.42;
-      this.createTree(xCenter - 24, z, foliageMat, trunkMat);
-      this.createTree(xCenter + 24, z, foliageMat, trunkMat);
+      this.createTree(xCenter - 17, z, foliageMat, trunkMat);
+      this.createTree(xCenter + 17, z, foliageMat, trunkMat);
     }
 
     // Trees around Monas Park & Taman Rusa (SE Quadrant of Monas)
@@ -911,15 +912,15 @@ export class CityScene {
     const colors = [0x0284c7, 0xf8fafc, 0x0f172a, 0x94a3b8, 0xef4444, 0xf59e0b];
 
     const routes = [
-      // Route 0A: North Thamrin (Patung Kuda Z=-188 to North Bundaran HI Z=-38)
-      { x1: -8, z1: -188, x2: -8, z2: -38, count: 10 },
-      { x1: 8, z1: -38, x2: 8, z2: -188, count: 10 },
-      // Route 0B: South Thamrin (South Bundaran HI Z=+38 to Dukuh Atas Z=+88)
-      { x1: -8, z1: 38, x2: -8, z2: 88, count: 5 },
-      { x1: 8, z1: 88, x2: 8, z2: 38, count: 5 },
+      // Route 0A: North Thamrin (Patung Kuda Z=-188 to North Bundaran HI Z=-25)
+      { x1: -6.5, z1: -188, x2: -6.5, z2: -25, count: 10 },
+      { x1: 6.5, z1: -25, x2: 6.5, z2: -188, count: 10 },
+      // Route 0B: South Thamrin (South Bundaran HI Z=+25 to Dukuh Atas Z=+88)
+      { x1: -6.5, z1: 25, x2: -6.5, z2: 88, count: 5 },
+      { x1: 6.5, z1: 88, x2: 6.5, z2: 25, count: 5 },
       // Route 1: Diagonal 23° SSW Sudirman (Dukuh Atas to Bundaran Senayan rim)
-      { x1: -8, z1: 92, x2: -184, z2: 448, count: 16 },
-      { x1: -168, z1: 448, x2: 8, z2: 92, count: 16 },
+      { x1: -6.5, z1: 92, x2: -184, z2: 448, count: 16 },
+      { x1: -172, z1: 448, x2: 6.5, z2: 92, count: 16 },
       // Route 2: Gatot Subroto NW-SE Toll Corridor
       { x1: -360, z1: 202, x2: 275, z2: 488, count: 12 },
       { x1: 275, z1: 498, x2: -360, z2: 212, count: 12 }
@@ -958,9 +959,9 @@ export class CityScene {
       }
     });
 
-    // Circular Roundabout Traffic orbiting Bundaran HI fountain (radius 27.5 & 33.5)
-    [27.5, 33.5].forEach((radius, rIdx) => {
-      const count = 8;
+    // Circular Roundabout Traffic orbiting Bundaran HI fountain (radius 16.5 & 20.2)
+    [16.5, 20.2].forEach((radius, rIdx) => {
+      const count = 7;
       for (let k = 0; k < count; k++) {
         const isBus = k === 0 && rIdx === 0;
         const vehicle = this.createVehicleMesh(
@@ -978,7 +979,7 @@ export class CityScene {
           cz: 0,
           radius,
           angle,
-          angularSpeed: 0.42 + (rIdx * 0.08)
+          angularSpeed: 0.45 + (rIdx * 0.08)
         });
 
         this.proceduralGroup.add(vehicle);
