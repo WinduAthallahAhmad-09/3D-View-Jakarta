@@ -26,30 +26,34 @@ export class TextureGenerator {
     const eCtx = emissiveCanvas.getContext('2d');
 
     // Base building color palette
-    let baseColor = '#102238';
-    let mullionColor = '#1e334a';
+    let baseColor = '#0f172a';
+    let mullionColor = '#1e293b';
     let windowColor = '#1e3a5f';
     let warmLight = '#ffd97d';
     let coolLight = '#e0f2fe';
 
     if (style === 'wisma-teal') {
       baseColor = '#0b2e36';
-      mullionColor = '#e2e8f0';
+      mullionColor = '#115e59';
       windowColor = '#0f4c5c';
+      coolLight = '#99f6e4';
     } else if (style === 'bronze-glass') {
       baseColor = '#2b2118';
-      mullionColor = '#423325';
+      mullionColor = '#451a03';
       windowColor = '#3d2e1e';
-      warmLight = '#ffc078';
+      warmLight = '#ffedd5';
     } else if (style === 'dark-minimal') {
-      baseColor = '#111827';
-      mullionColor = '#1f2937';
-      windowColor = '#182234';
+      baseColor = '#090d16';
+      mullionColor = '#1e293b';
+      windowColor = '#141d2e';
+      coolLight = '#f8fafc';
     }
 
+    // 1. Diffuse Canvas: Clean, uniform architectural curtain-wall glass
     ctx.fillStyle = baseColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // 2. Emissive Canvas: Pure black base (only glowing windows will light up)
     eCtx.fillStyle = '#000000';
     eCtx.fillRect(0, 0, emissiveCanvas.width, emissiveCanvas.height);
 
@@ -58,34 +62,31 @@ export class TextureGenerator {
 
     for (let f = 0; f < floors; f++) {
       const y = f * winH;
-      // Floor slab line
+      // Floor spandrel band (horizontal beam between floors)
       ctx.fillStyle = mullionColor;
-      ctx.fillRect(0, y, canvas.width, 2);
+      ctx.fillRect(0, y, canvas.width, Math.max(2, Math.round(winH * 0.18)));
 
       for (let w = 0; w < windowsAcross; w++) {
         const x = w * winW;
-        // Window frame
+        // Clean glass pane
         ctx.fillStyle = windowColor;
-        ctx.fillRect(x + 2, y + 2, winW - 4, winH - 4);
+        ctx.fillRect(x + 1.5, y + winH * 0.18 + 0.5, winW - 3, winH * 0.82 - 1);
 
-        // Randomly lit windows
+        // Thin subtle vertical mullion line
+        ctx.fillStyle = mullionColor;
+        ctx.fillRect(x, y, 1.5, winH);
+
+        // Glowing interior windows on emissive canvas (active only when emissiveIntensity > 0)
         const isLit = Math.random() < litWindowRatio;
         if (isLit) {
-          const isWarm = Math.random() > 0.35;
+          const isWarm = Math.random() > 0.4;
           const lightCol = isWarm ? warmLight : coolLight;
-          
-          eCtx.fillStyle = lightCol;
-          // Soft interior variation
-          const brightness = 0.5 + Math.random() * 0.5;
-          eCtx.globalAlpha = brightness;
-          eCtx.fillRect(x + 3, y + 3, winW - 6, winH - 6);
-          eCtx.globalAlpha = 1.0;
+          const brightness = 0.6 + Math.random() * 0.4;
 
-          // Day facade tint
-          ctx.fillStyle = lightCol;
-          ctx.globalAlpha = 0.4;
-          ctx.fillRect(x + 3, y + 3, winW - 6, winH - 6);
-          ctx.globalAlpha = 1.0;
+          eCtx.fillStyle = lightCol;
+          eCtx.globalAlpha = brightness;
+          eCtx.fillRect(x + 2, y + winH * 0.18 + 1, winW - 4, winH * 0.82 - 2);
+          eCtx.globalAlpha = 1.0;
         }
       }
     }

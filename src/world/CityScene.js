@@ -36,21 +36,23 @@ export class CityScene {
    * Expansive Jakarta ground plane with subtle urban coordinate grid
    */
   buildGroundAndGrid() {
-    const groundGeo = new THREE.PlaneGeometry(2600, 2600);
+    const groundGeo = new THREE.PlaneGeometry(3600, 3600);
     groundGeo.rotateX(-Math.PI / 2);
-    const groundMat = new THREE.MeshStandardMaterial({
-      color: 0x0b111e,
-      roughness: 0.92,
-      metalness: 0.08
+    this.groundMat = new THREE.MeshStandardMaterial({
+      color: 0xe8e6df,
+      roughness: 0.95,
+      metalness: 0.02
     });
-    const ground = new THREE.Mesh(groundGeo, groundMat);
+    const ground = new THREE.Mesh(groundGeo, this.groundMat);
     ground.receiveShadow = true;
     ground.position.y = -0.15;
     this.proceduralGroup.add(ground);
 
-    const gridHelper = new THREE.GridHelper(1800, 90, 0x1e293b, 0x111827);
-    gridHelper.position.y = -0.08;
-    this.proceduralGroup.add(gridHelper);
+    this.gridHelper = new THREE.GridHelper(2400, 120, 0xd2cfc7, 0xdcd8d0);
+    this.gridHelper.material.transparent = true;
+    this.gridHelper.material.opacity = 0.52;
+    this.gridHelper.position.y = -0.08;
+    this.proceduralGroup.add(this.gridHelper);
   }
 
   /**
@@ -381,29 +383,46 @@ export class CityScene {
         map: diffuseTexture,
         emissiveMap: emissiveTexture,
         emissive: style === 'bronze-glass' ? 0xd97706 : 0x0284c7,
-        emissiveIntensity: 0.22,
-        roughness: 0.25,
-        metalness: 0.75
+        emissiveIntensity: 0,
+        roughness: 0.22,
+        metalness: 0.82
       });
       this.nightMaterials.push(mat);
       return mat;
     });
 
-    const lowRiseMat = new THREE.MeshStandardMaterial({
-      color: 0xe2e8f0,
-      roughness: 0.65,
-      metalness: 0.12
-    });
-    const midRiseMat = new THREE.MeshStandardMaterial({
-      color: 0xcbd5e1,
-      roughness: 0.45,
-      metalness: 0.32
-    });
+    const buildingMaterials = {
+      highRiseRoofMat: new THREE.MeshStandardMaterial({
+        color: 0x1e293b,
+        roughness: 0.88,
+        metalness: 0.12
+      }),
+      midRiseRoofMat: new THREE.MeshStandardMaterial({
+        color: 0x475569,
+        roughness: 0.85,
+        metalness: 0.1
+      }),
+      midRiseWallMat: new THREE.MeshStandardMaterial({
+        color: 0x94a3b8,
+        roughness: 0.48,
+        metalness: 0.28
+      }),
+      lowRiseRoofMat: new THREE.MeshStandardMaterial({
+        color: 0x9a3412,
+        roughness: 0.78,
+        metalness: 0.05
+      }),
+      lowRiseWallMat: new THREE.MeshStandardMaterial({
+        color: 0xf1f5f9,
+        roughness: 0.75,
+        metalness: 0.08
+      })
+    };
 
     fetch('./src/data/jakarta_osm.json')
       .then((res) => res.json())
       .then((osm) => {
-        this.renderOSMLayers(osm, sharedMaterials, midRiseMat, lowRiseMat);
+        this.renderOSMLayers(osm, sharedMaterials, buildingMaterials);
       })
       .catch((err) => {
         console.warn('Failed to load jakarta_osm.json:', err);
@@ -475,7 +494,32 @@ export class CityScene {
     return geo;
   }
 
-  renderOSMLayers(osm, sharedMaterials, midRiseMat, lowRiseMat) {
+  applyBuildingUVs(geo) {
+    const pos = geo.attributes.position;
+    const normal = geo.attributes.normal;
+    const uv = geo.attributes.uv;
+    if (!pos || !normal || !uv) return;
+
+    for (let i = 0; i < pos.count; i++) {
+      const ny = normal.getY(i);
+      // Side walls (vertical faces where |ny| < 0.5)
+      if (Math.abs(ny) < 0.5) {
+        const y = pos.getY(i);
+        const x = pos.getX(i);
+        const z = pos.getZ(i);
+        const nx = normal.getX(i);
+        const nz = normal.getZ(i);
+
+        // Continuous horizontal perimeter coordinate and vertical floor scaling
+        const u = (x * -nz + z * nx) * 0.16;
+        const v = y * 0.24;
+        uv.setXY(i, u, v);
+      }
+    }
+    uv.needsUpdate = true;
+  }
+
+  renderOSMLayers(osm, sharedMaterials, bldMats) {
     // 1. Real OpenStreetMap Parks & Green Spaces (165 parks)
     const parkMat = new THREE.MeshStandardMaterial({
       color: 0x14532d,
@@ -653,16 +697,17 @@ export class CityScene {
         });
         geo.rotateX(-Math.PI / 2);
 
-        let mat;
+        let mats;
         if (h >= 24) {
-          mat = sharedMaterials[idx % sharedMaterials.length];
+          mats = [bldMats.highRiseRoofMat, sharedMaterials[idx % sharedMaterials.length]];
         } else if (h >= 12) {
-          mat = midRiseMat;
+          mats = [bldMats.midRiseRoofMat, bldMats.midRiseWallMat];
         } else {
-          mat = lowRiseMat;
+          mats = [bldMats.lowRiseRoofMat, bldMats.lowRiseWallMat];
         }
 
-        const mesh = new THREE.Mesh(geo, mat);
+        this.applyBuildingUVs(geo);
+        const mesh = new THREE.Mesh(geo, mats);
         mesh.castShadow = h >= 18;
         mesh.receiveShadow = true;
 
@@ -911,18 +956,52 @@ export class CityScene {
     });
   }
 
-  setNightMode(isNight, nightFactor = 1.0) {
+  setTimePreset(preset) {
+    const isNight = preset === 'night';
+    const isGolden = preset === 'golden';
+
+    // Dynamic ground & grid colors
+    if (this.groundMat) {
+      if (preset === 'day') {
+        this.groundMat.color.setHex(0xe8e6df);
+        this.groundMat.roughness = 0.95;
+      } else if (isGolden) {
+        this.groundMat.color.setHex(0x522f1c);
+        this.groundMat.roughness = 0.9;
+      } else {
+        this.groundMat.color.setHex(0x060b14);
+        this.groundMat.roughness = 0.92;
+      }
+    }
+
+    if (this.gridHelper) {
+      if (preset === 'day') {
+        this.gridHelper.material.color.setHex(0xd2cfc7);
+        this.gridHelper.material.opacity = 0.52;
+      } else if (isGolden) {
+        this.gridHelper.material.color.setHex(0x78350f);
+        this.gridHelper.material.opacity = 0.35;
+      } else {
+        this.gridHelper.material.color.setHex(0x1e293b);
+        this.gridHelper.material.opacity = 0.6;
+      }
+    }
+
     this.streetLights.forEach((light) => {
-      light.intensity = isNight ? 1.8 * nightFactor : 0;
+      light.intensity = isNight ? 1.8 : isGolden ? 0.6 : 0;
     });
 
     const monasSpots = this.scene.getObjectsByProperty("name", "monas-spotlight");
     monasSpots.forEach((s) => {
-      s.intensity = isNight ? 3.8 * nightFactor : 0;
+      s.intensity = isNight ? 3.8 : 0;
     });
 
     this.nightMaterials.forEach((m) => {
-      m.emissiveIntensity = isNight ? 0.88 * nightFactor : 0.16;
+      m.emissiveIntensity = isNight ? 0.88 : isGolden ? 0.35 : 0;
     });
+  }
+
+  setNightMode(isNight, nightFactor = 1.0) {
+    this.setTimePreset(isNight ? 'night' : 'day');
   }
 }

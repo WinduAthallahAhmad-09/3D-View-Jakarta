@@ -61,6 +61,7 @@ class JakartaApp {
 
     // 2. City Environment & Landmarks
     this.city = new CityScene(this.scene);
+    this.city.setTimePreset('day');
 
     // 3. Camera Controller with smooth flight
     this.cameraController = new CameraController(this.camera, this.renderer.domElement);
@@ -78,7 +79,7 @@ class JakartaApp {
       },
       onTimeChange: (preset) => {
         this.lighting.setTimeOfDay(preset);
-        this.city.setNightMode(preset === 'night');
+        this.city.setTimePreset(preset);
       }
     });
 
