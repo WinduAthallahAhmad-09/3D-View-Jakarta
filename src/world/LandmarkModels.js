@@ -324,15 +324,15 @@ export class LandmarkModels {
     const wallMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.5 });
     const greenRoofMat = new THREE.MeshStandardMaterial({ color: 0x047857, roughness: 0.4, metalness: 0.3 });
 
-    // Main Station Building
-    const station = new THREE.Mesh(new THREE.BoxGeometry(22, 14, 95), wallMat);
-    station.position.set(0, 7, 0);
+    // Main Station Building (proportional to elevated viaduct length)
+    const station = new THREE.Mesh(new THREE.BoxGeometry(16, 11, 56), wallMat);
+    station.position.set(0, 5.5, 0);
     station.castShadow = true;
     group.add(station);
 
     // Emerald Green Pitched Roof
-    const roof = new THREE.Mesh(new THREE.BoxGeometry(26, 4, 100), greenRoofMat);
-    roof.position.set(0, 16, 0);
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(19, 3.5, 60), greenRoofMat);
+    roof.position.set(0, 12.5, 0);
     group.add(roof);
 
     return group;
@@ -421,15 +421,15 @@ export class LandmarkModels {
 
     // Revitalized Stepped Podium
     const podium = new THREE.Mesh(
-      new THREE.BoxGeometry(36, 14, 42),
+      new THREE.BoxGeometry(28, 12, 30),
       new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 })
     );
-    podium.position.set(0, 7, 0);
+    podium.position.set(0, 6, 0);
     podium.castShadow = true;
     group.add(podium);
 
     // Main Historic Sarinah Tower
-    const tower = new THREE.Mesh(new THREE.BoxGeometry(20, 58, 32), facadeMat);
+    const tower = new THREE.Mesh(new THREE.BoxGeometry(20, 58, 26), facadeMat);
     tower.position.set(2, 29, 0);
     tower.castShadow = true;
     group.add(tower);

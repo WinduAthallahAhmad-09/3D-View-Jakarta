@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "description": "Interactive 3D View of Jakarta City with realistic landmarks and buildings",
+  "type": "module",
   "scripts": {
-    "dev": "python -m http.server 8000"
+    "dev": "node server.js"
   },
   "dependencies": {
     "three": "^0.160.0",

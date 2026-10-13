@@ -9,7 +9,7 @@ export class GLTFManager {
     this.customModels = [];
 
     this.setupDragAndDrop();
-    this.checkAndLoadDefaultModel();
+    // Default .glb models can be placed by user or loaded via drag-and-drop / modal
   }
 
   /**
