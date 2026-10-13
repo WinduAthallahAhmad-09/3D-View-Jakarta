@@ -2,13 +2,20 @@ import * as THREE from 'three';
 import { JAKARTA_LANDMARKS } from '../config/landmarks.js';
 
 export class UIManager {
-  constructor({ onSelectPreset, onTimeChange }) {
+  constructor({ onSelectPreset, onTimeChange, onResetNorth }) {
     this.onSelectPreset = onSelectPreset;
     this.onTimeChange = onTimeChange;
+    this.onResetNorth = onResetNorth;
 
     this.homescreen = document.getElementById('homescreen-overlay');
     this.uiOverlay = document.getElementById('ui-overlay');
     this.labelsContainer = document.getElementById('map-labels-container');
+
+    this.compassBtn = document.getElementById('compass-btn');
+    this.compassNeedle = document.getElementById('compass-needle');
+    this.tourBar = document.getElementById('tour-bar-scroll');
+    this.tourScrollLeft = document.getElementById('tour-scroll-left');
+    this.tourScrollRight = document.getElementById('tour-scroll-right');
 
     this.drawer = document.getElementById('detail-drawer');
     this.drawerTitle = document.getElementById('drawer-title');
@@ -27,6 +34,8 @@ export class UIManager {
     this.labelsVisible = true;
     this.labelElements = [];
     this.tempVec = new THREE.Vector3();
+    this.forwardVec = new THREE.Vector3();
+    this.toLabelVec = new THREE.Vector3();
 
     this.init();
   }
@@ -38,6 +47,8 @@ export class UIManager {
     this.bindHomescreenEvents();
     this.initMapLabels();
     this.bindTourButtons();
+    this.bindTourScrollEvents();
+    this.bindCompassEvents();
     this.bindTimeButtons();
     this.bindDrawerEvents();
     this.bindImportEvents();
@@ -298,15 +309,27 @@ export class UIManager {
 
   /**
    * Project 3D world coordinates of each Jakarta place to 2D screen coordinates
+   * with occlusion checking and smooth distance fading / LOD
    */
   updateMapLabels(camera) {
     if (this.isHomeActive || !this.labelsVisible || !this.labelElements.length) return;
 
     const widthHalf = window.innerWidth / 2;
     const heightHalf = window.innerHeight / 2;
+    camera.getWorldDirection(this.forwardVec);
 
     for (let i = 0; i < this.labelElements.length; i++) {
       const item = this.labelElements[i];
+
+      // 1. Occlusion check: Is label in front of camera?
+      this.toLabelVec.subVectors(item.worldPos, camera.position);
+      if (this.forwardVec.dot(this.toLabelVec) <= 0) {
+        item.element.style.opacity = '0';
+        item.element.style.pointerEvents = 'none';
+        continue;
+      }
+
+      // 2. Project 3D coordinate to screen NDC
       this.tempVec.copy(item.worldPos);
       this.tempVec.project(camera);
 
@@ -319,16 +342,51 @@ export class UIManager {
       const x = this.tempVec.x * widthHalf + widthHalf;
       const y = -(this.tempVec.y * heightHalf) + heightHalf;
 
+      // 3. Smooth distance fading & LOD
       const dist = camera.position.distanceTo(item.worldPos);
-      if (dist > 1150) {
+      if (dist > 950 || dist < 14) {
         item.element.style.opacity = '0';
         item.element.style.pointerEvents = 'none';
-      } else {
-        item.element.style.opacity = dist > 750 ? '0.68' : '1';
+      } else if (dist > 650) {
+        const alpha = ((950 - dist) / 300) * 0.75;
+        item.element.style.opacity = alpha.toFixed(2);
         item.element.style.pointerEvents = 'auto';
-        item.element.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -100%)`;
+        item.element.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -100%) scale(0.92)`;
+      } else {
+        item.element.style.opacity = '1';
+        item.element.style.pointerEvents = 'auto';
+        item.element.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -100%) scale(1)`;
       }
     }
+  }
+
+  bindTourScrollEvents() {
+    if (this.tourScrollLeft && this.tourBar) {
+      this.tourScrollLeft.addEventListener('click', () => {
+        this.tourBar.scrollBy({ left: -220, behavior: 'smooth' });
+      });
+    }
+    if (this.tourScrollRight && this.tourBar) {
+      this.tourScrollRight.addEventListener('click', () => {
+        this.tourBar.scrollBy({ left: 220, behavior: 'smooth' });
+      });
+    }
+  }
+
+  bindCompassEvents() {
+    if (this.compassBtn) {
+      this.compassBtn.addEventListener('click', () => {
+        if (this.onResetNorth) {
+          this.onResetNorth();
+        }
+      });
+    }
+  }
+
+  updateCompass(azimuth) {
+    if (!this.compassNeedle || this.isHomeActive) return;
+    const deg = azimuth * (180 / Math.PI);
+    this.compassNeedle.style.transform = `rotate(${deg.toFixed(1)}deg)`;
   }
 
   bindGoogleTilesEvents() {
@@ -407,6 +465,18 @@ export class UIManager {
   }
 
   selectTourPreset(id) {
+    // 1. Highlight active tour button in dock
+    const tourButtons = document.querySelectorAll('[data-tour-id]');
+    tourButtons.forEach((btn) => {
+      const match = btn.getAttribute('data-tour-id') === id;
+      btn.classList.toggle('active-tour-btn', match);
+    });
+
+    const activeBtn = document.querySelector(`[data-tour-id="${id}"]`);
+    if (activeBtn && this.tourBar) {
+      activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+
     if (id === 'aerial') {
       this.hideLandmarkDetails();
       this.onSelectPreset({
@@ -477,6 +547,17 @@ export class UIManager {
 
   showLandmarkDetails(data) {
     this.currentLandmark = data;
+
+    // Highlight corresponding tour dock button
+    if (data?.id) {
+      document.querySelectorAll('[data-tour-id]').forEach((btn) => {
+        btn.classList.toggle('active-tour-btn', btn.getAttribute('data-tour-id') === data.id);
+      });
+      const activeBtn = document.querySelector(`[data-tour-id="${data.id}"]`);
+      if (activeBtn && this.tourBar) {
+        activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+    }
 
     if (this.drawerTitle) this.drawerTitle.textContent = data.name;
     if (this.drawerTagline) this.drawerTagline.textContent = data.tagline || '';

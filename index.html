@@ -205,6 +205,29 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #B8B7B2;
     }
+
+    /* Hide scrollbars cleanly for horizontal tour bar */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Active tour dock button styling */
+    .active-tour-btn {
+      background: #111111 !important;
+      color: #FFFFFF !important;
+      border-color: #111111 !important;
+    }
+    .active-tour-btn span {
+      color: #FFFFFF !important;
+    }
+    .active-tour-btn svg {
+      color: #FFFFFF !important;
+      stroke: #FFFFFF !important;
+    }
   </style>
 </head>
 <body class="selection:bg-[#FBF3DB] selection:text-[#956400]">
@@ -647,6 +670,16 @@
           <span class="hidden md:inline">Label Peta</span>
         </button>
 
+        <!-- Interactive North Compass Button -->
+        <button id="compass-btn" class="min-btn-secondary px-2.5 py-2 text-xs font-medium flex items-center gap-1.5" title="Arah Kompas (Klik untuk Reset Kamera Menghadap Utara)">
+          <svg id="compass-needle" class="w-4 h-4 transition-transform duration-75" viewBox="0 0 24 24" fill="none">
+            <polygon points="12,2 16,12 12,9.5 8,12" fill="#E11D48"/>
+            <polygon points="12,22 16,12 12,9.5 8,12" fill="#94A3B8"/>
+            <circle cx="12" cy="12" r="1.5" fill="#111111"/>
+          </svg>
+          <span class="font-mono text-[10px] font-semibold text-[#111111] hidden md:inline">U</span>
+        </button>
+
         <!-- Time of Day Segmented Controller -->
         <div class="min-panel p-1 rounded-[8px] flex items-center gap-1">
           <button data-time-preset="day" class="active-time px-2.5 py-1.5 rounded-[5px] text-xs font-medium text-[#2F3437] hover:text-[#111111] transition flex items-center gap-1.5" title="Mode Siang (Maket Terang)">
@@ -706,8 +739,15 @@
         <span>TIMUR: <strong class="text-[#111111] font-medium">MENTENG &amp; KUNINGAN</strong></span>
       </div>
 
-      <!-- Scrollable 23-Location Bar -->
-      <nav class="min-panel p-1.5 rounded-[10px] flex items-center gap-1.5 max-w-full overflow-x-auto">
+      <!-- Scrollable 23-Location Bar with Left/Right Arrows -->
+      <div class="relative max-w-full flex items-center gap-1.5">
+        <button id="tour-scroll-left" class="min-panel w-8 h-8 rounded-[8px] flex items-center justify-center text-[#2F3437] hover:text-[#111111] hover:bg-[#F7F6F3] transition shrink-0" title="Geser ke Kiri">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+
+        <nav id="tour-bar-scroll" class="min-panel p-1.5 rounded-[10px] flex items-center gap-1.5 max-w-[85vw] sm:max-w-[76vw] lg:max-w-4xl overflow-x-auto scroll-smooth no-scrollbar">
         
         <button data-tour-id="aerial" class="min-btn-primary px-3 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
           <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -794,14 +834,14 @@
           <span>Wisma 46</span>
         </button>
 
-        <button data-tour-id="sampoerna-strategic" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+        <button data-tour-id="jpo-phinisi" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
           <span class="font-mono text-[10px] text-[#787774]">16</span>
-          <span>Sampoerna</span>
+          <span>JPO Phinisi</span>
         </button>
 
-        <button data-tour-id="jpo-phinisi" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
+        <button data-tour-id="sampoerna-strategic" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
           <span class="font-mono text-[10px] text-[#787774]">17</span>
-          <span>JPO Phinisi</span>
+          <span>Sampoerna</span>
         </button>
 
         <button data-tour-id="simpang-semanggi" class="min-btn-secondary px-2.5 py-1.5 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap shrink-0">
@@ -835,7 +875,14 @@
         </button>
 
       </nav>
+
+      <button id="tour-scroll-right" class="min-panel w-8 h-8 rounded-[8px] flex items-center justify-center text-[#2F3437] hover:text-[#111111] hover:bg-[#F7F6F3] transition shrink-0" title="Geser ke Kanan">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </button>
     </div>
+  </div>
 
   </div>
 

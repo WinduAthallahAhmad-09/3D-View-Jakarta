@@ -80,6 +80,11 @@ class JakartaApp {
       onTimeChange: (preset) => {
         this.lighting.setTimeOfDay(preset);
         this.city.setTimePreset(preset);
+      },
+      onResetNorth: () => {
+        if (this.cameraController) {
+          this.cameraController.resetToNorth();
+        }
       }
     });
 
@@ -155,6 +160,11 @@ class JakartaApp {
     // Update Google 3D Tiles stream
     if (this.googleTiles) {
       this.googleTiles.update();
+    }
+
+    // Update interactive North compass needle
+    if (this.ui && this.cameraController) {
+      this.ui.updateCompass(this.cameraController.getAzimuthAngle());
     }
 
     // Project 3D map place labels to 2D viewport

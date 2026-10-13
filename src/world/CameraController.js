@@ -91,6 +91,27 @@ export class CameraController {
     this.flightEndTarget.set(...lookAtPos);
   }
 
+  getAzimuthAngle() {
+    return this.controls.getAzimuthalAngle();
+  }
+
+  /**
+   * Smoothly rotate camera to face True North (looking toward negative Z)
+   */
+  resetToNorth(duration = 1.0) {
+    const offset = new THREE.Vector3().copy(this.camera.position).sub(this.controls.target);
+    const radius = Math.max(offset.length(), 15);
+    const polar = Math.acos(THREE.MathUtils.clamp(offset.y / radius, -1, 1));
+    const safePolar = Math.max(polar, 0.25);
+    const sinP = Math.sin(safePolar);
+
+    const newX = this.controls.target.x;
+    const newY = this.controls.target.y + radius * Math.cos(safePolar);
+    const newZ = this.controls.target.z + radius * sinP;
+
+    this.flyTo([newX, newY, newZ], [this.controls.target.x, this.controls.target.y, this.controls.target.z], duration);
+  }
+
   easeInOutCubic(x) {
     return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
   }
