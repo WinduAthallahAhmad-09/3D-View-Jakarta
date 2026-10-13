@@ -39,18 +39,18 @@ export class CityScene {
     const groundGeo = new THREE.PlaneGeometry(3600, 3600);
     groundGeo.rotateX(-Math.PI / 2);
     this.groundMat = new THREE.MeshStandardMaterial({
-      color: 0xe8e6df,
-      roughness: 0.95,
-      metalness: 0.02
+      color: 0x283344,
+      roughness: 0.92,
+      metalness: 0.08
     });
     const ground = new THREE.Mesh(groundGeo, this.groundMat);
     ground.receiveShadow = true;
     ground.position.y = -0.15;
     this.proceduralGroup.add(ground);
 
-    this.gridHelper = new THREE.GridHelper(2400, 120, 0xd2cfc7, 0xdcd8d0);
+    this.gridHelper = new THREE.GridHelper(2400, 120, 0x3e4c63, 0x334155);
     this.gridHelper.material.transparent = true;
-    this.gridHelper.material.opacity = 0.52;
+    this.gridHelper.material.opacity = 0.4;
     this.gridHelper.position.y = -0.08;
     this.proceduralGroup.add(this.gridHelper);
   }
@@ -963,8 +963,8 @@ export class CityScene {
     // Dynamic ground & grid colors
     if (this.groundMat) {
       if (preset === 'day') {
-        this.groundMat.color.setHex(0xe8e6df);
-        this.groundMat.roughness = 0.95;
+        this.groundMat.color.setHex(0x283344);
+        this.groundMat.roughness = 0.92;
       } else if (isGolden) {
         this.groundMat.color.setHex(0x522f1c);
         this.groundMat.roughness = 0.9;
@@ -976,8 +976,8 @@ export class CityScene {
 
     if (this.gridHelper) {
       if (preset === 'day') {
-        this.gridHelper.material.color.setHex(0xd2cfc7);
-        this.gridHelper.material.opacity = 0.52;
+        this.gridHelper.material.color.setHex(0x3e4c63);
+        this.gridHelper.material.opacity = 0.4;
       } else if (isGolden) {
         this.gridHelper.material.color.setHex(0x78350f);
         this.gridHelper.material.opacity = 0.35;
