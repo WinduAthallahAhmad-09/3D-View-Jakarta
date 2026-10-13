@@ -125,8 +125,8 @@ export const JAKARTA_LANDMARKS = [
     coordinates: { lat: -6.175397, lng: 106.827161 },
     position: [58, 0, -277],
     labelHeight: 142,
-    cameraPosition: [145, 78, -185],
-    cameraTarget: [58, 48, -277],
+    cameraPosition: [168, 95, -165],
+    cameraTarget: [58, 65, -277],
     description: "Monumen peringatan setinggi 132 meter di jantung Lapangan Medan Merdeka seluas 80 hektare yang membentang di sebelah timur poros Jl. M.H. Thamrin – Jl. Medan Merdeka Barat. Memiliki empat jalur diagonal X-Paths, Taman Rusa di tenggara, dan Kolam Air Mancur Menari di sisi barat.",
     facts: [
       "Lidah api di puncak obelisk dilapisi emas murni seberat 50 kilogram.",
@@ -172,8 +172,8 @@ export const JAKARTA_LANDMARKS = [
     coordinates: { lat: -6.179814, lng: 106.822849 },
     position: [-3, 0, -215],
     labelHeight: 32,
-    cameraPosition: [52, 35, -168],
-    cameraTarget: [-15, 14, -215],
+    cameraPosition: [-3, 30, -145],
+    cameraTarget: [-3, 10, -215],
     description: "Titik nol koridor Jalan M.H. Thamrin tepat di sudut barat daya Lapangan Medan Merdeka (Monas). Di bundaran ini terdapat air mancur Patung Kuda Arjuna Wijaya yang menjadi titik temu lurus Jl. M.H. Thamrin dengan Jl. Medan Merdeka Barat.",
     facts: [
       "Delapan patung kuda melambangkan delapan filosofi kepemimpinan Hasta Brata.",
@@ -193,8 +193,8 @@ export const JAKARTA_LANDMARKS = [
     coordinates: { lat: -6.1824, lng: 106.8339 },
     position: [153, 0, -178],
     labelHeight: 26,
-    cameraPosition: [120, 35, -135],
-    cameraTarget: [153, 10, -178],
+    cameraPosition: [120, 24, -145],
+    cameraTarget: [153, 9, -178],
     description: "Simpul persimpangan bersejarah di ujung timur Jalan Kebon Sirih tempat bertemunya Jalan Menteng Raya, Jalan Prapatan, dan Jalan Kwitang (Senen). Patung perunggu seorang ibu yang melepas putranya berjuang ini menjadi gerbang utara menuju kawasan Menteng dan Cikini.",
     facts: [
       "Nama resminya adalah Patung Pahlawan, hadiah persahabatan pemerintah Uni Soviet pada tahun 1963.",
@@ -276,8 +276,8 @@ export const JAKARTA_LANDMARKS = [
     coordinates: { lat: -6.198991, lng: 106.821213 },
     position: [-28, 0, 58],
     labelHeight: 205,
-    cameraPosition: [55, 128, 108],
-    cameraTarget: [-28, 95, 58],
+    cameraPosition: [75, 160, 145],
+    cameraTarget: [-28, 115, 58],
     description: "Kompleks superblok Thamrin Nine di sisi barat Jl. M.H. Thamrin antara Bundaran HI dan Dukuh Atas. Autograph Tower setinggi 382,9 meter adalah gedung tertinggi di Indonesia, berdampingan dengan Luminary Tower (304m) dan mal Agora.",
     facts: [
       "Gedung tertinggi pertama di Indonesia yang melampaui kategori 'Supertall' (>300 meter).",
@@ -369,8 +369,8 @@ export const JAKARTA_LANDMARKS = [
     position: [-60, 0, 272],
     rotationY: -0.72, // Orthogonal across the real OSM curve of Jl. Jend. Sudirman at Karet
     labelHeight: 24,
-    cameraPosition: [-15, 28, 308],
-    cameraTarget: [-60, 10, 272],
+    cameraPosition: [-44, 24, 235],
+    cameraTarget: [-60, 11, 272],
     description: "Jembatan Penyeberangan Orang (JPO) dan Sepeda (JPS) berbentuk haluan kapal Phinisi berwarna oranye terakota yang melintang tegak lurus di atas koridor Jalan Jenderal Sudirman di sebelah utara Flyover Karet.",
     facts: [
       "Dilengkapi anjungan pandang terbuka untuk menikmati panorama garis langit Sudirman."
@@ -390,8 +390,8 @@ export const JAKARTA_LANDMARKS = [
     position: [-68, 0, 311],
     rotationY: -0.68,
     labelHeight: 112,
-    cameraPosition: [-135, 68, 345],
-    cameraTarget: [-68, 52, 311],
+    cameraPosition: [-145, 82, 355],
+    cameraTarget: [-68, 62, 311],
     description: "Kompleks menara kembar bergaya Neo-Klasik dengan atap kubah berlapis kaca emas yang berdiri di sisi timur Jalan Jenderal Sudirman tepat di selatan simpang jalan layang Jl. Prof. Dr. Satrio (Casablanca – Karet).",
     facts: [
       "Berada di sebelah selatan JPO Phinisi dan Flyover Karet yang menghubungkan Tanah Abang dengan Kuningan/Casablanca."
@@ -453,8 +453,8 @@ export const JAKARTA_LANDMARKS = [
     coordinates: { lat: -6.223948, lng: 106.83265 },
     position: [135, 0, 411],
     labelHeight: 165,
-    cameraPosition: [55, 95, 470],
-    cameraTarget: [135, 65, 411],
+    cameraPosition: [45, 115, 490],
+    cameraTarget: [135, 75, 411],
     description: "Kawasan pusat bisnis dan kedutaan besar di sisi timur Segitiga Emas Jakarta. Koridor Jl. H.R. Rasuna Said merupakan kelanjutan lurus ke selatan dari Jl. HOS Cokroaminoto (Menteng) dan terhubung ke Semanggi melalui Jl. Gatot Subroto dan Jl. Prof. Dr. Satrio.",
     facts: [
       "Membentuk sudut timur 'Segitiga Emas Jakarta' bersama koridor Sudirman-Thamrin dan Gatot Subroto.",
@@ -475,8 +475,8 @@ export const JAKARTA_LANDMARKS = [
     position: [-198, 0, 433],
     rotationY: -0.68,
     labelHeight: 175,
-    cameraPosition: [-280, 92, 480],
-    cameraTarget: [-198, 68, 433],
+    cameraPosition: [-290, 108, 500],
+    cameraTarget: [-198, 75, 433],
     description: "Distrik bisnis super-modern seluas 45 hektare di kuadran tenggara Simpang Semanggi (sisi timur Jl. Jenderal Sudirman). Merupakan pusat keuangan pasar modal Indonesia tempat berdirinya Gedung Bursa Efek Indonesia (IDX), Treasury Tower, District 8, dan Pacific Place.",
     facts: [
       "Treasury Tower di kompleks District 8 mencapai tinggi 279,5 meter."

@@ -60,37 +60,37 @@ export class LightingManager {
       this.scene.fog.color.setHex(0xdce5ef);
       this.scene.fog.density = 0.00042;
     } else if (timePreset === 'golden') {
-      // Golden Hour / Senja Jakarta
-      this.sunLight.color.setHex(0xf97316);
-      this.sunLight.intensity = 2.0;
+      // Golden Hour / Senja Jakarta (Warm sunset glow, soft atmospheric twilight)
+      this.sunLight.color.setHex(0xf59e0b);
+      this.sunLight.intensity = 1.9;
       this.sunLight.position.set(280, 95, 180);
 
       this.ambientLight.color.setHex(0xfde047);
-      this.ambientLight.intensity = 0.35;
+      this.ambientLight.intensity = 0.45;
 
-      this.hemiLight.color.setHex(0xfb923c);
-      this.hemiLight.groundColor.setHex(0x431407);
-      this.hemiLight.intensity = 0.45;
+      this.hemiLight.color.setHex(0xf472b6);
+      this.hemiLight.groundColor.setHex(0x271924);
+      this.hemiLight.intensity = 0.52;
 
-      this.scene.background = new THREE.Color(0xc2410c);
-      this.scene.fog.color.setHex(0x9a3412);
-      this.scene.fog.density = 0.0008;
+      this.scene.background = new THREE.Color(0x663c46);
+      this.scene.fog.color.setHex(0x663c46);
+      this.scene.fog.density = 0.00052;
     } else if (timePreset === 'night') {
-      // Malam Hari (City Lights)
-      this.sunLight.color.setHex(0x38bdf8);
-      this.sunLight.intensity = 0.18;
-      this.sunLight.position.set(-100, 200, -120);
+      // Malam Hari (Luminous city lights under clear indigo moonlight)
+      this.sunLight.color.setHex(0x93c5fd);
+      this.sunLight.intensity = 0.45;
+      this.sunLight.position.set(-120, 240, -100);
 
-      this.ambientLight.color.setHex(0x0f172a);
-      this.ambientLight.intensity = 0.18;
+      this.ambientLight.color.setHex(0x1e293b);
+      this.ambientLight.intensity = 0.42;
 
-      this.hemiLight.color.setHex(0x1e293b);
-      this.hemiLight.groundColor.setHex(0x020617);
-      this.hemiLight.intensity = 0.2;
+      this.hemiLight.color.setHex(0x334155);
+      this.hemiLight.groundColor.setHex(0x090d16);
+      this.hemiLight.intensity = 0.40;
 
-      this.scene.background = new THREE.Color(0x030712);
-      this.scene.fog.color.setHex(0x030712);
-      this.scene.fog.density = 0.0028;
+      this.scene.background = new THREE.Color(0x0b1120);
+      this.scene.fog.color.setHex(0x0b1120);
+      this.scene.fog.density = 0.00065;
     }
   }
 }

@@ -775,16 +775,53 @@ export class CityScene {
       this.createTree(xCenter + 16, z, foliageMat, trunkMat);
     }
 
-    // Trees along North & South edges of Lapangan Medan Merdeka (Monas Park, X = +10 to +92)
-    for (let x = 12; x <= 92; x += 20) {
+    // Trees along Lapangan Medan Merdeka (Monas Park perimeter & walks)
+    for (let x = 12; x <= 92; x += 16) {
       this.createTree(x, -222, foliageMat, trunkMat);
       this.createTree(x, -330, foliageMat, trunkMat);
     }
+    for (let z = -320; z <= -230; z += 18) {
+      this.createTree(12, z, foliageMat, trunkMat);
+      this.createTree(92, z, foliageMat, trunkMat);
+    }
+
+    // Taman Suropati (Lush circular urban park in Menteng)
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2;
+      this.createTree(135 + Math.cos(angle) * 11, 55 + Math.sin(angle) * 11, foliageMat, trunkMat, 1.15);
+      this.createTree(135 + Math.cos(angle + 0.39) * 18, 55 + Math.sin(angle + 0.39) * 18, foliageMat, trunkMat, 1.25);
+    }
+
+    // Lapangan Banteng (Historic civic square east of Istiqlal)
+    for (let x = 150; x <= 184; x += 17) {
+      this.createTree(x, -365, foliageMat, trunkMat);
+      this.createTree(x, -330, foliageMat, trunkMat);
+    }
+    for (let z = -355; z <= -340; z += 15) {
+      this.createTree(150, z, foliageMat, trunkMat);
+      this.createTree(184, z, foliageMat, trunkMat);
+    }
+
+    // Gelora Bung Karno (GBK Senayan parkland & perimeter)
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * Math.PI * 2;
+      this.createTree(-285 + Math.cos(angle) * 44, 350 + Math.sin(angle) * 44, foliageMat, trunkMat, 1.25);
+      this.createTree(-285 + Math.cos(angle + 0.26) * 58, 350 + Math.sin(angle + 0.26) * 58, foliageMat, trunkMat, 1.15);
+    }
+
+    // Bundaran Senayan greenery
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2;
+      this.createTree(-195 + Math.cos(angle) * 22, 470 + Math.sin(angle) * 22, foliageMat, trunkMat);
+    }
   }
 
-  createTree(x, z, foliageMat, trunkMat) {
+  createTree(x, z, foliageMat, trunkMat, scale = 1.0) {
     const group = new THREE.Group();
     group.position.set(x, 0, z);
+    if (scale !== 1.0) {
+      group.scale.set(scale, scale, scale);
+    }
 
     const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.38, 4, 6), trunkMat);
     trunk.position.y = 2;
@@ -993,7 +1030,7 @@ export class CityScene {
 
     const monasSpots = this.scene.getObjectsByProperty("name", "monas-spotlight");
     monasSpots.forEach((s) => {
-      s.intensity = isNight ? 3.8 : 0;
+      s.intensity = isNight ? 4.5 : isGolden ? 1.2 : 0;
     });
 
     this.nightMaterials.forEach((m) => {

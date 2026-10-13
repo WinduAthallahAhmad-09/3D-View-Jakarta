@@ -304,11 +304,15 @@ export class LandmarkModels {
     flameLight.position.y = 135;
     group.add(flameLight);
 
-    // 4 Night Spotlights
+    // 4 Night Spotlights illuminating the obelisk
+    const spotTarget = new THREE.Object3D();
+    spotTarget.position.set(0, 70, 0);
+    group.add(spotTarget);
+
     [[-32, -32], [32, -32], [-32, 32], [32, 32]].forEach(([x, z]) => {
-      const spot = new THREE.SpotLight(0xffffff, 0, 190, Math.PI / 7, 0.4);
+      const spot = new THREE.SpotLight(0xfff5ea, 0, 220, Math.PI / 6, 0.45);
       spot.position.set(x, 2, z);
-      spot.target = shaft;
+      spot.target = spotTarget;
       spot.name = "monas-spotlight";
       group.add(spot);
     });
