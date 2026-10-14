@@ -97,6 +97,24 @@ export class CityScene {
     roxyBridge.position.set(-320.5, 0.35, -408.0);
     roxyBridge.rotation.y = 0.05;
     this.proceduralGroup.add(roxyBridge);
+
+    // 4. Jembatan Tanjung Duren Raya (Melintasi Kali Grogol di depan Podomoro City)
+    const tjDurenBridge = new THREE.Mesh(new THREE.BoxGeometry(22, 1.2, 16), bankMat);
+    tjDurenBridge.position.set(-452.0, 0.35, -266.0);
+    tjDurenBridge.rotation.y = -0.12;
+    this.proceduralGroup.add(tjDurenBridge);
+
+    // 5. Jembatan Kemanggisan Utama (Melintasi Kali Grogol di Kemanggisan)
+    const kemanggisanBridge = new THREE.Mesh(new THREE.BoxGeometry(20, 1.2, 15), bankMat);
+    kemanggisanBridge.position.set(-412.0, 0.35, -23.0);
+    kemanggisanBridge.rotation.y = -0.25;
+    this.proceduralGroup.add(kemanggisanBridge);
+
+    // 6. Jembatan Tol Tangerang (Melintasi aliran kali di Tomang Barat / Kebon Jeruk)
+    const tolTangerangBridge = new THREE.Mesh(new THREE.BoxGeometry(24, 1.2, 28), bankMat);
+    tolTangerangBridge.position.set(-482.0, 0.40, -212.0);
+    tolTangerangBridge.rotation.y = -0.28;
+    this.proceduralGroup.add(tolTangerangBridge);
   }
 
   /**
