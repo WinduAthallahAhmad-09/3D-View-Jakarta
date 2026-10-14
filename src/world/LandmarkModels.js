@@ -1153,5 +1153,273 @@ export class LandmarkModels {
 
     return group;
   }
+
+  /**
+   * 23. Superblok Podomoro City & Central Park Mall (Jakarta Barat)
+   * High-rise APL Tower, curved Neo Soho, Central Park Mall podium, Tribeca Park & glowing Eco Skywalk.
+   */
+  static createPodomoroCity() {
+    const group = new THREE.Group();
+    const podiumMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5 });
+    const aplGlassMat = new THREE.MeshStandardMaterial({
+      color: 0x0284c7,
+      metalness: 0.85,
+      roughness: 0.18
+    });
+    const sohoMat = new THREE.MeshStandardMaterial({
+      color: 0x475569,
+      metalness: 0.6,
+      roughness: 0.25
+    });
+    const parkMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.9 });
+    const skywalkMat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      emissive: 0x0284c7,
+      emissiveIntensity: 0.6,
+      roughness: 0.2
+    });
+
+    // 1. Central Park Mall Grand Podium
+    const mallPodium = new THREE.Mesh(new THREE.BoxGeometry(64, 15, 52), podiumMat);
+    mallPodium.position.set(0, 7.5, 0);
+    mallPodium.castShadow = true;
+    mallPodium.receiveShadow = true;
+    group.add(mallPodium);
+
+    // 2. APL Tower (Pencakar langit utama, tinggi ~188m / 92 unit)
+    const aplTower = new THREE.Mesh(new THREE.BoxGeometry(22, 92, 18), aplGlassMat);
+    aplTower.position.set(-16, 46, -12);
+    aplTower.castShadow = true;
+    group.add(aplTower);
+
+    // Mahkota miring APL Tower
+    const aplCrown = new THREE.Mesh(new THREE.BoxGeometry(20, 8, 16), aplGlassMat);
+    aplCrown.position.set(-16, 94, -12);
+    aplCrown.rotation.x = 0.2;
+    group.add(aplCrown);
+
+    // 3. Neo Soho Tower (Arsitektur lengkung modern)
+    const sohoTower = new THREE.Mesh(new THREE.BoxGeometry(20, 74, 20), sohoMat);
+    sohoTower.position.set(22, 37, 18);
+    sohoTower.rotation.y = 0.15;
+    sohoTower.castShadow = true;
+    group.add(sohoTower);
+
+    // 4. Tribeca Park (Taman terbuka hijau di tengah mall)
+    const tribeca = new THREE.Mesh(new THREE.CylinderGeometry(14, 15, 1.2, 16), parkMat);
+    tribeca.position.set(-4, 15.6, 12);
+    tribeca.receiveShadow = true;
+    group.add(tribeca);
+
+    // 5. Eco Skywalk (Jembatan lengkung ikonik melintasi jalan dari Central Park ke Neo Soho)
+    const skywalk = new THREE.Mesh(new THREE.BoxGeometry(28, 3.2, 4.5), skywalkMat);
+    skywalk.position.set(10, 18, 6);
+    skywalk.rotation.y = -0.55;
+    skywalk.castShadow = true;
+    group.add(skywalk);
+
+    // 6. Menara Residensial Mediterania Garden
+    [-18, 18].forEach((xOffset) => {
+      const resTower = new THREE.Mesh(
+        new THREE.BoxGeometry(16, 58, 16),
+        new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.6 })
+      );
+      resTower.position.set(xOffset, 29, -32);
+      resTower.castShadow = true;
+      group.add(resTower);
+    });
+
+    return group;
+  }
+
+  /**
+   * 24. Mall Taman Anggrek & Kondominium (Jakarta Barat)
+   * Megamall terbesar dengan Guinness World Record LED facade screen & 8 condomiunium towers.
+   */
+  static createMallTamanAnggrek() {
+    const group = new THREE.Group();
+    const podiumMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.5 });
+    const condoMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.45 });
+    const ledMat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      emissive: 0x0284c7,
+      emissiveIntensity: 0.85,
+      roughness: 0.2
+    });
+
+    // 1. Megamall Grand Podium
+    const mallPodium = new THREE.Mesh(new THREE.BoxGeometry(68, 16, 48), podiumMat);
+    mallPodium.position.set(0, 8, 0);
+    mallPodium.castShadow = true;
+    mallPodium.receiveShadow = true;
+    group.add(mallPodium);
+
+    // 2. Giant LED Facade Screen (Rekor Dunia Guinness menghadap Jl. S. Parman)
+    const ledScreen = new THREE.Mesh(new THREE.BoxGeometry(64, 11, 1.2), ledMat);
+    ledScreen.position.set(0, 9.5, 24.5);
+    group.add(ledScreen);
+
+    // 3. 8 Menara Kondominium Ikonik (2 baris x 4 menara kembar, tinggi ~150m / 72 unit)
+    const xOffsets = [-24, -8, 8, 24];
+    const zOffsets = [-12, 10];
+
+    xOffsets.forEach((x) => {
+      zOffsets.forEach((z) => {
+        const tower = new THREE.Mesh(new THREE.BoxGeometry(12, 70, 12), condoMat);
+        tower.position.set(x, 43, z);
+        tower.castShadow = true;
+        group.add(tower);
+
+        // Mahkota bertingkat kondominium
+        const crown = new THREE.Mesh(
+          new THREE.BoxGeometry(9, 5, 9),
+          new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.5 })
+        );
+        crown.position.set(x, 80, z);
+        group.add(crown);
+      });
+    });
+
+    return group;
+  }
+
+  /**
+   * 25. Kawasan Pendidikan UNTAR & Universitas Trisakti (Grogol)
+   * Kampus bersejarah, Menara Tarumanagara & Monumen Tragedi 12 Mei 1998.
+   */
+  static createKawasanGrogol() {
+    const group = new THREE.Group();
+    const brickMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.7 });
+    const creamMat = new THREE.MeshStandardMaterial({ color: 0xfef08a, roughness: 0.5 });
+    const trisaktiMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.45 });
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.75, roughness: 0.2 });
+
+    // 1. Menara Utama UNTAR I (Gedung M / Tarumanagara)
+    const untarTower = new THREE.Mesh(new THREE.BoxGeometry(22, 52, 18), creamMat);
+    untarTower.position.set(-12, 26, -10);
+    untarTower.castShadow = true;
+    group.add(untarTower);
+
+    // Aksen Fasad Merah Bata UNTAR
+    const untarFront = new THREE.Mesh(new THREE.BoxGeometry(14, 48, 2), brickMat);
+    untarFront.position.set(-12, 24, 0.1);
+    group.add(untarFront);
+
+    // 2. Kampus Universitas Trisakti (Gedung Rektorat & Fakultas)
+    const trisaktiHall = new THREE.Mesh(new THREE.BoxGeometry(32, 28, 20), trisaktiMat);
+    trisaktiHall.position.set(16, 14, 8);
+    trisaktiHall.castShadow = true;
+    group.add(trisaktiHall);
+
+    // Gedung Pascasarjana Kaca
+    const pascaTower = new THREE.Mesh(new THREE.BoxGeometry(16, 38, 14), glassMat);
+    pascaTower.position.set(16, 19, -14);
+    pascaTower.castShadow = true;
+    group.add(pascaTower);
+
+    // 3. Monumen Tragedi 12 Mei 1998 (Plaza lingkaran dan tugu peringatan reformasi)
+    const monumentPlaza = new THREE.Mesh(
+      new THREE.CylinderGeometry(7, 7, 0.8, 16),
+      new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.6 })
+    );
+    monumentPlaza.position.set(0, 0.4, 20);
+    group.add(monumentPlaza);
+
+    const monumentSpire = new THREE.Mesh(
+      new THREE.ConeGeometry(1.6, 9, 4),
+      new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.4 })
+    );
+    monumentSpire.position.set(0, 5, 20);
+    group.add(monumentSpire);
+
+    // 4. Jembatan Penyeberangan Penghubung Antar-Kampus
+    const campusBridge = new THREE.Mesh(
+      new THREE.BoxGeometry(24, 2.5, 3.8),
+      new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.5 })
+    );
+    campusBridge.position.set(2, 10, -2);
+    group.add(campusBridge);
+
+    return group;
+  }
+
+  /**
+   * 26. Pusat Medis Nasional: RS Jantung Harapan Kita & RS Kanker Dharmais (Slipi)
+   */
+  static createPusatMedisSlipi() {
+    const group = new THREE.Group();
+    const whiteMedMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35 });
+    const dharmaisMat = new THREE.MeshStandardMaterial({ color: 0x0f766e, metalness: 0.6, roughness: 0.25 });
+    const redCrossMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+
+    // 1. RS Jantung & Pembuluh Darah Harapan Kita (Bentuk Ventrikuler)
+    const hkMain = new THREE.Mesh(new THREE.BoxGeometry(34, 32, 24), whiteMedMat);
+    hkMain.position.set(-18, 16, 0);
+    hkMain.castShadow = true;
+    group.add(hkMain);
+
+    // Simbol Palang Merah Harapan Kita
+    const crossV = new THREE.Mesh(new THREE.BoxGeometry(2, 8, 0.4), redCrossMat);
+    crossV.position.set(-18, 26, 12.2);
+    group.add(crossV);
+    const crossH = new THREE.Mesh(new THREE.BoxGeometry(8, 2, 0.4), redCrossMat);
+    crossH.position.set(-18, 26, 12.2);
+    group.add(crossH);
+
+    // 2. RS Kanker Dharmais (Menara Modern Kaca Hijau Toska)
+    const dharmaisTower = new THREE.Mesh(new THREE.BoxGeometry(24, 46, 22), dharmaisMat);
+    dharmaisTower.position.set(18, 23, -4);
+    dharmaisTower.castShadow = true;
+    group.add(dharmaisTower);
+
+    // 3. Jembatan Skybridge Penghubung Medis
+    const medBridge = new THREE.Mesh(
+      new THREE.BoxGeometry(18, 2.6, 3.8),
+      new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.4 })
+    );
+    medBridge.position.set(0, 14, -2);
+    group.add(medBridge);
+
+    return group;
+  }
+
+  /**
+   * 27. Sentra Bisnis Slipi (Wisma Barito Pacific & Grand Slipi Tower)
+   */
+  static createSentraBisnisSlipi() {
+    const group = new THREE.Group();
+    const baritoGlass = new THREE.MeshStandardMaterial({
+      color: 0x1d4ed8,
+      metalness: 0.8,
+      roughness: 0.15
+    });
+    const grandSlipiMat = new THREE.MeshStandardMaterial({
+      color: 0x0ea5e9,
+      metalness: 0.75,
+      roughness: 0.2
+    });
+
+    // 1. Wisma Barito Pacific (Twin Towers kaca biru)
+    [-14, 14].forEach((x) => {
+      const barito = new THREE.Mesh(new THREE.BoxGeometry(16, 56, 16), baritoGlass);
+      barito.position.set(x, 28, -12);
+      barito.castShadow = true;
+      group.add(barito);
+
+      // Mahkota piramida modern
+      const crown = new THREE.Mesh(new THREE.ConeGeometry(9, 6, 4), baritoGlass);
+      crown.position.set(x, 59, -12);
+      crown.rotation.y = Math.PI / 4;
+      group.add(crown);
+    });
+
+    // 2. Grand Slipi Tower (Menara Silinder Spiral Modern)
+    const grandSlipi = new THREE.Mesh(new THREE.CylinderGeometry(11, 12, 68, 24), grandSlipiMat);
+    grandSlipi.position.set(0, 34, 16);
+    grandSlipi.castShadow = true;
+    group.add(grandSlipi);
+
+    return group;
+  }
 }
 

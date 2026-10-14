@@ -521,6 +521,119 @@ export const JAKARTA_LANDMARKS = [
     facts: [
       "Menandai ujung selatan poros Medan Merdeka – Thamrin – Sudirman."
     ]
+  },
+  // =====================================================
+  // ZONA 4: JAKARTA BARAT (GROGOL, TOMANG, TANJUNG DUREN & SLIPI)
+  // =====================================================
+  {
+    id: "podomoro-city-central-park",
+    name: "Superblok Podomoro City & Central Park",
+    shortName: "Podomoro City",
+    category: "Pusat Bisnis & Superblok",
+    tagline: "Ikon Megapolitan Jakarta Barat (APL Tower, Neo Soho, Tribeca Park & Eco Skywalk)",
+    height: "188 meter (APL Tower 46 lantai)",
+    year: "2009",
+    architect: "DP Architects & Agung Podomoro Land",
+    location: "Jl. Letjen S. Parman Kav. 28, Tanjung Duren Selatan, Grogol Petamburan, Jakarta Barat",
+    coordinates: { lat: -6.1775, lng: 106.7895 },
+    position: [-473, 0, -247],
+    labelHeight: 95,
+    cameraPosition: [-473, 110, -165],
+    cameraTarget: [-473, 40, -247],
+    description: "Superblok terpadu termegah di Jakarta Barat yang memadukan Mall Central Park, gedung perkantoran prestisius APL Tower (188m), pusat gaya hidup Neo Soho dengan arsitektur spiral khas, taman terbuka hijau Tribeca Park, dan jembatan lengkung ikonik Eco Skywalk yang melintasi jalan raya.",
+    facts: [
+      "Eco Skywalk merupakan jembatan penyeberangan melengkung ikonik berkaca penuh yang menyambungkan Central Park Mall dan Neo Soho.",
+      "APL Tower adalah salah satu gedung perkantoran tertinggi di koridor Jakarta Barat dengan tinggi mencapai 188 meter.",
+      "Tribeca Park merupakan salah satu ruang terbuka hijau ramah hewan peliharaan paling populer di Jakarta."
+    ]
+  },
+  {
+    id: "mall-taman-anggrek",
+    name: "Mall Taman Anggrek & Kondominium",
+    shortName: "Taman Anggrek",
+    category: "Pusat Perbelanjaan & Residensial",
+    tagline: "Pionir Megamall Terbesar Indonesia dengan Rekor LED Facade Dunia",
+    height: "150 meter (8 Tower Kondominium)",
+    year: "1996",
+    architect: "Altoon & Porter Architects (USA)",
+    location: "Jl. Letjen S. Parman Kav. 21, Tanjung Duren Selatan, Jakarta Barat",
+    coordinates: { lat: -6.1785, lng: 106.7925 },
+    position: [-435, 0, -233],
+    labelHeight: 85,
+    cameraPosition: [-435, 100, -155],
+    cameraTarget: [-435, 35, -233],
+    description: "Salah satu pusat perbelanjaan terbesar dan paling legendaris di Indonesia yang terkenal dengan layar fasad LED raksasa bersertifikat Guinness World Record, wahana ice skating rink berstandar internasional, serta 8 menara kondominium kembar bertingkat tinggi di atas podium mall.",
+    facts: [
+      "Layar LED fasad Mall Taman Anggrek memecahkan Rekor Guinness World Records sebagai layar LED terpanjang dan terbesar di dunia pada fasad bangunan.",
+      "Memiliki arena seluncur es indoor permanen pertama dan terbesar di Asia Tenggara (Sky Rink Jakarta).",
+      "Dilengkapi dengan 8 menara kondominium kembar berkapasitas ribuan unit hunian di atas mall."
+    ]
+  },
+  {
+    id: "kawasan-pendidikan-grogol",
+    name: "Kawasan Pendidikan UNTAR & Universitas Trisakti",
+    shortName: "UNTAR & Trisakti",
+    category: "Pendidikan & Sejarah Bangsa",
+    tagline: "Sentra Kampus Bersejarah & Monumen Tragedi 12 Mei 1998 di Grogol",
+    height: "65 meter (Menara Tarumanagara)",
+    year: "1959 / 1965",
+    architect: "Kawasan Kampus Terpadu Grogol",
+    location: "Jl. Letjen S. Parman No. 1, Grogol, Grogol Petamburan, Jakarta Barat",
+    coordinates: { lat: -6.1685, lng: 106.7895 },
+    position: [-472, 0, -375],
+    labelHeight: 48,
+    cameraPosition: [-472, 65, -300],
+    cameraTarget: [-472, 18, -375],
+    description: "Pusat pendidikan tinggi ternama di Jakarta Barat yang menaungi Universitas Tarumanagara (UNTAR I) dengan Menara Tarumanagara berdinding bata merah ikonik dan Universitas Trisakti (Kampus Reformasi) yang menjadi saksi kunci tonggak sejarah lahirnya Reformasi Indonesia 1998.",
+    facts: [
+      "Universitas Trisakti dijuluki sebagai Kampus Pahlawan Reformasi untuk mengenang 4 mahasiswa yang gugur pada Tragedi 12 Mei 1998.",
+      "Menara Gedung M UNTAR menjulang di samping koridor Jalan Tol Grogol - Tomang.",
+      "Kawasan ini terhubung langsung dengan Mal Ciputra (Citraland) dan Flyover Simpang Grogol."
+    ]
+  },
+  {
+    id: "rs-harapan-kita-dharmais",
+    name: "Pusat Jantung Harapan Kita & RS Kanker Dharmais",
+    shortName: "Harapan Kita & Dharmais",
+    category: "Kesehatan & Pusat Rujukan Nasional",
+    tagline: "Pusat Rujukan Kardiovaskular & Kanker Terbesar Tingkat Nasional di Slipi",
+    height: "75 meter (Menara Paviliun Sukaman)",
+    year: "1985 / 1993",
+    architect: "Kawasan Kesehatan Nasional Slipi",
+    location: "Jl. Letjen S. Parman Kav. 84-87, Slipi, Palmerah, Jakarta Barat",
+    coordinates: { lat: -6.1855, lng: 106.7972 },
+    position: [-364, 0, -134],
+    labelHeight: 46,
+    cameraPosition: [-364, 60, -65],
+    cameraTarget: [-364, 18, -134],
+    description: "Kompleks pusat rujukan medis tertinggi nasional yang menaungi RS Jantung dan Pembuluh Darah Harapan Kita (Pusat Jantung Nasional) serta RS Kanker Dharmais (Pusat Kanker Nasional), menjadi pusat teknologi kedokteran kardiovaskular dan onkologi paling modern di Indonesia.",
+    facts: [
+      "RS Jantung Harapan Kita didirikan atas prakarsa Yayasan Harapan Kita dan diresmikan oleh Presiden Soeharto pada November 1985.",
+      "Menjadi pusat transplantasi dan operasi bedah jantung tercanggih di Indonesia.",
+      "Terletak berdampingan di koridor Jalan Letjen S. Parman dekat dengan pintu Tol Slipi."
+    ]
+  },
+  {
+    id: "wisma-barito-pacific",
+    name: "Sentra Bisnis Slipi (Wisma Barito Pacific & Grand Slipi)",
+    shortName: "Sentra Bisnis Slipi",
+    category: "Kawasan Perkantoran & Finansial",
+    tagline: "Gerbang Koridor Finansial Jakarta Barat di Simpang Slipi",
+    height: "130 meter (Grand Slipi Tower 30 lantai)",
+    year: "1994 / 2012",
+    architect: "Kawasan Komersial Slipi",
+    location: "Jl. Letjen S. Parman Kav. 62-63, Slipi, Palmerah, Jakarta Barat",
+    coordinates: { lat: -6.1950, lng: 106.7995 },
+    position: [-332, 0, 0],
+    labelHeight: 72,
+    cameraPosition: [-332, 85, 75],
+    cameraTarget: [-332, 28, 0],
+    description: "Pusat perkantoran dan bisnis modern di persimpangan Slipi yang didominasi oleh menara kembar kaca biru Wisma Barito Pacific (kantor pusat konglomerasi petrokimia & energi), Grand Slipi Tower berarsitektur silinder spiral, dan Hotel Menara Peninsula.",
+    facts: [
+      "Menandai titik temu strategis antara Jakarta Barat (Kemanggisan/Palmerah) dengan Jakarta Pusat (Tanah Abang & Senayan).",
+      "Wisma Barito Pacific memiliki arsitektur mahkota piramida ganda dengan dinding tirai kaca biru reflektif.",
+      "Terhubung langsung dengan akses on-off ramp Tol Dalam Kota Slipi."
+    ]
   }
 ];
 

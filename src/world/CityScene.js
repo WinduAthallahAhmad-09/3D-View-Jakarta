@@ -370,7 +370,12 @@ export class CityScene {
       "mega-kuningan": () => LandmarkModels.createMegaKuningan(),
       "scbd-district": () => this.createSCBDCluster(),
       "gbk-senayan": () => LandmarkModels.createGBK(),
-      "bundaran-senayan": () => LandmarkModels.createBundaranSenayan()
+      "bundaran-senayan": () => LandmarkModels.createBundaranSenayan(),
+      "podomoro-city-central-park": () => LandmarkModels.createPodomoroCity(),
+      "mall-taman-anggrek": () => LandmarkModels.createMallTamanAnggrek(),
+      "kawasan-pendidikan-grogol": () => LandmarkModels.createKawasanGrogol(),
+      "rs-harapan-kita-dharmais": () => LandmarkModels.createPusatMedisSlipi(),
+      "wisma-barito-pacific": () => LandmarkModels.createSentraBisnisSlipi()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {
