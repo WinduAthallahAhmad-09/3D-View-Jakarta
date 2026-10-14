@@ -179,11 +179,58 @@ export class CityScene {
     satrioFlyover.castShadow = true;
     this.proceduralGroup.add(satrioFlyover);
 
-    // 3. Lampu Jalan PJU sepanjang koridor lurus Jl. M.H. Thamrin & Jl. Medan Merdeka Barat
+    // 3. Struktur Flyover Simpang Susun Tomang (Tol Dalam Kota & Tol Tangerang di atas Simpang Tomang)
+    const tomangFlyoverGroup = new THREE.Group();
+    const elevatedHighwayMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.6 });
+    const pierMat = new THREE.MeshStandardMaterial({ color: 0x64748b });
+
+    const tomangDeck = new THREE.Mesh(new THREE.BoxGeometry(110, 1.2, 11), elevatedHighwayMat);
+    tomangDeck.position.set(-418, 5.4, -224);
+    tomangDeck.rotation.y = -0.46;
+    tomangDeck.castShadow = true;
+    tomangFlyoverGroup.add(tomangDeck);
+
+    const tomangRamp = new THREE.Mesh(new THREE.BoxGeometry(65, 1.0, 7.5), elevatedHighwayMat);
+    tomangRamp.position.set(-440, 4.8, -222);
+    tomangRamp.rotation.y = -0.25;
+    tomangRamp.castShadow = true;
+    tomangFlyoverGroup.add(tomangRamp);
+
+    [-35, 0, 35].forEach((offset) => {
+      const pier = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.4, 5.4, 8), pierMat);
+      pier.position.set(-418 + offset * Math.sin(-0.46), 2.7, -224 + offset * Math.cos(-0.46));
+      tomangFlyoverGroup.add(pier);
+    });
+    this.proceduralGroup.add(tomangFlyoverGroup);
+
+    // 4. Struktur Flyover Simpang Grogol (Jembatan Layang Grogol)
+    const grogolFlyoverGroup = new THREE.Group();
+    const grogolDeck = new THREE.Mesh(new THREE.BoxGeometry(85, 1.2, 10), elevatedHighwayMat);
+    grogolDeck.position.set(-484, 5.0, -403);
+    grogolDeck.rotation.y = -0.28;
+    grogolDeck.castShadow = true;
+    grogolFlyoverGroup.add(grogolDeck);
+
+    [-25, 25].forEach((offset) => {
+      const pier = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.3, 5.0, 8), pierMat);
+      pier.position.set(-484 + offset * Math.sin(-0.28), 2.5, -403 + offset * Math.cos(-0.28));
+      grogolFlyoverGroup.add(pier);
+    });
+    this.proceduralGroup.add(grogolFlyoverGroup);
+
+    // 5. Lampu Jalan PJU sepanjang koridor lurus Jl. M.H. Thamrin & Jl. Medan Merdeka Barat
     for (let z = -325; z <= 85; z += 38) {
       if (Math.abs(z) < 32 || Math.abs(z + 215) < 28) continue;
       this.createStreetLamp(-16.5, z, true);
       this.createStreetLamp(16.5, z, false);
+    }
+
+    // 6. Lampu Jalan PJU sepanjang koridor Jalan Letjen S. Parman (Grogol -> Tomang -> Slipi)
+    for (let z = -390; z <= 70; z += 45) {
+      const t = (z + 390) / 460;
+      const x = -482 + t * 152;
+      this.createStreetLamp(x - 7.5, z, true);
+      this.createStreetLamp(x + 7.5, z, false);
     }
   }
 
