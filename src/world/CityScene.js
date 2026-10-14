@@ -81,10 +81,22 @@ export class CityScene {
   buildWaterways() {
     const bankMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 });
 
-    // Jembatan Dukuh Atas (Sudirman - Thamrin melintasi Kanal Banjir Barat pada [-3, 100])
+    // 1. Jembatan Dukuh Atas (Sudirman - Thamrin melintasi Kanal Banjir Barat pada [-3, 100])
     const dukuhAtasBridge = new THREE.Mesh(new THREE.BoxGeometry(36, 1.2, 26), bankMat);
     dukuhAtasBridge.position.set(-3, 0.35, 100);
     this.proceduralGroup.add(dukuhAtasBridge);
+
+    // 2. Jembatan Tomang (Jl. Tomang Raya melintasi Kanal Banjir Barat ke arah Kyai Caringin)
+    const tomangBridge = new THREE.Mesh(new THREE.BoxGeometry(32, 1.2, 24), bankMat);
+    tomangBridge.position.set(-247.5, 0.35, -305.5);
+    tomangBridge.rotation.y = -0.58;
+    this.proceduralGroup.add(tomangBridge);
+
+    // 3. Jembatan Roxy (Jl. Kyai Tapa melintasi Kanal Banjir Barat ke arah Hasyim Ashari)
+    const roxyBridge = new THREE.Mesh(new THREE.BoxGeometry(32, 1.2, 22), bankMat);
+    roxyBridge.position.set(-320.5, 0.35, -408.0);
+    roxyBridge.rotation.y = 0.05;
+    this.proceduralGroup.add(roxyBridge);
   }
 
   /**
