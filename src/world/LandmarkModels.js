@@ -1421,5 +1421,287 @@ export class LandmarkModels {
 
     return group;
   }
+
+  /**
+   * 29. Kompleks Pasar Tanah Abang (Blok A, Blok B & Skybridge Jatibaru)
+   * Pusat grosir tekstil terbesar se-Asia Tenggara dengan kubah toska khas Blok A & skybridge jalan raya.
+   */
+  static createPasarTanahAbang() {
+    const group = new THREE.Group();
+    const blokAMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.5 });
+    const blokBMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
+    const domeMat = new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.35, metalness: 0.3 });
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.8, roughness: 0.2 });
+    const skybridgeMat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      emissive: 0x0284c7,
+      emissiveIntensity: 0.5,
+      roughness: 0.25
+    });
+
+    // 1. Blok A (Podium Grosir Utama, 16 lantai)
+    const blokA = new THREE.Mesh(new THREE.BoxGeometry(46, 32, 38), blokAMat);
+    blokA.position.set(-10, 16, -6);
+    blokA.castShadow = true;
+    blokA.receiveShadow = true;
+    group.add(blokA);
+
+    // Kubah Hijau Toska Ikonik di atas Atap Blok A
+    const dome = new THREE.Mesh(
+      new THREE.SphereGeometry(7.5, 20, 14, 0, Math.PI * 2, 0, Math.PI / 2),
+      domeMat
+    );
+    dome.position.set(-10, 32, -6);
+    dome.castShadow = true;
+    group.add(dome);
+
+    // Spire mahkota kubah
+    const spire = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.3, 0.6, 5, 8),
+      new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.8 })
+    );
+    spire.position.set(-10, 41, -6);
+    group.add(spire);
+
+    // 2. Blok B (Gedung Berdampingan)
+    const blokB = new THREE.Mesh(new THREE.BoxGeometry(36, 38, 30), blokBMat);
+    blokB.position.set(24, 19, 4);
+    blokB.castShadow = true;
+    group.add(blokB);
+
+    // Dinding Kaca Blok B
+    const bGlass = new THREE.Mesh(new THREE.BoxGeometry(32, 32, 1.5), glassMat);
+    bGlass.position.set(24, 20, 19.5);
+    group.add(bGlass);
+
+    // 3. Skybridge Jatibaru (Jembatan Penyeberangan Multiguna Melintang di Atas Jalan Raya)
+    const skybridge = new THREE.Mesh(new THREE.BoxGeometry(52, 4.2, 5.5), skybridgeMat);
+    skybridge.position.set(-8, 9, 22);
+    skybridge.rotation.y = 0.15;
+    skybridge.castShadow = true;
+    group.add(skybridge);
+
+    // Pilar Penyangga Skybridge
+    [-20, 0, 20].forEach((ox) => {
+      const pier = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.8, 1.0, 9, 8),
+        new THREE.MeshStandardMaterial({ color: 0x64748b })
+      );
+      pier.position.set(-8 + ox, 4.5, 22);
+      group.add(pier);
+    });
+
+    // 4. Metro Tanah Abang & Blok F (Ruko & Toko Tekstil)
+    const metro = new THREE.Mesh(
+      new THREE.BoxGeometry(22, 24, 26),
+      new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.6 })
+    );
+    metro.position.set(-28, 12, 18);
+    metro.castShadow = true;
+    group.add(metro);
+
+    return group;
+  }
+
+  /**
+   * 30. Stasiun KRL Tanah Abang & Dipo Transit Hub
+   * Simpul transit kereta api komuter lintas lingkar barat dengan kanopi lengkung baja & peron bertingkat.
+   */
+  static createStasiunTanahAbang() {
+    const group = new THREE.Group();
+    const stMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
+    const blueMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.5 });
+    const canopyMat = new THREE.MeshStandardMaterial({
+      color: 0x0284c7,
+      metalness: 0.6,
+      roughness: 0.3,
+      side: THREE.DoubleSide
+    });
+    const trackMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.6 });
+
+    // 1. Concourse & Gedung Stasiun Utama
+    const mainStation = new THREE.Mesh(new THREE.BoxGeometry(44, 15, 24), stMat);
+    mainStation.position.set(0, 7.5, -8);
+    mainStation.castShadow = true;
+    group.add(mainStation);
+
+    // Lis biru khas KAI Commuter
+    const blueStripe = new THREE.Mesh(new THREE.BoxGeometry(44.5, 2.2, 24.5), blueMat);
+    blueStripe.position.set(0, 13, -8);
+    group.add(blueStripe);
+
+    // 2. Kanopi Lengkung Peron Baja di Atas Jalur Rel
+    const canopyGeo = new THREE.CylinderGeometry(14, 14, 56, 16, 1, true, 0, Math.PI);
+    canopyGeo.rotateZ(Math.PI / 2);
+    canopyGeo.rotateY(Math.PI / 2);
+    const canopy = new THREE.Mesh(canopyGeo, canopyMat);
+    canopy.position.set(0, 11, 14);
+    canopy.castShadow = true;
+    group.add(canopy);
+
+    // 3. Jembatan Penyeberangan Penumpang (JPO Peron)
+    const jpo = new THREE.Mesh(
+      new THREE.BoxGeometry(10, 3.8, 32),
+      new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.4 })
+    );
+    jpo.position.set(12, 10.5, 8);
+    jpo.castShadow = true;
+    group.add(jpo);
+
+    // 4. Peron & Bantalan Rel Kereta
+    const platform = new THREE.Mesh(new THREE.BoxGeometry(48, 1.2, 26), trackMat);
+    platform.position.set(0, 0.6, 14);
+    platform.receiveShadow = true;
+    group.add(platform);
+
+    return group;
+  }
+
+  /**
+   * 31. Stasiun KRL Palmerah & Menara Kompas Gramedia
+   * Gerbang transit Senayan-Palmerah dengan kanopi lengkung putih & twin tower media Kompas Gramedia.
+   */
+  static createStasiunPalmerah() {
+    const group = new THREE.Group();
+    const stationMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
+    const mediaGlassMat = new THREE.MeshStandardMaterial({
+      color: 0x059669,
+      metalness: 0.8,
+      roughness: 0.2
+    });
+    const mediaMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
+
+    // 1. Bangunan Stasiun Palmerah Berkanopi Lengkung Modern
+    const canopyGeo = new THREE.CylinderGeometry(11, 11, 42, 16, 1, true, 0, Math.PI);
+    canopyGeo.rotateZ(Math.PI / 2);
+    canopyGeo.rotateY(0.45);
+    const stationCanopy = new THREE.Mesh(canopyGeo, stationMat);
+    stationCanopy.position.set(-12, 8.5, -8);
+    stationCanopy.castShadow = true;
+    group.add(stationCanopy);
+
+    const stationBase = new THREE.Mesh(new THREE.BoxGeometry(36, 6, 18), stationMat);
+    stationBase.position.set(-12, 3, -8);
+    stationBase.rotation.y = 0.45;
+    group.add(stationBase);
+
+    // 2. Menara Multimedia Kompas Gramedia (Tower Utama, 26 lantai)
+    const kompasTower1 = new THREE.Mesh(new THREE.BoxGeometry(18, 62, 18), mediaGlassMat);
+    kompasTower1.position.set(16, 31, 8);
+    kompasTower1.castShadow = true;
+    group.add(kompasTower1);
+
+    // Menara Kompas Gramedia Tower 2
+    const kompasTower2 = new THREE.Mesh(new THREE.BoxGeometry(16, 48, 15), mediaMat);
+    kompasTower2.position.set(28, 24, -10);
+    kompasTower2.castShadow = true;
+    group.add(kompasTower2);
+
+    // Skybridge Penghubung Menara Kompas
+    const bridge = new THREE.Mesh(
+      new THREE.BoxGeometry(15, 3.2, 4.5),
+      new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.4 })
+    );
+    bridge.position.set(22, 32, -1);
+    bridge.rotation.y = -0.55;
+    group.add(bridge);
+
+    return group;
+  }
+
+  /**
+   * 32. Kampus Utama BINUS University (Anggrek & Syahdan)
+   * Kampus teknologi terkemuka dengan gedung bentuk L ikonik, aksen kuning/oranye & atrium kaca.
+   */
+  static createBinusUniversity() {
+    const group = new THREE.Group();
+    const wallMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
+    const orangeMat = new THREE.MeshStandardMaterial({ color: 0xea580c, roughness: 0.4 });
+    const yellowMat = new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.4 });
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.8, roughness: 0.18 });
+
+    // 1. Gedung Kampus Anggrek (Bentuk L Raksasa)
+    const wingA = new THREE.Mesh(new THREE.BoxGeometry(46, 38, 18), wallMat);
+    wingA.position.set(0, 19, -12);
+    wingA.castShadow = true;
+    group.add(wingA);
+
+    const wingB = new THREE.Mesh(new THREE.BoxGeometry(18, 38, 34), wallMat);
+    wingB.position.set(14, 19, 14);
+    wingB.castShadow = true;
+    group.add(wingB);
+
+    // 2. Fasad Aksen Warna Identitas BINUS (Oranye & Kuning)
+    const orangeStripe = new THREE.Mesh(new THREE.BoxGeometry(46.5, 4, 2), orangeMat);
+    orangeStripe.position.set(0, 32, -2.5);
+    group.add(orangeStripe);
+
+    const yellowStripe = new THREE.Mesh(new THREE.BoxGeometry(2, 4, 34.5), yellowMat);
+    yellowStripe.position.set(4.5, 32, 14);
+    group.add(yellowStripe);
+
+    // 3. Atrium Kaca Transparan di Tengah Sudut L
+    const atrium = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 36, 16), glassMat);
+    atrium.position.set(4, 18, -2);
+    atrium.castShadow = true;
+    group.add(atrium);
+
+    // 4. Gedung Kampus Syahdan (Annex Barat)
+    const syahdan = new THREE.Mesh(
+      new THREE.BoxGeometry(24, 26, 20),
+      new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.55 })
+    );
+    syahdan.position.set(-26, 13, 16);
+    syahdan.castShadow = true;
+    group.add(syahdan);
+
+    return group;
+  }
+
+  /**
+   * 33. Superblok Mediterania Garden Residences (Tanjung Duren)
+   * Cluster 4 menara kondominium kembar bertingkat 30 lantai dengan balkon putih berundak & ruko kuliner.
+   */
+  static createMediteraniaTanjungDuren() {
+    const group = new THREE.Group();
+    const towerMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
+    const terracottaMat = new THREE.MeshStandardMaterial({ color: 0xc2410c, roughness: 0.7 });
+    const podiumMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
+    const poolMat = new THREE.MeshStandardMaterial({ color: 0x06b6d4, roughness: 0.2, metalness: 0.8 });
+
+    // 1. Podium Komersial Ruko & Parkir
+    const podium = new THREE.Mesh(new THREE.BoxGeometry(58, 10, 52), podiumMat);
+    podium.position.set(0, 5, 0);
+    podium.castShadow = true;
+    podium.receiveShadow = true;
+    group.add(podium);
+
+    // 2. Kolam Renang Laguna Resort di Atas Podium
+    const pool = new THREE.Mesh(new THREE.BoxGeometry(22, 0.4, 16), poolMat);
+    pool.position.set(0, 10.3, 0);
+    group.add(pool);
+
+    // 3. Cluster 4 Menara Kembar Kondominium
+    const offsets = [
+      [-18, -16],
+      [18, -16],
+      [-18, 16],
+      [18, 16]
+    ];
+
+    offsets.forEach(([ox, oz]) => {
+      const tower = new THREE.Mesh(new THREE.BoxGeometry(15, 66, 14), towerMat);
+      tower.position.set(ox, 43, oz);
+      tower.castShadow = true;
+      group.add(tower);
+
+      // Aksen Terakota Mahkota Atap
+      const crown = new THREE.Mesh(new THREE.BoxGeometry(16, 4, 15), terracottaMat);
+      crown.position.set(ox, 77, oz);
+      group.add(crown);
+    });
+
+    return group;
+  }
 }
 

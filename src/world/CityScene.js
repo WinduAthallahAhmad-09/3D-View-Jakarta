@@ -375,7 +375,12 @@ export class CityScene {
       "mall-taman-anggrek": () => LandmarkModels.createMallTamanAnggrek(),
       "kawasan-pendidikan-grogol": () => LandmarkModels.createKawasanGrogol(),
       "rs-harapan-kita-dharmais": () => LandmarkModels.createPusatMedisSlipi(),
-      "wisma-barito-pacific": () => LandmarkModels.createSentraBisnisSlipi()
+      "wisma-barito-pacific": () => LandmarkModels.createSentraBisnisSlipi(),
+      "pasar-tanah-abang": () => LandmarkModels.createPasarTanahAbang(),
+      "stasiun-tanah-abang": () => LandmarkModels.createStasiunTanahAbang(),
+      "stasiun-palmerah": () => LandmarkModels.createStasiunPalmerah(),
+      "binus-university": () => LandmarkModels.createBinusUniversity(),
+      "mediterania-tanjung-duren": () => LandmarkModels.createMediteraniaTanjungDuren()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {

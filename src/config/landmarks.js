@@ -634,6 +634,119 @@ export const JAKARTA_LANDMARKS = [
       "Wisma Barito Pacific memiliki arsitektur mahkota piramida ganda dengan dinding tirai kaca biru reflektif.",
       "Terhubung langsung dengan akses on-off ramp Tol Dalam Kota Slipi."
     ]
+  },
+  // =====================================================
+  // ZONA 5: ANCHOR POINTS KAWASAN TENGAH-BARAT & PALMERAH
+  // =====================================================
+  {
+    id: "pasar-tanah-abang",
+    name: "Kompleks Pasar Tanah Abang & Skybridge",
+    shortName: "Pasar Tanah Abang",
+    category: "Pusat Perdagangan & Niaga",
+    tagline: "Pusat Grosir Tekstil Terbesar Se-Asia Tenggara & Jembatan Multiguna Jatibaru",
+    height: "65 meter (Blok A 16 lantai)",
+    year: "1735 / 2005",
+    architect: "PD Pasar Jaya & PT Putragaya Wahana",
+    location: "Jl. KH. Fakhrudin & Jl. KH. Mas Mansyur, Tanah Abang, Jakarta Pusat",
+    coordinates: { lat: -6.1872, lng: 106.8142 },
+    position: [-125, 0, -110],
+    labelHeight: 52,
+    cameraPosition: [-125, 75, -35],
+    cameraTarget: [-125, 20, -110],
+    description: "Pusat perdagangan dan perbelanjaan grosir tekstil serta garmen terbesar di Asia Tenggara yang berdiri sejak era kolonial (1735). Memadukan Blok A beratap kubah hijau toska ikonik, Blok B, Metro Tanah Abang, dan Jembatan Penyeberangan Multiguna (Skybridge) yang melayang di atas Jalan Jatibaru Raya.",
+    facts: [
+      "Didirikan pada 1 Mei 1735 oleh Yustinus Vinck dan berkembang menjadi pasar tekstil paling berpengaruh di kawasan Asia.",
+      "Blok A memiliki kubah toska megah dengan luas bangunan mencapai lebih dari 160.000 m² dan menampung ribuan kios pedagang.",
+      "Skybridge Tanah Abang dibangun membentang di atas jalan raya menghubungkan langsung peron Stasiun Tanah Abang ke gedung pasar grosir."
+    ]
+  },
+  {
+    id: "stasiun-tanah-abang",
+    name: "Stasiun KRL Tanah Abang & Dipo Transit",
+    shortName: "Stasiun Tanah Abang",
+    category: "Infrastruktur & Transit Hub",
+    tagline: "Simpul Pertemuan KRL Lintas Lingkar Barat & Koridor Serpong/Rangkasbitung",
+    height: "22 meter (Kanopi & JPO)",
+    year: "1899 / 2024",
+    architect: "Staatsspoorwegen & Balai Teknik Perkeretaapian",
+    location: "Jl. Jatibaru Raya, Kampung Bali, Tanah Abang, Jakarta Pusat",
+    coordinates: { lat: -6.1855, lng: 106.8111 },
+    position: [-168, 0, -85],
+    labelHeight: 38,
+    cameraPosition: [-168, 55, -15],
+    cameraTarget: [-168, 12, -85],
+    description: "Salah satu stasiun kereta api transit tersibuk di Indonesia yang melayani pertukaran ratusan ribu penumpang KRL Commuter Line setiap hari, menghubungkan jalur Lingkar Cikarang-Manggarai-Kampung Bandan dengan jalur Rangkasbitung-Serpong di tepi Kanal Banjir Barat.",
+    facts: [
+      "Dibuka pertama kali pada 1 Oktober 1899 oleh perusahaan kereta api kolonial Staatsspoorwegen (SS).",
+      "Dilengkapi depo lokomotif dan jembatan layang pejalan kaki multiguna yang terintegrasi dengan moda TransJakarta.",
+      "Menjadi gerbang mobilitas komuter utama bagi para pedagang dan pengunjung kawasan niaga Tanah Abang."
+    ]
+  },
+  {
+    id: "stasiun-palmerah",
+    name: "Stasiun KRL Palmerah & Menara Kompas Gramedia",
+    shortName: "Stasiun Palmerah",
+    category: "Infrastruktur & Kawasan Media",
+    tagline: "Gerbang Transit Senayan Barat & Markas Kompas Gramedia Media Tower",
+    height: "82 meter (Menara Kompas 26 lantai)",
+    year: "1899 / 2015",
+    architect: "PT KAI & Denton Corker Marshall (Menara Kompas)",
+    location: "Jl. Palmerah Timur & Jl. Tentara Pelajar, Gelora, Jakarta Pusat / Barat",
+    coordinates: { lat: -6.2072, lng: 106.7978 },
+    position: [-285, 0, 255],
+    labelHeight: 58,
+    cameraPosition: [-285, 78, 335],
+    cameraTarget: [-285, 22, 255],
+    description: "Kompleks stasiun transit modern berkanopi putih futuristik di barat Kompleks Parlemen DPR/MPR dan Stadion Gelora Bung Karno, berdampingan dengan Menara Kompas Gramedia (Multimedia Tower) berfasad kaca hijau metalik yang menjadi pusat konglomerasi media terbesar Indonesia.",
+    facts: [
+      "Stasiun Palmerah direvitalisasi menjadi stasiun bertingkat modern dua lantai pada tahun 2015 dengan fasilitas lift dan eskalator.",
+      "Menara Kompas Multimedia Tower dirancang dengan sirip-sirip logam peneduh dan efisiensi energi berstandar green building.",
+      "Menjadi titik sentral mobilitas komuter menuju kawasan Senayan, DPR/MPR, dan Palmerah."
+    ]
+  },
+  {
+    id: "binus-university",
+    name: "Kampus Utama BINUS University (Anggrek & Syahdan)",
+    shortName: "BINUS University",
+    category: "Pendidikan & Kampus Teknologi",
+    tagline: "Pionir Pendidikan Teknologi Informasi & Smart Campus Kemanggisan",
+    height: "45 meter (Gedung L Anggrek 10 lantai)",
+    year: "1981 / 1999",
+    architect: "Yayasan Bina Nusantara",
+    location: "Jl. Kebon Jeruk Raya No. 27 & Jl. K.H. Syahdan, Kemanggisan, Jakarta Barat",
+    coordinates: { lat: -6.2008, lng: 106.7845 },
+    position: [-480, 0, 25],
+    labelHeight: 48,
+    cameraPosition: [-480, 68, 105],
+    cameraTarget: [-480, 18, 25],
+    description: "Sentra kampus universitas swasta bidang komputasi dan teknologi informasi terkemuka di Indonesia. Terkenal dengan Gedung Kampus Anggrek berbentuk huruf L raksasa dengan aksen warna oranye-kuning cerah, atrium kaca megah, serta Kampus Syahdan yang legendaris di Kemanggisan.",
+    facts: [
+      "Bermula dari kursus komputer AT 85 pada tahun 1981 sebelum berkembang menjadi universitas teknologi kelas dunia.",
+      "Gedung Kampus Anggrek memiliki aula auditorium megah dan laboratorium komputer tercanggih di Jakarta Barat.",
+      "Kawasan di sekitar kampus membentuk ekosistem permukiman mahasiswa, sentra kuliner, dan indekos yang sangat dinamis."
+    ]
+  },
+  {
+    id: "mediterania-tanjung-duren",
+    name: "Superblok Mediterania Garden Residences",
+    shortName: "Mediterania Tanjung Duren",
+    category: "Kawasan Residensial Vertikal",
+    tagline: "Kompleks Apartemen & Sentra Ruko Kuliner Legendaris Tanjung Duren",
+    height: "105 meter (Tower Apartemen 32 lantai)",
+    year: "2004 / 2008",
+    architect: "Agung Podomoro Group",
+    location: "Jl. Tanjung Duren Raya & Jl. Podomoro City Ring Road, Jakarta Barat",
+    coordinates: { lat: -6.1792, lng: 106.7828 },
+    position: [-505, 0, -280],
+    labelHeight: 75,
+    cameraPosition: [-505, 95, -195],
+    cameraTarget: [-505, 32, -280],
+    description: "Kompleks hunian vertikal kondominium besar yang menjadi pionir apartemen modern di Jakarta Barat. Menghubungkan kawasan hunian Tanjung Duren dengan superblok Central Park, dilengkapi deretan ruko kuliner populer di lantai podium dan kolam renang bernuansa tropis.",
+    facts: [
+      "Terdiri dari beberapa tower kondominium kembar bertingkat 30+ lantai yang menjadi rumah bagi puluhan ribu warga Jakarta Barat.",
+      "Menjadi salah satu pusat kuliner paling ramai dan hidup sepanjang malam di koridor Tanjung Duren Raya.",
+      "Memiliki akses terowongan dan jembatan terpadu menuju kawasan mall dan taman Central Park."
+    ]
   }
 ];
 
