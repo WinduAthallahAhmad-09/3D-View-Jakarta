@@ -228,6 +228,55 @@
       color: #FFFFFF !important;
       stroke: #FFFFFF !important;
     }
+
+    /* Smart LOD 3D Map Pin Labels */
+    .map-pin-label {
+      will-change: transform, opacity;
+      user-select: none;
+    }
+    .map-pin-label .label-pill {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .map-pin-label:hover {
+      z-index: 9999 !important;
+    }
+    .map-pin-label:hover .label-pill {
+      background: #111111 !important;
+      border-color: #111111 !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+      transform: scale(1.08);
+    }
+    .map-pin-label:hover .label-num,
+    .map-pin-label:hover .label-text {
+      color: #FFFFFF !important;
+    }
+    /* Compact LOD mode (when camera is zoomed out / far away) */
+    .map-pin-label.is-compact .label-text {
+      max-width: 0;
+      opacity: 0;
+      margin: 0;
+      pointer-events: none;
+      display: inline-block;
+      overflow: hidden;
+      white-space: nowrap;
+      transition: max-width 220ms ease, opacity 180ms ease, margin 180ms ease;
+    }
+    .map-pin-label.is-compact .label-pill {
+      padding: 2px 6px;
+      border-radius: 9999px;
+    }
+    /* Hover over compact pin expands to reveal full landmark name */
+    .map-pin-label.is-compact:hover .label-text {
+      max-width: 180px;
+      opacity: 1;
+      margin-left: 4px;
+      pointer-events: auto;
+    }
+    .map-pin-label.is-compact:hover .label-pill {
+      border-radius: 6px;
+      padding: 3px 8px;
+    }
   </style>
 </head>
 <body class="selection:bg-[#FBF3DB] selection:text-[#956400]">

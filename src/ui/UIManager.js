@@ -270,9 +270,9 @@ export class UIManager {
         'map-pin-label pointer-events-auto fixed top-0 left-0 -translate-x-1/2 -translate-y-full flex flex-col items-center group cursor-pointer transition-opacity duration-150';
 
       el.innerHTML = `
-        <div class="px-2 py-0.5 rounded-[5px] bg-white/95 border border-[#EAEAEA] group-hover:border-[#111111] group-hover:bg-[#111111] flex items-center gap-1.5 transition-colors">
-          <span class="font-mono text-[9px] text-[#787774] group-hover:text-[#EAEAEA]">${num}</span>
-          <span class="text-[10px] font-sans font-medium text-[#111111] group-hover:text-white whitespace-nowrap tracking-tight">${landmark.shortName || landmark.name}</span>
+        <div class="label-pill px-2 py-0.5 rounded-[5px] bg-white/95 border border-[#EAEAEA] flex items-center gap-1.5 transition-all">
+          <span class="label-num font-mono text-[9px] font-semibold text-[#787774] transition-colors">${num}</span>
+          <span class="label-text text-[10px] font-sans font-medium text-[#111111] whitespace-nowrap tracking-tight transition-colors">${landmark.shortName || landmark.name}</span>
         </div>
         <div class="w-px h-2.5 bg-[#111111]/40"></div>
       `;
@@ -309,7 +309,8 @@ export class UIManager {
 
   /**
    * Project 3D world coordinates of each Jakarta place to 2D screen coordinates
-   * with occlusion checking and smooth distance fading / LOD
+   * with occlusion checking, depth sorting, and Smart LOD (compact badges when zoomed out,
+   * smooth expansion on hover or close range)
    */
   updateMapLabels(camera) {
     if (this.isHomeActive || !this.labelsVisible || !this.labelElements.length) return;
@@ -342,20 +343,28 @@ export class UIManager {
       const x = this.tempVec.x * widthHalf + widthHalf;
       const y = -(this.tempVec.y * heightHalf) + heightHalf;
 
-      // 3. Smooth distance fading & LOD
+      // 3. Smooth distance fading & Smart LOD
       const dist = camera.position.distanceTo(item.worldPos);
-      if (dist > 950 || dist < 14) {
+      if (dist > 1050 || dist < 14) {
         item.element.style.opacity = '0';
         item.element.style.pointerEvents = 'none';
-      } else if (dist > 650) {
-        const alpha = ((950 - dist) / 300) * 0.75;
+      } else {
+        const isCompact = dist > 360;
+        item.element.classList.toggle('is-compact', isCompact);
+
+        // Sorting by depth so closer pins stay on top
+        item.element.style.zIndex = Math.round(1500 - dist);
+
+        let alpha = 1.0;
+        if (dist > 800) {
+          alpha = Math.max(0, (1050 - dist) / 250);
+        }
+
+        const scale = isCompact ? Math.max(0.76, 1.0 - (dist - 360) * 0.00035) : 1.0;
+
         item.element.style.opacity = alpha.toFixed(2);
         item.element.style.pointerEvents = 'auto';
-        item.element.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -100%) scale(0.92)`;
-      } else {
-        item.element.style.opacity = '1';
-        item.element.style.pointerEvents = 'auto';
-        item.element.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -100%) scale(1)`;
+        item.element.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -100%) scale(${scale.toFixed(2)})`;
       }
     }
   }
