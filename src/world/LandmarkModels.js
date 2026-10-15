@@ -1703,5 +1703,123 @@ export class LandmarkModels {
 
     return group;
   }
+
+  /**
+   * Kereta Rel Listrik (KRL) Commuter Line Train Consist (Series JR 205 / Tokyo Metro)
+   * 4-car commuter train with stainless-steel body, signature red & yellow stripes,
+   * dark tinted passenger windows, pantographs, and driver cab headlights.
+   */
+  static createKRLCommuterTrain() {
+    const group = new THREE.Group();
+    const stainlessMat = new THREE.MeshStandardMaterial({
+      color: 0xe2e8f0,
+      metalness: 0.8,
+      roughness: 0.25
+    });
+    const redStripeMat = new THREE.MeshStandardMaterial({
+      color: 0xdc2626,
+      roughness: 0.4
+    });
+    const yellowStripeMat = new THREE.MeshStandardMaterial({
+      color: 0xfacc15,
+      roughness: 0.4
+    });
+    const windowGlassMat = new THREE.MeshStandardMaterial({
+      color: 0x0f172a,
+      metalness: 0.9,
+      roughness: 0.1
+    });
+    const bogieMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      metalness: 0.7,
+      roughness: 0.6
+    });
+    const pantographMat = new THREE.MeshStandardMaterial({
+      color: 0x475569,
+      metalness: 0.8,
+      roughness: 0.3
+    });
+    const headlightMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+
+    const cars = 4;
+    const carLen = 17;
+    const gap = 0.9;
+
+    for (let c = 0; c < cars; c++) {
+      const carGroup = new THREE.Group();
+      const cz = (c - (cars - 1) / 2) * (carLen + gap);
+      carGroup.position.set(0, 0, cz);
+
+      // Main Car Body
+      const body = new THREE.Mesh(new THREE.BoxGeometry(3.1, 2.9, carLen), stainlessMat);
+      body.position.set(0, 2.1, 0);
+      body.castShadow = true;
+      body.receiveShadow = true;
+      carGroup.add(body);
+
+      // Red Stripe (KAI Commuter Red Band)
+      const redBand = new THREE.Mesh(new THREE.BoxGeometry(3.15, 0.4, carLen), redStripeMat);
+      redBand.position.set(0, 2.3, 0);
+      carGroup.add(redBand);
+
+      // Yellow Accent Stripe
+      const yellowBand = new THREE.Mesh(new THREE.BoxGeometry(3.16, 0.15, carLen), yellowStripeMat);
+      yellowBand.position.set(0, 2.05, 0);
+      carGroup.add(yellowBand);
+
+      // Passenger Windows Strip (continuous dark tinted glass)
+      const winL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.75, carLen * 0.85), windowGlassMat);
+      winL.position.set(1.56, 2.5, 0);
+      carGroup.add(winL);
+
+      const winR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.75, carLen * 0.85), windowGlassMat);
+      winR.position.set(-1.56, 2.5, 0);
+      carGroup.add(winR);
+
+      // Wheel Bogies (front and rear)
+      [-carLen * 0.32, carLen * 0.32].forEach((bz) => {
+        const bogie = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.6, 3.8), bogieMat);
+        bogie.position.set(0, 0.45, bz);
+        carGroup.add(bogie);
+      });
+
+      // Pantograph on cars 1 and 3
+      if (c === 0 || c === 2) {
+        const panto = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.5, 2.8), pantographMat);
+        panto.position.set(0, 3.8, carLen * 0.28);
+        carGroup.add(panto);
+      }
+
+      // Driver Cab for Leading (Car 0) and Trailing (Car 3)
+      if (c === 0) {
+        const cabGlass = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.9, 0.2), windowGlassMat);
+        cabGlass.position.set(0, 2.5, -carLen * 0.5 - 0.05);
+        carGroup.add(cabGlass);
+
+        [-0.9, 0.9].forEach((hx) => {
+          const light = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.15, 8), headlightMat);
+          light.rotation.x = Math.PI / 2;
+          light.position.set(hx, 1.3, -carLen * 0.5 - 0.05);
+          carGroup.add(light);
+        });
+      } else if (c === cars - 1) {
+        const cabGlass = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.9, 0.2), windowGlassMat);
+        cabGlass.position.set(0, 2.5, carLen * 0.5 + 0.05);
+        carGroup.add(cabGlass);
+      }
+
+      // Gangway bellow connector between cars
+      if (c < cars - 1) {
+        const gangway = new THREE.Mesh(new THREE.BoxGeometry(2.0, 2.4, gap + 0.1), bogieMat);
+        gangway.position.set(0, 1.9, carLen * 0.5 + gap * 0.5);
+        carGroup.add(gangway);
+      }
+
+      group.add(carGroup);
+    }
+
+    return group;
+  }
 }
+
 

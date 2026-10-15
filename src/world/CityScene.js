@@ -115,6 +115,25 @@ export class CityScene {
     tolTangerangBridge.position.set(-482.0, 0.40, -212.0);
     tolTangerangBridge.rotation.y = -0.28;
     this.proceduralGroup.add(tolTangerangBridge);
+
+    // 7. Jembatan Jatibaru / Jembatan Tinggi (Tanah Abang ke Petamburan melintasi KBB)
+    const jatibaruBridge = new THREE.Mesh(new THREE.BoxGeometry(28, 1.2, 18), bankMat);
+    jatibaruBridge.position.set(-178.0, 0.35, -140.0);
+    jatibaruBridge.rotation.y = 0.42;
+    this.proceduralGroup.add(jatibaruBridge);
+
+    // 8. Jembatan Pejompongan / Penjernihan 1 (Karet Bivak ke Palmerah melintasi KBB)
+    const pejomponganBridge = new THREE.Mesh(new THREE.BoxGeometry(26, 1.2, 18), bankMat);
+    pejomponganBridge.position.set(-142.0, 0.35, 89.0);
+    pejomponganBridge.rotation.y = -0.15;
+    this.proceduralGroup.add(pejomponganBridge);
+
+    // 9. Jembatan Rangka Baja Kereta Api KRL Karet (Melintasi KBB)
+    const krlBridgeMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8, roughness: 0.3 });
+    const krlKbbBridge = new THREE.Mesh(new THREE.BoxGeometry(16, 1.6, 26), krlBridgeMat);
+    krlKbbBridge.position.set(-136.0, 0.45, 62.0);
+    krlKbbBridge.rotation.y = -0.65;
+    this.proceduralGroup.add(krlKbbBridge);
   }
 
   /**
@@ -746,23 +765,131 @@ export class CityScene {
       }
     }
 
-    // 4. Real OpenStreetMap Railways (KRL, MRT, LRT, KA Antarkota)
+    // 4. Real OpenStreetMap Railways (KRL Commuter Line, MRT, LRT, KA Antarkota)
     if (osm.railways && osm.railways.length) {
-      const railMat = new THREE.MeshStandardMaterial({
-        color: 0x64748b,
-        roughness: 0.6,
-        metalness: 0.4,
+      // 4a. Ballast Bed (Bantalan Kerikil Kasar)
+      const ballastMat = new THREE.MeshStandardMaterial({
+        color: 0x334155,
+        roughness: 0.95,
+        metalness: 0.05,
         side: THREE.DoubleSide
       });
-      const railGeo = this.buildMergedRibbonGeometry(
+      const ballastGeo = this.buildMergedRibbonGeometry(
         osm.railways,
-        () => 2.8,
-        (r) => (r.b ? 0.42 : 0.08),
+        () => 5.2,
+        (r) => (r.b ? 0.44 : 0.09),
         true
       );
-      if (railGeo) {
-        this.proceduralGroup.add(new THREE.Mesh(railGeo, railMat));
+      if (ballastGeo) {
+        const ballastMesh = new THREE.Mesh(ballastGeo, ballastMat);
+        ballastMesh.receiveShadow = true;
+        this.proceduralGroup.add(ballastMesh);
       }
+
+      // 4b. Twin Steel Rails (Rel Baja Mengkilap)
+      const steelRailMat = new THREE.MeshStandardMaterial({
+        color: 0x94a3b8,
+        roughness: 0.25,
+        metalness: 0.85,
+        side: THREE.DoubleSide
+      });
+      const steelRailGeo = this.buildMergedRibbonGeometry(
+        osm.railways,
+        () => 2.4,
+        (r) => (r.b ? 0.48 : 0.13),
+        true
+      );
+      if (steelRailGeo) {
+        const steelRailMesh = new THREE.Mesh(steelRailGeo, steelRailMat);
+        steelRailMesh.receiveShadow = true;
+        this.proceduralGroup.add(steelRailMesh);
+      }
+
+      // 4c. Tiang Portal Listrik Aliran Atas (LAA / Overhead Catenary Gantries) along KRL corridor
+      const krlWays = osm.railways.filter((r) => r.p && r.p.some(([x, z]) => x < -50 && z > -350 && z < 350));
+      const gantryTransforms = [];
+      let distAcc = 0;
+
+      krlWays.forEach((w) => {
+        for (let i = 0; i < w.p.length - 1; i++) {
+          const [x1, z1] = w.p[i];
+          const [x2, z2] = w.p[i + 1];
+          const len = Math.hypot(x2 - x1, z2 - z1);
+          if (len < 5) continue;
+          distAcc += len;
+          if (distAcc > 45) {
+            distAcc = 0;
+            const angle = Math.atan2(x2 - x1, z2 - z1);
+            gantryTransforms.push({
+              x: (x1 + x2) / 2,
+              y: w.b ? 0.48 : 0.12,
+              z: (z1 + z2) / 2,
+              angle
+            });
+          }
+        }
+      });
+
+      if (gantryTransforms.length > 0) {
+        const gantryMat = new THREE.MeshStandardMaterial({
+          color: 0x64748b,
+          metalness: 0.75,
+          roughness: 0.35
+        });
+        const poleGeo = new THREE.CylinderGeometry(0.12, 0.16, 6.2, 6);
+        const beamGeo = new THREE.BoxGeometry(6.6, 0.28, 0.28);
+
+        const poleMesh = new THREE.InstancedMesh(poleGeo, gantryMat, gantryTransforms.length * 2);
+        const beamMesh = new THREE.InstancedMesh(beamGeo, gantryMat, gantryTransforms.length);
+        poleMesh.castShadow = true;
+        beamMesh.castShadow = true;
+
+        const dummy = new THREE.Object3D();
+
+        gantryTransforms.forEach((g, idx) => {
+          const cosA = Math.cos(g.angle);
+          const sinA = Math.sin(g.angle);
+          const nx = cosA * 3.2;
+          const nz = -sinA * 3.2;
+
+          // Left pole
+          dummy.position.set(g.x - nx, g.y + 3.1, g.z - nz);
+          dummy.scale.set(1, 1, 1);
+          dummy.rotation.set(0, g.angle, 0);
+          dummy.updateMatrix();
+          poleMesh.setMatrixAt(idx * 2, dummy.matrix);
+
+          // Right pole
+          dummy.position.set(g.x + nx, g.y + 3.1, g.z + nz);
+          dummy.scale.set(1, 1, 1);
+          dummy.rotation.set(0, g.angle, 0);
+          dummy.updateMatrix();
+          poleMesh.setMatrixAt(idx * 2 + 1, dummy.matrix);
+
+          // Top beam
+          dummy.position.set(g.x, g.y + 5.8, g.z);
+          dummy.scale.set(1, 1, 1);
+          dummy.rotation.set(0, g.angle + Math.PI / 2, 0);
+          dummy.updateMatrix();
+          beamMesh.setMatrixAt(idx, dummy.matrix);
+        });
+
+        poleMesh.instanceMatrix.needsUpdate = true;
+        beamMesh.instanceMatrix.needsUpdate = true;
+        this.proceduralGroup.add(poleMesh);
+        this.proceduralGroup.add(beamMesh);
+      }
+
+      // 4d. Kereta Rel Listrik (KRL) Commuter Line Train Consists stationed at platforms
+      const trainTanahAbang = LandmarkModels.createKRLCommuterTrain();
+      trainTanahAbang.position.set(-168, 0.45, -85);
+      trainTanahAbang.rotation.y = 0.45;
+      this.proceduralGroup.add(trainTanahAbang);
+
+      const trainPalmerah = LandmarkModels.createKRLCommuterTrain();
+      trainPalmerah.position.set(-285, 0.45, 255);
+      trainPalmerah.rotation.y = 0.45;
+      this.proceduralGroup.add(trainPalmerah);
     }
 
     // 5. Real OpenStreetMap 3D Building Footprints (1,566 authentic Jakarta buildings)
