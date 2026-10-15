@@ -12,6 +12,7 @@ export class CityScene {
 
     this.interactiveObjects = [];
     this.vehicles = [];
+    this.animatedTrains = [];
     this.streetLights = [];
     this.nightMaterials = [];
     this.init();
@@ -894,14 +895,14 @@ export class CityScene {
         this.proceduralGroup.add(beamMesh);
       }
 
-      // 4d. Kereta Rel Listrik (KRL) Commuter Line Train Consists stationed at platforms
+      // 4d. Kereta Rel Listrik (KRL) Commuter Line Train Consists stationed at platform sidings
       const trainTanahAbang = LandmarkModels.createKRLCommuterTrain();
-      trainTanahAbang.position.set(-168, 0.45, -85);
+      trainTanahAbang.position.set(-165, 0.45, -85);
       trainTanahAbang.rotation.y = 0.45;
       this.proceduralGroup.add(trainTanahAbang);
 
       const trainPalmerah = LandmarkModels.createKRLCommuterTrain();
-      trainPalmerah.position.set(-285, 0.45, 255);
+      trainPalmerah.position.set(-288.5, 0.45, 255);
       trainPalmerah.rotation.y = 0.45;
       this.proceduralGroup.add(trainPalmerah);
     }
@@ -1370,7 +1371,22 @@ export class CityScene {
       { x1: -52.0, z1: 470, x2: -294.0, z2: 148, count: 12 },
       // 6. Jl. H.R. Rasuna Said (Setiabudi -> Mega Kuningan)
       { x1: 93.0, z1: 192, x2: 139.0, z2: 475, count: 8 },
-      { x1: 145.0, z1: 475, x2: 99.0, z2: 192, count: 8 }
+      { x1: 145.0, z1: 475, x2: 99.0, z2: 192, count: 8 },
+      // 7. Jl. Letjen S. Parman - Arteri Utara (Slipi -> Tomang -> Grogol)
+      { x1: -326.0, z1: 65, x2: -406.0, z2: -200, count: 6 },
+      { x1: -406.0, z1: -200, x2: -478.0, z2: -385, count: 6 },
+      // 8. Jl. Letjen S. Parman - Arteri Selatan (Grogol -> Tomang -> Slipi)
+      { x1: -486.0, z1: -385, x2: -414.0, z2: -200, count: 6 },
+      { x1: -414.0, z1: -200, x2: -334.0, z2: 65, count: 6 },
+      // 9. Tol Dalam Kota / Viaduk Tomang (Jalur Cepat Utara & Selatan, y=0.40)
+      { x1: -329.0, y: 0.40, z1: 65, x2: -481.0, z2: -385, count: 8, speedBoost: 1.4 },
+      { x1: -483.0, y: 0.40, z1: -385, x2: -331.0, z2: 65, count: 8, speedBoost: 1.4 },
+      // 10. Jl. Tomang Raya (Barat <-> Timur melintasi Kanal Banjir Barat)
+      { x1: -415.0, z1: -205, x2: -247.0, z2: -305, count: 5 },
+      { x1: -247.0, z1: -299, x2: -415.0, z2: -199, count: 5 },
+      // 11. Jl. Tanjung Duren Raya (Podomoro City & Mediterania)
+      { x1: -510.0, z1: -320, x2: -435.0, z2: -250, count: 5 },
+      { x1: -435.0, z1: -246, x2: -510.0, z2: -316, count: 5 }
     ];
 
     let idx = 0;
@@ -1378,6 +1394,7 @@ export class CityScene {
       const dx = route.x2 - route.x1;
       const dz = route.z2 - route.z1;
       const angle = Math.atan2(dx, dz);
+      const y = route.y || 0;
 
       for (let j = 0; j < route.count; j++) {
         const isBus = idx % 6 === 0;
@@ -1387,18 +1404,19 @@ export class CityScene {
         );
 
         const t = j / route.count;
-        vehicle.position.set(route.x1 + dx * t, 0, route.z1 + dz * t);
+        vehicle.position.set(route.x1 + dx * t, y, route.z1 + dz * t);
         vehicle.rotation.y = angle;
 
         this.vehicles.push({
           mesh: vehicle,
           isCircular: false,
           x1: route.x1,
+          y,
           z1: route.z1,
           dx,
           dz,
           progress: t,
-          speed: (isBus ? 0.065 : 0.095) + (idx % 4) * 0.014
+          speed: ((isBus ? 0.065 : 0.095) + (idx % 4) * 0.014) * (route.speedBoost || 1.0)
         });
 
         this.proceduralGroup.add(vehicle);
@@ -1438,6 +1456,47 @@ export class CityScene {
         this.proceduralGroup.add(vehicle);
       }
     });
+
+    // Dynamic Kereta Rel Listrik (KRL) Commuter Line Consists running on dual mainline tracks
+    const krlTrackPoints = [
+      new THREE.Vector3(-285, 0.48, 255),
+      new THREE.Vector3(-318, 0.48, 180),
+      new THREE.Vector3(-320, 0.48, 131),
+      new THREE.Vector3(-250, 0.48, 85),
+      new THREE.Vector3(-188, 0.48, 48),
+      new THREE.Vector3(-173, 0.48, 10),
+      new THREE.Vector3(-171, 0.48, -35),
+      new THREE.Vector3(-168, 0.48, -85),
+      new THREE.Vector3(-170, 0.48, -135),
+      new THREE.Vector3(-177, 0.48, -180),
+      new THREE.Vector3(-190, 0.48, -230),
+      new THREE.Vector3(-233, 0.48, -292)
+    ];
+    this.krlCurve = new THREE.CatmullRomCurve3(krlTrackPoints, false, 'catmullrom', 0.15);
+    this.krlCurveLength = this.krlCurve.getLength();
+
+    this.animatedTrains = [];
+    const trainConfigs = [
+      { id: 'krl-northbound', trackOffset: -1.35, speed: 0.024, progress: 0.15 },
+      { id: 'krl-southbound', trackOffset: 1.35, speed: -0.024, progress: 0.65 }
+    ];
+
+    trainConfigs.forEach((cfg) => {
+      const train = {
+        trackOffset: cfg.trackOffset,
+        speed: cfg.speed,
+        progress: cfg.progress,
+        cars: []
+      };
+
+      for (let c = 0; c < 4; c++) {
+        const carMesh = LandmarkModels.createSingleKRLCar(c, 4);
+        this.proceduralGroup.add(carMesh);
+        train.cars.push(carMesh);
+      }
+
+      this.animatedTrains.push(train);
+    });
   }
 
   updateTraffic(delta) {
@@ -1452,9 +1511,43 @@ export class CityScene {
         v.progress += v.speed * delta;
         if (v.progress > 1.0) v.progress -= 1.0;
         v.mesh.position.x = v.x1 + v.dx * v.progress;
+        v.mesh.position.y = v.y || 0;
         v.mesh.position.z = v.z1 + v.dz * v.progress;
       }
     });
+
+    if (this.krlCurve && this.animatedTrains.length) {
+      const totalLen = this.krlCurveLength;
+      const carSpacing = 17.8;
+
+      this.animatedTrains.forEach((train) => {
+        train.progress += train.speed * delta;
+        if (train.progress > 1.0) train.progress -= 1.0;
+        if (train.progress < 0.0) train.progress += 1.0;
+
+        const forward = train.speed > 0;
+
+        train.cars.forEach((car, cIdx) => {
+          const carOffset = forward ? -cIdx * carSpacing : cIdx * carSpacing;
+          let carDist = train.progress * totalLen + carOffset;
+          while (carDist < 0) carDist += totalLen;
+          while (carDist > totalLen) carDist -= totalLen;
+
+          const u = carDist / totalLen;
+          const pt = this.krlCurve.getPointAt(u);
+          const tangent = this.krlCurve.getTangentAt(u);
+
+          // Track lateral normal offset for dual tracks
+          const nx = -tangent.z * train.trackOffset;
+          const nz = tangent.x * train.trackOffset;
+
+          car.position.set(pt.x + nx, pt.y, pt.z + nz);
+          const dirX = forward ? -tangent.x : tangent.x;
+          const dirZ = forward ? -tangent.z : tangent.z;
+          car.rotation.y = Math.atan2(dirX, dirZ);
+        });
+      });
+    }
   }
 
   setTimePreset(preset) {
