@@ -825,6 +825,205 @@ export class CityScene {
         this.proceduralGroup.add(mesh);
       });
     }
+
+    // 6. Procedural Infill Urban Fabric (Tahap 2):
+    // Fills empty pockets across Tanah Abang, Cideng, Tomang, Tanjung Duren, Kemanggisan, and Palmerah
+    this.buildInfillUrbanFabric(osm, sharedMaterials, bldMats);
+  }
+
+  /**
+   * Procedural Infill Urban Fabric (Tahap 2):
+   * Fills empty pockets across Tanah Abang, Cideng, Tomang, Tanjung Duren, Kemanggisan, and Palmerah
+   * with authentic Jakarta ruko, residential townhouses, and commercial mid-rises using high-performance InstancedMesh.
+   */
+  buildInfillUrbanFabric(osm, sharedMaterials, bldMats) {
+    const waterPoints = [];
+    if (osm.waterways) {
+      osm.waterways.forEach((w) => w.p && w.p.forEach((pt) => waterPoints.push(pt)));
+    }
+
+    const roadPoints = [];
+    if (osm.roads) {
+      osm.roads
+        .filter((r) => ['motorway', 'trunk', 'primary'].includes(r.t))
+        .forEach((r) => r.p && r.p.forEach((pt) => roadPoints.push(pt)));
+    }
+
+    const bldgCenters = [];
+    if (osm.buildings) {
+      osm.buildings.forEach((b) => {
+        if (b.p && b.p.length >= 3) {
+          bldgCenters.push([
+            b.p.reduce((s, p) => s + p[0], 0) / b.p.length,
+            b.p.reduce((s, p) => s + p[1], 0) / b.p.length
+          ]);
+        }
+      });
+    }
+
+    const landmarks = JAKARTA_LANDMARKS.map((l) => [l.position[0], l.position[2], l.labelHeight || 40]);
+
+    const isClear = (x, z, r = 8) => {
+      for (let i = 0; i < landmarks.length; i++) {
+        const [lx, lz, lr] = landmarks[i];
+        if (Math.hypot(x - lx, z - lz) < lr * 0.85 + r) return false;
+      }
+      for (let i = 0; i < waterPoints.length; i++) {
+        const [wx, wz] = waterPoints[i];
+        if (Math.hypot(x - wx, z - wz) < 14 + r) return false;
+      }
+      for (let i = 0; i < roadPoints.length; i++) {
+        const [rx, rz] = roadPoints[i];
+        if (Math.hypot(x - rx, z - rz) < 11 + r) return false;
+      }
+      for (let i = 0; i < bldgCenters.length; i++) {
+        const [bx, bz] = bldgCenters[i];
+        if (Math.hypot(x - bx, z - bz) < 12 + r) return false;
+      }
+      return true;
+    };
+
+    // The 6 designated void zones
+    const zones = [
+      // Zona 1: Tanah Abang & Kebon Kacang
+      { minX: -240, maxX: -45, minZ: -190, maxZ: 10, stepX: 16, stepZ: 18, type: 'commercial-ruko' },
+      // Zona 2: Cideng, Petamburan & Jatipulo
+      { minX: -340, maxX: -170, minZ: -370, maxZ: -100, stepX: 18, stepZ: 18, type: 'mixed-ruko' },
+      // Zona 3: Tomang Pemukiman & Mandala
+      { minX: -420, maxX: -250, minZ: -320, maxZ: -150, stepX: 16, stepZ: 16, type: 'residential' },
+      // Zona 4: Tanjung Duren & Kemanggisan Utara
+      { minX: -580, maxX: -380, minZ: -360, maxZ: -140, stepX: 18, stepZ: 18, type: 'tanjung-duren' },
+      // Zona 5: Kemanggisan & Sekitar Kampus BINUS
+      { minX: -560, maxX: -340, minZ: -130, maxZ: 130, stepX: 18, stepZ: 18, type: 'kemanggisan' },
+      // Zona 6: Palmerah & Senayan Barat (Belakang DPR)
+      { minX: -380, maxX: -170, minZ: 130, maxZ: 370, stepX: 18, stepZ: 20, type: 'palmerah' }
+    ];
+
+    const instances = [];
+    zones.forEach((z) => {
+      for (let x = z.minX; x <= z.maxX; x += z.stepX) {
+        for (let zi = z.minZ; zi <= z.maxZ; zi += z.stepZ) {
+          const jx = x + Math.sin(x * 12.3 + zi) * (z.stepX * 0.12);
+          const jz = zi + Math.cos(zi * 8.7 + x) * (z.stepZ * 0.12);
+          if (isClear(jx, jz, 7)) {
+            const seed = Math.sin(jx * 7.1 + jz * 13.9);
+            const rand = seed - Math.floor(seed);
+            let w, d, h, style;
+
+            if (z.type === 'commercial-ruko') {
+              w = 11 + rand * 4;
+              d = 13 + (1 - rand) * 5;
+              h = 12 + rand * 10;
+              style = rand > 0.4 ? 'ruko' : 'midRise';
+            } else if (z.type === 'mixed-ruko') {
+              w = 12 + rand * 6;
+              d = 14 + (1 - rand) * 6;
+              h = 10 + rand * 16;
+              style = rand > 0.6 ? 'midRise' : 'ruko';
+            } else if (z.type === 'residential') {
+              w = 10 + rand * 4;
+              d = 12 + (1 - rand) * 4;
+              h = 7 + rand * 5;
+              style = 'residential';
+            } else if (z.type === 'tanjung-duren') {
+              w = 12 + rand * 5;
+              d = 14 + (1 - rand) * 6;
+              h = 11 + rand * 13;
+              style = rand > 0.5 ? 'ruko' : 'residential';
+            } else if (z.type === 'kemanggisan') {
+              w = 10 + rand * 5;
+              d = 12 + (1 - rand) * 5;
+              h = 8 + rand * 9;
+              style = rand > 0.7 ? 'ruko' : 'residential';
+            } else {
+              w = 13 + rand * 6;
+              d = 14 + (1 - rand) * 6;
+              h = 11 + rand * 15;
+              style = rand > 0.5 ? 'midRise' : 'ruko';
+            }
+
+            instances.push({ x: jx, z: jz, w, d, h, style, rand });
+          }
+        }
+      }
+    });
+
+    if (instances.length === 0) return;
+
+    // High performance InstancedMesh: renders all 300+ infill buildings in just 3 draw calls!
+    const rukoInstances = instances.filter((i) => i.style === 'ruko');
+    const resInstances = instances.filter((i) => i.style === 'residential');
+    const midInstances = instances.filter((i) => i.style === 'midRise');
+
+    const baseBoxGeo = new THREE.BoxGeometry(1, 1, 1);
+    const dummy = new THREE.Object3D();
+
+    // Ruko procedural texture with warm night emissive windows
+    const { diffuseTexture: rukoDiff, emissiveTexture: rukoEmis } = TextureGenerator.createFacadeTexture({
+      style: 'modern-blue',
+      floors: 4,
+      windowsAcross: 4,
+      litWindowRatio: 0.55
+    });
+    const rukoMat = new THREE.MeshStandardMaterial({
+      map: rukoDiff,
+      emissiveMap: rukoEmis,
+      emissive: 0xffd97d,
+      emissiveIntensity: 0,
+      roughness: 0.65,
+      metalness: 0.15
+    });
+    this.nightMaterials.push(rukoMat);
+
+    // Color palettes for rich visual variety
+    const rukoColors = [
+      new THREE.Color(0xf1f5f9),
+      new THREE.Color(0xe2e8f0),
+      new THREE.Color(0xdbeafe),
+      new THREE.Color(0xfef3c7),
+      new THREE.Color(0xe0e7ff),
+      new THREE.Color(0xf3e8ff)
+    ];
+    const resColors = [
+      new THREE.Color(0xb45309),
+      new THREE.Color(0x9a3412),
+      new THREE.Color(0xc2410c),
+      new THREE.Color(0x78350f),
+      new THREE.Color(0xd97706)
+    ];
+    const midColors = [
+      new THREE.Color(0x334155),
+      new THREE.Color(0x475569),
+      new THREE.Color(0x1e293b),
+      new THREE.Color(0x0f766e),
+      new THREE.Color(0x0369a1)
+    ];
+
+    const createInstancedGroup = (list, material, colorPalette) => {
+      if (list.length === 0) return;
+      const mesh = new THREE.InstancedMesh(baseBoxGeo, material, list.length);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+
+      list.forEach((item, idx) => {
+        dummy.position.set(item.x, item.h * 0.5, item.z);
+        dummy.scale.set(item.w, item.h, item.d);
+        dummy.rotation.y = (item.rand - 0.5) * 0.15;
+        dummy.updateMatrix();
+
+        mesh.setMatrixAt(idx, dummy.matrix);
+        const col = colorPalette[Math.floor(item.rand * colorPalette.length)];
+        mesh.setColorAt(idx, col);
+      });
+
+      mesh.instanceMatrix.needsUpdate = true;
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+      this.proceduralGroup.add(mesh);
+    };
+
+    createInstancedGroup(rukoInstances, rukoMat, rukoColors);
+    createInstancedGroup(resInstances, bldMats.lowRiseRoofMat, resColors);
+    createInstancedGroup(midInstances, sharedMaterials[0], midColors);
   }
 
   /**
