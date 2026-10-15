@@ -269,6 +269,20 @@ export class CityScene {
       this.createStreetLamp(x - 7.5, z, true);
       this.createStreetLamp(x + 7.5, z, false);
     }
+
+    // 7. Lampu Jalan PJU Koridor Penghubung: Tanah Abang, Palmerah, Tomang, dan Tanjung Duren
+    for (let z = -140; z <= -70; z += 35) {
+      this.createStreetLamp(-125, z, true);
+    }
+    for (let z = 220; z <= 290; z += 35) {
+      this.createStreetLamp(-285, z, true);
+    }
+    for (let x = -380; x <= -260; x += 40) {
+      this.createStreetLamp(x, -305, false);
+    }
+    for (let z = -320; z <= -240; z += 40) {
+      this.createStreetLamp(-495, z, true);
+    }
   }
 
   /**
@@ -1226,6 +1240,43 @@ export class CityScene {
     for (let i = 0; i < 6; i++) {
       const angle = (i / 6) * Math.PI * 2;
       this.createTree(-195 + Math.cos(angle) * 22, 470 + Math.sin(angle) * 22, foliageMat, trunkMat);
+    }
+
+    // 7. Jalur Hijau Bantaran Kanal Banjir Barat (KBB Green River Corridor)
+    // Dari Karet melewati Tanah Abang hingga Jatipulo & Tomang
+    const kbbGreenPoints = [
+      [-105, 75], [-115, 60], [-130, 35], [-145, 10], [-158, -25], [-162, -55],
+      [-172, -95], [-180, -135], [-190, -170], [-210, -215], [-230, -260], [-245, -295]
+    ];
+    kbbGreenPoints.forEach(([kx, kz]) => {
+      this.createTree(kx - 7, kz, foliageMat, trunkMat, 1.1);
+      this.createTree(kx + 7, kz, foliageMat, trunkMat, 1.1);
+    });
+
+    // 8. Koridor Penghijauan Jalan Letjen S. Parman (Grogol -> Tomang -> Slipi)
+    for (let z = -385; z <= 65; z += 35) {
+      const t = (z + 385) / 450;
+      const x = -482 + t * 152;
+      this.createTree(x - 9.5, z, foliageMat, trunkMat, 1.1);
+      this.createTree(x + 9.5, z, foliageMat, trunkMat, 1.1);
+    }
+
+    // 9. Ruang Terbuka Hijau & Lanskap Palmerah (Sekitar Stasiun & Belakang DPR/MPR)
+    for (let z = 225; z <= 285; z += 20) {
+      this.createTree(-295, z, foliageMat, trunkMat, 1.15);
+      this.createTree(-275, z, foliageMat, trunkMat, 1.05);
+    }
+
+    // 10. Ruang Terbuka Hijau Kampus BINUS & Kemanggisan
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2;
+      this.createTree(-480 + Math.cos(angle) * 22, 25 + Math.sin(angle) * 22, foliageMat, trunkMat, 1.05);
+    }
+
+    // 11. Ruang Terbuka Hijau Tanjung Duren & Tribeca Park Podomoro
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2;
+      this.createTree(-465 + Math.cos(angle) * 16, -245 + Math.sin(angle) * 16, foliageMat, trunkMat, 1.2);
     }
   }
 

@@ -26,12 +26,12 @@ export class LightingManager {
     this.sunLight.shadow.camera.near = 10;
     this.sunLight.shadow.camera.far = 1200;
 
-    const d = 480;
+    const d = 620;
     this.sunLight.shadow.camera.left = -d;
     this.sunLight.shadow.camera.right = d;
     this.sunLight.shadow.camera.top = d;
     this.sunLight.shadow.camera.bottom = -d;
-    this.sunLight.shadow.bias = -0.0005;
+    this.sunLight.shadow.bias = -0.0004;
 
     this.scene.add(this.sunLight);
 
