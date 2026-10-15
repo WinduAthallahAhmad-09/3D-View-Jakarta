@@ -74,7 +74,11 @@ class JakartaApp {
     this.ui = new UIManager({
       onSelectPreset: (preset) => {
         if (preset.cameraPosition && preset.cameraTarget) {
-          this.cameraController.flyTo(preset.cameraPosition, preset.cameraTarget);
+          this.cameraController.flyTo(
+            preset.cameraPosition,
+            preset.cameraTarget,
+            preset.duration || 1.6
+          );
         }
       },
       onTimeChange: (preset) => {

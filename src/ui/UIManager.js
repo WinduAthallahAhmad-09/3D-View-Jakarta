@@ -480,8 +480,9 @@ export class UIManager {
     if (id === 'aerial') {
       this.hideLandmarkDetails();
       this.onSelectPreset({
-        cameraPosition: [-160, 360, 620],
-        cameraTarget: [0, 20, 50]
+        cameraPosition: [-180, 480, 750],
+        cameraTarget: [-160, 25, 40],
+        duration: 1.8
       });
       return;
     }
