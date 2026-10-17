@@ -28,6 +28,7 @@ export class CityScene {
     this.buildRoadNetwork();
     this.buildElevatedRailway();
     this.buildSouthJakartaCorridor();
+    this.buildSouthJakartaInfillAndParks();
     this.buildLandmarks();
     this.buildUrbanDistricts();
     this.buildStreetVegetation();
@@ -630,6 +631,315 @@ export class CityScene {
       const x = -316 + t * (-364 - (-316));
       this.createTree(x - 15.5, z, foliageMat, trunkMat, 1.1);
       this.createTree(x + 15.5, z, foliageMat, trunkMat, 1.1);
+    }
+  }
+
+  /**
+   * Tahap 3: Procedural Infill, Permukiman Garden City & Ruang Terbuka Hijau (RTH)
+   * - Taman Literasi Martha Christina Tiahahu (Paviliun Melingkar, Kolam Refleksi, Amphitheater)
+   * - Taman Kota Ayodya & Danau Barito (Danau Sirkular, Air Mancur, Jembatan Kayu, Tabebuya) & Hutan Kota Taman Langsat
+   * - Kompleks Markas Besar Kepolisian RI (Mabes Polri) & Kementerian ATR/BPN
+   * - Kompleks Komersial Blok M Square & Masjid Rooftop Nurul Iman
+   * - 4 Klaster Permukiman Tropis Garden City Kebayoran Baru (Pakubuwono, Raden Patah, Barito, Petogogan)
+   */
+  buildSouthJakartaInfillAndParks() {
+    const grassMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 });
+    const waterMat = new THREE.MeshStandardMaterial({
+      color: 0x0284c7,
+      roughness: 0.15,
+      metalness: 0.8,
+      transparent: true,
+      opacity: 0.82
+    });
+    const stonePathMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.7 });
+    const timberMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.65 });
+    const whiteWallMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
+    const terracottaRoofMat = new THREE.MeshStandardMaterial({ color: 0x7c2d12, roughness: 0.75 });
+    const institutionalGreyMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
+    const goldMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.85, roughness: 0.2 });
+
+    // =========================================================================
+    // 1. TAMAN LITERASI MARTHA CHRISTINA TIAHAHU ([-348.9, 0, 688.3])
+    // =========================================================================
+    const tiahahuGroup = new THREE.Group();
+    tiahahuGroup.position.set(-348.9, 0, 688.3);
+
+    // Circular Park Lawn Base
+    const tiahahuLawn = new THREE.Mesh(new THREE.CylinderGeometry(18, 18.5, 0.35, 32), grassMat);
+    tiahahuLawn.position.y = 0.175;
+    tiahahuLawn.receiveShadow = true;
+    tiahahuGroup.add(tiahahuLawn);
+
+    // Curved Reading Pavilion (Paviliun Melengkung Kayu & Kaca)
+    const pavilionCurveGeo = new THREE.TorusGeometry(11, 2.2, 8, 24, Math.PI * 1.1);
+    pavilionCurveGeo.rotateX(Math.PI / 2);
+    const pavilionRoof = new THREE.Mesh(pavilionCurveGeo, whiteWallMat);
+    pavilionRoof.position.set(0, 4.2, 0);
+    pavilionRoof.castShadow = true;
+    tiahahuGroup.add(pavilionRoof);
+
+    // Pavilion Colonnade Pillars
+    for (let i = 0; i <= 8; i++) {
+      const angle = (i / 8) * Math.PI * 1.1;
+      const colX = Math.cos(angle) * 11;
+      const colZ = Math.sin(angle) * 11;
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.3, 3.8, 8), timberMat);
+      col.position.set(colX, 2.1, colZ);
+      col.castShadow = true;
+      tiahahuGroup.add(col);
+    }
+
+    // Shallow Reflection Pool (Kolam Refleksi Dangkal)
+    const pool = new THREE.Mesh(new THREE.CylinderGeometry(5.5, 5.5, 0.38, 24), waterMat);
+    pool.position.set(0, 0.2, 0);
+    tiahahuGroup.add(pool);
+
+    // Stepped Amphitheater (Plaza Duduk Kayu Komunal)
+    for (let s = 1; s <= 3; s++) {
+      const step = new THREE.Mesh(
+        new THREE.CylinderGeometry(s * 2.4, s * 2.4, 0.3, 16, 1, false, Math.PI * 1.2, Math.PI * 0.7),
+        timberMat
+      );
+      step.position.set(0, s * 0.3, 0);
+      step.receiveShadow = true;
+      tiahahuGroup.add(step);
+    }
+
+    // Perimeter Trees
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2;
+      const tx = Math.cos(angle) * 15.5;
+      const tz = Math.sin(angle) * 15.5;
+      this.createTree(-348.9 + tx, 688.3 + tz, new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.85 }), timberMat, 0.95);
+    }
+    this.proceduralGroup.add(tiahahuGroup);
+
+    // =========================================================================
+    // 2. TAMAN KOTA AYODYA & DANAU BARITO ([-416.6, 0, 695.4])
+    // =========================================================================
+    const ayodyaGroup = new THREE.Group();
+    ayodyaGroup.position.set(-416.6, 0, 695.4);
+
+    // Circular Park Base
+    const ayodyaLawn = new THREE.Mesh(new THREE.CylinderGeometry(25, 25.5, 0.35, 32), grassMat);
+    ayodyaLawn.position.y = 0.175;
+    ayodyaLawn.receiveShadow = true;
+    ayodyaGroup.add(ayodyaLawn);
+
+    // Circular Artificial Lake Basin (Danau Ayodya)
+    const lake = new THREE.Mesh(new THREE.CylinderGeometry(14, 14, 0.45, 32), waterMat);
+    lake.position.y = 0.23;
+    ayodyaGroup.add(lake);
+
+    // Central Fountain Jet Spray
+    const fountainJet = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.15, 0.4, 4.5, 8),
+      new THREE.MeshBasicMaterial({ color: 0xbae6fd, transparent: true, opacity: 0.85 })
+    );
+    fountainJet.position.set(0, 2.5, 0);
+    ayodyaGroup.add(fountainJet);
+
+    // Curved Wooden Footbridge (Jembatan Titian Lengkung)
+    const bridgeGeo = new THREE.BoxGeometry(3.2, 0.35, 15);
+    const bridge = new THREE.Mesh(bridgeGeo, timberMat);
+    bridge.position.set(4.5, 1.2, 0);
+    bridge.rotation.x = 0.08;
+    bridge.castShadow = true;
+    ayodyaGroup.add(bridge);
+
+    // Jogging Track Stone Ring
+    const trackRing = new THREE.Mesh(new THREE.TorusGeometry(17, 1.4, 6, 32), stonePathMat);
+    trackRing.rotation.x = Math.PI / 2;
+    trackRing.position.y = 0.22;
+    ayodyaGroup.add(trackRing);
+
+    // Ring of Tabebuya Trees (Golden & Pink Blossoms)
+    const tabebuyaGold = new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.75 });
+    const tabebuyaPink = new THREE.MeshStandardMaterial({ color: 0xf472b6, roughness: 0.75 });
+    for (let i = 0; i < 10; i++) {
+      const angle = (i / 10) * Math.PI * 2;
+      const tx = Math.cos(angle) * 21;
+      const tz = Math.sin(angle) * 21;
+      const tabMat = i % 2 === 0 ? tabebuyaGold : tabebuyaPink;
+      this.createTree(-416.6 + tx, 695.4 + tz, tabMat, timberMat, 1.15);
+    }
+    this.proceduralGroup.add(ayodyaGroup);
+
+    // Connected Hutan Kota Taman Langsat (Sisi Utara Ayodya [-416.6, 0, 660])
+    for (let lx = -435; lx <= -395; lx += 15) {
+      for (let lz = 645; lz <= 670; lz += 12) {
+        if (Math.hypot(lx - (-416.6), lz - 695.4) > 26) {
+          this.createTree(lx, lz, new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.9 }), timberMat, 1.3);
+        }
+      }
+    }
+
+    // =========================================================================
+    // 3. KOMPLEKS MABES POLRI ([-260, 0, 625], JL. TRUNOJOYO NO. 3)
+    // =========================================================================
+    const polriGroup = new THREE.Group();
+    polriGroup.position.set(-260, 0, 625);
+
+    // Main Police HQ Tower (8 lantai)
+    const polriMain = new THREE.Mesh(new THREE.BoxGeometry(32, 28, 22), institutionalGreyMat);
+    polriMain.position.set(0, 14, -6);
+    polriMain.castShadow = true;
+    polriMain.receiveShadow = true;
+    polriGroup.add(polriMain);
+
+    // East Wing & West Wing
+    [-19, 19].forEach((wx) => {
+      const wing = new THREE.Mesh(new THREE.BoxGeometry(10, 20, 18), institutionalGreyMat);
+      wing.position.set(wx, 10, -6);
+      wing.castShadow = true;
+      polriGroup.add(wing);
+    });
+
+    // Grand Entrance Portico with Gold Police Emblem
+    const polriPortico = new THREE.Mesh(new THREE.BoxGeometry(14, 6, 8), whiteWallMat);
+    polriPortico.position.set(0, 3, 7);
+    polriPortico.castShadow = true;
+    polriGroup.add(polriPortico);
+
+    const polriEmblem = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.3, 16), goldMat);
+    polriEmblem.rotation.x = Math.PI / 2;
+    polriEmblem.position.set(0, 7.5, 11.2);
+    polriGroup.add(polriEmblem);
+
+    this.proceduralGroup.add(polriGroup);
+
+    // =========================================================================
+    // 4. KEMENTERIAN ATR / BPN ([-300, 0, 580], JL. SISINGAMANGARAJA NO. 2)
+    // =========================================================================
+    const bpnGroup = new THREE.Group();
+    bpnGroup.position.set(-300, 0, 580);
+
+    const bpnTower = new THREE.Mesh(new THREE.BoxGeometry(26, 26, 20), institutionalGreyMat);
+    bpnTower.position.set(0, 13, 0);
+    bpnTower.castShadow = true;
+    bpnTower.receiveShadow = true;
+    bpnGroup.add(bpnTower);
+
+    // White Louvre Fins
+    [-10, -5, 0, 5, 10].forEach((fx) => {
+      const fin = new THREE.Mesh(new THREE.BoxGeometry(0.3, 26, 1.2), whiteWallMat);
+      fin.position.set(fx, 13, 10.6);
+      bpnGroup.add(fin);
+    });
+    this.proceduralGroup.add(bpnGroup);
+
+    // =========================================================================
+    // 5. KOMPLEKS KOMERSIAL BLOK M SQUARE & MASJID ROOFTOP NURUL IMAN ([-295, 0, 715])
+    // =========================================================================
+    const blokMSqGroup = new THREE.Group();
+    blokMSqGroup.position.set(-295, 0, 715);
+
+    // Massive Commercial Podium Block (7 lantai)
+    const squareMall = new THREE.Mesh(
+      new THREE.BoxGeometry(36, 26, 36),
+      new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.6 })
+    );
+    squareMall.position.set(0, 13, 0);
+    squareMall.castShadow = true;
+    squareMall.receiveShadow = true;
+    blokMSqGroup.add(squareMall);
+
+    // Fasad Kaca Retail Podium
+    [6, 12, 18].forEach((ly) => {
+      const glassBand = new THREE.Mesh(
+        new THREE.BoxGeometry(36.2, 2.2, 36.2),
+        new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.8, roughness: 0.2 })
+      );
+      glassBand.position.set(0, ly, 0);
+      blokMSqGroup.add(glassBand);
+    });
+
+    // Masjid Nurul Iman Rooftop di Puncak Mall
+    const masjidRooftop = new THREE.Mesh(new THREE.BoxGeometry(18, 5, 18), whiteWallMat);
+    masjidRooftop.position.set(0, 28.5, 0);
+    masjidRooftop.castShadow = true;
+    blokMSqGroup.add(masjidRooftop);
+
+    // Golden Dome on Rooftop Mosque
+    const masjidDome = new THREE.Mesh(
+      new THREE.SphereGeometry(5.2, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2),
+      goldMat
+    );
+    masjidDome.position.set(0, 31, 0);
+    masjidDome.castShadow = true;
+    blokMSqGroup.add(masjidDome);
+
+    this.proceduralGroup.add(blokMSqGroup);
+
+    // =========================================================================
+    // 6. PERMUKIMAN TROPIS GARDEN CITY KEBAYORAN BARU (MOH. SOESILO, 1948)
+    // =========================================================================
+    // Helper: Build a tropical garden house with authentic terracotta hipped roof
+    const createGardenVilla = (x, z, width = 11, depth = 9, height = 5.2) => {
+      const houseGroup = new THREE.Group();
+      houseGroup.position.set(x, 0, z);
+
+      // White Plastered Wall
+      const walls = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), whiteWallMat);
+      walls.position.set(0, height * 0.5, 0);
+      walls.castShadow = true;
+      walls.receiveShadow = true;
+      houseGroup.add(walls);
+
+      // Terracotta Hipped Roof (Genteng Limasan)
+      const roofGeo = new THREE.ConeGeometry(Math.max(width, depth) * 0.72, 3.6, 4);
+      roofGeo.rotateY(Math.PI / 4);
+      const roof = new THREE.Mesh(roofGeo, terracottaRoofMat);
+      roof.scale.set((width / (Math.max(width, depth) * 0.72)) * 0.65, 1, (depth / (Math.max(width, depth) * 0.72)) * 0.65);
+      roof.position.set(0, height + 1.8, 0);
+      roof.castShadow = true;
+      houseGroup.add(roof);
+
+      // Front Lawn Yard
+      const yard = new THREE.Mesh(new THREE.BoxGeometry(width + 3, 0.1, depth + 3), grassMat);
+      yard.position.set(0, 0.05, 0);
+      yard.receiveShadow = true;
+      houseGroup.add(yard);
+
+      this.proceduralGroup.add(houseGroup);
+    };
+
+    // Cluster 1: Pakubuwono & Hang Tuah (Barat Laut Sisingamangaraja)
+    for (let x = -410; x <= -355; x += 18) {
+      for (let z = 495; z <= 575; z += 18) {
+        if (Math.hypot(x - (-316), z - 478) > 55) {
+          createGardenVilla(x, z, 12, 10, 5.5);
+          this.createTree(x + 7, z + 6, new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 }), timberMat, 0.9);
+        }
+      }
+    }
+
+    // Cluster 2: Raden Patah & Senopati Barat (Timur Laut Sisingamangaraja)
+    for (let x = -305; x <= -230; x += 19) {
+      for (let z = 515; z <= 585; z += 18) {
+        createGardenVilla(x, z, 11, 10, 5.2);
+        this.createTree(x - 6, z + 6, new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.85 }), timberMat, 0.95);
+      }
+    }
+
+    // Cluster 3: Kramat Pela & Barito (Barat Daya CSW, sekitar Ayodya)
+    for (let x = -450; x <= -380; x += 18) {
+      for (let z = 650; z <= 745; z += 18) {
+        if (Math.hypot(x - (-416.6), z - 695.4) > 28) {
+          createGardenVilla(x, z, 12, 9, 5.0);
+          this.createTree(x + 6, z - 5, new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 }), timberMat, 0.9);
+        }
+      }
+    }
+
+    // Cluster 4: Petogogan & Melawai Selatan (Tenggara CSW)
+    for (let x = -280; x <= -200; x += 18) {
+      for (let z = 660; z <= 745; z += 18) {
+        if (Math.hypot(x - (-260), z - 625) > 28 && Math.hypot(x - (-295), z - 715) > 26) {
+          createGardenVilla(x, z, 11, 9, 5.2);
+          this.createTree(x - 6, z + 5, new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.85 }), timberMat, 0.9);
+        }
+      }
     }
   }
 
