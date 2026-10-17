@@ -4,8 +4,8 @@ import { JAKARTA_LANDMARKS } from './src/config/landmarks.js';
 
 console.log('Running test_landmarks.js verification...');
 
-// Check 1: Exactly 45 landmarks
-assert.strictEqual(JAKARTA_LANDMARKS.length, 45, `Expected 45 landmarks, got ${JAKARTA_LANDMARKS.length}`);
+// Check 1: Exactly 51 landmarks
+assert.strictEqual(JAKARTA_LANDMARKS.length, 51, `Expected 51 landmarks, got ${JAKARTA_LANDMARKS.length}`);
 
 // Check 2: Unique IDs and valid properties
 const seenIds = new Set();
@@ -214,4 +214,29 @@ assert.ok(
   'CityScene.js missing TransJakarta Koridor 2 & 5 route'
 );
 
-console.log('✅ All 45 landmarks, Tahap 1, 2, 3 & 4 (100% Jakarta Pusat Complete: KAI Antarkota, Simpang Senen, Infill, Landmarks, Roads, Selective Bloom) verified successfully!');
+// Check 11: Tahap 1 Anchor Landmarks Jakarta Selatan (#46 s.d. #51)
+const southTahap1Anchors = [
+  'patung-dirgantara-pancoran',
+  'menara-saidah',
+  'south-quarter-simatupang',
+  'pondok-indah-mall',
+  'stasiun-mrt-fatmawati',
+  'kemang-village-lifestyle'
+];
+
+southTahap1Anchors.forEach((id) => {
+  const lm = JAKARTA_LANDMARKS.find((l) => l.id === id);
+  assert.ok(lm, `Missing South Jakarta Tahap 1 anchor landmark: ${id}`);
+  assert.ok(lm.name, `Missing name for ${id}`);
+  assert.ok(lm.position && lm.position.length === 3, `Invalid position for ${id}`);
+  assert.ok(citySceneContent.includes(`"${id}": () =>`), `CityScene.js missing builder mapping for ${id}`);
+});
+
+assert.ok(landmarkModelsContent.includes('createPatungDirgantaraPancoran'), 'LandmarkModels.js missing createPatungDirgantaraPancoran');
+assert.ok(landmarkModelsContent.includes('createMenaraSaidah'), 'LandmarkModels.js missing createMenaraSaidah');
+assert.ok(landmarkModelsContent.includes('createSouthQuarterTowers'), 'LandmarkModels.js missing createSouthQuarterTowers');
+assert.ok(landmarkModelsContent.includes('createPondokIndahMall'), 'LandmarkModels.js missing createPondokIndahMall');
+assert.ok(landmarkModelsContent.includes('createStasiunMRTFatmawati'), 'LandmarkModels.js missing createStasiunMRTFatmawati');
+assert.ok(landmarkModelsContent.includes('createKemangVillage'), 'LandmarkModels.js missing createKemangVillage');
+
+console.log('✅ All 51 landmarks, Tahap 1 Jakarta Selatan (Patung Pancoran, Menara Saidah, South Quarter, PIM, MRT Fatmawati, Kemang Village), and 100% Jakarta Pusat verified successfully!');

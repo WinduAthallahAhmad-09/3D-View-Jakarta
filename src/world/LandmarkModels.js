@@ -3178,6 +3178,522 @@ export class LandmarkModels {
 
     return group;
   }
+
+  /**
+   * 46. Simpang Susun Pancoran & Monumen Patung Dirgantara (1966)
+   * Ikon kedirgantaraan nasional karya Edhi Sunarso dengan figur perunggu 11 ton di atas pilar beton lengkung hiperbolik setinggi 27m di tengah interchange Pancoran.
+   */
+  static createPatungDirgantaraPancoran() {
+    const group = new THREE.Group();
+
+    const bronzeMat = new THREE.MeshStandardMaterial({ color: 0x3f3f46, roughness: 0.55, metalness: 0.8 });
+    const pedestalMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.65 });
+    const basinMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.8 });
+    const waterMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.2, metalness: 0.8, transparent: true, opacity: 0.85 });
+    const grassMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 });
+
+    // 1. Central Roundabout Island & Fountain Basin
+    const island = new THREE.Mesh(new THREE.CylinderGeometry(22, 22.5, 0.4, 24), grassMat);
+    island.position.set(0, 0.2, 0);
+    island.receiveShadow = true;
+    group.add(island);
+
+    const basin = new THREE.Mesh(new THREE.CylinderGeometry(12, 12, 0.8, 20), basinMat);
+    basin.position.set(0, 0.4, 0);
+    group.add(basin);
+
+    const water = new THREE.Mesh(new THREE.CylinderGeometry(11.5, 11.5, 0.2, 20), waterMat);
+    water.position.set(0, 0.75, 0);
+    group.add(water);
+
+    // 2. Hyperbolic Curved Concrete Arch Pedestal (Pilar Melengkung Setinggi 27m)
+    // Pancoran arch gracefully leans northward (-Z)
+    const segCount = 7;
+    for (let s = 0; s < segCount; s++) {
+      const t = s / segCount;
+      const y = t * 27.0 + 2.0;
+      const zLean = -Math.pow(t, 1.35) * 6.5;
+      const w = 4.2 * (1 - t * 0.45);
+      const d = 3.2 * (1 - t * 0.4);
+      const h = 27.0 / segCount + 0.3;
+
+      const seg = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), pedestalMat);
+      seg.position.set(0, y, zLean);
+      seg.rotation.x = -t * 0.25;
+      seg.castShadow = true;
+      group.add(seg);
+    }
+
+    // Top Platform Plinth atop pedestal
+    const plinth = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.8, 2.5), pedestalMat);
+    plinth.position.set(0, 27.5, -6.6);
+    plinth.rotation.x = -0.25;
+    group.add(plinth);
+
+    // 3. Bronze Statue of the Soaring Aerospace Man (11-ton figure)
+    const statueGroup = new THREE.Group();
+    statueGroup.position.set(0, 28.2, -6.8);
+
+    // Muscular Torso leaning boldly forward
+    const torso = new THREE.Mesh(new THREE.BoxGeometry(2.0, 3.2, 1.5), bronzeMat);
+    torso.position.set(0, 1.8, 0);
+    torso.rotation.x = -0.3;
+    torso.castShadow = true;
+    statueGroup.add(torso);
+
+    // Heroic Head looking forward
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.75, 10, 10), bronzeMat);
+    head.position.set(0, 3.7, -0.6);
+    statueGroup.add(head);
+
+    // Outstretched Right Arm (pointing straight forward and up to the skies)
+    const rightArm = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.22, 4.0, 8), bronzeMat);
+    rightArm.rotation.x = -Math.PI / 2.8;
+    rightArm.position.set(1.2, 3.2, -1.8);
+    rightArm.castShadow = true;
+    statueGroup.add(rightArm);
+
+    // Sweeping Left Arm (balancing dynamically)
+    const leftArm = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.22, 3.6, 8), bronzeMat);
+    leftArm.rotation.x = Math.PI / 3.5;
+    leftArm.rotation.z = -0.3;
+    leftArm.position.set(-1.2, 2.0, 1.2);
+    leftArm.castShadow = true;
+    statueGroup.add(leftArm);
+
+    // Lunging Anchor Legs
+    [-0.65, 0.65].forEach((lx) => {
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.35, 2.2, 8), bronzeMat);
+      leg.position.set(lx, 0.9, 0.2);
+      leg.rotation.x = 0.15;
+      statueGroup.add(leg);
+    });
+
+    group.add(statueGroup);
+
+    return group;
+  }
+
+  /**
+   * 47. Menara Saidah & Koridor Cawang-MT Haryono (2001)
+   * Gedung perkantoran legendaris 28 lantai berarsitektur Neo-Klasik Romawi dengan pilar korintia kolosal, patung klasik, dan kubah tembaga megah di tepi Tol Dalam Kota.
+   */
+  static createMenaraSaidah() {
+    const group = new THREE.Group();
+
+    const marbleMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.55 });
+    const rusticatedStoneMat = new THREE.MeshStandardMaterial({ color: 0xd4d4d8, roughness: 0.7 });
+    const copperDomeMat = new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.45, metalness: 0.65 });
+    const goldAccentMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.35, metalness: 0.8 });
+    const romanGlassMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.2, metalness: 0.85 });
+
+    // 1. Rusticated Classical Stone Podium (Lantai 1-4)
+    const podium = new THREE.Mesh(new THREE.BoxGeometry(38, 16, 30), rusticatedStoneMat);
+    podium.position.set(0, 8, 0);
+    podium.castShadow = true;
+    podium.receiveShadow = true;
+    group.add(podium);
+
+    // Colossal Front Portico Colonnade (Pilar Korintia Kolosal)
+    [-15, -10, -5, 0, 5, 10, 15].forEach((cx) => {
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.75, 15, 12), marbleMat);
+      col.position.set(cx, 8.5, 16);
+      col.castShadow = true;
+      group.add(col);
+
+      // Ornate Gold Capital & Plinth
+      [1.2, 15.5].forEach((cy) => {
+        const cap = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.8, 1.6), goldAccentMat);
+        cap.position.set(cx, cy, 16);
+        group.add(cap);
+      });
+    });
+
+    // Triangular Pediment over Portico
+    const pedimentGeo = new THREE.ConeGeometry(18, 5, 4);
+    pedimentGeo.rotateY(Math.PI / 4);
+    const pediment = new THREE.Mesh(pedimentGeo, marbleMat);
+    pediment.scale.set(1.1, 1, 0.3);
+    pediment.position.set(0, 18.5, 15.5);
+    pediment.castShadow = true;
+    group.add(pediment);
+
+    // 2. Main Tower Shaft (28 Lantai Neo-Klasik)
+    const shaft = new THREE.Mesh(new THREE.BoxGeometry(28, 70, 24), marbleMat);
+    shaft.position.set(0, 51, 0);
+    shaft.castShadow = true;
+    shaft.receiveShadow = true;
+    group.add(shaft);
+
+    // Arched Roman Window Bands
+    for (let wy = 22; wy <= 82; wy += 8) {
+      [-14.1, 14.1].forEach((wx) => {
+        const winSide = new THREE.Mesh(new THREE.BoxGeometry(0.3, 4.5, 18), romanGlassMat);
+        winSide.position.set(wx, wy, 0);
+        group.add(winSide);
+      });
+
+      const winFront = new THREE.Mesh(new THREE.BoxGeometry(20, 4.5, 0.3), romanGlassMat);
+      winFront.position.set(0, wy, 12.1);
+      group.add(winFront);
+
+      // Classical Cornice Balcony Moulding
+      const cornice = new THREE.Mesh(new THREE.BoxGeometry(29.5, 0.6, 25.5), rusticatedStoneMat);
+      cornice.position.set(0, wy + 2.8, 0);
+      group.add(cornice);
+    }
+
+    // 3. Classical Stepped Attic Crown & Copper Cupola Dome
+    const attic = new THREE.Mesh(new THREE.BoxGeometry(22, 9, 18), marbleMat);
+    attic.position.set(0, 90.5, 0);
+    group.add(attic);
+
+    // Arched Colonnade Cupola Rotunda
+    const cupolaBase = new THREE.Mesh(new THREE.CylinderGeometry(6.5, 7.5, 5, 16), marbleMat);
+    cupolaBase.position.set(0, 97.5, 0);
+    group.add(cupolaBase);
+
+    // Weathered Green Copper Roman Dome
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(6.2, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2), copperDomeMat);
+    dome.position.set(0, 100, 0);
+    dome.castShadow = true;
+    group.add(dome);
+
+    // Golden Roman Spire Finial
+    const finial = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.45, 6, 8), goldAccentMat);
+    finial.position.set(0, 106, 0);
+    group.add(finial);
+
+    return group;
+  }
+
+  /**
+   * 48. South Quarter Towers (SQ) & CBD TB Simatupang (2015)
+   * Mahakarya arsitektur hijau dunia karya WS Atkins: 3 menara spiral elips berfasad kisi-kisi louvre surya terhubung dengan kanopi kubah The Dome.
+   */
+  static createSouthQuarterTowers() {
+    const group = new THREE.Group();
+
+    const louvreMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35 });
+    const solarGlassMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.15, metalness: 0.88 });
+    const canopyMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, metalness: 0.7, transparent: true, opacity: 0.75 });
+    const courtyardMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+    const waterMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.15, metalness: 0.85 });
+    const lawnMat = new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.85 });
+
+    // 1. Landscaped Ground Podium & Reflective Courtyard
+    const groundDeck = new THREE.Mesh(new THREE.BoxGeometry(90, 0.6, 90), courtyardMat);
+    groundDeck.position.set(0, 0.3, 0);
+    groundDeck.receiveShadow = true;
+    group.add(groundDeck);
+
+    // Central Circular Reflective Water Pool
+    const pool = new THREE.Mesh(new THREE.CylinderGeometry(14, 14, 0.4, 24), waterMat);
+    pool.position.set(0, 0.6, 0);
+    group.add(pool);
+
+    // 2. "The Dome" Organic Retail Canopy Connecting the Towers
+    const theDome = new THREE.Mesh(new THREE.SphereGeometry(18, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2.2), canopyMat);
+    theDome.position.set(0, 1.0, 0);
+    theDome.scale.set(1.0, 0.45, 1.0);
+    group.add(theDome);
+
+    // 3. Three Distinct Elliptical Towers (WS Atkins Triple Synergy)
+    // Arranged in harmonious triangular symmetry
+    const towerConfigs = [
+      { x: -24, z: -18, rot: 0.35, height: 82, floors: 22 },
+      { x: 24, z: -18, rot: -0.35, height: 76, floors: 20 },
+      { x: 0, z: 25, rot: Math.PI, height: 72, floors: 19 }
+    ];
+
+    towerConfigs.forEach((cfg) => {
+      const towerGroup = new THREE.Group();
+
+      // Elliptical Glass Core
+      const coreGeo = new THREE.CylinderGeometry(11, 12, cfg.height, 24);
+      coreGeo.scale(1.45, 1.0, 0.95);
+      const core = new THREE.Mesh(coreGeo, solarGlassMat);
+      core.position.set(0, cfg.height * 0.5, 0);
+      core.castShadow = true;
+      towerGroup.add(core);
+
+      // Signature Horizontal Solar Louvre Rings (WS Atkins Parametric Sunshade)
+      const ringCount = Math.floor(cfg.height / 3.8);
+      for (let r = 1; r < ringCount; r++) {
+        const ry = r * 3.8;
+        const ringGeo = new THREE.TorusGeometry(12.2, 0.35, 6, 24);
+        ringGeo.rotateX(Math.PI / 2);
+        ringGeo.scale(1.48, 1.0, 0.98);
+        const ring = new THREE.Mesh(ringGeo, louvreMat);
+        ring.position.set(0, ry, 0);
+        towerGroup.add(ring);
+      }
+
+      // Slanted Aerodynamic Crown with Integrated Louvres
+      const crown = new THREE.Mesh(new THREE.CylinderGeometry(9, 11.5, 6, 20), louvreMat);
+      crown.scale.set(1.45, 1.0, 0.95);
+      crown.position.set(0, cfg.height + 3, 0);
+      crown.rotation.x = -0.15;
+      towerGroup.add(crown);
+
+      towerGroup.position.set(cfg.x, 0, cfg.z);
+      towerGroup.rotation.y = cfg.rot;
+      group.add(towerGroup);
+    });
+
+    return group;
+  }
+
+  /**
+   * 49. Pusat Perbelanjaan & Kompleks Pondok Indah (PIM 1-3 & Skywalk)
+   * Megamall mewah Jakarta Selatan: PIM 1 beratap mediterania, PIM 2-3 modern, jembatan Skywalk kaca melintasi jalan, dan Bundaran Pondok Indah berhiaskan palem.
+   */
+  static createPondokIndahMall() {
+    const group = new THREE.Group();
+
+    const terracottaMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.75 });
+    const beigeMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.6 });
+    const modernGlassMat = new THREE.MeshStandardMaterial({ color: 0x0369a1, roughness: 0.18, metalness: 0.88 });
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.75, roughness: 0.35 });
+    const skywalkGlassMat = new THREE.MeshStandardMaterial({ color: 0x7dd3fc, transparent: true, opacity: 0.65, roughness: 0.1, metalness: 0.9 });
+    const palmTrunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
+    const palmLeafMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.7 });
+
+    // 1. PIM 1 Commercial Podium (Sisi Barat Boulevard, X=-28)
+    const pim1 = new THREE.Mesh(new THREE.BoxGeometry(40, 16, 65), beigeMat);
+    pim1.position.set(-28, 8, -10);
+    pim1.castShadow = true;
+    pim1.receiveShadow = true;
+    group.add(pim1);
+
+    // PIM 1 Distinctive Terracotta Gabled Roofs
+    [-20, 0, 20].forEach((rz) => {
+      const roof = new THREE.Mesh(new THREE.ConeGeometry(15, 6, 4), terracottaMat);
+      roof.rotateY(Math.PI / 4);
+      roof.scale.set(1.4, 1.0, 0.75);
+      roof.position.set(-28, 19, -10 + rz);
+      roof.castShadow = true;
+      group.add(roof);
+    });
+
+    // PIM 1 Classic Clock Tower
+    const clockTower = new THREE.Mesh(new THREE.BoxGeometry(6, 32, 6), beigeMat);
+    clockTower.position.set(-28, 16, 24);
+    clockTower.castShadow = true;
+    group.add(clockTower);
+
+    const clockRoof = new THREE.Mesh(new THREE.ConeGeometry(4.5, 6, 4), terracottaMat);
+    clockRoof.rotateY(Math.PI / 4);
+    clockRoof.position.set(-28, 35, 24);
+    group.add(clockRoof);
+
+    // 2. PIM 2 & 3 Contemporary Luxury Podium & Atrium (Sisi Timur Boulevard, X=+28)
+    const pim2 = new THREE.Mesh(new THREE.BoxGeometry(42, 22, 70), modernGlassMat);
+    pim2.position.set(28, 11, -5);
+    pim2.castShadow = true;
+    pim2.receiveShadow = true;
+    group.add(pim2);
+
+    // Menara Pondok Indah High-Rise Office Tower
+    const officeTower = new THREE.Mesh(new THREE.BoxGeometry(26, 65, 26), modernGlassMat);
+    officeTower.position.set(26, 32.5, -30);
+    officeTower.castShadow = true;
+    group.add(officeTower);
+
+    // Curved Crown Screen
+    const crown = new THREE.Mesh(new THREE.BoxGeometry(26.4, 5, 26.4), steelMat);
+    crown.position.set(26, 67.5, -30);
+    group.add(crown);
+
+    // 3. The Iconic Skywalk PIM (Elevated Enclosed Pedestrian Bridge at Y=12m)
+    // Spanning across the boulevard connecting PIM 1 and PIM 2
+    const skywalkDeck = new THREE.Mesh(new THREE.BoxGeometry(56, 4.5, 6.5), steelMat);
+    skywalkDeck.position.set(0, 11.5, 8);
+    skywalkDeck.castShadow = true;
+    group.add(skywalkDeck);
+
+    const skywalkGlass = new THREE.Mesh(new THREE.BoxGeometry(55.6, 3.8, 6.8), skywalkGlassMat);
+    skywalkGlass.position.set(0, 12.0, 8);
+    group.add(skywalkGlass);
+
+    // Skywalk Support Piers in the median
+    const pier = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.4, 10, 8), steelMat);
+    pier.position.set(0, 5, 8);
+    group.add(pier);
+
+    // 4. Bundaran Pondok Indah (Air Mancur & Deretan Palem di Z=48)
+    const roundabout = new THREE.Mesh(new THREE.CylinderGeometry(18, 18.5, 0.4, 24), beigeMat);
+    roundabout.position.set(0, 0.2, 48);
+    group.add(roundabout);
+
+    const fountain = new THREE.Mesh(new THREE.CylinderGeometry(9, 9, 1.0, 16), steelMat);
+    fountain.position.set(0, 0.5, 48);
+    group.add(fountain);
+
+    // Ring of Royal Palms around Bundaran
+    for (let p = 0; p < 8; p++) {
+      const angle = (p / 8) * Math.PI * 2;
+      const px = Math.cos(angle) * 14.5;
+      const pz = 48 + Math.sin(angle) * 14.5;
+
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.35, 7, 6), palmTrunkMat);
+      trunk.position.set(px, 3.5, pz);
+      group.add(trunk);
+
+      const crown = new THREE.Mesh(new THREE.SphereGeometry(1.8, 8, 6), palmLeafMat);
+      crown.scale.set(1.4, 0.6, 1.4);
+      crown.position.set(px, 7.2, pz);
+      group.add(crown);
+    }
+
+    return group;
+  }
+
+  /**
+   * 50. Stasiun MRT Elevated Fatmawati Indomaret & Dipo Lebak Bulus
+   * Stasiun layang transit terbesar di selatan Jakarta dengan kanopi membran aerodinamis, viaduk tinggi Y=14m, peron pulau ganda & jembatan integrasi JPO.
+   */
+  static createStasiunMRTFatmawati() {
+    const group = new THREE.Group();
+
+    const concreteMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.7 });
+    const membraneMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35, side: THREE.DoubleSide });
+    const mrtBlueMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4 });
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.7, roughness: 0.35 });
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2, metalness: 0.85 });
+
+    // 1. Massive V-Shaped Portal Piers (Tiang Penyangga Viaduk Layang Y=14m)
+    [-30, -10, 10, 30].forEach((pz) => {
+      [-6, 6].forEach((px) => {
+        const column = new THREE.Mesh(new THREE.BoxGeometry(1.8, 14, 2.2), concreteMat);
+        column.position.set(px, 7, pz);
+        column.castShadow = true;
+        group.add(column);
+      });
+
+      // Transverse Crosshead Beam
+      const crosshead = new THREE.Mesh(new THREE.BoxGeometry(18, 2.2, 3.0), concreteMat);
+      crosshead.position.set(0, 13.5, pz);
+      crosshead.castShadow = true;
+      group.add(crosshead);
+    });
+
+    // 2. Concourse Level (Lantai Tiket & JPO di Y=7m)
+    const concourse = new THREE.Mesh(new THREE.BoxGeometry(16, 5.5, 60), glassMat);
+    concourse.position.set(0, 7.5, 0);
+    concourse.castShadow = true;
+    group.add(concourse);
+
+    // JPO Skybridge extending across the road to the east
+    const jpo = new THREE.Mesh(new THREE.BoxGeometry(22, 3.2, 4.5), steelMat);
+    jpo.position.set(18, 7.5, 0);
+    group.add(jpo);
+
+    // 3. Platform Level (Lantai Peron & Jalur Rel di Y=14m)
+    const platformDeck = new THREE.Mesh(new THREE.BoxGeometry(19, 2.4, 88), concreteMat);
+    platformDeck.position.set(0, 14.2, 0);
+    platformDeck.castShadow = true;
+    platformDeck.receiveShadow = true;
+    group.add(platformDeck);
+
+    // Island Platform & PSD (Platform Screen Doors)
+    const islandPlat = new THREE.Mesh(new THREE.BoxGeometry(7, 1.2, 75), mrtBlueMat);
+    islandPlat.position.set(0, 15.5, 0);
+    group.add(islandPlat);
+
+    // 4. Aerodynamic Curved Tensile Wave Canopy (Atap Membran Stasiun Fatmawati)
+    const canopyCurve = new THREE.CylinderGeometry(11.5, 12, 86, 24, 1, true, 0, Math.PI);
+    canopyCurve.rotateZ(Math.PI / 2);
+    canopyCurve.scale(0.8, 1.0, 1.0);
+    const canopy = new THREE.Mesh(canopyCurve, membraneMat);
+    canopy.position.set(0, 20.5, 0);
+    canopy.castShadow = true;
+    group.add(canopy);
+
+    // Aerodynamic Blue End Ribs
+    [-43, 43].forEach((ez) => {
+      const archRib = new THREE.Mesh(new THREE.TorusGeometry(10.5, 0.45, 8, 16, Math.PI), mrtBlueMat);
+      archRib.position.set(0, 20.0, ez);
+      group.add(archRib);
+    });
+
+    return group;
+  }
+
+  /**
+   * 51. Kawasan Gaya Hidup Kemang (Kemang Village & Avenue of the Stars)
+   * Superblok terpadu di Kemang: Lippo Mall Kemang, menara hunian The Ritz & The Tiffany, serta promenade kuliner terbuka Avenue of the Stars.
+   */
+  static createKemangVillage() {
+    const group = new THREE.Group();
+
+    const podiumMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.55 });
+    const condoGlassMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2, metalness: 0.85 });
+    const whiteBalconyMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.4 });
+    const woodDeckMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.7 });
+    const tensileCanopyMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4, side: THREE.DoubleSide });
+    const crownMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x0284c7, emissiveIntensity: 0.35 });
+
+    // 1. Lippo Mall Kemang Multi-Tier Commercial Podium
+    const podium = new THREE.Mesh(new THREE.BoxGeometry(68, 20, 52), podiumMat);
+    podium.position.set(0, 10, -5);
+    podium.castShadow = true;
+    podium.receiveShadow = true;
+    group.add(podium);
+
+    // Upper Terraced Retail Deck with Glass Atrium
+    const atrium = new THREE.Mesh(new THREE.BoxGeometry(32, 6, 24), condoGlassMat);
+    atrium.position.set(0, 23, -5);
+    group.add(atrium);
+
+    // 2. High-Rise Luxury Residential Towers
+    // Tower 1: The Ritz Tower (38 Lantai, H=125m)
+    const towerRitz = new THREE.Mesh(new THREE.BoxGeometry(22, 105, 18), condoGlassMat);
+    towerRitz.position.set(-18, 72.5, -8);
+    towerRitz.castShadow = true;
+    group.add(towerRitz);
+
+    // White Balcony Bands every 4 floors
+    for (let by = 26; by <= 120; by += 12) {
+      const balcony = new THREE.Mesh(new THREE.BoxGeometry(22.8, 0.6, 18.8), whiteBalconyMat);
+      balcony.position.set(-18, by, -8);
+      group.add(balcony);
+    }
+
+    // Glowing Crown
+    const ritzCrown = new THREE.Mesh(new THREE.BoxGeometry(22.4, 4, 18.4), crownMat);
+    ritzCrown.position.set(-18, 127, -8);
+    group.add(ritzCrown);
+
+    // Tower 2: The Tiffany Tower (30 Lantai, H=98m)
+    const towerTiffany = new THREE.Mesh(new THREE.BoxGeometry(20, 78, 18), condoGlassMat);
+    towerTiffany.position.set(18, 59, -8);
+    towerTiffany.castShadow = true;
+    group.add(towerTiffany);
+
+    const tiffanyCrown = new THREE.Mesh(new THREE.BoxGeometry(20.4, 3.5, 18.4), crownMat);
+    tiffanyCrown.position.set(18, 99.5, -8);
+    group.add(tiffanyCrown);
+
+    // 3. "Avenue of the Stars" Outdoor Alfresco Dining Promenade
+    const diningDeck = new THREE.Mesh(new THREE.BoxGeometry(50, 0.5, 26), woodDeckMat);
+    diningDeck.position.set(0, 0.3, 26);
+    diningDeck.receiveShadow = true;
+    group.add(diningDeck);
+
+    // Conical Tensile Shading Canopies
+    [-16, 0, 16].forEach((cx) => {
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 7, 8), whiteBalconyMat);
+      pole.position.set(cx, 3.5, 26);
+      group.add(pole);
+
+      const shade = new THREE.Mesh(new THREE.ConeGeometry(4.5, 2.2, 12, 1, true), tensileCanopyMat);
+      shade.position.set(cx, 6.5, 26);
+      group.add(shade);
+    });
+
+    return group;
+  }
 }
 
 

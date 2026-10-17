@@ -1746,7 +1746,13 @@ export class CityScene {
       "stasiun-pasar-senen": () => LandmarkModels.createStasiunPasarSenen(),
       "pasar-senen-jaya": () => LandmarkModels.createPasarSenenJaya(),
       "taman-ismail-marzuki": () => LandmarkModels.createTamanIsmailMarzuki(),
-      "passer-baroe": () => LandmarkModels.createPasserBaroe()
+      "passer-baroe": () => LandmarkModels.createPasserBaroe(),
+      "patung-dirgantara-pancoran": () => LandmarkModels.createPatungDirgantaraPancoran(),
+      "menara-saidah": () => LandmarkModels.createMenaraSaidah(),
+      "south-quarter-simatupang": () => LandmarkModels.createSouthQuarterTowers(),
+      "pondok-indah-mall": () => LandmarkModels.createPondokIndahMall(),
+      "stasiun-mrt-fatmawati": () => LandmarkModels.createStasiunMRTFatmawati(),
+      "kemang-village-lifestyle": () => LandmarkModels.createKemangVillage()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {

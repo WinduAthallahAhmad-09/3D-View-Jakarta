@@ -1014,6 +1014,141 @@ export const JAKARTA_LANDMARKS = [
       "Terkenal sebagai sentra penjahit jas klasik (tailor), toko kacamata tertua, dan kuliner multikultural percampuran Tionghoa, India, dan Betawi.",
       "Terhubung langsung dengan Gedung Kesenian Jakarta (Schouwburg Weltevreden) dan Kantor Filateli Pos Indonesia."
     ]
+  },
+  // =====================================================
+  // ZONA 7: JAKARTA SELATAN (PANCORAN, CAWANG, SIMATUPANG, PONDOK INDAH & KEMANG)
+  // =====================================================
+  {
+    id: "patung-dirgantara-pancoran",
+    name: "Simpang Susun Pancoran & Monumen Patung Dirgantara",
+    shortName: "Patung Pancoran",
+    category: "Monumen Bersejarah & Simpang Susun",
+    tagline: "Ikon Kedirgantaraan Nasional Mahakarya Edhi Sunarso di Simpang Susun Pancoran",
+    height: "38 meter (Pilar Parabola 27m + Patung 11m)",
+    year: "1966",
+    architect: "Edhi Sunarso & Ir. Sutami",
+    location: "Jl. Gatot Subroto & Jl. MT Haryono, Pancoran, Jakarta Selatan",
+    coordinates: { lat: -6.2435, lng: 106.8430 },
+    position: [248.0, 0, 492.0],
+    labelHeight: 48,
+    cameraPosition: [248.0, 65, 570],
+    cameraTarget: [248.0, 22, 492.0],
+    description: "Monumen megah kebanggaan kedirgantaraan Indonesia yang digagas Presiden Soekarno untuk melambangkan keberanian, keperkasaan, dan kejayaan penerbangan bangsa. Memiliki figur perunggu seberat 11 ton yang membentangkan tangan gagah ke arah utara di atas pilar beton lengkung hiperbolik setinggi 27 meter, di tengah perlintasan interchange bertingkat Simpang Susun Pancoran.",
+    facts: [
+      "Digagas langsung oleh Bung Karno dan dipahat oleh pematung legendaris Edhi Sunarso dari Keluarga Arca Yogyakarta.",
+      "Berat patung perunggu mencapai 11 ton dan dirancang mampu menahan terpaan angin kencang serta gempa bumi.",
+      "Menjadi titik temu strategis antara Jalan Tol Dalam Kota, Koridor Gatot Subroto, MT Haryono, dan jalur LRT Jabodebek."
+    ]
+  },
+  {
+    id: "menara-saidah",
+    name: "Menara Saidah & Koridor Cawang-MT Haryono",
+    shortName: "Menara Saidah",
+    category: "Arsitektur Ikonik & Cagar Perkotaan",
+    tagline: "Ikon Megah Neo-Klasik Romawi 28 Lantai Berpilar Korintia Kolosal di MT Haryono",
+    height: "105 meter (28 lantai)",
+    year: "2001",
+    architect: "PT Hutama Karya & Ir. Saidah Abubakar",
+    location: "Jl. MT Haryono Kav. 29, Tebet Timur / Pancoran, Jakarta Selatan",
+    coordinates: { lat: -6.2440, lng: 106.8580 },
+    position: [318.0, 0, 506.0],
+    labelHeight: 110,
+    cameraPosition: [318.0, 95, 580],
+    cameraTarget: [318.0, 45, 506.0],
+    description: "Gedung perkantoran legendaris berarsitektur Neo-Klasik Romawi spektakuler yang menjulang di tepi Jalan Tol Cawang-Grogol. Memiliki ciri khas deretan pilar korintia kolosal, patung-patung marmer bergaya mitologi klasik yang diimpor dari Italia, serta kubah mahkota tembaga berornamen rumit.",
+    facts: [
+      "Mengadopsi gaya arsitektur Romawi kuno dengan pilar-pilar batu marmer dan patung-patung klasik bernilai seni tinggi.",
+      "Diresmikan pada tahun 2001 dan menjadi salah satu siluet gedung paling misterius dan ikonik di Jakarta.",
+      "Berada persis di samping Stasiun KRL Cawang dan jalur layang LRT Jabodebek MT Haryono."
+    ]
+  },
+  {
+    id: "south-quarter-simatupang",
+    name: "South Quarter Towers (SQ) & CBD TB Simatupang",
+    shortName: "South Quarter (SQ)",
+    category: "Pusat Bisnis & Mahakarya Ramah Lingkungan",
+    tagline: "Mahakarya Arsitektur Hijau Dunia WS Atkins: 3 Menara Spiral Berfasad Kisi Surya",
+    height: "115 meter (3 Menara 22 lantai)",
+    year: "2015",
+    architect: "WS Atkins (Inggris) & PT Intiland Development",
+    location: "Jl. R.A. Kartini Kav. 8, Cilandak Barat, Jakarta Selatan",
+    coordinates: { lat: -6.2930, lng: 106.7990 },
+    position: [-330.0, 0, 1060.0],
+    labelHeight: 120,
+    cameraPosition: [-330.0, 105, 1150],
+    cameraTarget: [-330.0, 45, 1060.0],
+    description: "Kompleks superblok bisnis prestisius di koridor CBD TB Simatupang yang dirancang oleh firma arsitek kelas dunia WS Atkins. Terdiri dari 3 menara perkantoran elips yang terinspirasi dari bentuk keranjang rotan tradisional Indonesia, diselimuti selubung louvre kisi-kisi penahan panas matahari berkelanjutan (*solar shading louvers*) dan terhubung dengan kanopi kubah The Dome.",
+    facts: [
+      "Meraih sertifikasi Platinum Greenship dari Green Building Council Indonesia berkat efisiensi energi fasad suryanya.",
+      "Bentuk elips dan kisi-kisi louvre eksterior mampu mereduksi radiasi panas matahari hingga 35 persen tanpa mengurangi pencahayaan alami.",
+      "Menjadi markas perkantoran korporasi multinasional terkemuka di koridor korporat Jalan Tol Lingkar Luar (JORR)."
+    ]
+  },
+  {
+    id: "pondok-indah-mall",
+    name: "Pusat Perbelanjaan & Kompleks Pondok Indah",
+    shortName: "Pondok Indah Mall",
+    category: "Pusat Perbelanjaan Mewah & Gaya Hidup",
+    tagline: "Pionir Mall Mewah Indonesia (PIM 1-3, Skywalk Kaca, Street Gallery & Bundaran PIM)",
+    height: "65 meter (Menara Pondok Indah & Kompleks Mall)",
+    year: "1991 / 2005 / 2021",
+    architect: "DDG (Development Design Group, USA) & PT Metropolitan Kentjana",
+    location: "Jl. Metro Pondok Indah Kav. IV, Pondok Pinang, Kebayoran Lama, Jakarta Selatan",
+    coordinates: { lat: -6.2655, lng: 106.7840 },
+    position: [-510.0, 0, 845.0],
+    labelHeight: 70,
+    cameraPosition: [-510.0, 75, 930],
+    cameraTarget: [-510.0, 25, 845.0],
+    description: "Kompleks perbelanjaan papan atas paling terkemuka di Jakarta Selatan yang membentang di sepanjang Jalan Metro Pondok Indah. Memadukan PIM 1 berarsitektur atap pelana mediterania klasik, PIM 2 modern bertingkat, PIM 3 futuristik dengan arena waterpark, jembatan penyeberangan kaca ikonik (*Skywalk PIM*) yang melintasi jalan raya, serta Bundaran Pondok Indah berhiaskan air mancur dan deretan palem kurma.",
+    facts: [
+      "Merupakan salah satu mall kelas atas pertama dan paling konsisten mempertahankan predikat destinasi belanja keluarga elite Jakarta.",
+      "Skywalk PIM menghubungkan PIM 1, PIM 2, PIM 3, dan Hotel InterContinental melintasi boulevard utama Pondok Indah.",
+      "Berada di tengah kawasan perumahan terencana mandiri pertama di Jakarta Selatan (Kawasan Perumahan Pondok Indah)."
+    ]
+  },
+  {
+    id: "stasiun-mrt-fatmawati",
+    name: "Stasiun MRT Elevated Fatmawati Indomaret & Dipo Lebak Bulus",
+    shortName: "Stasiun MRT Fatmawati",
+    category: "Infrastruktur Transit & Simpul Mobilitas",
+    tagline: "Stasiun Layang MRT Terbesar di Selatan Jakarta & Gerbang Transit Menuju Dipo",
+    height: "26 meter (Viaduk Layang Y=14m + Kanopi Membran Aerodinamis)",
+    year: "2019",
+    architect: "MRT Jakarta & Nippon Koei",
+    location: "Jl. R.A. Kartini / Jl. RS Fatmawati, Cilandak Barat, Jakarta Selatan",
+    coordinates: { lat: -6.2925, lng: 106.7930 },
+    position: [-382.0, 0, 1035.0],
+    labelHeight: 45,
+    cameraPosition: [-382.0, 60, 1115],
+    cameraTarget: [-382.0, 18, 1035.0],
+    description: "Stasiun layang transit terbesar MRT Jakarta di koridor selatan yang melayang megah di atas persimpangan Jalan RS Fatmawati dan Jalan Tol JORR Simatupang. Memiliki arsitektur atap bentang lebar aerodinamis, peron pulau ganda, wesel percabangan turnback track, dan terhubung dengan Dipo MRT Lebak Bulus.",
+    facts: [
+      "Menjadi stasiun perpindahan penting bagi ribuan komuter dari kawasan Depok, Tangerang Selatan, dan Jakarta Selatan.",
+      "Stasiun dibangun melayang pada ketinggian lebih dari 14 meter di atas permukaan jalan raya untuk melintasi simpang susun tol.",
+      "Dilengkapi fasilitas park and ride serta integrasi antarmoda bus pengumpan TransJakarta."
+    ]
+  },
+  {
+    id: "kemang-village-lifestyle",
+    name: "Kawasan Gaya Hidup Kemang (Kemang Village & Avenue of the Stars)",
+    shortName: "Kemang Village",
+    category: "Superblok Gaya Hidup & Komersial",
+    tagline: "Pusat Gaya Hidup Trendi, Residensial & Kuliner Alfresco di Jantung Kemang",
+    height: "145 meter (Menara Kondominium The Ritz 38 lantai)",
+    year: "2012",
+    architect: "DP Architects & PT Lippo Karawaci",
+    location: "Jl. Pangeran Antasari No. 36, Bangka, Mampang Prapatan, Jakarta Selatan",
+    coordinates: { lat: -6.2605, lng: 106.8145 },
+    position: [-95.0, 0, 775.0],
+    labelHeight: 115,
+    cameraPosition: [-95.0, 95, 860],
+    cameraTarget: [-95.0, 40, 775.0],
+    description: "Superblok terpadu seluas 15 hektare yang menjadi magnet gaya hidup dan hiburan di kawasan Kemang. Memadukan Lippo Mall Kemang, menara residensial mewah (The Ritz, The Tiffany, The Empire), Sekolah Pelita Harapan, dan area kuliner terbuka semi-outdoor Avenue of the Stars yang terkenal dengan panggung musik live dan atmosfer tropis kosmopolitan.",
+    facts: [
+      "Avenue of the Stars merupakan salah satu area kuliner dan bersantai alfresco paling populer di kalangan ekspatriat dan anak muda Jakarta Selatan.",
+      "Menara hunian Kemang Village merupakan salah satu kluster apartemen tertinggi di kawasan Jakarta Selatan bagian tengah.",
+      "Terletak di tengah kantong kebudayaan, galeri seni kontemporer, dan sentra kuliner legendaris kawasan Kemang."
+    ]
   }
 ];
 
