@@ -120,4 +120,38 @@ assert.ok(landmarkModelsContent.includes("'monas-flame'"), 'LandmarkModels.js mi
 assert.ok(landmarkModelsContent.includes("'menara-bca-crown'"), 'LandmarkModels.js missing menara-bca-crown');
 assert.ok(landmarkModelsContent.includes("'led-taman-anggrek'"), 'LandmarkModels.js missing led-taman-anggrek');
 
-console.log('✅ All 45 landmarks, Central Jakarta East builders, South Jakarta builders, MRT Ratangga, Koridor 13, Aerial View, and Selective Bloom Effect verified successfully!');
+// Check 8: Tahap 2 Jaringan Jalan Arteri & Jalur Rel Kereta Api Jakarta Pusat Bagian Timur
+assert.ok(
+  citySceneContent.includes('this.buildCentralJakartaEastCorridor()'),
+  'CityScene.js missing buildCentralJakartaEastCorridor call in init'
+);
+assert.ok(
+  citySceneContent.includes('buildCentralJakartaEastCorridor()'),
+  'CityScene.js missing buildCentralJakartaEastCorridor method'
+);
+assert.ok(
+  citySceneContent.includes('Benyamin Sueb Dual Carriageway'),
+  'CityScene.js missing Benyamin Sueb Dual Carriageway'
+);
+assert.ok(
+  citySceneContent.includes('Double Track Railway Senen'),
+  'CityScene.js missing Double Track Railway Senen'
+);
+assert.ok(
+  citySceneContent.includes('Simpang Lima Senen Interchange'),
+  'CityScene.js missing Simpang Lima Senen Interchange'
+);
+assert.ok(
+  citySceneContent.includes('Flyover Simpang Lima Senen'),
+  'CityScene.js missing Flyover Simpang Lima Senen'
+);
+assert.ok(
+  citySceneContent.includes('Kali Ciliwung Kwitang'),
+  'CityScene.js missing Kali Ciliwung Kwitang'
+);
+assert.ok(
+  citySceneContent.includes('this.addRoundaboutRing(267.2, -517.0'),
+  'CityScene.js missing Bundaran Ondel-Ondel roundabout ring'
+);
+
+console.log('✅ All 45 landmarks, Tahap 1 & 2 Central Jakarta East corridors & railways, South Jakarta builders, MRT Ratangga, Koridor 13, Aerial View, and Selective Bloom Effect verified successfully!');

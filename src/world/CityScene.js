@@ -28,6 +28,7 @@ export class CityScene {
     this.buildWaterways();
     this.buildRoadNetwork();
     this.buildElevatedRailway();
+    this.buildCentralJakartaEastCorridor();
     this.buildSouthJakartaCorridor();
     this.buildSouthJakartaInfillAndParks();
     this.buildLandmarks();
@@ -355,6 +356,433 @@ export class CityScene {
       stRoof.castShadow = true;
       this.proceduralGroup.add(stRoof);
     });
+  }
+
+  /**
+   * Tahap 2: Jaringan Jalan Arteri & Jalur Rel Kereta Api Jakarta Pusat Bagian Timur
+   * 1. Boulevard Ganda Jl. Benyamin Sueb Kemayoran (Dual Carriageway + 18m Green Runway Median)
+   * 2. Bundaran Ondel-Ondel & Akses Jl. HBR Motik / Jl. Angkasa / Jl. Garuda
+   * 3. Koridor Rel Kereta Api Ganda Senen - Kemayoran (Double Track Railway At-Grade + LAA Catenary)
+   * 4. Simpang Lima Senen Interchange & Flyover Senen (h=5.6m)
+   * 5. Aliran Kali Ciliwung Kwitang – Passer Baroe – Gunung Sahari & Jembatan Kanal
+   * 6. Koridor Jl. Cikini Raya & Menteng Timur (Akses TIM) & Jl. Diponegoro
+   * 7. Sistem Pencahayaan PJU & Penghijauan Palem Raja Boulevard Kemayoran
+   */
+  buildCentralJakartaEastCorridor() {
+    const roadMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      roughness: 0.78,
+      metalness: 0.12
+    });
+    const sidewalkMat = new THREE.MeshStandardMaterial({
+      map: TextureGenerator.createSidewalkTexture(),
+      roughness: 0.8
+    });
+    const medianGrassMat = new THREE.MeshStandardMaterial({
+      color: 0x15803d,
+      roughness: 0.85
+    });
+    const flyoverMat = new THREE.MeshStandardMaterial({
+      color: 0x475569,
+      roughness: 0.65
+    });
+    const pierMat = new THREE.MeshStandardMaterial({
+      color: 0x64748b,
+      roughness: 0.7
+    });
+    const railBallastMat = new THREE.MeshStandardMaterial({
+      color: 0x334155,
+      roughness: 0.95
+    });
+    const sleeperMat = new THREE.MeshStandardMaterial({
+      color: 0x475569,
+      roughness: 0.8
+    });
+    const steelRailMat = new THREE.MeshStandardMaterial({
+      color: 0x94a3b8,
+      metalness: 0.88,
+      roughness: 0.25
+    });
+    const catenaryMat = new THREE.MeshStandardMaterial({
+      color: 0x64748b,
+      metalness: 0.75,
+      roughness: 0.35
+    });
+    const waterMat = new THREE.MeshStandardMaterial({
+      color: 0x0891b2,
+      roughness: 0.1,
+      metalness: 0.75
+    });
+    const canalWallMat = new THREE.MeshStandardMaterial({
+      color: 0x475569,
+      roughness: 0.85
+    });
+    const bridgeMat = new THREE.MeshStandardMaterial({
+      color: 0x334155,
+      roughness: 0.8
+    });
+    const foliageMat = new THREE.MeshStandardMaterial({
+      color: 0x166534,
+      roughness: 0.85
+    });
+    const trunkMat = new THREE.MeshStandardMaterial({
+      color: 0x543d2b,
+      roughness: 0.9
+    });
+
+    // Helper: Build a multi-lane road segment with sidewalks and optional median
+    const buildEastRoad = (x1, z1, x2, z2, roadWidth = 18, hasMedian = false, medianWidth = 2.4) => {
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      if (len < 0.1) return;
+      const angle = Math.atan2(dx, dz);
+      const mx = (x1 + x2) * 0.5;
+      const mz = (z1 + z2) * 0.5;
+
+      // Asphalt
+      const road = new THREE.Mesh(new THREE.BoxGeometry(roadWidth, 0.22, len + 0.3), roadMat);
+      road.position.set(mx, 0.11, mz);
+      road.rotation.y = angle;
+      road.receiveShadow = true;
+      this.proceduralGroup.add(road);
+
+      // Sidewalks
+      const swWidth = 3.2;
+      [-1, 1].forEach((dir) => {
+        const sw = new THREE.Mesh(new THREE.BoxGeometry(swWidth, 0.35, len + 0.3), sidewalkMat);
+        const perpX = Math.cos(angle) * (roadWidth * 0.5 + swWidth * 0.5) * dir;
+        const perpZ = -Math.sin(angle) * (roadWidth * 0.5 + swWidth * 0.5) * dir;
+        sw.position.set(mx + perpX, 0.175, mz + perpZ);
+        sw.rotation.y = angle;
+        sw.receiveShadow = true;
+        this.proceduralGroup.add(sw);
+      });
+
+      // Median
+      if (hasMedian && roadWidth >= 16) {
+        const median = new THREE.Mesh(new THREE.BoxGeometry(medianWidth, 0.32, len), medianGrassMat);
+        median.position.set(mx, 0.16, mz);
+        median.rotation.y = angle;
+        median.receiveShadow = true;
+        this.proceduralGroup.add(median);
+      }
+    };
+
+    // =========================================================================
+    // 1. Benyamin Sueb Dual Carriageway & Kemayoran Boulevard Network
+    // =========================================================================
+    // Sumbu acuan Benyamin Sueb menghubungkan Simpang Angkasa (Z=-380),
+    // Bundaran Ondel-Ondel (Z=-517), dan JIExpo Kemayoran (Z=-691.4).
+    const westCarriagewayPoints = [
+      [254.0, -380.0],
+      [254.0, -500.0],
+      [252.0, -534.0],
+      [280.0, -620.0],
+      [298.0, -691.4],
+      [306.0, -755.0]
+    ];
+
+    const eastCarriagewayPoints = [
+      [280.0, -380.0],
+      [280.0, -500.0],
+      [282.0, -534.0],
+      [306.0, -620.0],
+      [321.0, -691.4],
+      [330.0, -755.0]
+    ];
+
+    for (let i = 0; i < westCarriagewayPoints.length - 1; i++) {
+      const [x1, z1] = westCarriagewayPoints[i];
+      const [x2, z2] = westCarriagewayPoints[i + 1];
+      buildEastRoad(x1, z1, x2, z2, 13.5, false);
+    }
+
+    for (let i = 0; i < eastCarriagewayPoints.length - 1; i++) {
+      const [x1, z1] = eastCarriagewayPoints[i];
+      const [x2, z2] = eastCarriagewayPoints[i + 1];
+      buildEastRoad(x1, z1, x2, z2, 13.5, false);
+    }
+
+    // Median Rumput Hijau Taman Eks-Runway Kemayoran (Width ~18m)
+    // Segmen 1: Selatan Bundaran Ondel-Ondel
+    const median1Len = 110;
+    const median1 = new THREE.Mesh(new THREE.BoxGeometry(18, 0.28, median1Len), medianGrassMat);
+    median1.position.set(267.2, 0.14, -440);
+    this.proceduralGroup.add(median1);
+
+    // Segmen 2: Utara Bundaran Ondel-Ondel s.d. Dekat JIExpo
+    const median2Len = 110;
+    const median2 = new THREE.Mesh(new THREE.BoxGeometry(18, 0.28, median2Len), medianGrassMat);
+    median2.position.set(286.0, 0.14, -600);
+    median2.rotation.y = 0.22;
+    this.proceduralGroup.add(median2);
+
+    // Bundaran Ondel-Ondel Road Ring
+    this.addRoundaboutRing(267.2, -517.0, 16.0, 24.5, roadMat, sidewalkMat);
+
+    // Koridor Silang Kemayoran:
+    // A. Jl. HBR Motik (Barat - Timur melintasi Bundaran Ondel-Ondel)
+    buildEastRoad(185.0, -517.0, 242.0, -517.0, 15, false);
+    buildEastRoad(292.0, -517.0, 360.0, -517.0, 15, false);
+
+    // B. Jl. Angkasa (Penghubung Gunung Sahari ke Kemayoran)
+    buildEastRoad(175.0, -380.0, 350.0, -380.0, 18, true, 2.0);
+
+    // C. Jl. Garuda (Kemayoran ke arah Senen barat)
+    buildEastRoad(190.0, -340.0, 267.2, -340.0, 14, false);
+
+    // =========================================================================
+    // 2. Double Track Railway Senen - Kemayoran (At-Grade & LAA Catenary)
+    // =========================================================================
+    const railWaypoints = [
+      [285.0, -80.0],
+      [290.0, -170.0],
+      [299.7, -288.7],
+      [292.0, -380.0],
+      [278.0, -480.0],
+      [255.0, -670.0]
+    ];
+
+    for (let i = 0; i < railWaypoints.length - 1; i++) {
+      const [x1, z1] = railWaypoints[i];
+      const [x2, z2] = railWaypoints[i + 1];
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const angle = Math.atan2(dx, dz);
+      const mx = (x1 + x2) * 0.5;
+      const mz = (z1 + z2) * 0.5;
+
+      // Gravel Ballast Bed
+      const ballast = new THREE.Mesh(new THREE.BoxGeometry(7.6, 0.24, len + 0.4), railBallastMat);
+      ballast.position.set(mx, 0.12, mz);
+      ballast.rotation.y = angle;
+      ballast.receiveShadow = true;
+      this.proceduralGroup.add(ballast);
+
+      // Sleepers (Bantalan Rel Beton)
+      const sleeperCount = Math.max(2, Math.floor(len / 3.8));
+      for (let s = 0; s < sleeperCount; s++) {
+        const t = (s + 0.5) / sleeperCount;
+        const sx = x1 + dx * t;
+        const sz = z1 + dz * t;
+        const sleeper = new THREE.Mesh(new THREE.BoxGeometry(6.6, 0.16, 0.5), sleeperMat);
+        sleeper.position.set(sx, 0.22, sz);
+        sleeper.rotation.y = angle;
+        this.proceduralGroup.add(sleeper);
+      }
+
+      // 4 Steel Rails (2 Rel per Jalur Ganda)
+      [-2.4, -1.0, 1.0, 2.4].forEach((railOffset) => {
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.24, len + 0.4), steelRailMat);
+        const perpX = Math.cos(angle) * railOffset;
+        const perpZ = -Math.sin(angle) * railOffset;
+        rail.position.set(mx + perpX, 0.32, mz + perpZ);
+        rail.rotation.y = angle;
+        this.proceduralGroup.add(rail);
+      });
+
+      // LAA Portal Catenary Poles (every ~35 meters)
+      const catenaryCount = Math.max(1, Math.floor(len / 35.0));
+      for (let c = 0; c < catenaryCount; c++) {
+        const t = (c + 0.5) / catenaryCount;
+        const cx = x1 + dx * t;
+        const cz = z1 + dz * t;
+        const catGroup = new THREE.Group();
+        catGroup.position.set(cx, 0, cz);
+        catGroup.rotation.y = angle;
+
+        [-4.2, 4.2].forEach((px) => {
+          const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.24, 7.2, 6), catenaryMat);
+          mast.position.set(px, 3.6, 0);
+          catGroup.add(mast);
+        });
+
+        const crossbeam = new THREE.Mesh(new THREE.BoxGeometry(8.8, 0.35, 0.35), catenaryMat);
+        crossbeam.position.set(0, 6.9, 0);
+        catGroup.add(crossbeam);
+
+        [-1.7, 1.7].forEach((wx) => {
+          const wire = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, len / catenaryCount), catenaryMat);
+          wire.position.set(wx, 5.8, 0);
+          catGroup.add(wire);
+        });
+
+        this.proceduralGroup.add(catGroup);
+      }
+    }
+
+    // =========================================================================
+    // 3. Simpang Lima Senen Interchange & Flyover Senen (h=5.6m)
+    // =========================================================================
+    // Lima Ruas Jalan Arteri yang Memusat ke Simpang Lima Senen [260.2, -275.9]:
+    // A. Jl. Senen Raya / Dr. Wahidin (Arah Pejambon / Banteng)
+    buildEastRoad(260.2, -275.9, 155.0, -315.0, 18, true, 2.2);
+
+    // B. Jl. Kwitang Raya / Prapatan (Arah Tugu Tani / Monas)
+    buildEastRoad(260.2, -275.9, 115.0, -180.0, 18, true, 2.2);
+
+    // C. Jl. Kramat Raya (Arah Salemba / UI)
+    buildEastRoad(260.2, -275.9, 272.0, -70.0, 20, true, 2.5);
+
+    // D. Jl. Letjen Suprapto (Arah Cempaka Putih / Galur ke Timur)
+    buildEastRoad(260.2, -275.9, 440.0, -275.9, 22, true, 2.5);
+
+    // E. Jl. Bungur Besar Raya (Arah Stasiun Senen & Kemayoran Selatan)
+    buildEastRoad(260.2, -275.9, 299.7, -288.7, 15, false);
+    buildEastRoad(299.7, -288.7, 298.0, -380.0, 15, false);
+
+    // Flyover Simpang Lima Senen:
+    // Jembatan layang melengkung dari Kwitang [180, -235] melewati atas Simpang Senen [260.2, -275.9]
+    // dan jalur rel menuju Jl. Letjen Suprapto [338, -275.9].
+    const flyoverPoints = [
+      [180.0, -235.0, 1.2],
+      [220.0, -258.0, 5.6],
+      [260.2, -275.9, 5.8],
+      [298.0, -275.9, 5.6],
+      [338.0, -275.9, 1.2]
+    ];
+
+    for (let i = 0; i < flyoverPoints.length - 1; i++) {
+      const [x1, z1, y1] = flyoverPoints[i];
+      const [x2, z2, y2] = flyoverPoints[i + 1];
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const angle = Math.atan2(dx, dz);
+      const mx = (x1 + x2) * 0.5;
+      const mz = (z1 + z2) * 0.5;
+      const my = (y1 + y2) * 0.5;
+
+      const deck = new THREE.Mesh(new THREE.BoxGeometry(9.5, 1.4, len + 0.4), flyoverMat);
+      deck.position.set(mx, my, mz);
+      deck.rotation.y = angle;
+      deck.castShadow = true;
+      this.proceduralGroup.add(deck);
+
+      [-4.5, 4.5].forEach((sideOffset) => {
+        const parapet = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.0, len + 0.4), flyoverMat);
+        const perpX = Math.cos(angle) * sideOffset;
+        const perpZ = -Math.sin(angle) * sideOffset;
+        parapet.position.set(mx + perpX, my + 0.9, mz + perpZ);
+        parapet.rotation.y = angle;
+        this.proceduralGroup.add(parapet);
+      });
+
+      if (my >= 4.0) {
+        const pier = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.4, my, 8), pierMat);
+        pier.position.set(mx, my * 0.5, mz);
+        pier.castShadow = true;
+        this.proceduralGroup.add(pier);
+      }
+    }
+
+    // =========================================================================
+    // 4. Kali Ciliwung Kwitang - Passer Baroe - Gunung Sahari & Jembatan Kanal
+    // =========================================================================
+    const riverWaypoints = [
+      [205.0, -80.0],
+      [195.0, -180.0],
+      [165.0, -280.0],
+      [147.4, -424.8],
+      [165.0, -530.0],
+      [170.0, -750.0]
+    ];
+
+    for (let i = 0; i < riverWaypoints.length - 1; i++) {
+      const [x1, z1] = riverWaypoints[i];
+      const [x2, z2] = riverWaypoints[i + 1];
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const angle = Math.atan2(dx, dz);
+      const mx = (x1 + x2) * 0.5;
+      const mz = (z1 + z2) * 0.5;
+
+      const water = new THREE.Mesh(new THREE.PlaneGeometry(14.0, len + 0.4), waterMat);
+      water.rotation.x = -Math.PI / 2;
+      water.rotation.z = -angle;
+      water.position.set(mx, 0.04, mz);
+      this.proceduralGroup.add(water);
+
+      [-7.3, 7.3].forEach((sideOffset) => {
+        const wall = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.45, len + 0.4), canalWallMat);
+        const perpX = Math.cos(angle) * sideOffset;
+        const perpZ = -Math.sin(angle) * sideOffset;
+        wall.position.set(mx + perpX, 0.22, mz + perpZ);
+        wall.rotation.y = angle;
+        this.proceduralGroup.add(wall);
+      });
+    }
+
+    // Jembatan-Jembatan Penyeberangan Sungai:
+    // A. Jembatan Kwitang
+    const kwitangBridge = new THREE.Mesh(new THREE.BoxGeometry(20, 1.2, 18), bridgeMat);
+    kwitangBridge.position.set(195.0, 0.38, -195.0);
+    kwitangBridge.rotation.y = -0.15;
+    this.proceduralGroup.add(kwitangBridge);
+
+    // B. Jembatan Pejambon / Wahidin
+    const pejambonBridge = new THREE.Mesh(new THREE.BoxGeometry(22, 1.2, 18), bridgeMat);
+    pejambonBridge.position.set(165.0, 0.38, -280.0);
+    pejambonBridge.rotation.y = -0.25;
+    this.proceduralGroup.add(pejambonBridge);
+
+    // C. Jembatan Pintu Air Passer Baroe (di depan Landmark #45)
+    const passerBaroeBridge = new THREE.Mesh(new THREE.BoxGeometry(18, 1.2, 16), bridgeMat);
+    passerBaroeBridge.position.set(147.4, 0.38, -415.0);
+    passerBaroeBridge.rotation.y = -0.12;
+    this.proceduralGroup.add(passerBaroeBridge);
+
+    // D. Jembatan Angkasa / Gunung Sahari
+    const angkasaBridge = new THREE.Mesh(new THREE.BoxGeometry(22, 1.2, 18), bridgeMat);
+    angkasaBridge.position.set(167.0, 0.38, -380.0);
+    this.proceduralGroup.add(angkasaBridge);
+
+    // =========================================================================
+    // 5. Koridor Jalan Cikini Raya & Menteng Timur (Akses TIM)
+    // =========================================================================
+    buildEastRoad(140.0, -10.0, 180.0, -45.0, 14, false);
+    buildEastRoad(180.0, -45.0, 217.9, -77.4, 14, false);
+    buildEastRoad(217.9, -77.4, 195.0, -170.0, 14, false);
+
+    // Jl. Diponegoro (Koneksi Megaria / Metropole ke UI Salemba / RSCM)
+    buildEastRoad(135.0, 10.0, 280.0, 10.0, 18, true, 2.0);
+
+    // =========================================================================
+    // 6. Sistem Pencahayaan PJU & Penghijauan Palem Raja Boulevard Kemayoran
+    // =========================================================================
+    for (let z = -380; z >= -745; z -= 35) {
+      const t = (z - (-380)) / (-755 - (-380));
+      const xCenter = 267.2 + t * (318.0 - 267.2);
+
+      const nearRoundabout = Math.abs(z - (-517.0)) < 26;
+      const nearJIExpo = Math.abs(z - (-691.4)) < 22;
+
+      if (!nearRoundabout && !nearJIExpo) {
+        this.createStreetLamp(xCenter - 1.2, z, false);
+        this.createStreetLamp(xCenter + 1.2, z, true);
+        this.createTree(xCenter, z + 12, foliageMat, trunkMat, 1.25);
+      }
+
+      this.createStreetLamp(xCenter - 18.0, z, true);
+      this.createStreetLamp(xCenter + 18.0, z, false);
+    }
+
+    for (let z = -260; z <= -85; z += 35) {
+      const t = (z - (-260)) / (-85 - (-260));
+      const kramatX = 260.2 + t * (272.0 - 260.2);
+      this.createStreetLamp(kramatX - 11.0, z, true);
+      this.createStreetLamp(kramatX + 11.0, z, false);
+    }
+
+    for (let x = 135; x <= 245; x += 35) {
+      const t = (x - 135) / (245 - 135);
+      const kwitangZ = -190 + t * (-270 - (-190));
+      this.createStreetLamp(x, kwitangZ - 10.0, true);
+      this.createStreetLamp(x, kwitangZ + 10.0, false);
+    }
   }
 
   /**
