@@ -1838,6 +1838,555 @@ export class LandmarkModels {
 
     return group;
   }
+
+  /**
+   * 34. Gedung Sekretariat Jenderal ASEAN
+   * Menara kembar ramah lingkungan 16 lantai di Jl. Sisingamangaraja dengan skybridge kaca 40m dan plaza bendera diplomatik.
+   */
+  static createSekretariatAsean() {
+    const group = new THREE.Group();
+    const emeraldGlassMat = new THREE.MeshStandardMaterial({
+      color: 0x047857,
+      metalness: 0.85,
+      roughness: 0.18,
+      emissive: 0x064e3b,
+      emissiveIntensity: 0.25
+    });
+    const whiteConcreteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
+    const graniteMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.7 });
+    const grassMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.9 });
+    const goldMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.85, roughness: 0.2 });
+
+    // 1. Diplomatic Courtyard & Plaza
+    const plaza = new THREE.Mesh(new THREE.BoxGeometry(48, 0.6, 36), graniteMat);
+    plaza.position.set(0, 0.3, 0);
+    plaza.receiveShadow = true;
+    group.add(plaza);
+
+    // Front Green Lawn Strips
+    const lawn = new THREE.Mesh(new THREE.BoxGeometry(44, 0.7, 8), grassMat);
+    lawn.position.set(0, 0.35, 12);
+    lawn.receiveShadow = true;
+    group.add(lawn);
+
+    // Semicircular Flagpoles (11 ASEAN + Dialogue Partner Flags)
+    for (let i = -5; i <= 5; i++) {
+      const angle = (i / 5) * (Math.PI / 3);
+      const fx = Math.sin(angle) * 16;
+      const fz = 10 + Math.cos(angle) * 5;
+      const pole = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.08, 0.12, 7, 8),
+        new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9 })
+      );
+      pole.position.set(fx, 3.8, fz);
+      pole.castShadow = true;
+      group.add(pole);
+
+      const flagColor = i === 0 ? 0x1d4ed8 : (i % 2 === 0 ? 0xdc2626 : 0xfacc15);
+      const flag = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.6, 0.05), new THREE.MeshBasicMaterial({ color: flagColor }));
+      flag.position.set(fx + 0.6, 6.8, fz);
+      group.add(flag);
+    }
+
+    // 2. Central Podium (Lantai 1-4)
+    const podium = new THREE.Mesh(new THREE.BoxGeometry(42, 8, 26), whiteConcreteMat);
+    podium.position.set(0, 4.3, -2);
+    podium.castShadow = true;
+    podium.receiveShadow = true;
+    group.add(podium);
+
+    // Grand Entrance Glass Canopy
+    const canopy = new THREE.Mesh(
+      new THREE.BoxGeometry(18, 0.5, 8),
+      new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.7, roughness: 0.2, transparent: true, opacity: 0.85 })
+    );
+    canopy.position.set(0, 4.6, 11);
+    canopy.castShadow = true;
+    group.add(canopy);
+
+    // 3. Menara Kembar (Twin Towers - 16 lantai, ~52m)
+    [-13, 13].forEach((tx) => {
+      const tower = new THREE.Mesh(new THREE.BoxGeometry(13.5, 46, 17), emeraldGlassMat);
+      tower.position.set(tx, 27, -2);
+      tower.castShadow = true;
+      tower.receiveShadow = true;
+      group.add(tower);
+
+      // White Vertical Solar Louvre Fins
+      [-6, -2, 2, 6].forEach((lx) => {
+        const fin = new THREE.Mesh(new THREE.BoxGeometry(0.3, 46, 0.8), whiteConcreteMat);
+        fin.position.set(tx + lx, 27, 6.7);
+        fin.castShadow = true;
+        group.add(fin);
+      });
+
+      // Rooftop Penthouse & Solar Trellis
+      const roof = new THREE.Mesh(new THREE.BoxGeometry(11, 3.5, 14), whiteConcreteMat);
+      roof.position.set(tx, 51.5, -2);
+      group.add(roof);
+    });
+
+    // 4. Skybridge Kaca Penghubung (Lantai 9-11)
+    const skybridge = new THREE.Mesh(
+      new THREE.BoxGeometry(12.5, 8.5, 10),
+      new THREE.MeshStandardMaterial({
+        color: 0x38bdf8,
+        metalness: 0.85,
+        roughness: 0.2,
+        emissive: 0x0284c7,
+        emissiveIntensity: 0.35
+      })
+    );
+    skybridge.position.set(0, 36, -2);
+    skybridge.castShadow = true;
+    group.add(skybridge);
+
+    // Golden ASEAN Logo / Spire
+    const logoEmblem = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 0.4, 16), goldMat);
+    logoEmblem.rotation.x = Math.PI / 2;
+    logoEmblem.position.set(0, 42, 3.2);
+    group.add(logoEmblem);
+
+    return group;
+  }
+
+  /**
+   * 35. Simpang Temu CSW & Stasiun MRT ASEAN
+   * Simpul integrasi transit 5 lantai berbentuk oval aerodinamis yang menyatukan MRT Layang & Halte Koridor 13 (23m).
+   */
+  static createCSWAseanHub() {
+    const group = new THREE.Group();
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35 });
+    const concreteMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.65 });
+    const tjBlueMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.6, roughness: 0.3 });
+    const glassMat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      metalness: 0.8,
+      roughness: 0.2,
+      emissive: 0x0284c7,
+      emissiveIntensity: 0.3
+    });
+
+    // 1. Central Oval Drum Hub (Bangunan Inti CSW 5 Lantai)
+    const hubDrum = new THREE.Mesh(new THREE.CylinderGeometry(16, 18, 18, 32), whiteMat);
+    hubDrum.position.set(0, 9, 0);
+    hubDrum.scale.set(1.1, 1, 0.9);
+    hubDrum.castShadow = true;
+    hubDrum.receiveShadow = true;
+    group.add(hubDrum);
+
+    // Glass Bands (Jendela Melingkar Fasad CSW)
+    [5, 9, 13, 17].forEach((hy) => {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(17, 0.35, 8, 32), glassMat);
+      ring.rotation.x = Math.PI / 2;
+      ring.scale.set(1.1, 0.9, 1);
+      ring.position.set(0, hy, 0);
+      group.add(ring);
+    });
+
+    // Central Skylight Dome on Top
+    const dome = new THREE.Mesh(
+      new THREE.SphereGeometry(7, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2),
+      glassMat
+    );
+    dome.position.set(0, 18, 0);
+    group.add(dome);
+
+    // 2. Viaduk & Stasiun MRT ASEAN (Elevated Level ~10m, arah Utara-Selatan)
+    const mrtTrack = new THREE.Mesh(new THREE.BoxGeometry(9.5, 2.5, 62), concreteMat);
+    mrtTrack.position.set(0, 10, 0);
+    mrtTrack.castShadow = true;
+    group.add(mrtTrack);
+
+    // Arched Canopy Stasiun MRT ASEAN
+    const mrtCanopyGeo = new THREE.CylinderGeometry(5.8, 5.8, 38, 16, 1, true, 0, Math.PI);
+    mrtCanopyGeo.rotateZ(Math.PI / 2);
+    const mrtCanopy = new THREE.Mesh(mrtCanopyGeo, whiteMat);
+    mrtCanopy.position.set(0, 13.5, 0);
+    mrtCanopy.castShadow = true;
+    group.add(mrtCanopy);
+
+    // Single-pier Concrete Columns for MRT
+    [-24, 24].forEach((pz) => {
+      const pier = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.5, 9, 12), concreteMat);
+      pier.position.set(0, 4.5, pz);
+      pier.castShadow = true;
+      group.add(pier);
+    });
+
+    // 3. Elevated Busway Koridor 13 TransJakarta (Level 22m, arah Barat-Timur melintang tinggi)
+    const brtTrack = new THREE.Mesh(new THREE.BoxGeometry(58, 2.8, 8), concreteMat);
+    brtTrack.position.set(0, 21, 0);
+    brtTrack.castShadow = true;
+    group.add(brtTrack);
+
+    // Elevated Halte CSW Transjakarta on Flyover
+    const brtStation = new THREE.Mesh(new THREE.BoxGeometry(26, 3.8, 6.5), tjBlueMat);
+    brtStation.position.set(0, 23.5, 0);
+    brtStation.castShadow = true;
+    group.add(brtStation);
+
+    // High Flyover Support Piers (Pilar Raksasa 20m)
+    [-22, 22].forEach((px) => {
+      const highPier = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.6, 20, 12), concreteMat);
+      highPier.position.set(px, 10, 0);
+      highPier.castShadow = true;
+      group.add(highPier);
+    });
+
+    // 4. Skywalk Pedestrian Bridges (Jembatan Lingkar Antar Sudut)
+    [Math.PI / 4, (3 * Math.PI) / 4, (5 * Math.PI) / 4, (7 * Math.PI) / 4].forEach((rad) => {
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(3.5, 2.8, 14), whiteMat);
+      arm.rotation.y = rad;
+      arm.position.set(Math.sin(rad) * 19, 9, Math.cos(rad) * 19);
+      arm.castShadow = true;
+      group.add(arm);
+    });
+
+    return group;
+  }
+
+  /**
+   * 36. Gedung Utama Kejaksaan Agung RI
+   * Markas besar penegak hukum nasional berarsitektur neo-klasik modern 22 lantai (~85m) berhias mahkota keadilan emas.
+   */
+  static createKejaksaanAgung() {
+    const group = new THREE.Group();
+    const creamMat = new THREE.MeshStandardMaterial({ color: 0xf5f5f4, roughness: 0.45 });
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 });
+    const darkGlassMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      metalness: 0.8,
+      roughness: 0.2,
+      emissive: 0x0f172a,
+      emissiveIntensity: 0.2
+    });
+    const goldMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9, roughness: 0.18 });
+
+    // 1. Grand Base Podium & Terraced Courtyard
+    const podium = new THREE.Mesh(new THREE.BoxGeometry(46, 3, 34), creamMat);
+    podium.position.set(0, 1.5, 0);
+    podium.receiveShadow = true;
+    group.add(podium);
+
+    // 2. Colonnaded Grand Entrance Portico
+    const porticoRoof = new THREE.Mesh(new THREE.BoxGeometry(22, 1.8, 9), whiteMat);
+    porticoRoof.position.set(0, 12, 13);
+    porticoRoof.castShadow = true;
+    group.add(porticoRoof);
+
+    for (let c = -9; c <= 9; c += 3.6) {
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 9, 12), whiteMat);
+      col.position.set(c, 7.5, 16.5);
+      col.castShadow = true;
+      group.add(col);
+    }
+
+    // 3. Main Central Tower (22 lantai, 65m tinggi scene)
+    const centralTower = new THREE.Mesh(new THREE.BoxGeometry(25, 60, 20), creamMat);
+    centralTower.position.set(0, 33, 0);
+    centralTower.castShadow = true;
+    centralTower.receiveShadow = true;
+    group.add(centralTower);
+
+    // Vertical Tinted Glass Strips on Central Facade
+    [-7.5, 0, 7.5].forEach((vx) => {
+      const glassStrip = new THREE.Mesh(new THREE.BoxGeometry(3.6, 52, 0.4), darkGlassMat);
+      glassStrip.position.set(vx, 34, 10.2);
+      group.add(glassStrip);
+    });
+
+    // 4. West & East Flanking Wings
+    [-17, 17].forEach((wx) => {
+      const wing = new THREE.Mesh(new THREE.BoxGeometry(9.5, 42, 18), creamMat);
+      wing.position.set(wx, 24, 0);
+      wing.castShadow = true;
+      wing.receiveShadow = true;
+      group.add(wing);
+
+      const wingRoof = new THREE.Mesh(new THREE.BoxGeometry(9.5, 1.5, 18), whiteMat);
+      wingRoof.position.set(wx, 45.8, 0);
+      group.add(wingRoof);
+    });
+
+    // 5. Tiered Classical Crown & Gold Finial Emblem
+    const crown1 = new THREE.Mesh(new THREE.BoxGeometry(21, 3.5, 16), whiteMat);
+    crown1.position.set(0, 64.5, 0);
+    group.add(crown1);
+
+    const crown2 = new THREE.Mesh(new THREE.BoxGeometry(15, 3.0, 11), whiteMat);
+    crown2.position.set(0, 67.5, 0);
+    group.add(crown2);
+
+    // Gold Pedang & Timbangan Keadilan Spire
+    const goldSpire = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.7, 7, 8), goldMat);
+    goldSpire.position.set(0, 72.5, 0);
+    goldSpire.castShadow = true;
+    group.add(goldSpire);
+
+    const goldEmblem = new THREE.Mesh(new THREE.TorusGeometry(1.8, 0.28, 8, 16), goldMat);
+    goldEmblem.position.set(0, 73.5, 0);
+    group.add(goldEmblem);
+
+    return group;
+  }
+
+  /**
+   * 37. M Bloc Space & Cagar Budaya Peruri
+   * Sentra ruang kreatif urban berarsitektur tropis gaya Jengki 1950-an dengan fasad bata ekspos, atap miring pelana & amphitheater seni.
+   */
+  static createMBlocSpace() {
+    const group = new THREE.Group();
+    const brickMat = new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.8 });
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xfafaf9, roughness: 0.5 });
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.75 });
+    const alleyMat = new THREE.MeshStandardMaterial({ color: 0x57534e, roughness: 0.85 });
+    const timberMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.7 });
+
+    // 1. Creative Alleyway Pedestrian Boulevard
+    const alley = new THREE.Mesh(new THREE.BoxGeometry(24, 0.4, 56), alleyMat);
+    alley.position.set(0, 0.2, 0);
+    alley.receiveShadow = true;
+    group.add(alley);
+
+    // 2. Deretan 4 Rumah Dinas Tropis Jengki 1950-an (Sisi Barat Alley)
+    [-20, -7, 6, 19].forEach((hz) => {
+      const houseGroup = new THREE.Group();
+
+      // Lower Brick Wall
+      const lowerWall = new THREE.Mesh(new THREE.BoxGeometry(8, 2.8, 9), brickMat);
+      lowerWall.position.set(-6.5, 1.4, 0);
+      lowerWall.castShadow = true;
+      houseGroup.add(lowerWall);
+
+      // Upper White Plastered Wall
+      const upperWall = new THREE.Mesh(new THREE.BoxGeometry(8, 2.6, 9), whiteMat);
+      upperWall.position.set(-6.5, 4.1, 0);
+      upperWall.castShadow = true;
+      houseGroup.add(upperWall);
+
+      // Distinctive Asymmetric Angled Jengki Gabled Roof
+      const roofGeo = new THREE.ConeGeometry(6.2, 3.2, 4);
+      roofGeo.rotateY(Math.PI / 4);
+      const roof = new THREE.Mesh(roofGeo, roofMat);
+      roof.scale.set(1.1, 1, 1.4);
+      roof.position.set(-6.5, 6.8, 0);
+      roof.castShadow = true;
+      houseGroup.add(roof);
+
+      // Front Awning & Vintage Wooden Windows
+      const awning = new THREE.Mesh(new THREE.BoxGeometry(2, 0.2, 6), timberMat);
+      awning.position.set(-1.8, 3.2, 0);
+      houseGroup.add(awning);
+
+      houseGroup.position.set(0, 0, hz);
+      group.add(houseGroup);
+    });
+
+    // 3. M Bloc Live House (Gedung Konser Musik & Hall Kreatif di Sisi Timur)
+    const liveHouse = new THREE.Mesh(new THREE.BoxGeometry(10, 8.5, 22), whiteMat);
+    liveHouse.position.set(6, 4.25, -12);
+    liveHouse.castShadow = true;
+    liveHouse.receiveShadow = true;
+    group.add(liveHouse);
+
+    // Colorful Artistic Mural Facade
+    const mural = new THREE.Mesh(
+      new THREE.BoxGeometry(0.2, 6, 18),
+      new THREE.MeshStandardMaterial({ color: 0xec4899, roughness: 0.5, emissive: 0xbe185d, emissiveIntensity: 0.2 })
+    );
+    mural.position.set(0.9, 4.5, -12);
+    group.add(mural);
+
+    // 4. Outdoor Stepped Amphitheater (Ruang Terbuka Komunitas)
+    for (let step = 1; step <= 4; step++) {
+      const stepMesh = new THREE.Mesh(
+        new THREE.CylinderGeometry(step * 2.2, step * 2.2, 0.6, 16, 1, false, 0, Math.PI),
+        timberMat
+      );
+      stepMesh.position.set(6, step * 0.4, 14);
+      stepMesh.receiveShadow = true;
+      group.add(stepMesh);
+    }
+
+    return group;
+  }
+
+  /**
+   * 38. Stasiun MRT Blok M BCA & Plaza Blok M
+   * Stasiun layang tersibuk MRT Jakarta dengan jalur elevated terintegrasi langsung melalui skybridge ke lantai 3 mall Plaza Blok M.
+   */
+  static createStasiunMRTBlokM() {
+    const group = new THREE.Group();
+    const mallMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.5 });
+    const concreteMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.65 });
+    const whiteCanopyMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35 });
+    const bcaBlueMat = new THREE.MeshStandardMaterial({
+      color: 0x0284c7,
+      metalness: 0.6,
+      emissive: 0x0369a1,
+      emissiveIntensity: 0.35
+    });
+    const glassMat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      metalness: 0.85,
+      roughness: 0.2,
+      emissive: 0x0284c7,
+      emissiveIntensity: 0.35
+    });
+
+    // 1. Gedung Plaza Blok M (Mall 8 Lantai di Sisi Barat)
+    const mall = new THREE.Mesh(new THREE.BoxGeometry(34, 34, 38), mallMat);
+    mall.position.set(-22, 17, 0);
+    mall.castShadow = true;
+    mall.receiveShadow = true;
+    group.add(mall);
+
+    // Atrium & Horizontal Glass Strips Mall
+    [8, 16, 24].forEach((my) => {
+      const mallGlass = new THREE.Mesh(new THREE.BoxGeometry(34.2, 2.5, 38.2), glassMat);
+      mallGlass.position.set(-22, my, 0);
+      group.add(mallGlass);
+    });
+
+    // Plaza Blok M Billboard Signage at Roof
+    const sign = new THREE.Mesh(new THREE.BoxGeometry(16, 4, 1), bcaBlueMat);
+    sign.position.set(-22, 36.5, 18.5);
+    group.add(sign);
+
+    // 2. Viaduk Jalur Rel Layang MRT Jakarta (Elevated Track Level ~12m)
+    const track = new THREE.Mesh(new THREE.BoxGeometry(11, 2.8, 64), concreteMat);
+    track.position.set(8, 12, 0);
+    track.castShadow = true;
+    group.add(track);
+
+    // Arched Canopy Stasiun MRT Blok M BCA
+    const stationCanopyGeo = new THREE.CylinderGeometry(7.2, 7.2, 44, 16, 1, true, 0, Math.PI);
+    stationCanopyGeo.rotateZ(Math.PI / 2);
+    const stationCanopy = new THREE.Mesh(stationCanopyGeo, whiteCanopyMat);
+    stationCanopy.position.set(8, 16.5, 0);
+    stationCanopy.castShadow = true;
+    group.add(stationCanopy);
+
+    // Signage Strip "BLOK M BCA"
+    const mrtSign = new THREE.Mesh(new THREE.BoxGeometry(1, 1.8, 20), bcaBlueMat);
+    mrtSign.position.set(13.8, 16, 0);
+    group.add(mrtSign);
+
+    // Concrete Pillars Supporting Elevated MRT Station
+    [-22, 0, 22].forEach((pz) => {
+      const colL = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.4, 11, 12), concreteMat);
+      colL.position.set(4, 5.5, pz);
+      colL.castShadow = true;
+      group.add(colL);
+
+      const colR = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.4, 11, 12), concreteMat);
+      colR.position.set(12, 5.5, pz);
+      colR.castShadow = true;
+      group.add(colR);
+    });
+
+    // 3. Direct Skybridge Connection: Stasiun MRT -> Lantai 3 Plaza Blok M
+    const skybridge = new THREE.Mesh(new THREE.BoxGeometry(18, 4.5, 7.5), glassMat);
+    skybridge.position.set(-2, 13.5, 0);
+    skybridge.castShadow = true;
+    group.add(skybridge);
+
+    return group;
+  }
+
+  /**
+   * 39. Kawasan Niaga Melawai & Little Tokyo Blok M
+   * Pusat ruko komersial legendaris 4-5 lantai dengan neon signage vertikal bilingual, gapura lampion merah, dan kanopi pejalan kaki.
+   */
+  static createDistrikMelawai() {
+    const group = new THREE.Group();
+    const roadMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
+    const sidewalkMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.6 });
+    const awningMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.5 });
+    const lanternMat = new THREE.MeshStandardMaterial({
+      color: 0xdc2626,
+      emissive: 0xef4444,
+      emissiveIntensity: 0.8
+    });
+
+    // 1. Street Corridor & Sidewalk
+    const street = new THREE.Mesh(new THREE.BoxGeometry(14, 0.2, 56), roadMat);
+    street.position.set(0, 0.1, 0);
+    street.receiveShadow = true;
+    group.add(street);
+
+    [-8, 8].forEach((sx) => {
+      const sw = new THREE.Mesh(new THREE.BoxGeometry(4, 0.35, 56), sidewalkMat);
+      sw.position.set(sx, 0.18, 0);
+      sw.receiveShadow = true;
+      group.add(sw);
+    });
+
+    // 2. Dual Shophouse Blocks (Row West & Row East)
+    const rukoTones = [0xf5f5f4, 0xd6d3d1, 0xe2e8f0, 0xfef08a];
+    const neonColors = [0xef4444, 0x06b6d4, 0xf59e0b, 0x8b5cf6, 0x10b981];
+
+    [-15, 15].forEach((rx, rIdx) => {
+      [-20, -7, 6, 19].forEach((rz, sIdx) => {
+        const height = 16 + (sIdx % 3) * 3;
+        const tone = rukoTones[(rIdx + sIdx) % rukoTones.length];
+        const ruko = new THREE.Mesh(
+          new THREE.BoxGeometry(10, height, 11),
+          new THREE.MeshStandardMaterial({ color: tone, roughness: 0.6 })
+        );
+        ruko.position.set(rx, height / 2, rz);
+        ruko.castShadow = true;
+        ruko.receiveShadow = true;
+        group.add(ruko);
+
+        // Ground Floor Pedestrian Awning
+        const awning = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.25, 10.5), awningMat);
+        awning.position.set(rx + (rIdx === 0 ? 5.5 : -5.5), 3.8, rz);
+        awning.castShadow = true;
+        group.add(awning);
+
+        // Vertical Blade Neon Signboards (Little Tokyo / Japanese Restaurant Vibe)
+        const neonColor = neonColors[(rIdx * 2 + sIdx) % neonColors.length];
+        const neonSign = new THREE.Mesh(
+          new THREE.BoxGeometry(0.3, 5.5, 1.4),
+          new THREE.MeshStandardMaterial({
+            color: neonColor,
+            emissive: neonColor,
+            emissiveIntensity: 0.75,
+            roughness: 0.2
+          })
+        );
+        neonSign.position.set(rx + (rIdx === 0 ? 5.3 : -5.3), 9 + (sIdx % 2) * 2, rz);
+        group.add(neonSign);
+      });
+    });
+
+    // 3. Melawai Street Gate (Gapura Lampion Melawai)
+    const gatePillarMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.4 });
+    [-7, 7].forEach((gx) => {
+      const pillar = new THREE.Mesh(new THREE.BoxGeometry(1.2, 8, 1.2), gatePillarMat);
+      pillar.position.set(gx, 4, -26);
+      pillar.castShadow = true;
+      group.add(pillar);
+    });
+
+    const crossbeam = new THREE.Mesh(new THREE.BoxGeometry(16.5, 1.2, 1.5), gatePillarMat);
+    crossbeam.position.set(0, 8.2, -26);
+    crossbeam.castShadow = true;
+    group.add(crossbeam);
+
+    // Hanging Red Lanterns (Lampion)
+    [-4, -1.5, 1.5, 4].forEach((lx) => {
+      const lantern = new THREE.Mesh(new THREE.SphereGeometry(0.7, 12, 12), lanternMat);
+      lantern.scale.set(1, 1.2, 1);
+      lantern.position.set(lx, 6.8, -26);
+      group.add(lantern);
+    });
+
+    return group;
+  }
 }
+
 
 

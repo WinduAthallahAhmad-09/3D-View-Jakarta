@@ -747,6 +747,141 @@ export const JAKARTA_LANDMARKS = [
       "Menjadi salah satu pusat kuliner paling ramai dan hidup sepanjang malam di koridor Tanjung Duren Raya.",
       "Memiliki akses terowongan dan jembatan terpadu menuju kawasan mall dan taman Central Park."
     ]
+  },
+  // =====================================================
+  // ZONA 6: KEBAYORAN BARU, BLOK M & CSW (JAKARTA SELATAN)
+  // =====================================================
+  {
+    id: "sekretariat-asean",
+    name: "Gedung Sekretariat Jenderal ASEAN",
+    shortName: "Sekretariat ASEAN",
+    category: "Diplomasi & Pemerintahan",
+    tagline: "Pusat Hubungan Diplomatik Asia Tenggara di Sisingamangaraja",
+    height: "65 meter (Twin Towers 16 lantai)",
+    year: "1981 / Transformasi 2019",
+    architect: "PT Airmas Asri",
+    location: "Jl. Sisingamangaraja No. 70A, Kebayoran Baru, Jakarta Selatan",
+    coordinates: { lat: -6.2372, lng: 106.7990 },
+    position: [-339.1, 0, 599.0],
+    labelHeight: 68,
+    cameraPosition: [-339.1, 65, 665],
+    cameraTarget: [-339.1, 24, 599.0],
+    description: "Markas besar organisasi perhimpunan bangsa-bangsa Asia Tenggara (ASEAN) yang baru diresmikan pada 2019. Terdiri dari sepasang menara kembar modern berwawasan lingkungan (green building) dengan skybridge penghubung kaca di lantai 9-11 dan plaza bendera 10 negara anggota.",
+    facts: [
+      "Dirancang sebagai gedung ramah lingkungan bersertifikasi Greenship Platinum.",
+      "Dilengkapi skybridge bentang 40 meter yang menghubungkan kedua menara tanpa tiang penyangga di tengah.",
+      "Menjadi landmark diplomasi internasional paling prestisius di koridor Kebayoran Baru."
+    ]
+  },
+  {
+    id: "csw-asean-hub",
+    name: "Simpang Temu CSW & Stasiun MRT ASEAN",
+    shortName: "Simpang CSW ASEAN",
+    category: "Infrastruktur Transit & Intermoda",
+    tagline: "Simpul Integrasi Multimoda 5 Lantai: MRT Layang × Busway Koridor 13",
+    height: "26 meter (Hub 5 Lantai)",
+    year: "2021",
+    architect: "Biro Arsitektur Studio Sae",
+    location: "Persimpangan Jl. Sisingamangaraja, Jl. Trunojoyo & Jl. Kyai Maja, Kebayoran Baru",
+    coordinates: { lat: -6.2395, lng: 106.7984 },
+    position: [-347.5, 0, 631.6],
+    labelHeight: 38,
+    cameraPosition: [-285, 52, 690],
+    cameraTarget: [-347.5, 18, 631.6],
+    description: "Simpul integrasi transit (Cakra Selaras Wahana) berarsitektur silinder aerodinamis yang menghubungkan Stasiun MRT ASEAN dengan 4 halte TransJakarta, termasuk Halte CSW di jalur layang Koridor 13 setinggi 23 meter di atas tanah.",
+    facts: [
+      "Mengintegrasikan 5 halte busway dan 1 stasiun MRT dengan fasilitas lift panoramik dan eskalator.",
+      "Bentuk bangunan menyerupai cakram bulat dinamis yang menghubungkan pertemuan 4 ruas jalan utama Kebayoran Baru.",
+      "Menjadi ikon transit oriented development (TOD) percontohan modern di Indonesia."
+    ]
+  },
+  {
+    id: "kejaksaan-agung",
+    name: "Gedung Utama Kejaksaan Agung RI",
+    shortName: "Kejaksaan Agung RI",
+    category: "Penegakan Hukum & Pemerintahan",
+    tagline: "Markas Komando Penegak Hukum Nasional Berarsitektur Neo-Klasik Modern",
+    height: "85 meter (22 lantai)",
+    year: "2022",
+    architect: "PT Hutama Karya & Biro Arsitek Negara",
+    location: "Jl. Sultan Hasanuddin No. 1, Kebayoran Baru, Jakarta Selatan",
+    coordinates: { lat: -6.2415, lng: 106.7981 },
+    position: [-351.8, 0, 660.0],
+    labelHeight: 88,
+    cameraPosition: [-351.8, 75, 730],
+    cameraTarget: [-351.8, 30, 660.0],
+    description: "Kompleks markas besar Kejaksaan Agung Republik Indonesia yang dibangun megah kembali pasca-transformasi 2022. Memadukan fasad simetris putih krem, pilar pilar kolosal di area lobby podium, dan mahkota atap berhiaskan lambang pedang timbangan keadilan.",
+    facts: [
+      "Memiliki sistem smart building modern dan pengamanan perimeter tingkat tinggi.",
+      "Berdiri persis di hadapan kawasan M Bloc Space dan stasiun MRT ASEAN.",
+      "Memiliki aula serbaguna Sasana Bhinneka Tunggal Ika berkapasitas ribuan orang."
+    ]
+  },
+  {
+    id: "m-bloc-space",
+    name: "M Bloc Space & Kompleks Peruri Heritage",
+    shortName: "M Bloc Space",
+    category: "Cagar Budaya & Sentra Kreatif",
+    tagline: "Transformasi Rumah Dinas Percetakan Uang 1950 Menjadi Creative Hub Populer",
+    height: "12 meter (Arsitektur Jengki Tropis)",
+    year: "1955 / Revitalisasi 2019",
+    architect: "Ruang Creative Hub & Perum Peruri",
+    location: "Jl. Panglima Polim No. 37, Melawai, Kebayoran Baru, Jakarta Selatan",
+    coordinates: { lat: -6.2422, lng: 106.8015 },
+    position: [-303.8, 0, 669.9],
+    labelHeight: 25,
+    cameraPosition: [-303.8, 38, 725],
+    cameraTarget: [-303.8, 10, 669.9],
+    description: "Sentra ruang kreatif dan komunitas urban anak muda yang memanfaatkan bekas kompleks perumahan dinas Perum Peruri era 1950-an. Mempertahankan gaya arsitektur tropis Jengki khas awal kemerdekaan dengan bata ekspos, atap miring pelana, dan live house konser musik.",
+    facts: [
+      "Dahulu merupakan komplek hunian dinas karyawan Perum Percetakan Uang RI (Peruri).",
+      "Melarang penggunaan plastik sekali pakai dan kantong kresek di seluruh tenantnya.",
+      "Menjadi magnet sentra musik independen, pameran seni, toko piringan hitam, dan kafe lokal."
+    ]
+  },
+  {
+    id: "stasiun-mrt-blok-m",
+    name: "Stasiun MRT Blok M BCA & Plaza Blok M",
+    shortName: "Stasiun MRT Blok M",
+    category: "Infrastruktur Transit & Komersial",
+    tagline: "Stasiun Layang Terbesar MRT Jakarta & Jembatan Langsung ke Lantai Mall",
+    height: "55 meter (Podium Plaza Blok M 8 lantai + Viaduk 16m)",
+    year: "1990 / MRT 2019",
+    architect: "MRT Jakarta & Plaza Blok M",
+    location: "Jl. Panglima Polim & Jl. Mahakam, Kramat Pela, Kebayoran Baru",
+    coordinates: { lat: -6.2445, lng: 106.7977 },
+    position: [-357.4, 0, 702.5],
+    labelHeight: 58,
+    cameraPosition: [-357.4, 65, 775],
+    cameraTarget: [-357.4, 22, 702.5],
+    description: "Stasiun layang terpadat MRT Jakarta yang terhubung langsung dengan skybridge tertutup menuju lantai 3 pusat perbelanjaan Plaza Blok M. Memiliki 3 jalur rel layang dan peron pulau luas yang menghadap langsung ke Taman Martha Tiahahu.",
+    facts: [
+      "Satu-satunya stasiun MRT layang yang memiliki akses jembatan langsung terintegrasi ke dalam gedung pusat perbelanjaan.",
+      "Menjadi simpul transit yang menghubungkan area perbelanjaan Blok M dengan Taman Literasi Martha Tiahahu.",
+      "Dilengkapi jalur wesel simpan rangkaian kereta Ratangga."
+    ]
+  },
+  {
+    id: "distrik-melawai",
+    name: "Kawasan Niaga Melawai & Little Tokyo Blok M",
+    shortName: "Little Tokyo Melawai",
+    category: "Kawasan Komersial & Budaya Pop",
+    tagline: "Pusat Ruko Kuliner Autentik, Budaya Populer 80-an & Gerbang Lampion Melawai",
+    height: "28 meter (Ruko & Hotel Butik 6 lantai)",
+    year: "1975 / 1990-an",
+    architect: "Kawasan Bisnis Melawai",
+    location: "Jl. Melawai Raya, Kramat Pela & Melawai, Kebayoran Baru",
+    coordinates: { lat: -6.2448, lng: 106.8002 },
+    position: [-322.2, 0, 706.8],
+    labelHeight: 35,
+    cameraPosition: [-322.2, 45, 770],
+    cameraTarget: [-322.2, 14, 706.8],
+    description: "Distrik komersial ruko legendaris yang terkenal sebagai pusat tren budaya pemuda Jakarta era 1980-an (Lintas Melawai) dan bertransformasi menjadi Little Tokyo Jakarta dengan deretan restoran izakaya, ramen bar, neon box bilingual vertikal, dan hotel butik.",
+    facts: [
+      "Terkenal dengan istilah 'JJS (Jalan-Jalan Sore) Lintas Melawai' yang melegenda dalam kultur pop Indonesia dekade 80-an.",
+      "Menjadi pusat komunitas ekspatriat Jepang di Jakarta Selatan dengan ratusan kedai kuliner khas.",
+      "Berdampingan dengan Blok M Square dan Pasaraya Grande."
+    ]
   }
 ];
 

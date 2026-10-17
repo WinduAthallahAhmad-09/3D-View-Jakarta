@@ -414,7 +414,13 @@ export class CityScene {
       "stasiun-tanah-abang": () => LandmarkModels.createStasiunTanahAbang(),
       "stasiun-palmerah": () => LandmarkModels.createStasiunPalmerah(),
       "binus-university": () => LandmarkModels.createBinusUniversity(),
-      "mediterania-tanjung-duren": () => LandmarkModels.createMediteraniaTanjungDuren()
+      "mediterania-tanjung-duren": () => LandmarkModels.createMediteraniaTanjungDuren(),
+      "sekretariat-asean": () => LandmarkModels.createSekretariatAsean(),
+      "csw-asean-hub": () => LandmarkModels.createCSWAseanHub(),
+      "kejaksaan-agung": () => LandmarkModels.createKejaksaanAgung(),
+      "m-bloc-space": () => LandmarkModels.createMBlocSpace(),
+      "stasiun-mrt-blok-m": () => LandmarkModels.createStasiunMRTBlokM(),
+      "distrik-melawai": () => LandmarkModels.createDistrikMelawai()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {
