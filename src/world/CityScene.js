@@ -2736,7 +2736,22 @@ export class CityScene {
       { x1: -425.0, z1: 707.0, x2: -245.0, z2: 707.0, count: 4 },
       // 17. Jl. Senopati (Bundaran Senayan -> Senopati Gastronomy Corridor)
       { x1: -310.0, z1: 500, x2: -210.0, z2: 550, count: 4 },
-      { x1: -210.0, z1: 554, x2: -310.0, z2: 504, count: 4 }
+      { x1: -210.0, z1: 554, x2: -310.0, z2: 504, count: 4 },
+      // 18. Boulevard Benyamin Sueb (Kemayoran Runway Dual Carriageway)
+      { x1: 224.0, z1: -360, x2: 224.0, z2: -680, count: 6 },
+      { x1: 236.0, z1: -680, x2: 236.0, z2: -360, count: 6 },
+      // 19. Jl. Letjen Suprapto (Simpang Lima Senen -> Cempaka Putih)
+      { x1: 300.0, z1: -286, x2: 450.0, z2: -290, count: 5 },
+      { x1: 450.0, z1: -294, x2: 300.0, z2: -290, count: 5 },
+      // 20. Jl. Kramat Raya / Salemba (Senen -> Cikini / RSCM FKUI)
+      { x1: 285.0, z1: -280, x2: 285.0, z2: -70, count: 5 },
+      { x1: 291.0, z1: -70, x2: 291.0, z2: -280, count: 5 },
+      // 21. TransJakarta Koridor 2 & 5 (Simpang Lima Senen Hub)
+      { x1: 297.0, z1: -320, x2: 297.0, z2: -240, count: 3, isBus: true, busColor: 0x0284c7, speedBoost: 1.1 },
+      { x1: 303.0, z1: -240, x2: 303.0, z2: -320, count: 3, isBus: true, busColor: 0x0284c7, speedBoost: 1.1 },
+      // 22. Flyover Simpang Lima Senen (Elevated Overpass, y=7.8)
+      { x1: 288.0, y: 7.8, z1: -230, x2: 288.0, y: 7.8, z2: -345, count: 3, speedBoost: 1.25 },
+      { x1: 293.0, y: 7.8, z1: -345, x2: 293.0, y: 7.8, z2: -230, count: 3, speedBoost: 1.25 }
     ];
 
     let idx = 0;
@@ -2842,12 +2857,27 @@ export class CityScene {
     this.mrtCurve = new THREE.CatmullRomCurve3(mrtTrackPoints, false, 'catmullrom', 0.15);
     this.mrtCurveLength = this.mrtCurve.getLength();
 
+    // Dynamic Kereta Api Antarkota KAI (CC 206 Locomotive + Eksekutif/Ekonomi Coaches)
+    // Running on double track through Stasiun Pasar Senen & Kemayoran corridor
+    const senenTrackPoints = [
+      new THREE.Vector3(285.0, 0.48, -80.0),
+      new THREE.Vector3(290.0, 0.48, -170.0),
+      new THREE.Vector3(299.7, 0.48, -288.7),
+      new THREE.Vector3(292.0, 0.48, -380.0),
+      new THREE.Vector3(278.0, 0.48, -480.0),
+      new THREE.Vector3(255.0, 0.48, -670.0)
+    ];
+    this.senenRailCurve = new THREE.CatmullRomCurve3(senenTrackPoints, false, 'catmullrom', 0.15);
+    this.senenRailCurveLength = this.senenRailCurve.getLength();
+
     this.animatedTrains = [];
     const trainConfigs = [
       { id: 'krl-northbound', curve: this.krlCurve, curveLength: this.krlCurveLength, carSpacing: 17.8, trackOffset: -1.35, speed: 0.024, progress: 0.15, type: 'krl' },
       { id: 'krl-southbound', curve: this.krlCurve, curveLength: this.krlCurveLength, carSpacing: 17.8, trackOffset: 1.35, speed: -0.024, progress: 0.65, type: 'krl' },
       { id: 'mrt-southbound', curve: this.mrtCurve, curveLength: this.mrtCurveLength, carSpacing: 17.35, trackOffset: 1.6, speed: 0.035, progress: 0.2, type: 'mrt' },
-      { id: 'mrt-northbound', curve: this.mrtCurve, curveLength: this.mrtCurveLength, carSpacing: 17.35, trackOffset: -1.6, speed: -0.035, progress: 0.75, type: 'mrt' }
+      { id: 'mrt-northbound', curve: this.mrtCurve, curveLength: this.mrtCurveLength, carSpacing: 17.35, trackOffset: -1.6, speed: -0.035, progress: 0.75, type: 'mrt' },
+      { id: 'kai-antarkota-northbound', curve: this.senenRailCurve, curveLength: this.senenRailCurveLength, carSpacing: 18.2, trackOffset: -1.7, speed: 0.022, progress: 0.1, type: 'kai' },
+      { id: 'kai-antarkota-southbound', curve: this.senenRailCurve, curveLength: this.senenRailCurveLength, carSpacing: 18.2, trackOffset: 1.7, speed: -0.022, progress: 0.6, type: 'kai' }
     ];
 
     trainConfigs.forEach((cfg) => {
@@ -2864,7 +2894,9 @@ export class CityScene {
       for (let c = 0; c < 4; c++) {
         const carMesh = cfg.type === 'mrt'
           ? LandmarkModels.createSingleMRTRatanggaCar(c, 4)
-          : LandmarkModels.createSingleKRLCar(c, 4);
+          : (cfg.type === 'kai'
+            ? LandmarkModels.createSingleKAIAntarkotaCar(c, 4)
+            : LandmarkModels.createSingleKRLCar(c, 4));
         this.proceduralGroup.add(carMesh);
         train.cars.push(carMesh);
       }

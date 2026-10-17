@@ -2012,6 +2012,165 @@ export class LandmarkModels {
   }
 
   /**
+   * Kereta Api Antarkota Jarak Jauh PT KAI (Stasiun Pasar Senen)
+   * Terdiri dari Lokomotif Diesel Elektrik CC 206 (General Electric CM20EMP)
+   * dengan hidung ganda, striping oranye-biru khas KAI, dan rangkaian kereta
+   * penumpang eksekutif/ekonomi stainless steel KAI beratap corrugated.
+   */
+  static createSingleKAIAntarkotaCar(c, cars = 4) {
+    const locoLen = 17.5;
+    const coachLen = 18.0;
+    const carLen = c === 0 ? locoLen : coachLen;
+    const gap = 0.9;
+
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35 });
+    const stainlessMat = new THREE.MeshStandardMaterial({
+      color: 0xe2e8f0,
+      metalness: 0.88,
+      roughness: 0.22
+    });
+    const orangeKAIMat = new THREE.MeshStandardMaterial({
+      color: 0xea580c,
+      roughness: 0.4
+    });
+    const navyKAIMat = new THREE.MeshStandardMaterial({
+      color: 0x1e3a8a,
+      roughness: 0.35
+    });
+    const windowGlassMat = new THREE.MeshStandardMaterial({
+      color: 0x0f172a,
+      roughness: 0.15,
+      metalness: 0.85
+    });
+    const bogieMat = new THREE.MeshStandardMaterial({
+      color: 0x334155,
+      metalness: 0.6,
+      roughness: 0.7
+    });
+    const headlightMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+
+    const carGroup = new THREE.Group();
+
+    if (c === 0) {
+      // ==========================================
+      // LOKOMOTIF CC 206 (GE CM20EMP)
+      // ==========================================
+      const locoBody = new THREE.Mesh(new THREE.BoxGeometry(2.9, 2.7, locoLen - 2.8), whiteMat);
+      locoBody.position.set(0, 2.15, -0.6);
+      locoBody.castShadow = true;
+      carGroup.add(locoBody);
+
+      // Aerodynamic Sloped Cab Noses (Front & Rear Double Cab)
+      // Front Cab Nose
+      const frontNose = new THREE.Mesh(new THREE.BoxGeometry(2.88, 2.3, 2.8), whiteMat);
+      frontNose.position.set(0, 1.95, (locoLen - 2.8) * 0.5 + 0.8);
+      frontNose.rotation.x = -0.15;
+      frontNose.castShadow = true;
+      carGroup.add(frontNose);
+
+      // Signature KAI Orange & Blue Livery Stripes
+      const orangeStripe = new THREE.Mesh(new THREE.BoxGeometry(2.94, 0.45, locoLen), orangeKAIMat);
+      orangeStripe.position.set(0, 1.55, 0);
+      carGroup.add(orangeStripe);
+
+      const navyStripe = new THREE.Mesh(new THREE.BoxGeometry(2.94, 0.25, locoLen), navyKAIMat);
+      navyStripe.position.set(0, 1.15, 0);
+      carGroup.add(navyStripe);
+
+      // Cab Windshields (Front & Rear)
+      const windShieldF = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.75, 0.2), windowGlassMat);
+      windShieldF.position.set(0, 2.45, locoLen * 0.5 + 0.1);
+      windShieldF.rotation.x = -0.15;
+      carGroup.add(windShieldF);
+
+      // Rooftop Radiator & AC Units
+      const radiator = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.45, 4.5), bogieMat);
+      radiator.position.set(0, 3.65, -1.5);
+      carGroup.add(radiator);
+
+      // Dual High-Intensity LED Headlights
+      [-0.8, 0.8].forEach((hx) => {
+        const headlight = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.15, 8), headlightMat);
+        headlight.rotation.x = Math.PI / 2;
+        headlight.position.set(hx, 1.6, locoLen * 0.5 + 0.35);
+        carGroup.add(headlight);
+      });
+    } else {
+      // ==========================================
+      // KERETA PENUMPANG STAINLESS STEEL KAI
+      // ==========================================
+      const coachBody = new THREE.Mesh(new THREE.BoxGeometry(3.0, 2.8, coachLen), stainlessMat);
+      coachBody.position.set(0, 2.1, 0);
+      coachBody.castShadow = true;
+      coachBody.receiveShadow = true;
+      carGroup.add(coachBody);
+
+      // KAI Blue & Orange Accent Stripes along the windows
+      const blueBand = new THREE.Mesh(new THREE.BoxGeometry(3.04, 0.35, coachLen), navyKAIMat);
+      blueBand.position.set(0, 1.35, 0);
+      carGroup.add(blueBand);
+
+      const orangeAccent = new THREE.Mesh(new THREE.BoxGeometry(3.04, 0.18, coachLen), orangeKAIMat);
+      orangeAccent.position.set(0, 1.65, 0);
+      carGroup.add(orangeAccent);
+
+      // Panoramic Tinted Passenger Windows
+      const winL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.95, coachLen * 0.86), windowGlassMat);
+      winL.position.set(1.52, 2.35, 0);
+      carGroup.add(winL);
+
+      const winR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.95, coachLen * 0.86), windowGlassMat);
+      winR.position.set(-1.52, 2.35, 0);
+      carGroup.add(winR);
+
+      // Rooftop Corrugated Ribs & AC Units
+      const acUnit = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.45, 3.8), whiteMat);
+      acUnit.position.set(0, 3.65, 0);
+      carGroup.add(acUnit);
+    }
+
+    // Steel Wheel Bogies (Front & Rear Bogies)
+    [-carLen * 0.32, carLen * 0.32].forEach((bz) => {
+      const bogieFrame = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.45, 3.8), bogieMat);
+      bogieFrame.position.set(0, 0.55, bz);
+      carGroup.add(bogieFrame);
+
+      [-1.15, 1.15].forEach((wx) => {
+        [-1.2, 0, 1.2].forEach((wz) => {
+          const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.22, 10), bogieMat);
+          wheel.rotation.z = Math.PI / 2;
+          wheel.position.set(wx, 0.42, bz + wz);
+          carGroup.add(wheel);
+        });
+      });
+    });
+
+    // Flexible rubber gangway connection
+    if (c < cars - 1) {
+      const gangway = new THREE.Mesh(new THREE.BoxGeometry(1.9, 2.4, gap + 0.1), bogieMat);
+      gangway.position.set(0, 1.95, carLen * 0.5 + gap * 0.5);
+      carGroup.add(gangway);
+    }
+
+    return carGroup;
+  }
+
+  static createKAIAntarkotaTrain(cars = 4) {
+    const group = new THREE.Group();
+    const coachLen = 18.0;
+    const gap = 0.9;
+
+    for (let c = 0; c < cars; c++) {
+      const car = this.createSingleKAIAntarkotaCar(c, cars);
+      const cz = (c - (cars - 1) / 2) * (coachLen + gap);
+      car.position.set(0, 0, cz);
+      group.add(car);
+    }
+
+    return group;
+  }
+
+  /**
    * 34. Gedung Sekretariat Jenderal ASEAN
    * Menara kembar ramah lingkungan 16 lantai di Jl. Sisingamangaraja dengan skybridge kaca 40m dan plaza bendera diplomatik.
    */

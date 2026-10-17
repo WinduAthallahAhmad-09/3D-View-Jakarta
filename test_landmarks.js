@@ -184,4 +184,34 @@ assert.ok(
   'CityScene.js missing Kompleks FKUI & RSCM Salemba'
 );
 
-console.log('✅ All 45 landmarks, Tahap 1, 2 & 3 Central Jakarta East infill & districts, South Jakarta builders, MRT Ratangga, Koridor 13, Aerial View, and Selective Bloom Effect verified successfully!');
+// Check 10: Tahap 4 Integrasi Transit & Mobilitas Kereta Api Antarkota Stasiun Pasar Senen
+assert.ok(
+  landmarkModelsContent.includes('createSingleKAIAntarkotaCar'),
+  'LandmarkModels.js missing createSingleKAIAntarkotaCar'
+);
+assert.ok(
+  landmarkModelsContent.includes('createKAIAntarkotaTrain'),
+  'LandmarkModels.js missing createKAIAntarkotaTrain'
+);
+assert.ok(
+  citySceneContent.includes('this.senenRailCurve = new THREE.CatmullRomCurve3'),
+  'CityScene.js missing senenRailCurve'
+);
+assert.ok(
+  citySceneContent.includes("'kai-antarkota-northbound'"),
+  'CityScene.js missing kai-antarkota-northbound'
+);
+assert.ok(
+  citySceneContent.includes("'kai-antarkota-southbound'"),
+  'CityScene.js missing kai-antarkota-southbound'
+);
+assert.ok(
+  citySceneContent.includes('LandmarkModels.createSingleKAIAntarkotaCar(c, 4)'),
+  'CityScene.js missing call to LandmarkModels.createSingleKAIAntarkotaCar'
+);
+assert.ok(
+  citySceneContent.includes('TransJakarta Koridor 2 & 5 (Simpang Lima Senen Hub)'),
+  'CityScene.js missing TransJakarta Koridor 2 & 5 route'
+);
+
+console.log('✅ All 45 landmarks, Tahap 1, 2, 3 & 4 (100% Jakarta Pusat Complete: KAI Antarkota, Simpang Senen, Infill, Landmarks, Roads, Selective Bloom) verified successfully!');
