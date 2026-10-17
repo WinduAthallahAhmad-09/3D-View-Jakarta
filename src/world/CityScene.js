@@ -1982,7 +1982,25 @@ export class CityScene {
       { x1: -247.0, z1: -299, x2: -415.0, z2: -199, count: 5 },
       // 11. Jl. Tanjung Duren Raya (Podomoro City & Mediterania)
       { x1: -510.0, z1: -320, x2: -435.0, z2: -250, count: 5 },
-      { x1: -435.0, z1: -246, x2: -510.0, z2: -316, count: 5 }
+      { x1: -435.0, z1: -246, x2: -510.0, z2: -316, count: 5 },
+      // 12. Koridor 13 TransJakarta Elevated Flyover (Jalur Busway Layang CSW, y=22.8)
+      { x1: -215.0, y: 22.8, z1: 630.0, x2: -455.0, y: 22.8, z2: 630.0, count: 2, isBus: true, busColor: 0x0284c7, speedBoost: 1.15 },
+      { x1: -455.0, y: 22.8, z1: 633.2, x2: -215.0, y: 22.8, z2: 633.2, count: 2, isBus: true, busColor: 0x0284c7, speedBoost: 1.15 },
+      // 13. Jl. Sisingamangaraja (Bundaran Senayan -> CSW Stasiun ASEAN)
+      { x1: -319.0, z1: 480, x2: -350.5, z2: 631.6, count: 6 },
+      { x1: -344.5, z1: 631.6, x2: -313.0, z2: 480, count: 6 },
+      // 14. Jl. Panglima Polim (CSW -> Blok M BCA -> Selatan Melawai)
+      { x1: -350.5, z1: 631.6, x2: -367.0, z2: 750, count: 6 },
+      { x1: -361.0, z1: 750, x2: -344.5, z2: 631.6, count: 6 },
+      // 15. Jl. Trunojoyo & Jl. Kyai Maja (Arteri Barat-Timur CSW & Mabes Polri)
+      { x1: -225.0, z1: 629.0, x2: -435.0, z2: 629.0, count: 5 },
+      { x1: -435.0, z1: 634.2, x2: -225.0, z2: 634.2, count: 5 },
+      // 16. Jl. Melawai Raya (Kawasan Niaga Blok M & Little Tokyo)
+      { x1: -245.0, z1: 703.0, x2: -425.0, z2: 703.0, count: 4 },
+      { x1: -425.0, z1: 707.0, x2: -245.0, z2: 707.0, count: 4 },
+      // 17. Jl. Senopati (Bundaran Senayan -> Senopati Gastronomy Corridor)
+      { x1: -310.0, z1: 500, x2: -210.0, z2: 550, count: 4 },
+      { x1: -210.0, z1: 554, x2: -310.0, z2: 504, count: 4 }
     ];
 
     let idx = 0;
@@ -1993,10 +2011,11 @@ export class CityScene {
       const y = route.y || 0;
 
       for (let j = 0; j < route.count; j++) {
-        const isBus = idx % 6 === 0;
+        const isBus = route.isBus || (idx % 6 === 0);
+        const busColor = route.busColor || 0x0284c7;
         const vehicle = this.createVehicleMesh(
           isBus,
-          isBus ? 0x0284c7 : colors[idx % colors.length]
+          isBus ? busColor : colors[idx % colors.length]
         );
 
         const t = j / route.count;
@@ -2071,14 +2090,35 @@ export class CityScene {
     this.krlCurve = new THREE.CatmullRomCurve3(krlTrackPoints, false, 'catmullrom', 0.15);
     this.krlCurveLength = this.krlCurve.getLength();
 
+    // Dynamic Kereta MRT Jakarta (Ratangga) running on the elevated viaduct
+    const mrtTrackPoints = [
+      new THREE.Vector3(-321, 4.0, 508),
+      new THREE.Vector3(-324, 8.5, 532),
+      new THREE.Vector3(-328, 12.35, 555),
+      new THREE.Vector3(-334, 12.35, 580),
+      new THREE.Vector3(-339.1, 12.35, 599.0),
+      new THREE.Vector3(-347.5, 12.35, 631.6),
+      new THREE.Vector3(-351.8, 12.35, 660.0),
+      new THREE.Vector3(-355.0, 12.35, 685.0),
+      new THREE.Vector3(-357.4, 12.35, 702.5),
+      new THREE.Vector3(-364.0, 12.35, 750.0)
+    ];
+    this.mrtCurve = new THREE.CatmullRomCurve3(mrtTrackPoints, false, 'catmullrom', 0.15);
+    this.mrtCurveLength = this.mrtCurve.getLength();
+
     this.animatedTrains = [];
     const trainConfigs = [
-      { id: 'krl-northbound', trackOffset: -1.35, speed: 0.024, progress: 0.15 },
-      { id: 'krl-southbound', trackOffset: 1.35, speed: -0.024, progress: 0.65 }
+      { id: 'krl-northbound', curve: this.krlCurve, curveLength: this.krlCurveLength, carSpacing: 17.8, trackOffset: -1.35, speed: 0.024, progress: 0.15, type: 'krl' },
+      { id: 'krl-southbound', curve: this.krlCurve, curveLength: this.krlCurveLength, carSpacing: 17.8, trackOffset: 1.35, speed: -0.024, progress: 0.65, type: 'krl' },
+      { id: 'mrt-southbound', curve: this.mrtCurve, curveLength: this.mrtCurveLength, carSpacing: 17.35, trackOffset: 1.6, speed: 0.035, progress: 0.2, type: 'mrt' },
+      { id: 'mrt-northbound', curve: this.mrtCurve, curveLength: this.mrtCurveLength, carSpacing: 17.35, trackOffset: -1.6, speed: -0.035, progress: 0.75, type: 'mrt' }
     ];
 
     trainConfigs.forEach((cfg) => {
       const train = {
+        curve: cfg.curve,
+        curveLength: cfg.curveLength,
+        carSpacing: cfg.carSpacing,
         trackOffset: cfg.trackOffset,
         speed: cfg.speed,
         progress: cfg.progress,
@@ -2086,7 +2126,9 @@ export class CityScene {
       };
 
       for (let c = 0; c < 4; c++) {
-        const carMesh = LandmarkModels.createSingleKRLCar(c, 4);
+        const carMesh = cfg.type === 'mrt'
+          ? LandmarkModels.createSingleMRTRatanggaCar(c, 4)
+          : LandmarkModels.createSingleKRLCar(c, 4);
         this.proceduralGroup.add(carMesh);
         train.cars.push(carMesh);
       }
@@ -2112,11 +2154,11 @@ export class CityScene {
       }
     });
 
-    if (this.krlCurve && this.animatedTrains.length) {
-      const totalLen = this.krlCurveLength;
-      const carSpacing = 17.8;
-
+    if (this.animatedTrains && this.animatedTrains.length) {
       this.animatedTrains.forEach((train) => {
+        const totalLen = train.curveLength;
+        const carSpacing = train.carSpacing;
+
         train.progress += train.speed * delta;
         if (train.progress > 1.0) train.progress -= 1.0;
         if (train.progress < 0.0) train.progress += 1.0;
@@ -2130,8 +2172,8 @@ export class CityScene {
           while (carDist > totalLen) carDist -= totalLen;
 
           const u = carDist / totalLen;
-          const pt = this.krlCurve.getPointAt(u);
-          const tangent = this.krlCurve.getTangentAt(u);
+          const pt = train.curve.getPointAt(u);
+          const tangent = train.curve.getTangentAt(u);
 
           // Track lateral normal offset for dual tracks
           const nx = -tangent.z * train.trackOffset;

@@ -55,4 +55,37 @@ southAnchors.forEach((id) => {
   );
 });
 
-console.log('✅ All 39 landmarks and South Jakarta builders/tour buttons verified successfully!');
+// Check 6: Tahap 4 Dynamic Mobility & MRT Ratangga Train Animation
+const landmarkModelsContent = fs.readFileSync('./src/world/LandmarkModels.js', 'utf-8');
+assert.ok(
+  landmarkModelsContent.includes('createSingleMRTRatanggaCar'),
+  'LandmarkModels.js missing createSingleMRTRatanggaCar'
+);
+assert.ok(
+  landmarkModelsContent.includes('createMRTRatanggaTrain'),
+  'LandmarkModels.js missing createMRTRatanggaTrain'
+);
+assert.ok(
+  citySceneContent.includes('mrtCurve = new THREE.CatmullRomCurve3'),
+  'CityScene.js missing mrtCurve definition'
+);
+assert.ok(
+  citySceneContent.includes("'mrt-southbound'"),
+  'CityScene.js missing mrt-southbound train config'
+);
+assert.ok(
+  citySceneContent.includes("'mrt-northbound'"),
+  'CityScene.js missing mrt-northbound train config'
+);
+assert.ok(
+  citySceneContent.includes('Koridor 13 TransJakarta Elevated Flyover'),
+  'CityScene.js missing Koridor 13 TransJakarta route'
+);
+
+const uiManagerContent = fs.readFileSync('./src/ui/UIManager.js', 'utf-8');
+assert.ok(
+  uiManagerContent.includes('cameraPosition: [-180, 520, 920]'),
+  'UIManager.js missing expanded aerial cameraPosition'
+);
+
+console.log('✅ All 39 landmarks, South Jakarta builders, MRT Ratangga, Koridor 13, and Aerial View verified successfully!');

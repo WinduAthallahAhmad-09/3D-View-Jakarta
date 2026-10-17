@@ -1840,6 +1840,157 @@ export class LandmarkModels {
   }
 
   /**
+   * Kereta MRT Jakarta (Ratangga - Nippon Sharyo)
+   * 4-car train consist with stainless-steel body, signature MRT navy blue & sky blue livery,
+   * aerodynamic cab nose, continuous dark tinted windows, and LED headlights.
+   */
+  static createSingleMRTRatanggaCar(c, cars = 4) {
+    const carLen = 16.5;
+    const gap = 0.85;
+
+    const stainlessMat = new THREE.MeshStandardMaterial({
+      color: 0xf1f5f9,
+      metalness: 0.85,
+      roughness: 0.25
+    });
+    const navyBlueMat = new THREE.MeshStandardMaterial({
+      color: 0x1e3a8a,
+      metalness: 0.5,
+      roughness: 0.35
+    });
+    const skyBlueMat = new THREE.MeshStandardMaterial({
+      color: 0x0284c7,
+      metalness: 0.4,
+      roughness: 0.4
+    });
+    const windowGlassMat = new THREE.MeshStandardMaterial({
+      color: 0x0f172a,
+      roughness: 0.15,
+      metalness: 0.85
+    });
+    const bogieMat = new THREE.MeshStandardMaterial({
+      color: 0x334155,
+      metalness: 0.5,
+      roughness: 0.8
+    });
+    const pantographMat = new THREE.MeshStandardMaterial({
+      color: 0xd97706,
+      metalness: 0.8,
+      roughness: 0.3
+    });
+    const headlightMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+
+    const carGroup = new THREE.Group();
+
+    // Main Car Body
+    const body = new THREE.Mesh(new THREE.BoxGeometry(3.1, 2.8, carLen), stainlessMat);
+    body.position.set(0, 2.05, 0);
+    body.castShadow = true;
+    body.receiveShadow = true;
+    carGroup.add(body);
+
+    // MRT Navy Blue Top Roof Band
+    const roofBand = new THREE.Mesh(new THREE.BoxGeometry(3.12, 0.45, carLen), navyBlueMat);
+    roofBand.position.set(0, 3.25, 0);
+    carGroup.add(roofBand);
+
+    // MRT Sky Blue Belt Line
+    const skyBlueBand = new THREE.Mesh(new THREE.BoxGeometry(3.14, 0.3, carLen), skyBlueMat);
+    skyBlueBand.position.set(0, 1.35, 0);
+    carGroup.add(skyBlueBand);
+
+    // Passenger Windows Strip (continuous dark tinted glass)
+    const winL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.85, carLen * 0.88), windowGlassMat);
+    winL.position.set(1.56, 2.3, 0);
+    carGroup.add(winL);
+
+    const winR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.85, carLen * 0.88), windowGlassMat);
+    winR.position.set(-1.56, 2.3, 0);
+    carGroup.add(winR);
+
+    // Wheel Bogies (front and rear)
+    [-carLen * 0.32, carLen * 0.32].forEach((bz) => {
+      const bogie = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.55, 3.6), bogieMat);
+      bogie.position.set(0, 0.45, bz);
+      carGroup.add(bogie);
+    });
+
+    // Pantograph on cars 1 and 2
+    if (c === 1 || c === 2) {
+      const panto = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.45, 2.5), pantographMat);
+      panto.position.set(0, 3.7, carLen * 0.25);
+      carGroup.add(panto);
+    }
+
+    // Aerodynamic Sloped Driver Cab for Leading (Car 0) and Trailing (Car 3)
+    if (c === 0) {
+      // Sloped front nose
+      const noseGeo = new THREE.BoxGeometry(3.08, 2.7, 1.8);
+      const nose = new THREE.Mesh(noseGeo, navyBlueMat);
+      nose.position.set(0, 2.05, -carLen * 0.5 - 0.7);
+      carGroup.add(nose);
+
+      // Curved Cab Windshield
+      const cabGlass = new THREE.Mesh(new THREE.BoxGeometry(2.7, 1.1, 0.25), windowGlassMat);
+      cabGlass.position.set(0, 2.4, -carLen * 0.5 - 1.55);
+      cabGlass.rotation.x = 0.2;
+      carGroup.add(cabGlass);
+
+      // Dual LED Headlights
+      [-0.95, 0.95].forEach((hx) => {
+        const light = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.15, 8), headlightMat);
+        light.rotation.x = Math.PI / 2;
+        light.position.set(hx, 1.35, -carLen * 0.5 - 1.6);
+        carGroup.add(light);
+      });
+    } else if (c === cars - 1) {
+      // Sloped rear nose
+      const noseGeo = new THREE.BoxGeometry(3.08, 2.7, 1.8);
+      const nose = new THREE.Mesh(noseGeo, navyBlueMat);
+      nose.position.set(0, 2.05, carLen * 0.5 + 0.7);
+      carGroup.add(nose);
+
+      // Curved Cab Windshield
+      const cabGlass = new THREE.Mesh(new THREE.BoxGeometry(2.7, 1.1, 0.25), windowGlassMat);
+      cabGlass.position.set(0, 2.4, carLen * 0.5 + 1.55);
+      cabGlass.rotation.x = -0.2;
+      carGroup.add(cabGlass);
+
+      // Dual LED Headlights
+      [-0.95, 0.95].forEach((hx) => {
+        const light = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.15, 8), headlightMat);
+        light.rotation.x = Math.PI / 2;
+        light.position.set(hx, 1.35, carLen * 0.5 + 1.6);
+        carGroup.add(light);
+      });
+    }
+
+    // Gangway bellow connector between cars
+    if (c < cars - 1) {
+      const gangway = new THREE.Mesh(new THREE.BoxGeometry(1.9, 2.3, gap + 0.1), bogieMat);
+      gangway.position.set(0, 1.85, carLen * 0.5 + gap * 0.5);
+      carGroup.add(gangway);
+    }
+
+    return carGroup;
+  }
+
+  static createMRTRatanggaTrain(cars = 4) {
+    const group = new THREE.Group();
+    const carLen = 16.5;
+    const gap = 0.85;
+
+    for (let c = 0; c < cars; c++) {
+      const car = this.createSingleMRTRatanggaCar(c, cars);
+      const cz = (c - (cars - 1) / 2) * (carLen + gap);
+      car.position.set(0, 0, cz);
+      group.add(car);
+    }
+
+    return group;
+  }
+
+  /**
    * 34. Gedung Sekretariat Jenderal ASEAN
    * Menara kembar ramah lingkungan 16 lantai di Jl. Sisingamangaraja dengan skybridge kaca 40m dan plaza bendera diplomatik.
    */
