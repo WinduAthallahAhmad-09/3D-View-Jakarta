@@ -88,4 +88,20 @@ assert.ok(
   'UIManager.js missing expanded aerial cameraPosition'
 );
 
-console.log('✅ All 39 landmarks, South Jakarta builders, MRT Ratangga, Koridor 13, and Aerial View verified successfully!');
+// Check 7: Poin 8 Selective Bloom Effect (Malam)
+const mainJsContent = fs.readFileSync('./src/main.js', 'utf-8');
+assert.ok(mainJsContent.includes('UnrealBloomPass'), 'src/main.js missing UnrealBloomPass import');
+assert.ok(mainJsContent.includes('EffectComposer'), 'src/main.js missing EffectComposer import');
+assert.ok(mainJsContent.includes('OutputPass'), 'src/main.js missing OutputPass import');
+assert.ok(mainJsContent.includes('initPostprocessing()'), 'src/main.js missing initPostprocessing()');
+assert.ok(mainJsContent.includes('setTimePresetBloom'), 'src/main.js missing setTimePresetBloom');
+
+assert.ok(citySceneContent.includes("'pju-bulb'"), 'CityScene.js missing pju-bulb');
+assert.ok(citySceneContent.includes('glowMaterials'), 'CityScene.js missing glowMaterials');
+assert.ok(citySceneContent.includes('collectGlowMaterials'), 'CityScene.js missing collectGlowMaterials');
+
+assert.ok(landmarkModelsContent.includes("'monas-flame'"), 'LandmarkModels.js missing monas-flame');
+assert.ok(landmarkModelsContent.includes("'menara-bca-crown'"), 'LandmarkModels.js missing menara-bca-crown');
+assert.ok(landmarkModelsContent.includes("'led-taman-anggrek'"), 'LandmarkModels.js missing led-taman-anggrek');
+
+console.log('✅ All 39 landmarks, South Jakarta builders, MRT Ratangga, Koridor 13, Aerial View, and Selective Bloom Effect verified successfully!');

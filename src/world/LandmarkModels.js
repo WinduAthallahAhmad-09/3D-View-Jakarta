@@ -290,11 +290,12 @@ export class LandmarkModels {
     // Lidah Api Kemerdekaan (Emas Murni 50kg)
     const flameMat = new THREE.MeshStandardMaterial({
       color: 0xffb703,
-      emissive: 0xfb8500,
-      emissiveIntensity: 0.9,
+      emissive: 0xff9900,
+      emissiveIntensity: 1.4,
       roughness: 0.15,
       metalness: 0.95
     });
+    flameMat.name = 'monas-flame';
 
     const flame = new THREE.Mesh(new THREE.ConeGeometry(2.6, 14, 16), flameMat);
     flame.position.y = 132.5;
@@ -515,6 +516,25 @@ export class LandmarkModels {
     tower.castShadow = true;
     tower.receiveShadow = true;
     group.add(tower);
+
+    // Mahkota Ikonik Menara BCA (Glowing Curved Cantilever Crown Halo)
+    const crownMat = new THREE.MeshStandardMaterial({
+      color: 0x00f0ff,
+      emissive: 0x00f0ff,
+      emissiveIntensity: 1.5,
+      roughness: 0.15,
+      metalness: 0.85
+    });
+    crownMat.name = 'menara-bca-crown';
+
+    const crownSlab = new THREE.Mesh(new THREE.BoxGeometry(27.6, 2.8, 23.6), crownMat);
+    crownSlab.position.set(0, h + 1.4, 0);
+    crownSlab.castShadow = true;
+    group.add(crownSlab);
+
+    const crownRibbon = new THREE.Mesh(new THREE.BoxGeometry(28.4, 0.8, 24.4), crownMat);
+    crownRibbon.position.set(0, h + 2.6, 0);
+    group.add(crownRibbon);
 
     // Grand Indonesia Mall Podium & Kempinski Wing (strictly west of Thamrin and outside Bundaran HI ring)
     const mall = new THREE.Mesh(
@@ -1242,10 +1262,11 @@ export class LandmarkModels {
     const condoMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.45 });
     const ledMat = new THREE.MeshStandardMaterial({
       color: 0x38bdf8,
-      emissive: 0x0284c7,
-      emissiveIntensity: 0.85,
-      roughness: 0.2
+      emissive: 0x38bdf8,
+      emissiveIntensity: 1.2,
+      roughness: 0.15
     });
+    ledMat.name = 'led-taman-anggrek';
 
     // 1. Megamall Grand Podium
     const mallPodium = new THREE.Mesh(new THREE.BoxGeometry(68, 16, 48), podiumMat);

@@ -15,6 +15,7 @@ export class CityScene {
     this.animatedTrains = [];
     this.streetLights = [];
     this.nightMaterials = [];
+    this.glowMaterials = [];
     this.init();
   }
 
@@ -33,6 +34,7 @@ export class CityScene {
     this.buildUrbanDistricts();
     this.buildStreetVegetation();
     this.buildTraffic();
+    this.collectGlowMaterials();
   }
 
   /**
@@ -952,9 +954,20 @@ export class CityScene {
     pole.position.y = 4.5;
     poleGroup.add(pole);
 
+    if (!this.pjuBulbMat) {
+      this.pjuBulbMat = new THREE.MeshStandardMaterial({
+        color: 0xfef08a,
+        emissive: 0xfef08a,
+        emissiveIntensity: 0.0,
+        roughness: 0.2
+      });
+      this.pjuBulbMat.name = 'pju-bulb';
+      this.glowMaterials.push(this.pjuBulbMat);
+    }
+
     const bulb = new THREE.Mesh(
-      new THREE.SphereGeometry(0.28, 6, 6),
-      new THREE.MeshBasicMaterial({ color: 0xfef08a })
+      new THREE.SphereGeometry(0.35, 8, 8),
+      this.pjuBulbMat
     );
     bulb.position.set(facingEast ? 2.0 : -2.0, 8.5, 0);
     poleGroup.add(bulb);
@@ -2188,6 +2201,21 @@ export class CityScene {
     }
   }
 
+  collectGlowMaterials() {
+    this.proceduralGroup.traverse((child) => {
+      if (child.isMesh && child.material) {
+        const mats = Array.isArray(child.material) ? child.material : [child.material];
+        mats.forEach((m) => {
+          if (m && m.name && ['pju-bulb', 'monas-flame', 'menara-bca-crown', 'led-taman-anggrek'].includes(m.name)) {
+            if (!this.glowMaterials.includes(m)) {
+              this.glowMaterials.push(m);
+            }
+          }
+        });
+      }
+    });
+  }
+
   setTimePreset(preset) {
     const isNight = preset === 'night';
     const isGolden = preset === 'golden';
@@ -2230,6 +2258,19 @@ export class CityScene {
 
     this.nightMaterials.forEach((m) => {
       m.emissiveIntensity = isNight ? 0.88 : isGolden ? 0.35 : 0;
+    });
+
+    // Selective Night Bloom Targets: PJU, Taman Anggrek LED, Menara BCA Crown, and Monas Flame
+    this.glowMaterials.forEach((m) => {
+      if (m.name === 'pju-bulb') {
+        m.emissiveIntensity = isNight ? 2.6 : isGolden ? 1.0 : 0.0;
+      } else if (m.name === 'monas-flame') {
+        m.emissiveIntensity = isNight ? 2.8 : isGolden ? 1.4 : 0.6;
+      } else if (m.name === 'menara-bca-crown') {
+        m.emissiveIntensity = isNight ? 2.7 : isGolden ? 1.2 : 0.3;
+      } else if (m.name === 'led-taman-anggrek') {
+        m.emissiveIntensity = isNight ? 2.4 : isGolden ? 1.0 : 0.4;
+      }
     });
   }
 

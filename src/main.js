@@ -1,4 +1,8 @@
 import * as THREE from 'three';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { CityScene } from './world/CityScene.js';
 import { LightingManager } from './world/Lighting.js';
 import { CameraController } from './world/CameraController.js';
@@ -16,6 +20,7 @@ class JakartaApp {
     this.initRenderer();
     this.initCamera();
     this.initScene();
+    this.initPostprocessing();
     this.initSubsystems();
     this.initEvents();
 
@@ -54,6 +59,42 @@ class JakartaApp {
     this.scene = new THREE.Scene();
   }
 
+  initPostprocessing() {
+    this.composer = new EffectComposer(this.renderer);
+
+    const renderPass = new RenderPass(this.scene, this.camera);
+    this.composer.addPass(renderPass);
+
+    // Selective UnrealBloomPass: tuned specifically for night-time emissive elements
+    this.bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      0.0,   // default strength (0 in day mode)
+      0.45,  // bloom radius
+      0.82   // bloom threshold (only HDR emissive lights pass!)
+    );
+    this.composer.addPass(this.bloomPass);
+
+    const outputPass = new OutputPass();
+    this.composer.addPass(outputPass);
+  }
+
+  setTimePresetBloom(preset) {
+    this.currentTimePreset = preset;
+    if (this.bloomPass) {
+      if (preset === 'night') {
+        this.bloomPass.strength = 1.15;
+        this.bloomPass.threshold = 0.82;
+        this.bloomPass.radius = 0.50;
+      } else if (preset === 'golden') {
+        this.bloomPass.strength = 0.38;
+        this.bloomPass.threshold = 0.85;
+        this.bloomPass.radius = 0.35;
+      } else {
+        this.bloomPass.strength = 0.0;
+      }
+    }
+  }
+
   initSubsystems() {
     // 1. Lighting & Atmosphere
     this.lighting = new LightingManager(this.scene);
@@ -84,6 +125,7 @@ class JakartaApp {
       onTimeChange: (preset) => {
         this.lighting.setTimeOfDay(preset);
         this.city.setTimePreset(preset);
+        this.setTimePresetBloom(preset);
       },
       onResetNorth: () => {
         if (this.cameraController) {
@@ -143,6 +185,10 @@ class JakartaApp {
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(window.innerWidth, window.innerHeight);
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      if (this.composer) {
+        this.composer.setSize(window.innerWidth, window.innerHeight);
+        this.composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      }
     });
   }
 
@@ -176,7 +222,12 @@ class JakartaApp {
       this.ui.updateMapLabels(this.camera);
     }
 
-    this.renderer.render(this.scene, this.camera);
+    // Selective Night Bloom Rendering via EffectComposer or direct WebGL rendering
+    if (this.composer && this.bloomPass && this.bloomPass.strength > 0) {
+      this.composer.render();
+    } else {
+      this.renderer.render(this.scene, this.camera);
+    }
   }
 }
 
