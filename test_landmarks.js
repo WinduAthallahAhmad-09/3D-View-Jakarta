@@ -154,4 +154,34 @@ assert.ok(
   'CityScene.js missing Bundaran Ondel-Ondel roundabout ring'
 );
 
-console.log('✅ All 45 landmarks, Tahap 1 & 2 Central Jakarta East corridors & railways, South Jakarta builders, MRT Ratangga, Koridor 13, Aerial View, and Selective Bloom Effect verified successfully!');
+// Check 9: Tahap 3 Infill Urban Fabric, Distrik Komersial & Permukiman Jakarta Pusat Timur
+assert.ok(
+  citySceneContent.includes('this.buildCentralJakartaEastInfillAndDistricts()'),
+  'CityScene.js missing buildCentralJakartaEastInfillAndDistricts call in init'
+);
+assert.ok(
+  citySceneContent.includes('buildCentralJakartaEastInfillAndDistricts()'),
+  'CityScene.js missing buildCentralJakartaEastInfillAndDistricts method'
+);
+assert.ok(
+  citySceneContent.includes('Wisma Atlet Kemayoran'),
+  'CityScene.js missing Wisma Atlet Kemayoran'
+);
+assert.ok(
+  citySceneContent.includes('RSPAD Gatot Soebroto'),
+  'CityScene.js missing RSPAD Gatot Soebroto'
+);
+assert.ok(
+  citySceneContent.includes('Metropole XXI'),
+  'CityScene.js missing Metropole XXI'
+);
+assert.ok(
+  citySceneContent.includes('Gedung Kesenian Jakarta (GKJ 1821)'),
+  'CityScene.js missing Gedung Kesenian Jakarta'
+);
+assert.ok(
+  citySceneContent.includes('Kompleks FKUI & RSCM Salemba'),
+  'CityScene.js missing Kompleks FKUI & RSCM Salemba'
+);
+
+console.log('✅ All 45 landmarks, Tahap 1, 2 & 3 Central Jakarta East infill & districts, South Jakarta builders, MRT Ratangga, Koridor 13, Aerial View, and Selective Bloom Effect verified successfully!');

@@ -29,6 +29,7 @@ export class CityScene {
     this.buildRoadNetwork();
     this.buildElevatedRailway();
     this.buildCentralJakartaEastCorridor();
+    this.buildCentralJakartaEastInfillAndDistricts();
     this.buildSouthJakartaCorridor();
     this.buildSouthJakartaInfillAndParks();
     this.buildLandmarks();
@@ -782,6 +783,294 @@ export class CityScene {
       const kwitangZ = -190 + t * (-270 - (-190));
       this.createStreetLamp(x, kwitangZ - 10.0, true);
       this.createStreetLamp(x, kwitangZ + 10.0, false);
+    }
+  }
+
+  /**
+   * Tahap 3: Infill Urban Fabric, Distrik Komersial & Permukiman Jakarta Pusat Timur
+   * 1. Kawasan Kemayoran: Menara Apartemen Wisma Atlet & Ruko Niaga Grand Palace
+   * 2. Kawasan Senen & Kramat: Blok Grosir Pasar Senen (Blok III-VI), Ruko Kwitang, Sentra Kuliner Kramat & RSPAD Gatot Soebroto
+   * 3. Kawasan Cikini & Salemba: Kampus IKJ, Gedung Metropole XXI (Megaria Art-Deco 1951), FKUI Salemba & RSCM
+   * 4. Kawasan Passer Baroe & Sawah Besar: Arkade Toko Neoklasik, Gedung Kesenian Jakarta (GKJ 1821), & Kantor Filateli
+   */
+  buildCentralJakartaEastInfillAndDistricts() {
+    const whiteWallMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.45 });
+    const creamWallMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.55 });
+    const greyWallMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.65 });
+    const terracottaRoofMat = new THREE.MeshStandardMaterial({ color: 0x7c2d12, roughness: 0.75 });
+    const darkRoofMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+    const brickMat = new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.85 });
+    const glassBlueMat = new THREE.MeshStandardMaterial({
+      color: 0x0284c7,
+      metalness: 0.82,
+      roughness: 0.18
+    });
+    const glassModernMat = new THREE.MeshStandardMaterial({
+      color: 0x0ea5e9,
+      metalness: 0.75,
+      roughness: 0.25
+    });
+    const grassMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 });
+    const timberMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.7 });
+    const redCrossMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.3 });
+    const goldMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.85, roughness: 0.2 });
+
+    // =========================================================================
+    // 1. KAWASAN KEMAYORAN: WISMA ATLET & RUKO NIAGA GRAND PALACE
+    // =========================================================================
+    // Menara Kembar Wisma Atlet Kemayoran (Tower C1, C2, D10)
+    const kemayoranTowers = [
+      { x: 335, z: -635, w: 22, d: 20, h: 84 },
+      { x: 345, z: -575, w: 24, d: 20, h: 92 },
+      { x: 350, z: -675, w: 22, d: 22, h: 76 },
+      { x: 232, z: -630, w: 20, d: 18, h: 72 }
+    ];
+
+    kemayoranTowers.forEach((t) => {
+      const towerGroup = new THREE.Group();
+      towerGroup.position.set(t.x, 0, t.z);
+
+      const tower = new THREE.Mesh(new THREE.BoxGeometry(t.w, t.h, t.d), whiteWallMat);
+      tower.position.y = t.h * 0.5;
+      tower.castShadow = true;
+      tower.receiveShadow = true;
+      towerGroup.add(tower);
+
+      const floors = Math.floor(t.h / 7.5);
+      for (let f = 1; f < floors; f++) {
+        const band = new THREE.Mesh(new THREE.BoxGeometry(t.w + 0.4, 1.2, t.d + 0.4), glassModernMat);
+        band.position.y = f * 7.5;
+        towerGroup.add(band);
+      }
+
+      const crown = new THREE.Mesh(new THREE.BoxGeometry(t.w * 0.7, 4.5, t.d * 0.7), greyWallMat);
+      crown.position.y = t.h + 2.25;
+      crown.castShadow = true;
+      towerGroup.add(crown);
+
+      this.proceduralGroup.add(towerGroup);
+    });
+
+    // Ruko Komersial Grand Palace Kemayoran (5 lantai, 18m)
+    for (let z = -430; z >= -490; z -= 16) {
+      const rukoWest = new THREE.Mesh(new THREE.BoxGeometry(16, 18, 12), creamWallMat);
+      rukoWest.position.set(232, 9, z);
+      rukoWest.castShadow = true;
+      this.proceduralGroup.add(rukoWest);
+
+      const rukoEast = new THREE.Mesh(new THREE.BoxGeometry(16, 18, 12), greyWallMat);
+      rukoEast.position.set(302, 9, z);
+      rukoEast.castShadow = true;
+      this.proceduralGroup.add(rukoEast);
+    }
+
+    // Lapangan Hijau Golf Kemayoran (Springhill RTH)
+    const golfPark = new THREE.Mesh(new THREE.BoxGeometry(60, 0.15, 80), grassMat);
+    golfPark.position.set(360, 0.075, -460);
+    golfPark.receiveShadow = true;
+    this.proceduralGroup.add(golfPark);
+
+    // Danau Golf Kemayoran
+    const golfPond = new THREE.Mesh(
+      new THREE.CylinderGeometry(14, 14, 0.2, 24),
+      new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.15, metalness: 0.8 })
+    );
+    golfPond.position.set(360, 0.12, -460);
+    this.proceduralGroup.add(golfPond);
+
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2;
+      this.createTree(360 + Math.cos(angle) * 22, -460 + Math.sin(angle) * 30, grassMat, timberMat, 1.15);
+    }
+
+    // =========================================================================
+    // 2. KAWASAN SENEN & KRAMAT: BLOK GROSIR, KWITANG & RSPAD
+    // =========================================================================
+    // Blok Grosir Pasar Senen Blok III & IV (Podium masif 6 lantai)
+    const senenBlok3 = new THREE.Mesh(new THREE.BoxGeometry(32, 24, 28), greyWallMat);
+    senenBlok3.position.set(230, 12, -295);
+    senenBlok3.castShadow = true;
+    this.proceduralGroup.add(senenBlok3);
+
+    [6, 14].forEach((fy) => {
+      const band = new THREE.Mesh(new THREE.BoxGeometry(32.4, 2.0, 28.4), glassBlueMat);
+      band.position.set(230, fy, -295);
+      this.proceduralGroup.add(band);
+    });
+
+    const senenBlok5 = new THREE.Mesh(new THREE.BoxGeometry(26, 20, 32), creamWallMat);
+    senenBlok5.position.set(260, 10, -328);
+    senenBlok5.castShadow = true;
+    this.proceduralGroup.add(senenBlok5);
+
+    // Ruko Sentra Buku & Percetakan Kwitang (3-4 lantai, 12m-15m)
+    for (let x = 145; x <= 205; x += 18) {
+      const rukoKwitang = new THREE.Mesh(new THREE.BoxGeometry(14, 13, 14), whiteWallMat);
+      rukoKwitang.position.set(x, 6.5, -200);
+      rukoKwitang.castShadow = true;
+      this.proceduralGroup.add(rukoKwitang);
+
+      const rukoRoof = new THREE.Mesh(new THREE.BoxGeometry(14.4, 1.2, 14.4), terracottaRoofMat);
+      rukoRoof.position.set(x, 13.5, -200);
+      this.proceduralGroup.add(rukoRoof);
+    }
+
+    // Deretan Kantor & Sentra Kuliner Nasi Kapau Kramat Raya
+    for (let z = -140; z >= -220; z -= 22) {
+      const rukoKramat = new THREE.Mesh(new THREE.BoxGeometry(18, 16, 16), creamWallMat);
+      rukoKramat.position.set(288, 8, z);
+      rukoKramat.castShadow = true;
+      this.proceduralGroup.add(rukoKramat);
+    }
+
+    // Kompleks Rumah Sakit Pusat Angkatan Darat (RSPAD Gatot Soebroto)
+    const rspadGroup = new THREE.Group();
+    rspadGroup.position.set(185, 0, -330);
+
+    const rspadMain = new THREE.Mesh(new THREE.BoxGeometry(34, 30, 22), whiteWallMat);
+    rspadMain.position.y = 15;
+    rspadMain.castShadow = true;
+    rspadGroup.add(rspadMain);
+
+    [8, 16, 24].forEach((hy) => {
+      const glassStrip = new THREE.Mesh(new THREE.BoxGeometry(34.2, 2.2, 22.2), glassModernMat);
+      glassStrip.position.y = hy;
+      rspadGroup.add(glassStrip);
+    });
+
+    const crossV = new THREE.Mesh(new THREE.BoxGeometry(1.2, 4.2, 0.4), redCrossMat);
+    crossV.position.set(0, 26, 11.2);
+    rspadGroup.add(crossV);
+
+    const crossH = new THREE.Mesh(new THREE.BoxGeometry(4.2, 1.2, 0.4), redCrossMat);
+    crossH.position.set(0, 26, 11.2);
+    rspadGroup.add(crossH);
+
+    const helipad = new THREE.Mesh(new THREE.CylinderGeometry(5.5, 5.5, 0.3, 20), greyWallMat);
+    helipad.position.set(0, 30.2, 0);
+    rspadGroup.add(helipad);
+
+    this.proceduralGroup.add(rspadGroup);
+
+    // =========================================================================
+    // 3. KAWASAN CIKINI & SALEMBA: KAMPUS IKJ, METROPOLE XXI & FKUI / RSCM
+    // =========================================================================
+    const ikjGroup = new THREE.Group();
+    ikjGroup.position.set(240, 0, -95);
+
+    const ikjBuilding = new THREE.Mesh(new THREE.BoxGeometry(26, 14, 20), brickMat);
+    ikjBuilding.position.y = 7;
+    ikjBuilding.castShadow = true;
+    ikjGroup.add(ikjBuilding);
+
+    const ikjRoof = new THREE.Mesh(new THREE.BoxGeometry(27, 1.4, 21), darkRoofMat);
+    ikjRoof.position.y = 14.7;
+    ikjGroup.add(ikjRoof);
+    this.proceduralGroup.add(ikjGroup);
+
+    // Bioskop Metropole XXI (Megaria 1951)
+    const metropoleGroup = new THREE.Group();
+    metropoleGroup.position.set(165, 0, -25);
+
+    const metropoleBase = new THREE.Mesh(new THREE.BoxGeometry(24, 15, 26), whiteWallMat);
+    metropoleBase.position.y = 7.5;
+    metropoleBase.castShadow = true;
+    metropoleGroup.add(metropoleBase);
+
+    const metropoleTower = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.8, 12, 16), whiteWallMat);
+    metropoleTower.position.set(8, 21, 8);
+    metropoleTower.castShadow = true;
+    metropoleGroup.add(metropoleTower);
+
+    const metropoleDome = new THREE.Mesh(new THREE.SphereGeometry(2.5, 16, 12), goldMat);
+    metropoleDome.position.set(8, 28, 8);
+    metropoleGroup.add(metropoleDome);
+
+    const canopy = new THREE.Mesh(new THREE.BoxGeometry(16, 1.2, 6), greyWallMat);
+    canopy.position.set(0, 5, 14);
+    metropoleGroup.add(canopy);
+    this.proceduralGroup.add(metropoleGroup);
+
+    // Kompleks FKUI & RSCM Salemba
+    const fkuiGroup = new THREE.Group();
+    fkuiGroup.position.set(285, 0, 15);
+
+    const fkuiHeritage = new THREE.Mesh(new THREE.BoxGeometry(32, 12, 18), creamWallMat);
+    fkuiHeritage.position.y = 6;
+    fkuiHeritage.castShadow = true;
+    fkuiGroup.add(fkuiHeritage);
+
+    const fkuiRoof = new THREE.Mesh(new THREE.ConeGeometry(22, 7, 4), terracottaRoofMat);
+    fkuiRoof.rotation.y = Math.PI / 4;
+    fkuiRoof.position.y = 15.5;
+    fkuiGroup.add(fkuiRoof);
+
+    const rscmTower = new THREE.Mesh(new THREE.BoxGeometry(24, 45, 20), whiteWallMat);
+    rscmTower.position.set(25, 22.5, -8);
+    rscmTower.castShadow = true;
+    fkuiGroup.add(rscmTower);
+
+    [12, 24, 36].forEach((gy) => {
+      const glassBand = new THREE.Mesh(new THREE.BoxGeometry(24.3, 2.4, 20.3), glassModernMat);
+      glassBand.position.set(25, gy, -8);
+      fkuiGroup.add(glassBand);
+    });
+
+    this.proceduralGroup.add(fkuiGroup);
+
+    // =========================================================================
+    // 4. KAWASAN PASSER BAROE & SAWAH BESAR: ARKADE, GKJ & FILATELI
+    // =========================================================================
+    // Gedung Kesenian Jakarta (GKJ 1821)
+    const gkjGroup = new THREE.Group();
+    gkjGroup.position.set(168, 0, -420);
+
+    const gkjHall = new THREE.Mesh(new THREE.BoxGeometry(22, 12, 28), whiteWallMat);
+    gkjHall.position.y = 6;
+    gkjHall.castShadow = true;
+    gkjGroup.add(gkjHall);
+
+    const pediment = new THREE.Mesh(new THREE.ConeGeometry(12, 4.5, 4), whiteWallMat);
+    pediment.rotation.y = Math.PI / 4;
+    pediment.position.set(-11.5, 14, 0);
+    gkjGroup.add(pediment);
+
+    [-7, -2.5, 2.5, 7].forEach((colZ) => {
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, 10, 12), whiteWallMat);
+      col.position.set(-11.5, 5, colZ);
+      gkjGroup.add(col);
+    });
+    this.proceduralGroup.add(gkjGroup);
+
+    // Gedung Filateli / Kantor Pos Batavia
+    const filateliGroup = new THREE.Group();
+    filateliGroup.position.set(128, 0, -410);
+
+    const filateliMain = new THREE.Mesh(new THREE.BoxGeometry(18, 12, 18), creamWallMat);
+    filateliMain.position.y = 6;
+    filateliMain.castShadow = true;
+    filateliGroup.add(filateliMain);
+
+    const filateliRoof = new THREE.Mesh(new THREE.BoxGeometry(19, 4, 19), terracottaRoofMat);
+    filateliRoof.position.y = 14;
+    filateliGroup.add(filateliRoof);
+    this.proceduralGroup.add(filateliGroup);
+
+    // Arkade Ruko Neoklasik Passer Baroe
+    for (let z = -440; z >= -520; z -= 18) {
+      const rukoWest = new THREE.Mesh(new THREE.BoxGeometry(12, 11, 14), creamWallMat);
+      rukoWest.position.set(134, 5.5, z);
+      rukoWest.castShadow = true;
+      this.proceduralGroup.add(rukoWest);
+
+      const rukoEast = new THREE.Mesh(new THREE.BoxGeometry(12, 11, 14), whiteWallMat);
+      rukoEast.position.set(158, 5.5, z);
+      rukoEast.castShadow = true;
+      this.proceduralGroup.add(rukoEast);
+
+      const arcadeCanopy = new THREE.Mesh(new THREE.BoxGeometry(3, 0.4, 14), greyWallMat);
+      arcadeCanopy.position.set(141.5, 3.5, z);
+      this.proceduralGroup.add(arcadeCanopy);
     }
   }
 
