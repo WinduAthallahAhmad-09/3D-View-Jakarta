@@ -1023,7 +1023,13 @@ export class CityScene {
       "kejaksaan-agung": () => LandmarkModels.createKejaksaanAgung(),
       "m-bloc-space": () => LandmarkModels.createMBlocSpace(),
       "stasiun-mrt-blok-m": () => LandmarkModels.createStasiunMRTBlokM(),
-      "distrik-melawai": () => LandmarkModels.createDistrikMelawai()
+      "distrik-melawai": () => LandmarkModels.createDistrikMelawai(),
+      "jiexpo-kemayoran": () => LandmarkModels.createJIExpoKemayoran(),
+      "menara-atc-kemayoran": () => LandmarkModels.createMenaraATCKemayoran(),
+      "stasiun-pasar-senen": () => LandmarkModels.createStasiunPasarSenen(),
+      "pasar-senen-jaya": () => LandmarkModels.createPasarSenenJaya(),
+      "taman-ismail-marzuki": () => LandmarkModels.createTamanIsmailMarzuki(),
+      "passer-baroe": () => LandmarkModels.createPasserBaroe()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {

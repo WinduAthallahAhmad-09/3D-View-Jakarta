@@ -882,6 +882,138 @@ export const JAKARTA_LANDMARKS = [
       "Menjadi pusat komunitas ekspatriat Jepang di Jakarta Selatan dengan ratusan kedai kuliner khas.",
       "Berdampingan dengan Blok M Square dan Pasaraya Grande."
     ]
+  },
+  {
+    id: "jiexpo-kemayoran",
+    name: "Jakarta International Expo (JIExpo Kemayoran)",
+    shortName: "JIExpo Kemayoran",
+    category: "Pusat Pameran & Konvensi Internasional",
+    tagline: "Arena Eksibisi Terbesar Indonesia & Rumah Pekan Raya Jakarta (PRJ)",
+    height: "36 meter (Grand Hall & Teater JIExpo)",
+    year: "2010",
+    architect: "PT Jakarta International Expo / BDP Architects",
+    location: "Gedung Pusat Niaga, Arena JIExpo, Kemayoran, Jakarta Pusat",
+    coordinates: { lat: -6.1462, lng: 106.8450 },
+    position: [309.5, 0, -691.4],
+    labelHeight: 48,
+    cameraPosition: [309.5, 75, -600],
+    cameraTarget: [309.5, 18, -691.4],
+    description: "Kompleks pameran dan konvensi MICE terbesar dan paling modern di Indonesia yang berdiri di atas eks-landasan pacu Bandara Kemayoran. Memiliki luas area 44 hektar dengan Hall A, B, C, D, Grand Ballroom, Teater JIExpo, dan pelataran terbuka raksasa tempat diselenggarakannya Jakarta Fair / Pekan Raya Jakarta (PRJ).",
+    facts: [
+      "Menjadi tuan rumah tahunan Pekan Raya Jakarta (Jakarta Fair Kemayoran) yang merayakan HUT Kota Jakarta sejak 1968.",
+      "Dibangun di atas area bekas landasan pacu penerbangan internasional pertama Indonesia (Bandara Kemayoran).",
+      "Memiliki kapasitas teater dan ruang pameran indoor lebih dari 100.000 meter persegi."
+    ]
+  },
+  {
+    id: "menara-atc-kemayoran",
+    name: "Menara ATC Heritage Kemayoran & Bundaran Ondel-Ondel",
+    shortName: "Menara ATC Kemayoran",
+    category: "Cagar Budaya & Sejarah Penerbangan",
+    tagline: "Menara Pengawas Udara Pertama di Asia (1938) & Ikon Budaya Betawi",
+    height: "28 meter (Menara ATC 5 lantai) & 16 meter (Monumen Ondel-Ondel)",
+    year: "1938 (ATC) / 2014 (Ondel-Ondel)",
+    architect: "Departemen Pekerjaan Umum Hindia Belanda (1938)",
+    location: "Boulevard Jl. Benyamin Sueb, Kebon Kosong, Kemayoran, Jakarta Pusat",
+    coordinates: { lat: -6.1585, lng: 106.8420 },
+    position: [267.2, 0, -517.0],
+    labelHeight: 42,
+    cameraPosition: [267.2, 55, -445],
+    cameraTarget: [267.2, 14, -517.0],
+    description: "Situs cagar budaya bersejarah nasional berupa menara pengawas lalu lintas udara (Air Traffic Control) tertua di Indonesia dan Asia Tenggara yang dibangun pada tahun 1938 untuk Bandara Internasional Kemayoran, berdampingan dengan sepasang patung Ondel-Ondel raksasa megah di bundaran tengah Boulevard Benyamin Sueb.",
+    facts: [
+      "Menara ATC Kemayoran merupakan cagar budaya saksi sejarah pendaratan pesawat-pesawat legendaris dunia era DC-3 Dakota dan Fokker.",
+      "Bandara Kemayoran pernah diabadikan dalam komik legendaris dunia Petualangan Tintin karya Hergé ('Penerbangan 714 ke Sydney').",
+      "Monumen Ondel-Ondel di median jalan menjadi simbol kebanggaan pelestarian seni dan kebudayaan asli Betawi."
+    ]
+  },
+  {
+    id: "stasiun-pasar-senen",
+    name: "Stasiun Pasar Senen (Heritage Railway Station)",
+    shortName: "Stasiun Pasar Senen",
+    category: "Infrastruktur Transit & Cagar Budaya",
+    tagline: "Stasiun Kereta Api Antarkota Terbesar Kedua Jakarta & Mahakarya Art-Deco 1916",
+    height: "18 meter (Fasad Kanopi Utama & Menara Jam)",
+    year: "1886 / 1916",
+    architect: "J. van Gendt (Staatsspoorwegen / SS)",
+    location: "Jl. Stasiun Senen No. 1, Senen, Jakarta Pusat",
+    coordinates: { lat: -6.1746, lng: 106.8443 },
+    position: [299.7, 0, -288.7],
+    labelHeight: 45,
+    cameraPosition: [299.7, 60, -215],
+    cameraTarget: [299.7, 12, -288.7],
+    description: "Stasiun kereta api cagar budaya kelas besar tipe A yang menjadi pintu gerbang utama layanan kereta api antarkota jarak jauh kelas ekonomi dan eksekutif dari Jakarta menuju kota-kota di Pulau Jawa. Memiliki kanopi baja lengkung bentang panjang khas arsitektur stasiun kolonial awal abad ke-20.",
+    facts: [
+      "Stasiun Pasar Senen pertama kali dibuka pada 31 Maret 1887 oleh Bataviasche Oosterspoorweg Maatschappij (BOS).",
+      "Gedung megah bergaya Indische Empire dan Art Deco yang berdiri saat ini dirancang oleh arsitek ternama J. van Gendt dan diresmikan pada 19 Maret 1916.",
+      "Melayani jutaan penumpang setiap tahunnya dan terhubung dengan halte TransJakarta dan stasiun KRL Commuter Line."
+    ]
+  },
+  {
+    id: "pasar-senen-jaya",
+    name: "Kompleks Pasar Senen Jaya & Simpang Lima Senen",
+    shortName: "Pasar Senen Jaya",
+    category: "Pusat Perbelanjaan & Simpul Lalu Lintas",
+    tagline: "Pusat Grosir Pakaian Tertua Sejak 1735, Skybridge Ikonik & Simpang Lima",
+    height: "38 meter (Pasar Senen Blok I & II 7 lantai)",
+    year: "1735 / Revitalisasi 2021",
+    architect: "Yustinus Vinck (1735) / PT Pembangunan Jaya",
+    location: "Jl. Pasar Senen Raya & Jl. Kramat Raya, Senen, Jakarta Pusat",
+    coordinates: { lat: -6.1755, lng: 106.8415 },
+    position: [260.2, 0, -275.9],
+    labelHeight: 48,
+    cameraPosition: [260.2, 65, -200],
+    cameraTarget: [260.2, 16, -275.9],
+    description: "Pusat perbelanjaan grosir dan tekstil tertua di Jakarta yang didirikan oleh Yustinus Vinck pada 30 Agustus 1735 (dikenal sebagai Pasar Vinck). Kini direvitalisasi dengan arsitektur modern berbalut corak ornamen Betawi, JPO Skybridge melengkung futuristik, dan terintegrasi dengan Flyover Simpang Lima Senen.",
+    facts: [
+      "Dahulu hanya dibuka setiap hari Senin, sehingga pasar ini kemudian dinamai Pasar Senen.",
+      "JPO Simpang Senen memenangkan penghargaan desain arsitektur jembatan penyeberangan ramah disabilitas dengan tata lampu dinamis.",
+      "Merupakan sentra buku bekas, pakaian impor (thrifting), dan kue subuh paling melegenda di Indonesia."
+    ]
+  },
+  {
+    id: "taman-ismail-marzuki",
+    name: "Taman Ismail Marzuki (TIM) & Teater Jakarta Cikini",
+    shortName: "Taman Ismail Marzuki",
+    category: "Seni Budaya & Arsitektur Kontemporer",
+    tagline: "Pusat Kesenian & Kebudayaan Ibu Kota dengan Fasad Kisi-Kisi Not Balok",
+    height: "58 meter (Gedung Panjang Ali Sadikin & Perpustakaan Jakarta 14 lantai)",
+    year: "1968 / Revitalisasi 2022",
+    architect: "Andra Matin (Masterplan Revitalisasi 2022)",
+    location: "Jl. Cikini Raya No. 73, Cikini, Menteng, Jakarta Pusat",
+    coordinates: { lat: -6.1895, lng: 106.8385 },
+    position: [217.9, 0, -77.4],
+    labelHeight: 52,
+    cameraPosition: [217.9, 70, -5],
+    cameraTarget: [217.9, 18, -77.4],
+    description: "Pusat kesenian dan kebudayaan termegah di Indonesia yang didirikan oleh Gubernur Ali Sadikin pada 10 November 1968 dan direvitalisasi secara spektakuler oleh arsitek Andra Matin. Menampilkan fasad Gedung Panjang dengan motif kisi-kisi terakota lagu 'Rayuan Pulau Kelapa', Teater Besar berstandar internasional, serta kubah bersejarah Planetarium Jakarta.",
+    facts: [
+      "Nama kompleks ini diambil dari komponis besar pahlawan nasional asal Betawi, Ismail Marzuki.",
+      "Fasad arsitektur Gedung Panjang terinspirasi dari not balok tangga nada lagu ciptaan Ismail Marzuki yang diterjemahkan menjadi fasad kisi-kisi peneduh.",
+      "Menampung Perpustakaan Jakarta berstandar dunia, Institut Kesenian Jakarta (IKJ), dan Planetarium tertua di Asia Tenggara (1969)."
+    ]
+  },
+  {
+    id: "passer-baroe",
+    name: "Gerbang Bersejarah Passer Baroe (1820) & Kawasan Sawah Besar",
+    shortName: "Passer Baroe 1820",
+    category: "Cagar Budaya & Wisata Belanja Sejarah",
+    tagline: "Pusat Belanja Neoklasik Tertua Jakarta Era Batavia di Tepian Ciliwung",
+    height: "15 meter (Gerbang Utama Monumental & Arcade Jalan Pedestrian)",
+    year: "1820",
+    architect: "Pemerintah Kolonial Batavia / Komunitas Peranakan Tionghoa & India",
+    location: "Jl. Pasar Baru & Jl. Pos, Pasar Baru, Sawah Besar, Jakarta Pusat",
+    coordinates: { lat: -6.1650, lng: 106.8335 },
+    position: [147.4, 0, -424.8],
+    labelHeight: 38,
+    cameraPosition: [147.4, 45, -360],
+    cameraTarget: [147.4, 10, -424.8],
+    description: "Kawasan perbelanjaan legendaris tertua di Jakarta yang dibangun pada tahun 1820 untuk melayani warga kawasan Weltevreden (Batavia baru). Ditandai dengan gerbang megah bergaya perpaduan arsitektur Tionghoa-Eropa berwarna merah marun dan emas, membentang di atas koridor pedestrian yang asri dekat aliran Kali Ciliwung.",
+    facts: [
+      "Didirikan pada era Gubernur Jenderal Hindia Belanda G.A.G.Ph. van der Capellen pada tahun 1820.",
+      "Terkenal sebagai sentra penjahit jas klasik (tailor), toko kacamata tertua, dan kuliner multikultural percampuran Tionghoa, India, dan Betawi.",
+      "Terhubung langsung dengan Gedung Kesenian Jakarta (Schouwburg Weltevreden) dan Kantor Filateli Pos Indonesia."
+    ]
   }
 ];
 

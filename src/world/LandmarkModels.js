@@ -2558,6 +2558,467 @@ export class LandmarkModels {
 
     return group;
   }
+
+  /**
+   * 40. Jakarta International Expo (JIExpo Kemayoran)
+   * Kompleks pameran terbesar Indonesia dengan Grand Hall lengkung, atap truss baja, JIExpo Theatre, dan pelataran PRJ.
+   */
+  static createJIExpoKemayoran() {
+    const group = new THREE.Group();
+
+    const hallMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.45 });
+    const roofTrussMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.6, roughness: 0.3 });
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.8, roughness: 0.15, transparent: true, opacity: 0.85 });
+    const plazaMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.9 });
+    const accentRedMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.5 });
+
+    // Grand Exhibition Plaza (Pelataran Aspal & Paviliun Terbuka)
+    const plaza = new THREE.Mesh(new THREE.BoxGeometry(110, 0.4, 90), plazaMat);
+    plaza.position.set(0, 0.2, 0);
+    plaza.receiveShadow = true;
+    group.add(plaza);
+
+    // 1. Grand Exhibition Hall A & B (Twin Arched Barrel-Vault Halls)
+    [-30, 30].forEach((hx) => {
+      const hallBase = new THREE.Mesh(new THREE.BoxGeometry(44, 14, 60), hallMat);
+      hallBase.position.set(hx, 7, -6);
+      hallBase.castShadow = true;
+      hallBase.receiveShadow = true;
+      group.add(hallBase);
+
+      // Curved Barrel Roof
+      const roofGeo = new THREE.CylinderGeometry(23, 23, 60, 20, 1, false, 0, Math.PI);
+      roofGeo.rotateZ(Math.PI / 2);
+      roofGeo.rotateY(Math.PI / 2);
+      const roof = new THREE.Mesh(roofGeo, roofTrussMat);
+      roof.position.set(hx, 14, -6);
+      roof.castShadow = true;
+      group.add(roof);
+
+      // Front Glass Curtain Facade
+      const frontGlass = new THREE.Mesh(new THREE.BoxGeometry(40, 10, 0.5), glassMat);
+      frontGlass.position.set(hx, 8, 24.2);
+      group.add(frontGlass);
+    });
+
+    // 2. Central Convention Hall & JIExpo Theatre (Hall C & D)
+    const centerHall = new THREE.Mesh(new THREE.BoxGeometry(32, 22, 48), hallMat);
+    centerHall.position.set(0, 11, -8);
+    centerHall.castShadow = true;
+    group.add(centerHall);
+
+    // Modern Curved Theatre Canopy
+    const theatreCanopy = new THREE.Mesh(new THREE.BoxGeometry(36, 3, 26), accentRedMat);
+    theatreCanopy.position.set(0, 22.5, 6);
+    theatreCanopy.castShadow = true;
+    group.add(theatreCanopy);
+
+    // Glass Entry Atrium
+    const atriumGlass = new THREE.Mesh(new THREE.BoxGeometry(28, 16, 12), glassMat);
+    atriumGlass.position.set(0, 9, 18);
+    group.add(atriumGlass);
+
+    // 3. Flag Colonnade / Banner Pylons at the Main Gate
+    [-36, -24, -12, 12, 24, 36].forEach((px) => {
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.25, 14, 8), new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8 }));
+      pole.position.set(px, 7, 36);
+      pole.castShadow = true;
+      group.add(pole);
+
+      const flag = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.4, 0.08), accentRedMat);
+      flag.position.set(px + 1.2, 13, 36);
+      group.add(flag);
+    });
+
+    return group;
+  }
+
+  /**
+   * 41. Menara ATC Heritage Bandara Kemayoran & Monumen Ondel-Ondel
+   * Menara pemandu lalu lintas udara pertama di Asia (1938) & patung Ondel-Ondel Betawi raksasa di Benyamin Sueb.
+   */
+  static createMenaraATCKemayoran() {
+    const group = new THREE.Group();
+
+    const whiteConcreteMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.4 });
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.8, roughness: 0.15 });
+    const metalMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.85, roughness: 0.25 });
+    const grassMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 });
+
+    // Roundabout Base & Garden Island in the Median of Benyamin Sueb
+    const island = new THREE.Mesh(new THREE.CylinderGeometry(28, 28.5, 0.5, 32), grassMat);
+    island.position.set(0, 0.25, 0);
+    island.receiveShadow = true;
+    group.add(island);
+
+    // 1. Menara ATC Kemayoran 1938 (Air Traffic Control Tower - West Side)
+    const atcGroup = new THREE.Group();
+    atcGroup.position.set(-10, 0, 0);
+
+    // Art Deco Stepped Terminal Base Pavilion
+    const terminalBase = new THREE.Mesh(new THREE.BoxGeometry(18, 5, 14), whiteConcreteMat);
+    terminalBase.position.set(0, 2.5, 0);
+    terminalBase.castShadow = true;
+    terminalBase.receiveShadow = true;
+    atcGroup.add(terminalBase);
+
+    // Circular Tower Shaft (5 storeys)
+    const towerShaft = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.8, 18, 24), whiteConcreteMat);
+    towerShaft.position.set(0, 14, 0);
+    towerShaft.castShadow = true;
+    atcGroup.add(towerShaft);
+
+    // Wrap-around Observation Balcony
+    const balcony = new THREE.Mesh(new THREE.CylinderGeometry(5.2, 5.2, 0.6, 24), metalMat);
+    balcony.position.set(0, 22.5, 0);
+    atcGroup.add(balcony);
+
+    // Octagonal Glass Control Cab
+    const cab = new THREE.Mesh(new THREE.CylinderGeometry(4.4, 3.6, 4.2, 8), glassMat);
+    cab.position.set(0, 24.8, 0);
+    cab.castShadow = true;
+    atcGroup.add(cab);
+
+    // Conical Cab Roof & Radar Mast
+    const cabRoof = new THREE.Mesh(new THREE.ConeGeometry(4.8, 2.2, 8), whiteConcreteMat);
+    cabRoof.position.set(0, 27.5, 0);
+    atcGroup.add(cabRoof);
+
+    const radarMast = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.2, 6, 8), metalMat);
+    radarMast.position.set(0, 31, 0);
+    atcGroup.add(radarMast);
+
+    group.add(atcGroup);
+
+    // 2. Monumen Ondel-Ondel Kemayoran (East Side of Roundabout)
+    const ondelGroup = new THREE.Group();
+    ondelGroup.position.set(10, 0, 0);
+
+    const statuePedestal = new THREE.Mesh(new THREE.CylinderGeometry(6, 6.5, 2.2, 16), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.7 }));
+    statuePedestal.position.set(0, 1.1, 0);
+    statuePedestal.castShadow = true;
+    ondelGroup.add(statuePedestal);
+
+    // Ondel-Ondel Laki-Laki (Red Face, Golden Crown, Red/Black Baju Kurung)
+    const maleGroup = new THREE.Group();
+    maleGroup.position.set(-2.4, 2.2, 0);
+
+    const maleBody = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 2.0, 9.5, 12), new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.6 }));
+    maleBody.position.set(0, 4.75, 0);
+    maleBody.castShadow = true;
+    maleGroup.add(maleBody);
+
+    const maleHead = new THREE.Mesh(new THREE.SphereGeometry(1.2, 12, 12), new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.4 }));
+    maleHead.position.set(0, 10.2, 0);
+    maleGroup.add(maleHead);
+
+    const maleCrown = new THREE.Mesh(new THREE.ConeGeometry(1.6, 2.8, 10), new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.8, roughness: 0.2 }));
+    maleCrown.position.set(0, 12.0, 0);
+    maleGroup.add(maleCrown);
+    ondelGroup.add(maleGroup);
+
+    // Ondel-Ondel Perempuan (White Face, Yellow/Green Kemben & Selendang)
+    const femaleGroup = new THREE.Group();
+    femaleGroup.position.set(2.4, 2.2, 0);
+
+    const femaleBody = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.9, 9.2, 12), new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.6 }));
+    femaleBody.position.set(0, 4.6, 0);
+    femaleBody.castShadow = true;
+    femaleGroup.add(femaleBody);
+
+    const femaleHead = new THREE.Mesh(new THREE.SphereGeometry(1.15, 12, 12), new THREE.MeshStandardMaterial({ color: 0xfef08a, roughness: 0.35 }));
+    femaleHead.position.set(0, 9.8, 0);
+    femaleGroup.add(femaleHead);
+
+    const femaleCrown = new THREE.Mesh(new THREE.ConeGeometry(1.5, 2.6, 10), new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.8, roughness: 0.2 }));
+    femaleCrown.position.set(0, 11.6, 0);
+    femaleGroup.add(femaleCrown);
+    ondelGroup.add(femaleGroup);
+
+    group.add(ondelGroup);
+
+    return group;
+  }
+
+  /**
+   * 42. Stasiun Pasar Senen (Heritage Railway Station - J. van Gendt 1916)
+   * Bangunan stasiun cagar budaya Indische Art-Deco dengan menara jam, kanopi peron baja, dan 4 jalur rel.
+   */
+  static createStasiunPasarSenen() {
+    const group = new THREE.Group();
+
+    const brickMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.75 });
+    const whitePlasterMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
+    const roofTileMat = new THREE.MeshStandardMaterial({ color: 0x7c2d12, roughness: 0.8 });
+    const trainShedSteelMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.7, roughness: 0.4 });
+    const platformSlabMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.85 });
+
+    // 1. Gedung Induk Stasiun (Grand Art-Deco Entrance Hall, J. van Gendt 1916)
+    const mainHall = new THREE.Mesh(new THREE.BoxGeometry(42, 13, 16), brickMat);
+    mainHall.position.set(0, 6.5, 10);
+    mainHall.castShadow = true;
+    mainHall.receiveShadow = true;
+    group.add(mainHall);
+
+    // Mansard / Hipped Tile Roof
+    const roofGeo = new THREE.ConeGeometry(24, 7, 4);
+    roofGeo.rotateY(Math.PI / 4);
+    const roof = new THREE.Mesh(roofGeo, roofTileMat);
+    roof.scale.set(1.2, 1, 0.75);
+    roof.position.set(0, 16.5, 10);
+    roof.castShadow = true;
+    group.add(roof);
+
+    // Central Portico & Clock Tower (Menara Jam Cagar Budaya)
+    const clockTower = new THREE.Mesh(new THREE.BoxGeometry(10, 20, 6), whitePlasterMat);
+    clockTower.position.set(0, 10, 17);
+    clockTower.castShadow = true;
+    group.add(clockTower);
+
+    // Glowing Round Clock Face
+    const clockFace = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.4, 1.4, 0.3, 16),
+      new THREE.MeshStandardMaterial({ color: 0xfffbeb, emissive: 0xfef08a, emissiveIntensity: 0.8 })
+    );
+    clockFace.rotation.x = Math.PI / 2;
+    clockFace.position.set(0, 17, 20.1);
+    group.add(clockFace);
+
+    // Classical Arched Entry Porticos
+    for (let x = -14; x <= 14; x += 7) {
+      const arch = new THREE.Mesh(new THREE.BoxGeometry(4.5, 7, 1.5), whitePlasterMat);
+      arch.position.set(x, 3.5, 18.2);
+      group.add(arch);
+    }
+
+    // 2. Twin Covered Train Canopies (Overhead Steel Platform Sheds)
+    [-11, 11].forEach((px) => {
+      // Concrete Platform Island
+      const platform = new THREE.Mesh(new THREE.BoxGeometry(9, 1.2, 95), platformSlabMat);
+      platform.position.set(px, 0.6, -35);
+      platform.receiveShadow = true;
+      group.add(platform);
+
+      // Curved Iron Train Shed Roof
+      const shedRoofGeo = new THREE.CylinderGeometry(7.5, 7.5, 95, 16, 1, false, 0, Math.PI);
+      shedRoofGeo.rotateZ(Math.PI / 2);
+      shedRoofGeo.rotateY(Math.PI / 2);
+      const shedRoof = new THREE.Mesh(shedRoofGeo, trainShedSteelMat);
+      shedRoof.position.set(px, 7.5, -35);
+      shedRoof.castShadow = true;
+      group.add(shedRoof);
+
+      // Steel Support Pillars along the platform
+      for (let z = -75; z <= 5; z += 16) {
+        const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 7.5, 8), trainShedSteelMat);
+        pillar.position.set(px, 3.75, z);
+        pillar.castShadow = true;
+        group.add(pillar);
+      }
+    });
+
+    return group;
+  }
+
+  /**
+   * 43. Kompleks Pasar Senen Jaya & Simpang Lima Senen
+   * Pusat grosir tertua Jakarta (sejak 1735), JPO Skybridge melengkung futuristik, dan simpang susun arteri Senen.
+   */
+  static createPasarSenenJaya() {
+    const group = new THREE.Group();
+
+    const facadeWhiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
+    const blueGlassMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.8, roughness: 0.2 });
+    const orangeAccentMat = new THREE.MeshStandardMaterial({ color: 0xe11d48, roughness: 0.5 });
+    const skybridgeMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.7, roughness: 0.2, transparent: true, opacity: 0.85 });
+    const pierMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.7 });
+
+    // 1. Pasar Senen Blok I & II (Modern 7-Storey Podium Wholesale Center)
+    const block1 = new THREE.Mesh(new THREE.BoxGeometry(48, 28, 38), facadeWhiteMat);
+    block1.position.set(-16, 14, 0);
+    block1.castShadow = true;
+    block1.receiveShadow = true;
+    group.add(block1);
+
+    // Horizontal Glazing Strips across Blok I & II
+    [8, 14, 20, 25].forEach((ly) => {
+      const glassBand = new THREE.Mesh(new THREE.BoxGeometry(48.5, 2.6, 38.5), blueGlassMat);
+      glassBand.position.set(-16, ly, 0);
+      group.add(glassBand);
+    });
+
+    // Decorative Rooftop Parapet with Modern Betawi Gigi Balang Accent
+    const roofPinnacle = new THREE.Mesh(new THREE.BoxGeometry(49, 2.2, 39), orangeAccentMat);
+    roofPinnacle.position.set(-16, 29, 0);
+    group.add(roofPinnacle);
+
+    // 2. Pasar Senen Blok IV (Adjacent Wholesale Wing)
+    const block4 = new THREE.Mesh(new THREE.BoxGeometry(32, 22, 34), facadeWhiteMat);
+    block4.position.set(28, 11, -4);
+    block4.castShadow = true;
+    group.add(block4);
+
+    // 3. Ikonik JPO Skybridge Senen (Revitalisasi Modern Menyeberang Jalan Raya)
+    const bridgeGeo = new THREE.BoxGeometry(36, 4.2, 5.5);
+    const bridge = new THREE.Mesh(bridgeGeo, skybridgeMat);
+    bridge.position.set(8, 12, 16);
+    bridge.rotation.y = 0.18;
+    bridge.castShadow = true;
+    group.add(bridge);
+
+    // Skybridge Piers & Support Columns
+    [-6, 22].forEach((bx) => {
+      const pier = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.0, 10, 10), pierMat);
+      pier.position.set(bx, 5, 17);
+      pier.castShadow = true;
+      group.add(pier);
+    });
+
+    return group;
+  }
+
+  /**
+   * 44. Taman Ismail Marzuki (TIM) & Teater Jakarta Cikini
+   * Pusat kesenian ibu kota karya Andra Matin: Gedung Panjang fasad kisi-kisi terakota, Teater Besar, dan kubah Planetarium 1969.
+   */
+  static createTamanIsmailMarzuki() {
+    const group = new THREE.Group();
+
+    const terracottaMat = new THREE.MeshStandardMaterial({ color: 0xc2410c, roughness: 0.65 });
+    const concreteGrayMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.7 });
+    const planetariumWhiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35, metalness: 0.1 });
+    const timberDeckMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.8 });
+
+    // Open Plaza & Cultural Ground Stage
+    const plaza = new THREE.Mesh(new THREE.BoxGeometry(75, 0.4, 65), timberDeckMat);
+    plaza.position.set(0, 0.2, 0);
+    plaza.receiveShadow = true;
+    group.add(plaza);
+
+    // 1. Gedung Panjang Ali Sadikin (Perpustakaan Jakarta & Wisma Seni)
+    const gedungPanjang = new THREE.Mesh(new THREE.BoxGeometry(58, 26, 18), terracottaMat);
+    gedungPanjang.position.set(-6, 13, -16);
+    gedungPanjang.castShadow = true;
+    gedungPanjang.receiveShadow = true;
+    group.add(gedungPanjang);
+
+    // Fasad Kisi-Kisi Not Balok (Louver screen stripes)
+    [7, 13, 19, 24].forEach((ly) => {
+      const louver = new THREE.Mesh(new THREE.BoxGeometry(59, 1.8, 18.6), concreteGrayMat);
+      louver.position.set(-6, ly, -16);
+      group.add(louver);
+    });
+
+    // 2. Teater Besar / Graha Bhakti Budaya (Sculptural Angled Auditorium)
+    const theatreBase = new THREE.Mesh(new THREE.BoxGeometry(32, 18, 28), concreteGrayMat);
+    theatreBase.position.set(16, 9, 12);
+    theatreBase.castShadow = true;
+    group.add(theatreBase);
+
+    // Angled Modern Roof
+    const theatreRoof = new THREE.Mesh(new THREE.BoxGeometry(34, 3, 30), terracottaMat);
+    theatreRoof.position.set(16, 19, 12);
+    theatreRoof.rotation.z = -0.06;
+    theatreRoof.castShadow = true;
+    group.add(theatreRoof);
+
+    // 3. Kubah Bersejarah Planetarium Jakarta (1969)
+    const planetariumDome = new THREE.Mesh(
+      new THREE.SphereGeometry(8.5, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2),
+      planetariumWhiteMat
+    );
+    planetariumDome.position.set(-20, 0.2, 15);
+    planetariumDome.castShadow = true;
+    group.add(planetariumDome);
+
+    // Planetarium Base Ring
+    const domeRing = new THREE.Mesh(new THREE.CylinderGeometry(9.2, 9.5, 1.8, 24), concreteGrayMat);
+    domeRing.position.set(-20, 0.9, 15);
+    group.add(domeRing);
+
+    return group;
+  }
+
+  /**
+   * 45. Gerbang Bersejarah Passer Baroe (1820) & Kawasan Sawah Besar
+   * Gerbang monumental cagar budaya bergaya Tionghoa-Eropa di tepi Kali Ciliwung dengan koridor pedestrian klasik.
+   */
+  static createPasserBaroe() {
+    const group = new THREE.Group();
+
+    const redImperialMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.45 });
+    const goldOrnamentMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.85, roughness: 0.2 });
+    const greenTileMat = new THREE.MeshStandardMaterial({ color: 0x065f46, roughness: 0.5 });
+    const whiteColonnadeMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
+    const cobblestoneMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.9 });
+
+    // Pedestrian Street Floor (Jalan Kaki Tertutup Passer Baroe)
+    const walkStreet = new THREE.Mesh(new THREE.BoxGeometry(16, 0.3, 70), cobblestoneMat);
+    walkStreet.position.set(0, 0.15, -20);
+    walkStreet.receiveShadow = true;
+    group.add(walkStreet);
+
+    // 1. Monumental Heritage Gate Arch (Gerbang Utama 'Passer Baroe 1820')
+    [-6.5, 6.5].forEach((px) => {
+      const pillar = new THREE.Mesh(new THREE.BoxGeometry(2.6, 12, 2.6), redImperialMat);
+      pillar.position.set(px, 6, 12);
+      pillar.castShadow = true;
+      group.add(pillar);
+
+      // Gold Corinthian Capitals & Bases
+      [0.6, 11.5].forEach((cy) => {
+        const cap = new THREE.Mesh(new THREE.BoxGeometry(3.0, 1.0, 3.0), goldOrnamentMat);
+        cap.position.set(px, cy, 12);
+        group.add(cap);
+      });
+    });
+
+    // Central Arch Crossbeam with Inscription Board
+    const archBeam = new THREE.Mesh(new THREE.BoxGeometry(16, 3.2, 2.2), redImperialMat);
+    archBeam.position.set(0, 11, 12);
+    archBeam.castShadow = true;
+    group.add(archBeam);
+
+    // Golden Inscription Plaque "PASSER BAROE 1820"
+    const plaque = new THREE.Mesh(
+      new THREE.BoxGeometry(9.5, 1.4, 0.4),
+      new THREE.MeshStandardMaterial({ color: 0x1e293b, emissive: 0xfbbf24, emissiveIntensity: 0.6 })
+    );
+    plaque.position.set(0, 11, 13.2);
+    group.add(plaque);
+
+    // Multi-Tiered Chinese Hip Roof with Curved Eaves
+    const roof1 = new THREE.Mesh(new THREE.BoxGeometry(18.5, 1.6, 4.5), greenTileMat);
+    roof1.position.set(0, 13.2, 12);
+    roof1.castShadow = true;
+    group.add(roof1);
+
+    const roof2 = new THREE.Mesh(new THREE.ConeGeometry(8, 2.5, 4), greenTileMat);
+    roof2.rotateY(Math.PI / 4);
+    roof2.scale.set(1.4, 1, 0.5);
+    roof2.position.set(0, 15, 12);
+    roof2.castShadow = true;
+    group.add(roof2);
+
+    // Golden Apex Finials
+    [-8.5, 0, 8.5].forEach((fx) => {
+      const finial = new THREE.Mesh(new THREE.SphereGeometry(0.5, 8, 8), goldOrnamentMat);
+      finial.position.set(fx, 14.5 + (fx === 0 ? 2 : 0), 12);
+      group.add(finial);
+    });
+
+    // 2. Colonnaded Pedestrian Arcade along Jl. Pasar Baru
+    [-8, 8].forEach((ax) => {
+      for (let z = -45; z <= 0; z += 12) {
+        const arcadeCol = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.4, 7, 8), whiteColonnadeMat);
+        arcadeCol.position.set(ax, 3.5, z);
+        arcadeCol.castShadow = true;
+        group.add(arcadeCol);
+      }
+    });
+
+    return group;
+  }
 }
 
 

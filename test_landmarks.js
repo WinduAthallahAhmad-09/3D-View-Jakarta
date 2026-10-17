@@ -4,8 +4,8 @@ import { JAKARTA_LANDMARKS } from './src/config/landmarks.js';
 
 console.log('Running test_landmarks.js verification...');
 
-// Check 1: Exactly 39 landmarks
-assert.strictEqual(JAKARTA_LANDMARKS.length, 39, `Expected 39 landmarks, got ${JAKARTA_LANDMARKS.length}`);
+// Check 1: Exactly 45 landmarks
+assert.strictEqual(JAKARTA_LANDMARKS.length, 45, `Expected 45 landmarks, got ${JAKARTA_LANDMARKS.length}`);
 
 // Check 2: Unique IDs and valid properties
 const seenIds = new Set();
@@ -37,7 +37,23 @@ southAnchors.forEach((id) => {
   assert.ok(lm.position[2] > 550, `Landmark ${id} Z position ${lm.position[2]} should be in Kebayoran Baru (Z > 550)`);
 });
 
-// Check 4: Check that CityScene.js maps builders for all 39 landmarks
+// Check 3b: Check Central Jakarta East / Kemayoran anchors specifically
+const jakpusEastAnchors = [
+  'jiexpo-kemayoran',
+  'menara-atc-kemayoran',
+  'stasiun-pasar-senen',
+  'pasar-senen-jaya',
+  'taman-ismail-marzuki',
+  'passer-baroe'
+];
+
+jakpusEastAnchors.forEach((id) => {
+  const lm = JAKARTA_LANDMARKS.find((l) => l.id === id);
+  assert.ok(lm, `Missing Central Jakarta East anchor landmark: ${id}`);
+  assert.ok(lm.position[0] > 100, `Landmark ${id} X position ${lm.position[0]} should be east of Monas/Thamrin (X > 100)`);
+});
+
+// Check 4: Check that CityScene.js maps builders for all 45 landmarks
 const citySceneContent = fs.readFileSync('./src/world/CityScene.js', 'utf-8');
 JAKARTA_LANDMARKS.forEach((lm) => {
   assert.ok(
@@ -46,9 +62,9 @@ JAKARTA_LANDMARKS.forEach((lm) => {
   );
 });
 
-// Check 5: Check that index.html includes tour buttons for all South Jakarta anchors
+// Check 5: Check that index.html includes tour buttons for all anchors
 const indexHtmlContent = fs.readFileSync('./index.html', 'utf-8');
-southAnchors.forEach((id) => {
+[...southAnchors, ...jakpusEastAnchors].forEach((id) => {
   assert.ok(
     indexHtmlContent.includes(`data-tour-id="${id}"`),
     `index.html missing tour button for "${id}"`
@@ -104,4 +120,4 @@ assert.ok(landmarkModelsContent.includes("'monas-flame'"), 'LandmarkModels.js mi
 assert.ok(landmarkModelsContent.includes("'menara-bca-crown'"), 'LandmarkModels.js missing menara-bca-crown');
 assert.ok(landmarkModelsContent.includes("'led-taman-anggrek'"), 'LandmarkModels.js missing led-taman-anggrek');
 
-console.log('✅ All 39 landmarks, South Jakarta builders, MRT Ratangga, Koridor 13, Aerial View, and Selective Bloom Effect verified successfully!');
+console.log('✅ All 45 landmarks, Central Jakarta East builders, South Jakarta builders, MRT Ratangga, Koridor 13, Aerial View, and Selective Bloom Effect verified successfully!');
