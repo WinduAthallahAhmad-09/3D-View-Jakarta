@@ -27,6 +27,7 @@ export class CityScene {
     this.buildWaterways();
     this.buildRoadNetwork();
     this.buildElevatedRailway();
+    this.buildSouthJakartaCorridor();
     this.buildLandmarks();
     this.buildUrbanDistricts();
     this.buildStreetVegetation();
@@ -351,6 +352,285 @@ export class CityScene {
       stRoof.castShadow = true;
       this.proceduralGroup.add(stRoof);
     });
+  }
+
+  /**
+   * Tahap 2: Jaringan Jalan Arteri & Jalur Layang MRT Elevated Jakarta Selatan
+   * - Koridor Jl. Sisingamangaraja & Jl. Panglima Polim (Bundaran Senayan -> CSW -> Blok M)
+   * - Poros Barat-Timur Jl. Kyai Maja & Jl. Trunojoyo (Barito -> CSW -> Mabes Polri / Wolter Monginsidi)
+   * - Koridor Niaga Jl. Melawai Raya & Little Tokyo
+   * - Koridor Penghubung Senopati - Suryo
+   * - Portal Transisi Bawah Tanah & Viaduk Beton Rel Layang MRT Jakarta (Elevated Guideway)
+   * - Jembatan Layang Raksasa Koridor 13 TransJakarta (Elevated Busway Ciledug - Tendean h=21.5m)
+   * - PJU Street Lamps & Pohon Peneduh Boulevard Kebayoran Baru
+   */
+  buildSouthJakartaCorridor() {
+    const roadMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      roughness: 0.8,
+      metalness: 0.1
+    });
+    const sidewalkMat = new THREE.MeshStandardMaterial({
+      map: TextureGenerator.createSidewalkTexture(),
+      roughness: 0.8
+    });
+    const medianGrassMat = new THREE.MeshStandardMaterial({
+      color: 0x15803d,
+      roughness: 0.85
+    });
+    const viaductMat = new THREE.MeshStandardMaterial({
+      color: 0x475569,
+      roughness: 0.65
+    });
+    const railTrackMat = new THREE.MeshStandardMaterial({
+      color: 0x94a3b8,
+      metalness: 0.8,
+      roughness: 0.2
+    });
+    const pierMat = new THREE.MeshStandardMaterial({
+      color: 0x64748b,
+      roughness: 0.6
+    });
+    const tjFlyoverMat = new THREE.MeshStandardMaterial({
+      color: 0x334155,
+      roughness: 0.6
+    });
+    const tjBarrierMat = new THREE.MeshStandardMaterial({
+      color: 0x0284c7,
+      metalness: 0.5,
+      roughness: 0.3
+    });
+
+    // Helper: Build a multi-lane road segment with side sidewalks and optional green median
+    const buildRoadSegment = (x1, z1, x2, z2, roadWidth = 22, hasMedian = true) => {
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const angle = Math.atan2(dx, dz);
+      const mx = (x1 + x2) * 0.5;
+      const mz = (z1 + z2) * 0.5;
+
+      // Road Asphalt
+      const road = new THREE.Mesh(new THREE.BoxGeometry(roadWidth, 0.25, len + 0.4), roadMat);
+      road.position.set(mx, 0.125, mz);
+      road.rotation.y = angle;
+      road.receiveShadow = true;
+      this.proceduralGroup.add(road);
+
+      // Left & Right Sidewalks
+      const swWidth = 3.6;
+      [-1, 1].forEach((dir) => {
+        const sw = new THREE.Mesh(new THREE.BoxGeometry(swWidth, 0.4, len + 0.4), sidewalkMat);
+        const perpX = Math.cos(angle) * (roadWidth * 0.5 + swWidth * 0.5) * dir;
+        const perpZ = -Math.sin(angle) * (roadWidth * 0.5 + swWidth * 0.5) * dir;
+        sw.position.set(mx + perpX, 0.2, mz + perpZ);
+        sw.rotation.y = angle;
+        sw.receiveShadow = true;
+        this.proceduralGroup.add(sw);
+      });
+
+      // Center Green Median Island
+      if (hasMedian && roadWidth >= 18) {
+        const medianW = 2.4;
+        const median = new THREE.Mesh(new THREE.BoxGeometry(medianW, 0.38, len), medianGrassMat);
+        median.position.set(mx, 0.2, mz);
+        median.rotation.y = angle;
+        median.receiveShadow = true;
+        this.proceduralGroup.add(median);
+      }
+    };
+
+    // 1. Koridor Utama Poros Sisingamangaraja & Panglima Polim
+    // Waypoints from Bundaran Senayan to Blok M & Panglima Polim Selatan
+    const mainCorridorPoints = [
+      [-316, 478],     // Bundaran Senayan
+      [-322, 515],     // Portal Transisi MRT
+      [-330, 560],     // Masjid Al-Azhar
+      [-339.1, 599.0], // Sekretariat ASEAN
+      [-347.5, 631.6], // Simpang CSW ASEAN
+      [-351.8, 660.0], // Kejaksaan Agung & M Bloc
+      [-357.4, 702.5], // Stasiun MRT Blok M BCA & Plaza Blok M
+      [-364.0, 750.0]  // Menuju Barito / Fatmawati
+    ];
+
+    for (let i = 0; i < mainCorridorPoints.length - 1; i++) {
+      const [x1, z1] = mainCorridorPoints[i];
+      const [x2, z2] = mainCorridorPoints[i + 1];
+      buildRoadSegment(x1, z1, x2, z2, 22, true);
+    }
+
+    // 2. Poros Barat-Timur Simpang CSW: Jl. Kyai Maja & Jl. Trunojoyo
+    const cswCrossPoints = [
+      [-450, 631.6],   // Barito / Taman Ayodya Barat
+      [-347.5, 631.6], // CSW Hub Center
+      [-210, 631.6]    // Depan Mabes Polri & Wolter Monginsidi
+    ];
+    for (let i = 0; i < cswCrossPoints.length - 1; i++) {
+      const [x1, z1] = cswCrossPoints[i];
+      const [x2, z2] = cswCrossPoints[i + 1];
+      buildRoadSegment(x1, z1, x2, z2, 18, false);
+    }
+
+    // 3. Koridor Niaga Jl. Melawai Raya
+    buildRoadSegment(-364, 706.8, -270, 706.8, 15, false);
+
+    // Jalan Falatehan / Sultan Hasanuddin (Sisi Timur M Bloc)
+    buildRoadSegment(-303.8, 650, -303.8, 715, 14, false);
+
+    // 4. Koridor Diagonal Senopati - Suryo (Konektor SCBD ke Kebayoran Baru)
+    buildRoadSegment(-325, 525, -210, 505, 14, false); // Senopati Barat
+    buildRoadSegment(-210, 505, -170, 555, 14, false); // Menuju Jl. Suryo
+
+    // 5. Viaduk Jalur Rel Layang MRT Jakarta (Elevated Guideway)
+    // A. Portal Transisi Keluar Terowongan Senayan (Underground Portal)
+    const portalGroup = new THREE.Group();
+    portalGroup.position.set(-319, 0, 498);
+    portalGroup.rotation.y = -0.16;
+
+    const portalBase = new THREE.Mesh(new THREE.BoxGeometry(9.6, 1.2, 24), viaductMat);
+    portalBase.position.set(0, 0.6, 0);
+    portalGroup.add(portalBase);
+
+    // U-shaped retaining portal walls rising toward elevated level
+    const wallL = new THREE.Mesh(new THREE.BoxGeometry(1.0, 3.2, 24), viaductMat);
+    wallL.position.set(-4.5, 2.2, 0);
+    portalGroup.add(wallL);
+
+    const wallR = new THREE.Mesh(new THREE.BoxGeometry(1.0, 3.2, 24), viaductMat);
+    wallR.position.set(4.5, 2.2, 0);
+    portalGroup.add(wallR);
+
+    // Portal arch header
+    const portalArch = new THREE.Mesh(new THREE.BoxGeometry(10, 1.4, 2.4), viaductMat);
+    portalArch.position.set(0, 4.2, -10);
+    portalGroup.add(portalArch);
+
+    this.proceduralGroup.add(portalGroup);
+
+    // B. Elevated Box Girder Deck & Dual Tracks from Portal to Blok M
+    const mrtDeckHeight = 11.5;
+    const mrtPoints = [
+      [-321, 510, 4.0],  // Ramp up from portal
+      [-324, 532, 8.5],  // Incline
+      [-328, 555, mrtDeckHeight], // Reaches elevated level at Al-Azhar
+      [-334, 580, mrtDeckHeight],
+      [-339.1, 599.0, mrtDeckHeight], // Sekretariat ASEAN
+      [-347.5, 631.6, mrtDeckHeight], // CSW Stasiun ASEAN
+      [-351.8, 660.0, mrtDeckHeight], // Kejagung / M Bloc
+      [-355.0, 685.0, mrtDeckHeight], // Taman Martha Tiahahu
+      [-357.4, 702.5, mrtDeckHeight], // Stasiun Blok M BCA
+      [-364.0, 750.0, mrtDeckHeight]  // Selatan Blok M
+    ];
+
+    for (let i = 0; i < mrtPoints.length - 1; i++) {
+      const [x1, z1, y1] = mrtPoints[i];
+      const [x2, z2, y2] = mrtPoints[i + 1];
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const angle = Math.atan2(dx, dz);
+      const mx = (x1 + x2) * 0.5;
+      const mz = (z1 + z2) * 0.5;
+      const my = (y1 + y2) * 0.5;
+
+      // Skip the segment inside CSW / Blok M stations since station models have their own platforms
+      const isInsideCSW = Math.hypot(mx - (-347.5), mz - 631.6) < 18;
+      const isInsideBlokM = Math.hypot(mx - (-357.4), mz - 702.5) < 18;
+
+      if (!isInsideCSW && !isInsideBlokM) {
+        // Concrete Box Girder Deck
+        const deck = new THREE.Mesh(new THREE.BoxGeometry(8.2, 1.6, len + 0.8), viaductMat);
+        deck.position.set(mx, my, mz);
+        deck.rotation.y = angle;
+        deck.castShadow = true;
+        this.proceduralGroup.add(deck);
+
+        // Side Parapet Sound-barrier Walls (Grey concrete)
+        [-3.8, 3.8].forEach((wx) => {
+          const parapet = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.2, len + 0.8), viaductMat);
+          const perpX = Math.cos(angle) * wx;
+          const perpZ = -Math.sin(angle) * wx;
+          parapet.position.set(mx + perpX, my + 1.2, mz + perpZ);
+          parapet.rotation.y = angle;
+          this.proceduralGroup.add(parapet);
+        });
+
+        // Dual Steel Rail Tracks
+        [-1.6, 1.6].forEach((tx) => {
+          const track = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.25, len + 0.8), railTrackMat);
+          const perpX = Math.cos(angle) * tx;
+          const perpZ = -Math.sin(angle) * tx;
+          track.position.set(mx + perpX, my + 0.9, mz + perpZ);
+          track.rotation.y = angle;
+          this.proceduralGroup.add(track);
+        });
+
+        // Concrete Single-Pier Columns (Tiang Pilar Tunggal di Median)
+        if (my >= 6.0) {
+          const pier = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.45, my, 12), pierMat);
+          pier.position.set(mx, my * 0.5, mz);
+          pier.castShadow = true;
+          this.proceduralGroup.add(pier);
+
+          // Hammerhead Cap
+          const cap = new THREE.Mesh(new THREE.BoxGeometry(7.2, 1.1, 2.5), pierMat);
+          cap.position.set(mx, my - 0.7, mz);
+          cap.rotation.y = angle;
+          this.proceduralGroup.add(cap);
+        }
+      }
+    }
+
+    // 6. Jembatan Layang Raksasa Koridor 13 TransJakarta (Elevated Busway Ciledug - Tendean)
+    // High Flyover at y = 21.5m crossing West to East above CSW
+    const tjFlyoverGroup = new THREE.Group();
+    const tjDeckLen = 240;
+    const tjDeck = new THREE.Mesh(new THREE.BoxGeometry(tjDeckLen, 2.2, 7.8), tjFlyoverMat);
+    tjDeck.position.set(-335, 21.5, 631.6);
+    tjDeck.castShadow = true;
+    tjFlyoverGroup.add(tjDeck);
+
+    // Blue Transjakarta Parapets on both sides
+    [-3.6, 3.6].forEach((sideZ) => {
+      const barrier = new THREE.Mesh(new THREE.BoxGeometry(tjDeckLen, 1.1, 0.4), tjBarrierMat);
+      barrier.position.set(-335, 22.8, 631.6 + sideZ);
+      tjFlyoverGroup.add(barrier);
+    });
+
+    // High Piers for Koridor 13 (every 38 units, avoiding CSW center)
+    [-430, -392, -300, -260, -225].forEach((px) => {
+      const highPier = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.6, 21.5, 12), pierMat);
+      highPier.position.set(px, 10.75, 631.6);
+      highPier.castShadow = true;
+      tjFlyoverGroup.add(highPier);
+    });
+    this.proceduralGroup.add(tjFlyoverGroup);
+
+    // 7. Sistem Penerangan PJU (Street Lamps) Koridor Sisingamangaraja & CSW
+    for (let z = 485; z <= 745; z += 35) {
+      // Interpolate X along Sisingamangaraja / Panglima Polim
+      const t = (z - 485) / 260;
+      const x = -316 + t * (-364 - (-316));
+      this.createStreetLamp(x - 14.5, z, true);
+      this.createStreetLamp(x + 14.5, z, false);
+    }
+
+    // PJU along Trunojoyo - Kyai Maja
+    for (let x = -430; x <= -230; x += 40) {
+      if (Math.abs(x - (-347.5)) < 24) continue;
+      this.createStreetLamp(x, 631.6 - 11.5, true);
+      this.createStreetLamp(x, 631.6 + 11.5, false);
+    }
+
+    // 8. Pohon Peneduh Boulevard Kebayoran Baru
+    const foliageMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.85 });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x543d2b, roughness: 0.9 });
+    for (let z = 490; z <= 740; z += 22) {
+      const t = (z - 490) / 250;
+      const x = -316 + t * (-364 - (-316));
+      this.createTree(x - 15.5, z, foliageMat, trunkMat, 1.1);
+      this.createTree(x + 15.5, z, foliageMat, trunkMat, 1.1);
+    }
   }
 
   createStreetLamp(x, z, facingEast) {
