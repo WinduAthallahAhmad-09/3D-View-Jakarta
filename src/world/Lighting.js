@@ -20,18 +20,18 @@ export class LightingManager {
     this.sunLight.position.set(120, 180, 90);
     this.sunLight.castShadow = true;
 
-    // High quality shadow configuration
-    this.sunLight.shadow.mapSize.width = 2048;
-    this.sunLight.shadow.mapSize.height = 2048;
+    // High performance shadow configuration (optimized for 60 FPS)
+    this.sunLight.shadow.mapSize.width = 1024;
+    this.sunLight.shadow.mapSize.height = 1024;
     this.sunLight.shadow.camera.near = 10;
     this.sunLight.shadow.camera.far = 1200;
 
-    const d = 620;
+    const d = 480;
     this.sunLight.shadow.camera.left = -d;
     this.sunLight.shadow.camera.right = d;
     this.sunLight.shadow.camera.top = d;
     this.sunLight.shadow.camera.bottom = -d;
-    this.sunLight.shadow.bias = -0.0004;
+    this.sunLight.shadow.bias = -0.0003;
 
     this.scene.add(this.sunLight);
 

@@ -16,6 +16,7 @@ class JakartaApp {
   constructor() {
     this.container = document.getElementById('canvas-container');
     this.clock = new THREE.Clock();
+    this.initialRenderFrames = 2;
 
     this.initRenderer();
     this.initCamera();
@@ -33,7 +34,8 @@ class JakartaApp {
       powerPreference: 'high-performance'
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const maxDPR = window.innerWidth > 1920 ? 1.25 : 1.5;
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxDPR));
 
     // Realistic Tone Mapping & Shadows
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -184,10 +186,11 @@ class JakartaApp {
       this.camera.aspect = window.innerWidth / window.innerHeight;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(window.innerWidth, window.innerHeight);
-      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      const maxDPR = window.innerWidth > 1920 ? 1.25 : 1.5;
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxDPR));
       if (this.composer) {
         this.composer.setSize(window.innerWidth, window.innerHeight);
-        this.composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.composer.setPixelRatio(Math.min(window.devicePixelRatio, maxDPR));
       }
     });
   }
@@ -195,7 +198,19 @@ class JakartaApp {
   animate() {
     requestAnimationFrame(() => this.animate());
 
-    const delta = this.clock.getDelta();
+    // 1. Lifecycle Pause: completely suspend rendering if tab is minimized or hidden in background
+    if (document.hidden) return;
+
+    // 2. Homescreen Idle Throttle: keep GPU cold (0% load) while user reads homescreen
+    if (this.ui && this.ui.isHomeActive) {
+      if (this.initialRenderFrames > 0) {
+        this.initialRenderFrames--;
+        this.renderer.render(this.scene, this.camera);
+      }
+      return;
+    }
+
+    const delta = Math.min(this.clock.getDelta(), 0.1);
 
     // Update traffic animation
     if (this.city) {

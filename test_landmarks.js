@@ -361,4 +361,16 @@ assert.ok(
   'CityScene.js missing Bundaran PIM roundabout traffic'
 );
 
-console.log('✅ All 51 landmarks, Tahap 1, 2, 3 & 4 (100% Jakarta Selatan Complete & 100% Jakarta Pusat Complete) verified successfully!');
+// Check 15: Quick Wins Performance Optimization verification
+const mainContent = fs.readFileSync('./src/main.js', 'utf-8');
+const lightingContent = fs.readFileSync('./src/world/Lighting.js', 'utf-8');
+
+assert.ok(mainContent.includes('const maxDPR = window.innerWidth > 1920 ? 1.25 : 1.5;'), 'main.js missing capped maxDPR');
+assert.ok(mainContent.includes('if (document.hidden) return;'), 'main.js missing tab visibility throttling');
+assert.ok(mainContent.includes('if (this.ui && this.ui.isHomeActive)'), 'main.js missing homescreen idle pause');
+assert.ok(lightingContent.includes('this.sunLight.shadow.mapSize.width = 1024;'), 'Lighting.js missing 1024 shadow map width');
+assert.ok(lightingContent.includes('this.sunLight.shadow.mapSize.height = 1024;'), 'Lighting.js missing 1024 shadow map height');
+assert.ok(citySceneContent.includes('mesh.castShadow = false;\n        mesh.receiveShadow = true;\n\n        const meters'), 'CityScene.js OSM buildings must have castShadow = false');
+assert.ok(uiManagerContent.includes('// Dirty checking: Skip expensive DOM reflow when camera is stationary'), 'UIManager.js missing label dirty checking');
+
+console.log('✅ All 51 landmarks and Quick Wins Performance Optimizations verified successfully!');

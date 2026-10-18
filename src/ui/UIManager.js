@@ -221,6 +221,7 @@ export class UIManager {
 
     if (this.labelsContainer && this.labelsVisible) {
       this.labelsContainer.style.display = 'block';
+      this.forceLabelUpdate = true;
     }
 
     if (presetId) {
@@ -314,6 +315,26 @@ export class UIManager {
    */
   updateMapLabels(camera) {
     if (this.isHomeActive || !this.labelsVisible || !this.labelElements.length) return;
+
+    // Dirty checking: Skip expensive DOM reflow when camera is stationary
+    if (!this.lastCamPos) {
+      this.lastCamPos = new THREE.Vector3();
+      this.lastCamRot = new THREE.Quaternion();
+      this.forceLabelUpdate = true;
+      window.addEventListener('resize', () => {
+        this.forceLabelUpdate = true;
+      });
+    }
+
+    const posDistSq = this.lastCamPos.distanceToSquared(camera.position);
+    const rotDiff = this.lastCamRot.angleTo(camera.quaternion);
+
+    if (posDistSq < 0.0025 && rotDiff < 0.0015 && !this.forceLabelUpdate) {
+      return;
+    }
+    this.forceLabelUpdate = false;
+    this.lastCamPos.copy(camera.position);
+    this.lastCamRot.copy(camera.quaternion);
 
     const widthHalf = window.innerWidth / 2;
     const heightHalf = window.innerHeight / 2;

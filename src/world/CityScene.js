@@ -2897,7 +2897,7 @@ export class CityScene {
 
         this.applyBuildingUVs(geo);
         const mesh = new THREE.Mesh(geo, mats);
-        mesh.castShadow = h >= 18;
+        mesh.castShadow = false;
         mesh.receiveShadow = true;
 
         const meters = b.hm || Math.round(h * 1.78);
@@ -3104,7 +3104,7 @@ export class CityScene {
     const createInstancedGroup = (list, material, colorPalette) => {
       if (list.length === 0) return;
       const mesh = new THREE.InstancedMesh(baseBoxGeo, material, list.length);
-      mesh.castShadow = true;
+      mesh.castShadow = false;
       mesh.receiveShadow = true;
 
       list.forEach((item, idx) => {
@@ -3254,7 +3254,7 @@ export class CityScene {
 
     const foliage = new THREE.Mesh(new THREE.ConeGeometry(2.6, 6.5, 7), foliageMat);
     foliage.position.y = 6;
-    foliage.castShadow = true;
+    foliage.castShadow = false;
     group.add(foliage);
 
     this.proceduralGroup.add(group);
