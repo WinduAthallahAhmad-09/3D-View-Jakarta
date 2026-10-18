@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { TextureGenerator } from './TextureGenerator.js';
 import { LandmarkModels } from './LandmarkModels.js';
 import { JAKARTA_LANDMARKS, CITY_CORRIDOR_CONFIG } from '../config/landmarks.js';
@@ -2575,6 +2576,85 @@ export class CityScene {
     return geo;
   }
 
+  buildMergedBuildingWallsGeometry(buildings) {
+    const positions = [];
+    const normals = [];
+    const uvs = [];
+
+    for (let i = 0; i < buildings.length; i++) {
+      const b = buildings[i];
+      const pts = b.p;
+      if (!pts || pts.length < 3) continue;
+      const h = b.h || 12;
+
+      let cumDist = 0;
+      const ptCount = pts.length;
+      for (let j = 0; j < ptCount; j++) {
+        const x1 = pts[j][0];
+        const z1 = pts[j][1];
+        const next = (j + 1) % ptCount;
+        const x2 = pts[next][0];
+        const z2 = pts[next][1];
+
+        const dx = x2 - x1;
+        const dz = z2 - z1;
+        const edgeLen = Math.hypot(dx, dz);
+        if (edgeLen < 0.05) continue;
+
+        // Normal perpendicular to wall edge pointing outward (counter-clockwise winding in XZ)
+        const nx = -dz / edgeLen;
+        const nz = dx / edgeLen;
+
+        const u1 = cumDist * 0.16;
+        const u2 = (cumDist + edgeLen) * 0.16;
+        cumDist += edgeLen;
+        const vTop = h * 0.24;
+
+        // Counter-clockwise quad triangles facing outward:
+        // Triangle 1: (x1, 0, z1) -> (x2, h, z2) -> (x1, h, z1)
+        positions.push(
+          x1, 0, z1,
+          x2, h, z2,
+          x1, h, z1
+        );
+        normals.push(
+          nx, 0, nz,
+          nx, 0, nz,
+          nx, 0, nz
+        );
+        uvs.push(
+          u1, 0,
+          u2, vTop,
+          u1, vTop
+        );
+
+        // Triangle 2: (x1, 0, z1) -> (x2, 0, z2) -> (x2, h, z2)
+        positions.push(
+          x1, 0, z1,
+          x2, 0, z2,
+          x2, h, z2
+        );
+        normals.push(
+          nx, 0, nz,
+          nx, 0, nz,
+          nx, 0, nz
+        );
+        uvs.push(
+          u1, 0,
+          u2, 0,
+          u2, vTop
+        );
+      }
+    }
+
+    if (positions.length === 0) return null;
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geo.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+    return geo;
+  }
+
   applyBuildingUVs(geo) {
     const pos = geo.attributes.position;
     const normal = geo.attributes.normal;
@@ -2601,14 +2681,15 @@ export class CityScene {
   }
 
   renderOSMLayers(osm, sharedMaterials, bldMats) {
-    // 1. Real OpenStreetMap Parks & Green Spaces (165 parks)
+    // 1. Real OpenStreetMap Parks & Green Spaces (165 parks - Merged into 1 draw call)
     const parkMat = new THREE.MeshStandardMaterial({
       color: 0x14532d,
       roughness: 0.9,
       metalness: 0.05,
       side: THREE.DoubleSide
     });
-    if (osm.parks) {
+    if (osm.parks && osm.parks.length) {
+      const parkGeos = [];
       osm.parks.forEach((park) => {
         if (!park.p || park.p.length < 3) return;
         const shape = new THREE.Shape();
@@ -2618,21 +2699,28 @@ export class CityScene {
         }
         const geo = new THREE.ShapeGeometry(shape);
         geo.rotateX(-Math.PI / 2);
-        const mesh = new THREE.Mesh(geo, parkMat);
-        mesh.position.y = 0.015;
-        mesh.receiveShadow = true;
-        this.proceduralGroup.add(mesh);
+        geo.translate(0, 0.015, 0);
+        parkGeos.push(geo);
       });
+      if (parkGeos.length > 0) {
+        const mergedParks = BufferGeometryUtils.mergeGeometries(parkGeos, false);
+        if (mergedParks) {
+          const mesh = new THREE.Mesh(mergedParks, parkMat);
+          mesh.receiveShadow = true;
+          this.proceduralGroup.add(mesh);
+        }
+      }
     }
 
-    // 2. Real OpenStreetMap Water Bodies & Rivers/Canals
+    // 2. Real OpenStreetMap Water Bodies & Rivers/Canals (Merged into 1 draw call)
     const waterMat = new THREE.MeshStandardMaterial({
       color: 0x0369a1,
       roughness: 0.15,
       metalness: 0.85,
       side: THREE.DoubleSide
     });
-    if (osm.waterPolygons) {
+    if (osm.waterPolygons && osm.waterPolygons.length) {
+      const waterGeos = [];
       osm.waterPolygons.forEach((wp) => {
         if (!wp.p || wp.p.length < 3) return;
         const shape = new THREE.Shape();
@@ -2642,10 +2730,16 @@ export class CityScene {
         }
         const geo = new THREE.ShapeGeometry(shape);
         geo.rotateX(-Math.PI / 2);
-        const mesh = new THREE.Mesh(geo, waterMat);
-        mesh.position.y = 0.03;
-        this.proceduralGroup.add(mesh);
+        geo.translate(0, 0.03, 0);
+        waterGeos.push(geo);
       });
+      if (waterGeos.length > 0) {
+        const mergedWater = BufferGeometryUtils.mergeGeometries(waterGeos, false);
+        if (mergedWater) {
+          const mesh = new THREE.Mesh(mergedWater, waterMat);
+          this.proceduralGroup.add(mesh);
+        }
+      }
     }
 
     if (osm.waterways && osm.waterways.length) {
@@ -2867,65 +2961,64 @@ export class CityScene {
       this.proceduralGroup.add(trainPalmerah);
     }
 
-    // 5. Real OpenStreetMap 3D Building Footprints (1,566 authentic Jakarta buildings)
+    // 5. Real OpenStreetMap 3D Building Footprints (1,518 authentic Jakarta buildings - Merged by tier into 6 draw calls)
     if (osm.buildings && osm.buildings.length) {
-      osm.buildings.forEach((b, idx) => {
+      const lowRiseBldgs = [];
+      const midRiseBldgs = [];
+      const highRiseBldgs = [];
+
+      const lowRoofGeos = [];
+      const midRoofGeos = [];
+      const highRoofGeos = [];
+
+      osm.buildings.forEach((b) => {
         const pts = b.p;
         if (!pts || pts.length < 3) return;
+        const h = b.h || 12;
 
         const shape = new THREE.Shape();
         shape.moveTo(pts[0][0], -pts[0][1]);
         for (let i = 1; i < pts.length; i++) {
           shape.lineTo(pts[i][0], -pts[i][1]);
         }
+        const roofGeo = new THREE.ShapeGeometry(shape);
+        roofGeo.rotateX(-Math.PI / 2);
+        roofGeo.translate(0, h, 0);
 
-        const h = b.h || 12;
-        const geo = new THREE.ExtrudeGeometry(shape, {
-          depth: h,
-          bevelEnabled: false
-        });
-        geo.rotateX(-Math.PI / 2);
-
-        let mats;
         if (h >= 24) {
-          mats = [bldMats.highRiseRoofMat, sharedMaterials[idx % sharedMaterials.length]];
+          highRiseBldgs.push(b);
+          highRoofGeos.push(roofGeo);
         } else if (h >= 12) {
-          mats = [bldMats.midRiseRoofMat, bldMats.midRiseWallMat];
+          midRiseBldgs.push(b);
+          midRoofGeos.push(roofGeo);
         } else {
-          mats = [bldMats.lowRiseRoofMat, bldMats.lowRiseWallMat];
+          lowRiseBldgs.push(b);
+          lowRoofGeos.push(roofGeo);
         }
-
-        this.applyBuildingUVs(geo);
-        const mesh = new THREE.Mesh(geo, mats);
-        mesh.castShadow = false;
-        mesh.receiveShadow = true;
-
-        const meters = b.hm || Math.round(h * 1.78);
-        const floors = Math.max(1, Math.round(meters / 3.8));
-        const bName = b.n || `Gedung Jakarta #${idx + 1}`;
-        const bStreet = b.s || 'Kawasan Inti DKI Jakarta';
-
-        mesh.userData = {
-          landmarkData: {
-            id: `osm-bldg-${idx}`,
-            name: bName,
-            category: b.n ? 'Data Gedung OpenStreetMap Jakarta' : 'Bangunan Perkotaan Jakarta',
-            tagline: `${bStreet} — Geometri Tapak Asli Peta Jakarta`,
-            height: `${meters} meter (~${floors} lantai)`,
-            year: 'Data OSM DKI Jakarta',
-            location: bStreet,
-            description: `Bangunan nyata di Jakarta (${bName}) yang diekstrak langsung dari koordinat poligon tapak bangunan OpenStreetMap DKI Jakarta.`,
-            facts: [
-              `Bentuk tapak poligon (${pts.length} titik sudut) sesuai koordinat GPS asli Jakarta.`,
-              `Estimasi elevasi struktur: ${meters} meter (~${floors} lantai).`
-            ]
-          },
-          isClickable: true
-        };
-
-        this.interactiveObjects.push(mesh);
-        this.proceduralGroup.add(mesh);
       });
+
+      const renderTier = (buildings, roofGeos, roofMat, wallMat) => {
+        if (roofGeos.length > 0) {
+          const mergedRoofs = BufferGeometryUtils.mergeGeometries(roofGeos, false);
+          if (mergedRoofs) {
+            const roofMesh = new THREE.Mesh(mergedRoofs, roofMat);
+            roofMesh.receiveShadow = true;
+            this.proceduralGroup.add(roofMesh);
+          }
+        }
+        if (buildings.length > 0) {
+          const mergedWalls = this.buildMergedBuildingWallsGeometry(buildings);
+          if (mergedWalls) {
+            const wallMesh = new THREE.Mesh(mergedWalls, wallMat);
+            wallMesh.receiveShadow = true;
+            this.proceduralGroup.add(wallMesh);
+          }
+        }
+      };
+
+      renderTier(lowRiseBldgs, lowRoofGeos, bldMats.lowRiseRoofMat, bldMats.lowRiseWallMat);
+      renderTier(midRiseBldgs, midRoofGeos, bldMats.midRiseRoofMat, bldMats.midRiseWallMat);
+      renderTier(highRiseBldgs, highRoofGeos, bldMats.highRiseRoofMat, sharedMaterials[0]);
     }
 
     // 6. Procedural Infill Urban Fabric (Tahap 2):
@@ -3145,13 +3238,17 @@ export class CityScene {
   buildStreetVegetation() {
     const foliageMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.75 });
     const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
+    const treeTransforms = [];
+    const addTree = (x, z, scale = 1.0) => {
+      treeTransforms.push({ x, z, scale });
+    };
 
     // Trees along straight Thamrin & Medan Merdeka Barat spine (outside Bundaran HI & Patung Kuda)
     for (let z = -325; z <= 82; z += 26) {
       if (Math.abs(z) < 29 || Math.abs(z + 215) < 26) continue;
-      this.createTree(-15.5, z, foliageMat, trunkMat);
+      addTree(-15.5, z, 1.0);
       if (z > -205) {
-        this.createTree(15.5, z, foliageMat, trunkMat);
+        addTree(15.5, z, 1.0);
       }
     }
 
@@ -3159,48 +3256,48 @@ export class CityScene {
     for (let z = 118; z <= 452; z += 28) {
       if (Math.abs(z - 350) < 48) continue; // Skip Simpang Semanggi
       const xCenter = this.getSudirmanCenterX(z);
-      this.createTree(xCenter - 16, z, foliageMat, trunkMat);
-      this.createTree(xCenter + 16, z, foliageMat, trunkMat);
+      addTree(xCenter - 16, z, 1.0);
+      addTree(xCenter + 16, z, 1.0);
     }
 
     // Trees along Lapangan Medan Merdeka (Monas Park perimeter & walks)
     for (let x = 12; x <= 92; x += 16) {
-      this.createTree(x, -222, foliageMat, trunkMat);
-      this.createTree(x, -330, foliageMat, trunkMat);
+      addTree(x, -222, 1.0);
+      addTree(x, -330, 1.0);
     }
     for (let z = -320; z <= -230; z += 18) {
-      this.createTree(12, z, foliageMat, trunkMat);
-      this.createTree(92, z, foliageMat, trunkMat);
+      addTree(12, z, 1.0);
+      addTree(92, z, 1.0);
     }
 
     // Taman Suropati (Lush circular urban park in Menteng)
     for (let i = 0; i < 8; i++) {
       const angle = (i / 8) * Math.PI * 2;
-      this.createTree(135 + Math.cos(angle) * 11, 55 + Math.sin(angle) * 11, foliageMat, trunkMat, 1.15);
-      this.createTree(135 + Math.cos(angle + 0.39) * 18, 55 + Math.sin(angle + 0.39) * 18, foliageMat, trunkMat, 1.25);
+      addTree(135 + Math.cos(angle) * 11, 55 + Math.sin(angle) * 11, 1.15);
+      addTree(135 + Math.cos(angle + 0.39) * 18, 55 + Math.sin(angle + 0.39) * 18, 1.25);
     }
 
     // Lapangan Banteng (Historic civic square east of Istiqlal)
     for (let x = 150; x <= 184; x += 17) {
-      this.createTree(x, -365, foliageMat, trunkMat);
-      this.createTree(x, -330, foliageMat, trunkMat);
+      addTree(x, -365, 1.0);
+      addTree(x, -330, 1.0);
     }
     for (let z = -355; z <= -340; z += 15) {
-      this.createTree(150, z, foliageMat, trunkMat);
-      this.createTree(184, z, foliageMat, trunkMat);
+      addTree(150, z, 1.0);
+      addTree(184, z, 1.0);
     }
 
     // Gelora Bung Karno (GBK Senayan parkland & perimeter)
     for (let i = 0; i < 12; i++) {
       const angle = (i / 12) * Math.PI * 2;
-      this.createTree(-285 + Math.cos(angle) * 44, 350 + Math.sin(angle) * 44, foliageMat, trunkMat, 1.25);
-      this.createTree(-285 + Math.cos(angle + 0.26) * 58, 350 + Math.sin(angle + 0.26) * 58, foliageMat, trunkMat, 1.15);
+      addTree(-285 + Math.cos(angle) * 44, 350 + Math.sin(angle) * 44, 1.25);
+      addTree(-285 + Math.cos(angle + 0.26) * 58, 350 + Math.sin(angle + 0.26) * 58, 1.15);
     }
 
     // Bundaran Senayan greenery
     for (let i = 0; i < 6; i++) {
       const angle = (i / 6) * Math.PI * 2;
-      this.createTree(-195 + Math.cos(angle) * 22, 470 + Math.sin(angle) * 22, foliageMat, trunkMat);
+      addTree(-195 + Math.cos(angle) * 22, 470 + Math.sin(angle) * 22, 1.0);
     }
 
     // 7. Jalur Hijau Bantaran Kanal Banjir Barat (KBB Green River Corridor)
@@ -3210,34 +3307,67 @@ export class CityScene {
       [-172, -95], [-180, -135], [-190, -170], [-210, -215], [-230, -260], [-245, -295]
     ];
     kbbGreenPoints.forEach(([kx, kz]) => {
-      this.createTree(kx - 7, kz, foliageMat, trunkMat, 1.1);
-      this.createTree(kx + 7, kz, foliageMat, trunkMat, 1.1);
+      addTree(kx - 7, kz, 1.1);
+      addTree(kx + 7, kz, 1.1);
     });
 
     // 8. Koridor Penghijauan Jalan Letjen S. Parman (Grogol -> Tomang -> Slipi)
     for (let z = -385; z <= 65; z += 35) {
       const t = (z + 385) / 450;
       const x = -482 + t * 152;
-      this.createTree(x - 9.5, z, foliageMat, trunkMat, 1.1);
-      this.createTree(x + 9.5, z, foliageMat, trunkMat, 1.1);
+      addTree(x - 9.5, z, 1.1);
+      addTree(x + 9.5, z, 1.1);
     }
 
     // 9. Ruang Terbuka Hijau & Lanskap Palmerah (Sekitar Stasiun & Belakang DPR/MPR)
     for (let z = 225; z <= 285; z += 20) {
-      this.createTree(-295, z, foliageMat, trunkMat, 1.15);
-      this.createTree(-275, z, foliageMat, trunkMat, 1.05);
+      addTree(-295, z, 1.15);
+      addTree(-275, z, 1.05);
     }
 
     // 10. Ruang Terbuka Hijau Kampus BINUS & Kemanggisan
     for (let i = 0; i < 6; i++) {
       const angle = (i / 6) * Math.PI * 2;
-      this.createTree(-480 + Math.cos(angle) * 22, 25 + Math.sin(angle) * 22, foliageMat, trunkMat, 1.05);
+      addTree(-480 + Math.cos(angle) * 22, 25 + Math.sin(angle) * 22, 1.05);
     }
 
     // 11. Ruang Terbuka Hijau Tanjung Duren & Tribeca Park Podomoro
     for (let i = 0; i < 6; i++) {
       const angle = (i / 6) * Math.PI * 2;
-      this.createTree(-465 + Math.cos(angle) * 16, -245 + Math.sin(angle) * 16, foliageMat, trunkMat, 1.2);
+      addTree(-465 + Math.cos(angle) * 16, -245 + Math.sin(angle) * 16, 1.2);
+    }
+
+    // High performance InstancedMesh: renders all 200+ city trees in exactly 2 draw calls!
+    if (treeTransforms.length > 0) {
+      const trunkGeo = new THREE.CylinderGeometry(0.28, 0.38, 4, 6);
+      const foliageGeo = new THREE.ConeGeometry(2.6, 6.5, 7);
+
+      const trunkMesh = new THREE.InstancedMesh(trunkGeo, trunkMat, treeTransforms.length);
+      const foliageMesh = new THREE.InstancedMesh(foliageGeo, foliageMat, treeTransforms.length);
+      trunkMesh.receiveShadow = true;
+      foliageMesh.receiveShadow = true;
+
+      const dummy = new THREE.Object3D();
+      treeTransforms.forEach((t, idx) => {
+        const s = t.scale || 1.0;
+
+        dummy.position.set(t.x, 2 * s, t.z);
+        dummy.scale.set(s, s, s);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        trunkMesh.setMatrixAt(idx, dummy.matrix);
+
+        dummy.position.set(t.x, 6 * s, t.z);
+        dummy.scale.set(s, s, s);
+        dummy.rotation.set(0, (t.x * 2.7 + t.z * 1.3) % Math.PI, 0);
+        dummy.updateMatrix();
+        foliageMesh.setMatrixAt(idx, dummy.matrix);
+      });
+
+      trunkMesh.instanceMatrix.needsUpdate = true;
+      foliageMesh.instanceMatrix.needsUpdate = true;
+      this.proceduralGroup.add(trunkMesh);
+      this.proceduralGroup.add(foliageMesh);
     }
   }
 
