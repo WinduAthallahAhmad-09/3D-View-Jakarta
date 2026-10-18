@@ -3379,7 +3379,25 @@ export class CityScene {
       { x1: 303.0, z1: -240, x2: 303.0, z2: -320, count: 3, isBus: true, busColor: 0x0284c7, speedBoost: 1.1 },
       // 22. Flyover Simpang Lima Senen (Elevated Overpass, y=7.8)
       { x1: 288.0, y: 7.8, z1: -230, x2: 288.0, y: 7.8, z2: -345, count: 3, speedBoost: 1.25 },
-      { x1: 293.0, y: 7.8, z1: -345, x2: 293.0, y: 7.8, z2: -230, count: 3, speedBoost: 1.25 }
+      { x1: 293.0, y: 7.8, z1: -345, x2: 293.0, y: 7.8, z2: -230, count: 3, speedBoost: 1.25 },
+      // 23. Jalan Tol JORR TB Simatupang - Jalur Cepat Timur & Barat (y=0.225)
+      { x1: -490.0, y: 0.225, z1: 1035.0, x2: 120.0, y: 0.225, z2: 1065.0, count: 8, speedBoost: 1.45 },
+      { x1: 120.0, y: 0.225, z1: 1065.0, x2: -490.0, y: 0.225, z2: 1035.0, count: 8, speedBoost: 1.45 },
+      // 24. TransJakarta Koridor 6 (Ragunan - Mampang - Rasuna Said Hub)
+      { x1: 45.0, z1: 1065.0, x2: 135.0, z2: 435.0, count: 4, isBus: true, busColor: 0x0284c7, speedBoost: 1.1 },
+      { x1: 135.0, z1: 435.0, x2: 45.0, z2: 1065.0, count: 4, isBus: true, busColor: 0x0284c7, speedBoost: 1.1 },
+      // 25. TransJakarta Koridor 9 (Pinang Ranti - Pancoran - Semanggi)
+      { x1: 360.0, z1: 515.0, x2: 135.0, z2: 435.0, count: 4, isBus: true, busColor: 0x0284c7, speedBoost: 1.15 },
+      { x1: 135.0, z1: 435.0, x2: 360.0, z2: 515.0, count: 4, isBus: true, busColor: 0x0284c7, speedBoost: 1.15 },
+      // 26. Flyover Simpang Susun Pancoran (Elevated Overpass, y=7.8)
+      { x1: 180.0, y: 7.8, z1: 475.0, x2: 310.0, y: 7.8, z2: 508.0, count: 4, speedBoost: 1.3 },
+      { x1: 310.0, y: 7.8, z1: 508.0, x2: 180.0, y: 7.8, z2: 475.0, count: 4, speedBoost: 1.3 },
+      // 27. Boulevard Jl. Metro Pondok Indah (PIM 1-3)
+      { x1: -460.0, z1: 700.0, x2: -520.0, z2: 990.0, count: 6 },
+      { x1: -520.0, z1: 990.0, x2: -460.0, z2: 700.0, count: 6 },
+      // 28. Flyover Non-Tol Pangeran Antasari (Kemang, y=9.0)
+      { x1: -85.0, y: 9.0, z1: 680.0, x2: -85.0, y: 9.0, z2: 900.0, count: 4, speedBoost: 1.25 },
+      { x1: -85.0, y: 9.0, z1: 900.0, x2: -85.0, y: 9.0, z2: 680.0, count: 4, speedBoost: 1.25 }
     ];
 
     let idx = 0;
@@ -3418,12 +3436,14 @@ export class CityScene {
       }
     });
 
-    // Circular Roundabout Traffic orbiting Bundaran HI (0,0), Patung Kuda (-3,-215), & Bundaran Senayan (-316,478)
+    // Circular Roundabout Traffic orbiting Bundaran HI (0,0), Patung Kuda (-3,-215), Bundaran Senayan (-316,478), Bundaran PIM (-515,915), & Pancoran (248,492)
     const roundabouts = [
       { cx: 0, cz: 0, radius: 16.5, count: 6, speed: 0.45 },
       { cx: 0, cz: 0, radius: 20.2, count: 6, speed: 0.52 },
       { cx: -3, cz: -215, radius: 18.0, count: 5, speed: 0.48 },
-      { cx: -316, cz: 478, radius: 22.0, count: 5, speed: 0.44 }
+      { cx: -316, cz: 478, radius: 22.0, count: 5, speed: 0.44 },
+      { cx: -515, cz: 915, radius: 19.5, count: 5, speed: 0.45 },
+      { cx: 248, cz: 492, radius: 21.0, count: 6, speed: 0.48 }
     ];
 
     roundabouts.forEach((rb, rIdx) => {
@@ -3480,10 +3500,30 @@ export class CityScene {
       new THREE.Vector3(-351.8, 12.35, 660.0),
       new THREE.Vector3(-355.0, 12.35, 685.0),
       new THREE.Vector3(-357.4, 12.35, 702.5),
-      new THREE.Vector3(-364.0, 12.35, 750.0)
+      new THREE.Vector3(-364.0, 12.35, 750.0),
+      new THREE.Vector3(-368.0, 12.0, 815.0),
+      new THREE.Vector3(-372.0, 12.5, 885.0),
+      new THREE.Vector3(-377.0, 13.0, 960.0),
+      new THREE.Vector3(-382.0, 14.0, 1035.0),
+      new THREE.Vector3(-425.0, 13.0, 1060.0),
+      new THREE.Vector3(-465.0, 12.0, 1075.0)
     ];
     this.mrtCurve = new THREE.CatmullRomCurve3(mrtTrackPoints, false, 'catmullrom', 0.15);
     this.mrtCurveLength = this.mrtCurve.getLength();
+
+    // Dynamic Kereta LRT Jabodebek (Lin Cibubur & Bekasi) running on elevated viaduct
+    const lrtTrackPoints = [
+      new THREE.Vector3(360.0, 15.5, 515.0),  // Cawang Barat
+      new THREE.Vector3(318.0, 15.5, 506.0),  // Menara Saidah
+      new THREE.Vector3(248.0, 15.5, 492.0),  // Stasiun LRT Pancoran
+      new THREE.Vector3(185.0, 15.5, 465.0),  // Smesco / Bidakara
+      new THREE.Vector3(145.0, 16.0, 440.0),  // Tikungan Kuningan Timur
+      new THREE.Vector3(138.0, 15.5, 350.0),  // Rasuna Said Selatan
+      new THREE.Vector3(135.0, 15.5, 260.0),  // Rasuna Said Tengah
+      new THREE.Vector3(135.0, 15.5, 160.0)   // Menuju Setiabudi / Dukuh Atas
+    ];
+    this.lrtCurve = new THREE.CatmullRomCurve3(lrtTrackPoints, false, 'catmullrom', 0.15);
+    this.lrtCurveLength = this.lrtCurve.getLength();
 
     // Dynamic Kereta Api Antarkota KAI (CC 206 Locomotive + Eksekutif/Ekonomi Coaches)
     // Running on double track through Stasiun Pasar Senen & Kemayoran corridor
@@ -3505,7 +3545,9 @@ export class CityScene {
       { id: 'mrt-southbound', curve: this.mrtCurve, curveLength: this.mrtCurveLength, carSpacing: 17.35, trackOffset: 1.6, speed: 0.035, progress: 0.2, type: 'mrt' },
       { id: 'mrt-northbound', curve: this.mrtCurve, curveLength: this.mrtCurveLength, carSpacing: 17.35, trackOffset: -1.6, speed: -0.035, progress: 0.75, type: 'mrt' },
       { id: 'kai-antarkota-northbound', curve: this.senenRailCurve, curveLength: this.senenRailCurveLength, carSpacing: 18.2, trackOffset: -1.7, speed: 0.022, progress: 0.1, type: 'kai' },
-      { id: 'kai-antarkota-southbound', curve: this.senenRailCurve, curveLength: this.senenRailCurveLength, carSpacing: 18.2, trackOffset: 1.7, speed: -0.022, progress: 0.6, type: 'kai' }
+      { id: 'kai-antarkota-southbound', curve: this.senenRailCurve, curveLength: this.senenRailCurveLength, carSpacing: 18.2, trackOffset: 1.7, speed: -0.022, progress: 0.6, type: 'kai' },
+      { id: 'lrt-eastbound', curve: this.lrtCurve, curveLength: this.lrtCurveLength, carSpacing: 16.5, trackOffset: 1.4, speed: 0.026, progress: 0.15, type: 'lrt' },
+      { id: 'lrt-westbound', curve: this.lrtCurve, curveLength: this.lrtCurveLength, carSpacing: 16.5, trackOffset: -1.4, speed: -0.026, progress: 0.65, type: 'lrt' }
     ];
 
     trainConfigs.forEach((cfg) => {
@@ -3520,11 +3562,16 @@ export class CityScene {
       };
 
       for (let c = 0; c < 4; c++) {
-        const carMesh = cfg.type === 'mrt'
-          ? LandmarkModels.createSingleMRTRatanggaCar(c, 4)
-          : (cfg.type === 'kai'
-            ? LandmarkModels.createSingleKAIAntarkotaCar(c, 4)
-            : LandmarkModels.createSingleKRLCar(c, 4));
+        let carMesh;
+        if (cfg.type === 'mrt') {
+          carMesh = LandmarkModels.createSingleMRTRatanggaCar(c, 4);
+        } else if (cfg.type === 'kai') {
+          carMesh = LandmarkModels.createSingleKAIAntarkotaCar(c, 4);
+        } else if (cfg.type === 'lrt') {
+          carMesh = LandmarkModels.createSingleLRTJabodebekCar(c, 4);
+        } else {
+          carMesh = LandmarkModels.createSingleKRLCar(c, 4);
+        }
         this.proceduralGroup.add(carMesh);
         train.cars.push(carMesh);
       }

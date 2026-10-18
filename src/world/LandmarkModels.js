@@ -2171,6 +2171,161 @@ export class LandmarkModels {
   }
 
   /**
+   * Kereta LRT Jabodebek (PT INKA / PT KAI)
+   * Terdiri dari rangkaian kereta ringan articulated berlivery merah marun-putih khas Jabodebek,
+   * kabin aerodinamis modern, pantograf atap, dan bogie bantalan udara.
+   */
+  static createSingleLRTJabodebekCar(c, cars = 4) {
+    const carLen = 16.5;
+    const gap = 0.85;
+
+    const redMarunMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.35 });
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35 });
+    const windowGlassMat = new THREE.MeshStandardMaterial({
+      color: 0x0f172a,
+      roughness: 0.15,
+      metalness: 0.85
+    });
+    const stainlessMat = new THREE.MeshStandardMaterial({
+      color: 0xe2e8f0,
+      metalness: 0.85,
+      roughness: 0.25
+    });
+    const bogieMat = new THREE.MeshStandardMaterial({
+      color: 0x334155,
+      metalness: 0.6,
+      roughness: 0.7
+    });
+    const pantographMat = new THREE.MeshStandardMaterial({
+      color: 0xd97706,
+      metalness: 0.8,
+      roughness: 0.3
+    });
+    const headlightMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+    const taillightMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+
+    const carGroup = new THREE.Group();
+
+    // 1. Lower Body Shell (Merah Marun Khas LRT Jabodebek)
+    const lowerBody = new THREE.Mesh(new THREE.BoxGeometry(2.85, 1.2, carLen), redMarunMat);
+    lowerBody.position.set(0, 1.3, 0);
+    lowerBody.castShadow = true;
+    carGroup.add(lowerBody);
+
+    // 2. White Signature Livery Stripe
+    const whiteStripe = new THREE.Mesh(new THREE.BoxGeometry(2.88, 0.35, carLen), whiteMat);
+    whiteStripe.position.set(0, 1.95, 0);
+    carGroup.add(whiteStripe);
+
+    // 3. Middle Window Band
+    const windowBand = new THREE.Mesh(new THREE.BoxGeometry(2.86, 1.0, carLen * 0.88), windowGlassMat);
+    windowBand.position.set(0, 2.5, 0);
+    carGroup.add(windowBand);
+
+    // 4. Upper Roof Cap & AC Units
+    const roofCap = new THREE.Mesh(new THREE.BoxGeometry(2.82, 0.45, carLen), stainlessMat);
+    roofCap.position.set(0, 3.15, 0);
+    roofCap.castShadow = true;
+    carGroup.add(roofCap);
+
+    const acUnit = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.35, 3.6), whiteMat);
+    acUnit.position.set(0, 3.45, 0);
+    carGroup.add(acUnit);
+
+    // 5. Aerodynamic Sloped Cabs (Front & Rear)
+    if (c === 0) {
+      // Front Driving Cab Nose (+Z)
+      const frontNose = new THREE.Mesh(new THREE.BoxGeometry(2.82, 2.2, 2.4), redMarunMat);
+      frontNose.position.set(0, 2.0, carLen * 0.5 + 0.6);
+      frontNose.rotation.x = -0.22;
+      frontNose.castShadow = true;
+      carGroup.add(frontNose);
+
+      const windshield = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.9, 0.2), windowGlassMat);
+      windshield.position.set(0, 2.35, carLen * 0.5 + 1.25);
+      windshield.rotation.x = -0.22;
+      carGroup.add(windshield);
+
+      // Dual High-Intensity LED Headlights
+      [-0.8, 0.8].forEach((hx) => {
+        const headlight = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.15, 8), headlightMat);
+        headlight.rotation.x = Math.PI / 2;
+        headlight.position.set(hx, 1.5, carLen * 0.5 + 1.5);
+        carGroup.add(headlight);
+      });
+    } else if (c === cars - 1) {
+      // Rear Driving Cab Nose (-Z)
+      const rearNose = new THREE.Mesh(new THREE.BoxGeometry(2.82, 2.2, 2.4), redMarunMat);
+      rearNose.position.set(0, 2.0, -carLen * 0.5 - 0.6);
+      rearNose.rotation.x = 0.22;
+      rearNose.castShadow = true;
+      carGroup.add(rearNose);
+
+      [-0.8, 0.8].forEach((hx) => {
+        const taillight = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.15, 8), taillightMat);
+        taillight.rotation.x = Math.PI / 2;
+        taillight.position.set(hx, 1.5, -carLen * 0.5 - 1.5);
+        carGroup.add(taillight);
+      });
+    }
+
+    // 6. Rooftop Pantograph (on Car 1)
+    if (c === 1) {
+      const pantoBase = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.15, 1.6), bogieMat);
+      pantoBase.position.set(0, 3.4, 2.5);
+      carGroup.add(pantoBase);
+
+      const arm1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.2, 6), pantographMat);
+      arm1.rotation.x = Math.PI / 3.5;
+      arm1.position.set(0, 3.85, 2.2);
+      carGroup.add(arm1);
+
+      const arm2 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.2, 6), pantographMat);
+      arm2.rotation.x = -Math.PI / 3.5;
+      arm2.position.set(0, 4.3, 2.45);
+      carGroup.add(arm2);
+
+      const head = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.06, 0.2), pantographMat);
+      head.position.set(0, 4.8, 2.6);
+      carGroup.add(head);
+    }
+
+    // 7. Underframe Wheelsets & Bogies
+    [-5.0, 5.0].forEach((bz) => {
+      const bogieFrame = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.35, 3.2), bogieMat);
+      bogieFrame.position.set(0, 0.5, bz);
+      carGroup.add(bogieFrame);
+
+      [-1.1, 1.1].forEach((wx) => {
+        [-0.9, 0.9].forEach((wz) => {
+          const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.22, 10), bogieMat);
+          wheel.rotation.z = Math.PI / 2;
+          wheel.position.set(wx, 0.42, bz + wz);
+          carGroup.add(wheel);
+        });
+      });
+    });
+
+    return carGroup;
+  }
+
+  static createLRTJabodebekTrain(cars = 4) {
+    const group = new THREE.Group();
+    const carLen = 16.5;
+    const gap = 0.85;
+
+    for (let c = 0; c < cars; c++) {
+      const car = this.createSingleLRTJabodebekCar(c, cars);
+      const cz = (c - (cars - 1) / 2) * (carLen + gap);
+      car.position.set(0, 0, cz);
+      group.add(car);
+    }
+
+    return group;
+  }
+
+
+  /**
    * 34. Gedung Sekretariat Jenderal ASEAN
    * Menara kembar ramah lingkungan 16 lantai di Jl. Sisingamangaraja dengan skybridge kaca 40m dan plaza bendera diplomatik.
    */

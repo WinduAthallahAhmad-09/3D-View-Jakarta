@@ -311,4 +311,54 @@ assert.ok(
   'CityScene.js missing Smesco SME Tower & Menara Bidakara'
 );
 
-console.log('✅ All 51 landmarks, Tahap 1, 2 & 3 Jakarta Selatan (Pondok Indah, Citos, Arkadia, Kemang, RSUP Fatmawati, Ragunan, Smesco/Bidakara, Tol JORR, Simpang Pancoran, Viaduk MRT/LRT), and 100% Jakarta Pusat verified successfully!');
+// Check 14: Tahap 4 Integrasi Transit Dinamis & Mobilitas Terpadu Jakarta Selatan
+assert.ok(
+  landmarkModelsContent.includes('createSingleLRTJabodebekCar'),
+  'LandmarkModels.js missing createSingleLRTJabodebekCar'
+);
+assert.ok(
+  landmarkModelsContent.includes('createLRTJabodebekTrain'),
+  'LandmarkModels.js missing createLRTJabodebekTrain'
+);
+assert.ok(
+  citySceneContent.includes('this.lrtCurve = new THREE.CatmullRomCurve3'),
+  'CityScene.js missing lrtCurve'
+);
+assert.ok(
+  citySceneContent.includes("'lrt-eastbound'"),
+  'CityScene.js missing lrt-eastbound'
+);
+assert.ok(
+  citySceneContent.includes("'lrt-westbound'"),
+  'CityScene.js missing lrt-westbound'
+);
+assert.ok(
+  citySceneContent.includes('LandmarkModels.createSingleLRTJabodebekCar(c, 4)'),
+  'CityScene.js missing call to LandmarkModels.createSingleLRTJabodebekCar'
+);
+assert.ok(
+  citySceneContent.includes('-465.0, 12.0, 1075.0'),
+  'CityScene.js missing MRT extension to Dipo Lebak Bulus'
+);
+assert.ok(
+  citySceneContent.includes('TransJakarta Koridor 6 (Ragunan - Mampang - Rasuna Said Hub)'),
+  'CityScene.js missing TransJakarta Koridor 6'
+);
+assert.ok(
+  citySceneContent.includes('TransJakarta Koridor 9 (Pinang Ranti - Pancoran - Semanggi)'),
+  'CityScene.js missing TransJakarta Koridor 9'
+);
+assert.ok(
+  citySceneContent.includes('Jalan Tol JORR TB Simatupang - Jalur Cepat Timur & Barat'),
+  'CityScene.js missing Tol JORR traffic route'
+);
+assert.ok(
+  citySceneContent.includes('cx: 248, cz: 492, radius: 21.0'),
+  'CityScene.js missing Simpang Pancoran roundabout traffic'
+);
+assert.ok(
+  citySceneContent.includes('cx: -515, cz: 915, radius: 19.5'),
+  'CityScene.js missing Bundaran PIM roundabout traffic'
+);
+
+console.log('✅ All 51 landmarks, Tahap 1, 2, 3 & 4 (100% Jakarta Selatan Complete & 100% Jakarta Pusat Complete) verified successfully!');
