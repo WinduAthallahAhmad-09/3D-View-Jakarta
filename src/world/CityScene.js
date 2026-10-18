@@ -1351,6 +1351,354 @@ export class CityScene {
       this.createTree(x - 15.5, z, foliageMat, trunkMat, 1.1);
       this.createTree(x + 15.5, z, foliageMat, trunkMat, 1.1);
     }
+
+    // =========================================================================
+    // 9. Jalan Tol Lingkar Luar Jakarta (Tol JORR TB Simatupang)
+    // =========================================================================
+    const highwayMat = new THREE.MeshStandardMaterial({
+      color: 0x0f172a,
+      roughness: 0.72,
+      metalness: 0.15
+    });
+    const jerseyBarrierMat = new THREE.MeshStandardMaterial({
+      color: 0x64748b,
+      roughness: 0.6
+    });
+
+    const jorrWaypoints = [
+      [-490.0, 1035.0], // Barat Lebak Bulus
+      [-382.0, 1045.0], // Simpang Fatmawati
+      [-330.0, 1060.0], // Cilandak / South Quarter
+      [-260.0, 1062.0], // Citos / Antasari Interchange
+      [-140.0, 1065.0], // Ampera / Cilandak KKO
+      [0.0, 1065.0],    // Ragunan / Warung Jati
+      [120.0, 1065.0]   // TB Simatupang Timur / Tanjung Barat
+    ];
+
+    for (let i = 0; i < jorrWaypoints.length - 1; i++) {
+      const [x1, z1] = jorrWaypoints[i];
+      const [x2, z2] = jorrWaypoints[i + 1];
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const angle = Math.atan2(dx, dz);
+      const mx = (x1 + x2) * 0.5;
+      const mz = (z1 + z2) * 0.5;
+
+      // Tol JORR 6-Lane Expressway Bed (Width 24m)
+      const tollRoad = new THREE.Mesh(new THREE.BoxGeometry(24, 0.45, len + 0.4), highwayMat);
+      tollRoad.position.set(mx, 0.225, mz);
+      tollRoad.rotation.y = angle;
+      tollRoad.receiveShadow = true;
+      this.proceduralGroup.add(tollRoad);
+
+      // Central Concrete Jersey Barrier Median
+      const medianBarrier = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.9, len + 0.4), jerseyBarrierMat);
+      medianBarrier.position.set(mx, 0.65, mz);
+      medianBarrier.rotation.y = angle;
+      this.proceduralGroup.add(medianBarrier);
+
+      // Outer Guardrails / Concrete Parapets
+      [-11.6, 11.6].forEach((dir) => {
+        const outerBarrier = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, len + 0.4), jerseyBarrierMat);
+        const perpX = Math.cos(angle) * dir;
+        const perpZ = -Math.sin(angle) * dir;
+        outerBarrier.position.set(mx + perpX, 0.6, mz + perpZ);
+        outerBarrier.rotation.y = angle;
+        this.proceduralGroup.add(outerBarrier);
+      });
+
+      // Parallel Frontage Arterial Road TB Simatupang (North & South 2-Lane Frontage)
+      [-17.5, 17.5].forEach((sideOffset) => {
+        const frontage = new THREE.Mesh(new THREE.BoxGeometry(7.5, 0.25, len + 0.4), roadMat);
+        const perpX = Math.cos(angle) * sideOffset;
+        const perpZ = -Math.sin(angle) * sideOffset;
+        frontage.position.set(mx + perpX, 0.125, mz + perpZ);
+        frontage.rotation.y = angle;
+        frontage.receiveShadow = true;
+        this.proceduralGroup.add(frontage);
+      });
+    }
+
+    // =========================================================================
+    // 10. Simpang Susun Pancoran & Koridor MT Haryono - Gatot Subroto Timur
+    // =========================================================================
+    // Arteri Gatot Subroto Timur -> Pancoran -> MT Haryono
+    const gatsuEastPoints = [
+      [135.0, 435.0], // Simpang Kuningan
+      [185.0, 465.0], // Depan Bidakara / Smesco
+      [248.0, 492.0], // Simpang Pancoran / Patung Dirgantara
+      [318.0, 506.0], // Menara Saidah / Stasiun Cawang
+      [370.0, 515.0]  // Menuju Cawang Interchange
+    ];
+
+    for (let i = 0; i < gatsuEastPoints.length - 1; i++) {
+      const [x1, z1] = gatsuEastPoints[i];
+      const [x2, z2] = gatsuEastPoints[i + 1];
+      buildRoadSegment(x1, z1, x2, z2, 24, true);
+    }
+
+    // Flyover Simpang Susun Pancoran (Elevated Overpass Barat - Timur, Y=7.8m)
+    const pancoranFlyoverGroup = new THREE.Group();
+    const pancoranOverpassLen = 160;
+    const pancoranDeck = new THREE.Mesh(new THREE.BoxGeometry(14, 1.4, pancoranOverpassLen), viaductMat);
+    pancoranDeck.position.set(248, 7.8, 492);
+    pancoranDeck.rotation.y = 0.38; // Aligning with Gatot Subroto / MT Haryono angle
+    pancoranDeck.castShadow = true;
+    pancoranFlyoverGroup.add(pancoranDeck);
+
+    // Parapets
+    [-6.6, 6.6].forEach((px) => {
+      const parapet = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.1, pancoranOverpassLen), jerseyBarrierMat);
+      parapet.position.set(px, 0.9, 0);
+      pancoranDeck.add(parapet);
+    });
+
+    // Support Piers
+    [-60, -20, 20, 60].forEach((pz) => {
+      const pier = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.6, 7.8, 12), pierMat);
+      const angle = 0.38;
+      pier.position.set(248 + Math.sin(angle) * pz, 3.9, 492 + Math.cos(angle) * pz);
+      pier.castShadow = true;
+      pancoranFlyoverGroup.add(pier);
+    });
+    this.proceduralGroup.add(pancoranFlyoverGroup);
+
+    // Flyover Pancoran Utara - Selatan (Jl. Prof. Dr. Soepomo -> Jl. Pasar Minggu, Y=6.4m)
+    const soepomoFlyover = new THREE.Mesh(new THREE.BoxGeometry(11, 1.2, 130), viaductMat);
+    soepomoFlyover.position.set(248, 6.4, 492);
+    soepomoFlyover.castShadow = true;
+    this.proceduralGroup.add(soepomoFlyover);
+
+    // Jalan Pasar Minggu & Dr. Soepomo At-Grade
+    buildRoadSegment(248, 390, 248, 460, 18, false);
+    buildRoadSegment(248, 525, 248, 620, 18, false);
+
+    // =========================================================================
+    // 11. Perpanjangan Viaduk Layang MRT Fase 1 (Fatmawati - Lebak Bulus)
+    // =========================================================================
+    const mrtSouthExtensionPoints = [
+      [-364.0, 750.0, 11.5],  // Selatan Blok M
+      [-368.0, 815.0, 12.0],  // Menuju Stasiun Blok A
+      [-372.0, 885.0, 12.5],  // Menuju Stasiun Haji Nawi
+      [-377.0, 960.0, 13.0],  // Menuju Stasiun Cipete Raya
+      [-382.0, 1035.0, 14.0], // Stasiun MRT Fatmawati Indomaret
+      [-425.0, 1060.0, 13.0], // Belokan R.A. Kartini
+      [-465.0, 1075.0, 12.0]  // Stasiun Akhir & Dipo Lebak Bulus Grab
+    ];
+
+    for (let i = 0; i < mrtSouthExtensionPoints.length - 1; i++) {
+      const [x1, z1, y1] = mrtSouthExtensionPoints[i];
+      const [x2, z2, y2] = mrtSouthExtensionPoints[i + 1];
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const angle = Math.atan2(dx, dz);
+      const mx = (x1 + x2) * 0.5;
+      const mz = (z1 + z2) * 0.5;
+      const my = (y1 + y2) * 0.5;
+
+      // Skip segment inside Stasiun Fatmawati (has its own detailed station mesh)
+      const isInsideFatmawati = Math.hypot(mx - (-382.0), mz - 1035.0) < 22;
+
+      if (!isInsideFatmawati) {
+        // Concrete Box Girder Deck
+        const deck = new THREE.Mesh(new THREE.BoxGeometry(8.2, 1.6, len + 0.8), viaductMat);
+        deck.position.set(mx, my, mz);
+        deck.rotation.y = angle;
+        deck.castShadow = true;
+        this.proceduralGroup.add(deck);
+
+        // Parapet walls
+        [-3.8, 3.8].forEach((wx) => {
+          const parapet = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.2, len + 0.8), viaductMat);
+          const perpX = Math.cos(angle) * wx;
+          const perpZ = -Math.sin(angle) * wx;
+          parapet.position.set(mx + perpX, my + 1.2, mz + perpZ);
+          parapet.rotation.y = angle;
+          this.proceduralGroup.add(parapet);
+        });
+
+        // Dual Steel Rail Tracks
+        [-1.6, 1.6].forEach((tx) => {
+          const track = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.25, len + 0.8), railTrackMat);
+          const perpX = Math.cos(angle) * tx;
+          const perpZ = -Math.sin(angle) * tx;
+          track.position.set(mx + perpX, my + 0.9, mz + perpZ);
+          track.rotation.y = angle;
+          this.proceduralGroup.add(track);
+        });
+
+        // Single-Pier Hammerhead Column
+        const pier = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.5, my, 12), pierMat);
+        pier.position.set(mx, my * 0.5, mz);
+        pier.castShadow = true;
+        this.proceduralGroup.add(pier);
+
+        const cap = new THREE.Mesh(new THREE.BoxGeometry(7.2, 1.2, 2.5), pierMat);
+        cap.position.set(mx, my - 0.7, mz);
+        cap.rotation.y = angle;
+        this.proceduralGroup.add(cap);
+      }
+    }
+
+    // Jalan RS Fatmawati Arteri Bawah (Blok M -> Fatmawati)
+    for (let i = 0; i < mrtSouthExtensionPoints.length - 2; i++) {
+      const [x1, z1] = mrtSouthExtensionPoints[i];
+      const [x2, z2] = mrtSouthExtensionPoints[i + 1];
+      buildRoadSegment(x1, z1, x2, z2, 20, false);
+    }
+
+    // =========================================================================
+    // 12. Viaduk Layang Jalur LRT Jabodebek (MT Haryono - Pancoran - Kuningan)
+    // =========================================================================
+    const lrtViaductMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
+    const lrtRedMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.45 });
+
+    const lrtWaypoints = [
+      [360.0, 515.0, 15.5],  // Cawang Barat
+      [318.0, 506.0, 15.5],  // Menara Saidah
+      [248.0, 492.0, 15.5],  // Stasiun LRT Pancoran
+      [185.0, 465.0, 15.5],  // Smesco / Bidakara
+      [145.0, 440.0, 16.0],  // Tikungan Kuningan Timur
+      [138.0, 350.0, 15.5],  // Rasuna Said Selatan
+      [135.0, 260.0, 15.5],  // Rasuna Said Tengah
+      [135.0, 160.0, 15.5]   // Menuju Setiabudi / Dukuh Atas
+    ];
+
+    for (let i = 0; i < lrtWaypoints.length - 1; i++) {
+      const [x1, z1, y1] = lrtWaypoints[i];
+      const [x2, z2, y2] = lrtWaypoints[i + 1];
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const angle = Math.atan2(dx, dz);
+      const mx = (x1 + x2) * 0.5;
+      const mz = (z1 + z2) * 0.5;
+      const my = (y1 + y2) * 0.5;
+
+      // U-Girder LRT Deck (Width 6.8m)
+      const lrtDeck = new THREE.Mesh(new THREE.BoxGeometry(6.8, 1.4, len + 0.6), lrtViaductMat);
+      lrtDeck.position.set(mx, my, mz);
+      lrtDeck.rotation.y = angle;
+      lrtDeck.castShadow = true;
+      this.proceduralGroup.add(lrtDeck);
+
+      // Red Accent Flange along LRT Viaduct Edge
+      [-3.3, 3.3].forEach((rx) => {
+        const accent = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.9, len + 0.6), lrtRedMat);
+        const perpX = Math.cos(angle) * rx;
+        const perpZ = -Math.sin(angle) * rx;
+        accent.position.set(mx + perpX, my + 0.8, mz + perpZ);
+        accent.rotation.y = angle;
+        this.proceduralGroup.add(accent);
+      });
+
+      // Dual LRT Tracks
+      [-1.3, 1.3].forEach((tx) => {
+        const track = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.2, len + 0.6), railTrackMat);
+        const perpX = Math.cos(angle) * tx;
+        const perpZ = -Math.sin(angle) * tx;
+        track.position.set(mx + perpX, my + 0.8, mz + perpZ);
+        track.rotation.y = angle;
+        this.proceduralGroup.add(track);
+      });
+
+      // Slender Cylindrical Piers for Elevated LRT Viaduct
+      const lrtPier = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.3, my, 12), pierMat);
+      lrtPier.position.set(mx, my * 0.5, mz);
+      lrtPier.castShadow = true;
+      this.proceduralGroup.add(lrtPier);
+    }
+
+    // =========================================================================
+    // 13. Koridor Arteri Mampang Prapatan & Underpass Mampang-Kuningan
+    // =========================================================================
+    // Arteri Mampang Prapatan ke arah Warung Buncit
+    buildRoadSegment(135.0, 435.0, 125.0, 580.0, 22, true);
+    buildRoadSegment(125.0, 580.0, 115.0, 740.0, 20, true);
+
+    // Underpass Mampang-Kuningan (Y=-3.5m Depressed Tunnel Cutting Under Gatot Subroto)
+    const underpassGroup = new THREE.Group();
+    const underpassLen = 130;
+    const underpassRoad = new THREE.Mesh(new THREE.BoxGeometry(14, 0.3, underpassLen), roadMat);
+    underpassRoad.position.set(135, -2.5, 435);
+    underpassRoad.receiveShadow = true;
+    underpassGroup.add(underpassRoad);
+
+    // Retaining Portal Walls
+    [-7.2, 7.2].forEach((wx) => {
+      const wall = new THREE.Mesh(new THREE.BoxGeometry(0.8, 4.0, underpassLen), viaductMat);
+      wall.position.set(135 + wx, -0.6, 435);
+      underpassGroup.add(wall);
+    });
+    this.proceduralGroup.add(underpassGroup);
+
+    // Flyover Non-Tol Pangeran Antasari (Melintasi Kemang Village, Y=9.0m)
+    const antasariFlyoverGroup = new THREE.Group();
+    const antasariLen = 220;
+    const antasariDeck = new THREE.Mesh(new THREE.BoxGeometry(11, 1.2, antasariLen), viaductMat);
+    antasariDeck.position.set(-85, 9.0, 780);
+    antasariDeck.castShadow = true;
+    antasariFlyoverGroup.add(antasariDeck);
+
+    [-70, -20, 30, 80].forEach((py) => {
+      const pier = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.4, 9.0, 10), pierMat);
+      pier.position.set(-85, 4.5, 780 + py);
+      antasariFlyoverGroup.add(pier);
+    });
+    this.proceduralGroup.add(antasariFlyoverGroup);
+
+    // Arteri Bawah Jl. Pangeran Antasari & Kemang Raya
+    buildRoadSegment(-85, 680, -85, 900, 16, false);
+    buildRoadSegment(-105, 740, -50, 820, 14, false); // Kemang Raya cross
+
+    // =========================================================================
+    // 14. Boulevard Jl. Metro Pondok Indah & Bundaran PIM
+    // =========================================================================
+    const pondokIndahPoints = [
+      [-460.0, 700.0], // Dari arah Kebayoran Lama / Gandaria
+      [-490.0, 775.0], // Utara PIM
+      [-510.0, 845.0], // Depan PIM 1 & PIM 2 (di bawah Skywalk)
+      [-515.0, 915.0], // Bundaran Pondok Indah
+      [-520.0, 990.0]  // Menyambung ke Simpang Tol Simatupang Barat
+    ];
+
+    for (let i = 0; i < pondokIndahPoints.length - 1; i++) {
+      const [x1, z1] = pondokIndahPoints[i];
+      const [x2, z2] = pondokIndahPoints[i + 1];
+      buildRoadSegment(x1, z1, x2, z2, 24, true);
+    }
+
+    // Bundaran Pondok Indah Road Ring
+    this.addRoundaboutRing(-515.0, 915.0, 15.0, 23.5, roadMat, sidewalkMat);
+
+    // =========================================================================
+    // 15. Sistem PJU & Penghijauan Palem Koridor Selatan (Pancoran, Simatupang, Pondok Indah)
+    // =========================================================================
+    // PJU & Palem sepanjang Tol JORR TB Simatupang
+    for (let x = -480; x <= 100; x += 45) {
+      this.createStreetLamp(x, 1065 - 13.5, true);
+      this.createStreetLamp(x, 1065 + 13.5, false);
+    }
+
+    // PJU & Palem sepanjang Metro Pondok Indah
+    for (let z = 720; z <= 980; z += 32) {
+      const t = (z - 720) / 260;
+      const x = -460 + t * (-520 - (-460));
+      this.createStreetLamp(x - 14.0, z, true);
+      this.createStreetLamp(x + 14.0, z, false);
+      this.createTree(x - 15.5, z, foliageMat, trunkMat, 1.2);
+      this.createTree(x + 15.5, z, foliageMat, trunkMat, 1.2);
+    }
+
+    // PJU sepanjang Gatot Subroto Timur & Pancoran
+    for (let x = 145; x <= 350; x += 38) {
+      const t = (x - 145) / 205;
+      const z = 440 + t * (515 - 440);
+      this.createStreetLamp(x, z - 13.5, true);
+      this.createStreetLamp(x, z + 13.5, false);
+    }
   }
 
   /**

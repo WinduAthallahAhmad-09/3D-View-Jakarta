@@ -239,4 +239,38 @@ assert.ok(landmarkModelsContent.includes('createPondokIndahMall'), 'LandmarkMode
 assert.ok(landmarkModelsContent.includes('createStasiunMRTFatmawati'), 'LandmarkModels.js missing createStasiunMRTFatmawati');
 assert.ok(landmarkModelsContent.includes('createKemangVillage'), 'LandmarkModels.js missing createKemangVillage');
 
-console.log('✅ All 51 landmarks, Tahap 1 Jakarta Selatan (Patung Pancoran, Menara Saidah, South Quarter, PIM, MRT Fatmawati, Kemang Village), and 100% Jakarta Pusat verified successfully!');
+// Check 12: Tahap 2 Infrastruktur Jalan Tol JORR, Simpang Susun & Viaduk Transit Jakarta Selatan
+assert.ok(
+  citySceneContent.includes('Jalan Tol Lingkar Luar Jakarta (Tol JORR TB Simatupang)'),
+  'CityScene.js missing Tol JORR TB Simatupang'
+);
+assert.ok(
+  citySceneContent.includes('Simpang Susun Pancoran & Koridor MT Haryono'),
+  'CityScene.js missing Simpang Susun Pancoran corridor'
+);
+assert.ok(
+  citySceneContent.includes('Perpanjangan Viaduk Layang MRT Fase 1 (Fatmawati - Lebak Bulus)'),
+  'CityScene.js missing MRT southern viaduct extension'
+);
+assert.ok(
+  citySceneContent.includes('Viaduk Layang Jalur LRT Jabodebek (MT Haryono - Pancoran - Kuningan)'),
+  'CityScene.js missing LRT Jabodebek viaduct'
+);
+assert.ok(
+  citySceneContent.includes('Underpass Mampang-Kuningan'),
+  'CityScene.js missing Underpass Mampang-Kuningan'
+);
+assert.ok(
+  citySceneContent.includes('Flyover Non-Tol Pangeran Antasari'),
+  'CityScene.js missing Flyover Non-Tol Pangeran Antasari'
+);
+assert.ok(
+  citySceneContent.includes('Boulevard Jl. Metro Pondok Indah & Bundaran PIM'),
+  'CityScene.js missing Boulevard Jl. Metro Pondok Indah'
+);
+assert.ok(
+  citySceneContent.includes('this.addRoundaboutRing(-515.0, 915.0'),
+  'CityScene.js missing Bundaran Pondok Indah roundabout ring'
+);
+
+console.log('✅ All 51 landmarks, Tahap 1 & 2 Jakarta Selatan (Tol JORR, Simpang Pancoran, Viaduk MRT & LRT, 6 Anchor Landmarks), and 100% Jakarta Pusat verified successfully!');
