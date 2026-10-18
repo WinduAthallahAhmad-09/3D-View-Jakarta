@@ -2008,6 +2008,280 @@ export class CityScene {
         }
       }
     }
+
+    // =========================================================================
+    // 7. DISTRIK RESIDENSIAL ELITE PONDOK INDAH (BUKIT GOLFINDO & PINANG EMAS)
+    // =========================================================================
+    // Helper for Luxury Pondok Indah Villa with pool and gated driveway
+    const createPondokIndahVilla = (x, z, width = 16, depth = 13, height = 7.5) => {
+      const villaGroup = new THREE.Group();
+      villaGroup.position.set(x, 0, z);
+
+      // Base Perimeter Plot Yard
+      const plot = new THREE.Mesh(new THREE.BoxGeometry(width + 4, 0.15, depth + 4), grassMat);
+      plot.position.set(0, 0.075, 0);
+      plot.receiveShadow = true;
+      villaGroup.add(plot);
+
+      // Main Villa 2-3 Storey Mansion
+      const villaWalls = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), whiteWallMat);
+      villaWalls.position.set(0, height * 0.5, 0);
+      villaWalls.castShadow = true;
+      villaWalls.receiveShadow = true;
+      villaGroup.add(villaWalls);
+
+      // Distinctive Mediterranean Limasan Terracotta Roof
+      const roof = new THREE.Mesh(new THREE.ConeGeometry(Math.max(width, depth) * 0.65, 4.2, 4), terracottaRoofMat);
+      roof.rotateY(Math.PI / 4);
+      roof.scale.set((width / Math.max(width, depth)) * 0.85, 1, (depth / Math.max(width, depth)) * 0.85);
+      roof.position.set(0, height + 2.1, 0);
+      roof.castShadow = true;
+      villaGroup.add(roof);
+
+      // Private Backyard Swimming Pool
+      const pool = new THREE.Mesh(new THREE.BoxGeometry(5.5, 0.25, 3.8), waterMat);
+      pool.position.set(width * 0.35, 0.15, depth * 0.35);
+      villaGroup.add(pool);
+
+      this.proceduralGroup.add(villaGroup);
+    };
+
+    // Cluster A: Pondok Indah Barat (Sisi Barat Jl. Metro Pondok Indah)
+    for (let x = -555; x <= -485; x += 24) {
+      for (let z = 750; z <= 960; z += 24) {
+        if (Math.hypot(x - (-510), z - 845) > 45 && Math.hypot(x - (-515), z - 915) > 35) {
+          createPondokIndahVilla(x, z, 15, 13, 8.0);
+          this.createTree(x + 8, z + 7, new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.8 }), timberMat, 1.15);
+        }
+      }
+    }
+
+    // Cluster B: Pondok Indah Timur & Bukit Golf
+    for (let x = -470; x <= -425; x += 22) {
+      for (let z = 780; z <= 940; z += 22) {
+        if (Math.hypot(x - (-510), z - 845) > 45) {
+          createPondokIndahVilla(x, z, 14, 12, 7.5);
+          this.createTree(x - 7, z - 6, new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.85 }), timberMat, 1.1);
+        }
+      }
+    }
+
+    // =========================================================================
+    // 8. KAWASAN KOMERSIAL & PERKANTORAN CBD TB SIMATUPANG
+    // =========================================================================
+    const corporateGlassMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.18, metalness: 0.88 });
+    const darkGlassMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2, metalness: 0.85 });
+    const brickOfficeMat = new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.8 });
+    const concreteOfficeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.55 });
+
+    // A. Talavera Office Park ([-360, 0, 1085])
+    const talaveraGroup = new THREE.Group();
+    talaveraGroup.position.set(-360, 0, 1085);
+    const talaveraTower = new THREE.Mesh(new THREE.BoxGeometry(26, 75, 22), corporateGlassMat);
+    talaveraTower.position.set(0, 37.5, 0);
+    talaveraTower.castShadow = true;
+    talaveraGroup.add(talaveraTower);
+
+    // Cantilevered Upper Screen
+    const talaveraCrown = new THREE.Mesh(new THREE.BoxGeometry(26.8, 6, 22.8), concreteOfficeMat);
+    talaveraCrown.position.set(0, 78, 0);
+    talaveraGroup.add(talaveraCrown);
+    this.proceduralGroup.add(talaveraGroup);
+
+    // B. Cilandak Town Square (Citos) ([-260, 0, 1035])
+    const citosGroup = new THREE.Group();
+    citosGroup.position.set(-260, 0, 1035);
+    const citosPodium = new THREE.Mesh(new THREE.BoxGeometry(45, 16, 32), concreteOfficeMat);
+    citosPodium.position.set(0, 8, 0);
+    citosPodium.castShadow = true;
+    citosGroup.add(citosPodium);
+
+    // Open-Air Dining Terrace Canopy
+    const citosCanopy = new THREE.Mesh(new THREE.BoxGeometry(42, 1.2, 12), timberMat);
+    citosCanopy.position.set(0, 16.5, 12);
+    citosGroup.add(citosCanopy);
+    this.proceduralGroup.add(citosGroup);
+
+    // C. Arkadia Green Park & Talavera Office Park ([-180, 0, 1085])
+    // Distinctive red-brick clustered office park towers
+    const arkadiaGroup = new THREE.Group();
+    arkadiaGroup.position.set(-180, 0, 1085);
+    [-18, 0, 18].forEach((ax) => {
+      const arkTower = new THREE.Mesh(new THREE.BoxGeometry(15, 45, 16), brickOfficeMat);
+      arkTower.position.set(ax, 22.5, 0);
+      arkTower.castShadow = true;
+      arkadiaGroup.add(arkTower);
+
+      // Arched Copper Top Trim
+      const arkTop = new THREE.Mesh(new THREE.CylinderGeometry(7.5, 7.5, 16, 12, 1, false, 0, Math.PI), corporateGlassMat);
+      arkTop.rotateZ(Math.PI / 2);
+      arkTop.position.set(ax, 45, 0);
+      arkadiaGroup.add(arkTop);
+    });
+    this.proceduralGroup.add(arkadiaGroup);
+
+    // D. Alamanda Tower & 18 Office Park ([-115, 0, 1035])
+    const alamandaGroup = new THREE.Group();
+    alamandaGroup.position.set(-115, 0, 1035);
+    const alamandaTower = new THREE.Mesh(new THREE.BoxGeometry(22, 85, 20), darkGlassMat);
+    alamandaTower.position.set(0, 42.5, 0);
+    alamandaTower.rotation.y = -0.22;
+    alamandaTower.castShadow = true;
+    alamandaGroup.add(alamandaTower);
+    this.proceduralGroup.add(alamandaGroup);
+
+    // =========================================================================
+    // 9. KAWASAN RESIDENSIAL & KREATIF KEMANG (JL. KEMANG RAYA & BANGKA)
+    // =========================================================================
+    // Helper: Build an artistic alfresco shop/cafe or contemporary townhouse
+    const createKemangBoutique = (x, z, width = 12, depth = 11, height = 7.5) => {
+      const bGroup = new THREE.Group();
+      bGroup.position.set(x, 0, z);
+
+      // Modern Brick/Concrete Wall
+      const wall = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), concreteOfficeMat);
+      wall.position.set(0, height * 0.5, 0);
+      wall.castShadow = true;
+      bGroup.add(wall);
+
+      // Glass Boutique Storefront
+      const glass = new THREE.Mesh(new THREE.BoxGeometry(width * 0.85, height * 0.45, 0.3), corporateGlassMat);
+      glass.position.set(0, height * 0.25, depth * 0.5 + 0.1);
+      bGroup.add(glass);
+
+      // Timber Awning & Planter Boxes
+      const awning = new THREE.Mesh(new THREE.BoxGeometry(width, 0.25, 3.0), timberMat);
+      awning.position.set(0, height * 0.55, depth * 0.5 + 1.5);
+      bGroup.add(awning);
+
+      this.proceduralGroup.add(bGroup);
+    };
+
+    // Kemang North & Bangka
+    for (let x = -135; x <= -55; x += 18) {
+      for (let z = 720; z <= 830; z += 18) {
+        if (Math.hypot(x - (-95), z - 775) > 38) {
+          createKemangBoutique(x, z, 13, 11, 7.2);
+          this.createTree(x + 6, z + 5, new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 }), timberMat, 0.95);
+        }
+      }
+    }
+
+    // =========================================================================
+    // 10. KOMPLEKS PUSAT MEDIS RSUP FATMAWATI ([-340, 0, 1010])
+    // =========================================================================
+    const rsupGroup = new THREE.Group();
+    rsupGroup.position.set(-340, 0, 1010);
+
+    // Main Inpatient Tower Paviliun Terpadu (8 lantai)
+    const rsupMain = new THREE.Mesh(new THREE.BoxGeometry(32, 28, 24), whiteWallMat);
+    rsupMain.position.set(0, 14, 0);
+    rsupMain.castShadow = true;
+    rsupGroup.add(rsupMain);
+
+    // Red Cross Hospital Emblem on Facade
+    const crossV = new THREE.Mesh(new THREE.BoxGeometry(2, 6, 0.3), new THREE.MeshStandardMaterial({ color: 0xdc2626 }));
+    crossV.position.set(0, 24, 12.2);
+    rsupGroup.add(crossV);
+    const crossH = new THREE.Mesh(new THREE.BoxGeometry(6, 2, 0.3), new THREE.MeshStandardMaterial({ color: 0xdc2626 }));
+    crossH.position.set(0, 24, 12.2);
+    rsupGroup.add(crossH);
+
+    // Diagnostic & Trauma Center Wing with Rooftop Helipad
+    const traumaWing = new THREE.Mesh(new THREE.BoxGeometry(22, 14, 20), concreteOfficeMat);
+    traumaWing.position.set(22, 7, 0);
+    traumaWing.castShadow = true;
+    rsupGroup.add(traumaWing);
+
+    // Helipad Landing Circle
+    const helipad = new THREE.Mesh(new THREE.CylinderGeometry(6, 6, 0.3, 16), darkGlassMat);
+    helipad.position.set(22, 14.2, 0);
+    rsupGroup.add(helipad);
+
+    this.proceduralGroup.add(rsupGroup);
+
+    // =========================================================================
+    // 11. HUTAN KOTA TAMAN MARGASATWA RAGUNAN ([45, 0, 1065])
+    // =========================================================================
+    const ragunanGroup = new THREE.Group();
+    ragunanGroup.position.set(45, 0, 1065);
+
+    // Vast Forest Green Lawn Base (147 Hectares Park representation)
+    const ragunanBase = new THREE.Mesh(new THREE.BoxGeometry(85, 0.35, 75), grassMat);
+    ragunanBase.position.y = 0.175;
+    ragunanBase.receiveShadow = true;
+    ragunanGroup.add(ragunanBase);
+
+    // Natural Safari Lake
+    const ragunanLake = new THREE.Mesh(new THREE.CylinderGeometry(18, 18, 0.4, 24), waterMat);
+    ragunanLake.position.set(-12, 0.25, 0);
+    ragunanGroup.add(ragunanLake);
+
+    // Schmutzer Primate Center Glass Pavilion
+    const schmutzerDome = new THREE.Mesh(
+      new THREE.SphereGeometry(11, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2),
+      new THREE.MeshStandardMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.7, metalness: 0.8 })
+    );
+    schmutzerDome.position.set(18, 0.2, 0);
+    ragunanGroup.add(schmutzerDome);
+
+    // Dense Rainforest Canopy
+    const deepForestMat = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.9 });
+    for (let rx = -35; rx <= 35; rx += 14) {
+      for (let rz = -30; rz <= 30; rz += 14) {
+        if (Math.hypot(rx - (-12), rz) > 18 && Math.hypot(rx - 18, rz) > 12) {
+          this.createTree(45 + rx, 1065 + rz, deepForestMat, timberMat, 1.4);
+        }
+      }
+    }
+    this.proceduralGroup.add(ragunanGroup);
+
+    // =========================================================================
+    // 12. SMESCO INDONESIA (SME TOWER) & KOMPLEKS BIDAKARA ([195, 0, 465])
+    // =========================================================================
+    // A. Smesco Indonesia / SME Tower with Futuristic Geodesic Dome
+    const smescoGroup = new THREE.Group();
+    smescoGroup.position.set(185, 0, 455);
+
+    const smescoPodium = new THREE.Mesh(new THREE.BoxGeometry(32, 16, 26), concreteOfficeMat);
+    smescoPodium.position.set(0, 8, 0);
+    smescoPodium.castShadow = true;
+    smescoGroup.add(smescoPodium);
+
+    // Futuristic Spherical Dome Exhibition Hall
+    const smescoDome = new THREE.Mesh(
+      new THREE.SphereGeometry(12, 24, 14, 0, Math.PI * 2, 0, Math.PI / 1.7),
+      new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.25, metalness: 0.85 })
+    );
+    smescoDome.position.set(0, 16, 0);
+    smescoDome.castShadow = true;
+    smescoGroup.add(smescoDome);
+
+    // SME Office Tower
+    const smeTower = new THREE.Mesh(new THREE.BoxGeometry(18, 65, 18), corporateGlassMat);
+    smeTower.position.set(18, 32.5, -8);
+    smeTower.castShadow = true;
+    smescoGroup.add(smeTower);
+    this.proceduralGroup.add(smescoGroup);
+
+    // B. Kompleks Menara Bidakara & Auditorium Birawa ([215, 0, 475])
+    const bidakaraGroup = new THREE.Group();
+    bidakaraGroup.position.set(215, 0, 475);
+
+    // Twin Bidakara Towers
+    [-9, 9].forEach((bx) => {
+      const bTower = new THREE.Mesh(new THREE.BoxGeometry(16, 68, 16), corporateGlassMat);
+      bTower.position.set(bx, 34, 0);
+      bTower.castShadow = true;
+      bidakaraGroup.add(bTower);
+    });
+
+    // Birawa Grand Auditorium (Curved Classical Roof)
+    const auditorium = new THREE.Mesh(new THREE.CylinderGeometry(14, 15, 12, 16), concreteOfficeMat);
+    auditorium.position.set(0, 6, 18);
+    auditorium.castShadow = true;
+    bidakaraGroup.add(auditorium);
+    this.proceduralGroup.add(bidakaraGroup);
   }
 
   createStreetLamp(x, z, facingEast) {

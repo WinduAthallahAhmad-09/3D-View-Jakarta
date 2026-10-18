@@ -273,4 +273,42 @@ assert.ok(
   'CityScene.js missing Bundaran Pondok Indah roundabout ring'
 );
 
-console.log('✅ All 51 landmarks, Tahap 1 & 2 Jakarta Selatan (Tol JORR, Simpang Pancoran, Viaduk MRT & LRT, 6 Anchor Landmarks), and 100% Jakarta Pusat verified successfully!');
+// Check 13: Tahap 3 Infill Urban Fabric, Distrik Residensial Elite & Sentra Hijau Jakarta Selatan
+assert.ok(
+  citySceneContent.includes('DISTRIK RESIDENSIAL ELITE PONDOK INDAH'),
+  'CityScene.js missing Pondok Indah residential villas'
+);
+assert.ok(
+  citySceneContent.includes('KAWASAN KOMERSIAL & PERKANTORAN CBD TB SIMATUPANG'),
+  'CityScene.js missing TB Simatupang CBD'
+);
+assert.ok(
+  citySceneContent.includes('Talavera Office Park'),
+  'CityScene.js missing Talavera Office Park'
+);
+assert.ok(
+  citySceneContent.includes('Cilandak Town Square (Citos)'),
+  'CityScene.js missing Cilandak Town Square (Citos)'
+);
+assert.ok(
+  citySceneContent.includes('Arkadia Green Park & Talavera Office Park'),
+  'CityScene.js missing Arkadia Green Park'
+);
+assert.ok(
+  citySceneContent.includes('KAWASAN RESIDENSIAL & KREATIF KEMANG'),
+  'CityScene.js missing Kemang boutique & residential district'
+);
+assert.ok(
+  citySceneContent.includes('KOMPLEKS PUSAT MEDIS RSUP FATMAWATI'),
+  'CityScene.js missing RSUP Fatmawati'
+);
+assert.ok(
+  citySceneContent.includes('HUTAN KOTA TAMAN MARGASATWA RAGUNAN'),
+  'CityScene.js missing Taman Margasatwa Ragunan forest & lake'
+);
+assert.ok(
+  citySceneContent.includes('SMESCO INDONESIA (SME TOWER) & KOMPLEKS BIDAKARA'),
+  'CityScene.js missing Smesco SME Tower & Menara Bidakara'
+);
+
+console.log('✅ All 51 landmarks, Tahap 1, 2 & 3 Jakarta Selatan (Pondok Indah, Citos, Arkadia, Kemang, RSUP Fatmawati, Ragunan, Smesco/Bidakara, Tol JORR, Simpang Pancoran, Viaduk MRT/LRT), and 100% Jakarta Pusat verified successfully!');
