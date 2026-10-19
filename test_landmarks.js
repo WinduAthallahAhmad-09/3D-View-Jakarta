@@ -783,4 +783,74 @@ assert.ok(
   'CityScene.js missing Sabuk Hijau Tanggul Kanal Banjir Timur'
 );
 
-console.log('✅ All 69 landmarks, Quick Wins & Tahap 1 + 2 + 3 Jakarta Timur verified successfully!');
+// Check 28: Tahap 4 Transit Dinamis & Sirkulasi Multimoda Jakarta Timur
+assert.ok(
+  citySceneContent.includes('this.cikarangRailCurve'),
+  'CityScene.js missing cikarangRailCurve'
+);
+assert.ok(
+  citySceneContent.includes('this.lrtCibuburCurve'),
+  'CityScene.js missing lrtCibuburCurve'
+);
+assert.ok(
+  citySceneContent.includes('this.velodromeLrtCurve'),
+  'CityScene.js missing velodromeLrtCurve'
+);
+assert.ok(
+  citySceneContent.includes("'krl-cikarang-eastbound'"),
+  'CityScene.js missing krl-cikarang-eastbound'
+);
+assert.ok(
+  citySceneContent.includes("'krl-cikarang-westbound'"),
+  'CityScene.js missing krl-cikarang-westbound'
+);
+assert.ok(
+  citySceneContent.includes("'lrt-cibubur-southbound'"),
+  'CityScene.js missing lrt-cibubur-southbound'
+);
+assert.ok(
+  citySceneContent.includes("'lrt-cibubur-northbound'"),
+  'CityScene.js missing lrt-cibubur-northbound'
+);
+assert.ok(
+  citySceneContent.includes("'lrt-velodrome-northbound'"),
+  'CityScene.js missing lrt-velodrome-northbound'
+);
+assert.ok(
+  citySceneContent.includes("'lrt-velodrome-southbound'"),
+  'CityScene.js missing lrt-velodrome-southbound'
+);
+assert.ok(
+  citySceneContent.includes('TransJakarta Koridor 5 (Kampung Melayu <-> Jatinegara <-> Salemba <-> Ancol)'),
+  'CityScene.js missing TransJakarta Koridor 5 East Jakarta route'
+);
+assert.ok(
+  citySceneContent.includes('TransJakarta Koridor 7 (Kampung Rambutan <-> TMII <-> Cililitan <-> Cawang <-> Kampung Melayu)'),
+  'CityScene.js missing TransJakarta Koridor 7 route'
+);
+assert.ok(
+  citySceneContent.includes('TransJakarta Koridor 9 (Pinang Ranti <-> Garuda Tamini <-> Cawang Hub <-> Pancoran)'),
+  'CityScene.js missing TransJakarta Koridor 9 East Jakarta route'
+);
+assert.ok(
+  citySceneContent.includes('TransJakarta Koridor 11 (Kampung Melayu <-> Jatinegara <-> Klender <-> Buaran <-> Pulogebang)'),
+  'CityScene.js missing TransJakarta Koridor 11 route'
+);
+assert.ok(
+  citySceneContent.includes('Jalan Tol Jagorawi Express'),
+  'CityScene.js missing Jalan Tol Jagorawi Express route'
+);
+assert.ok(
+  citySceneContent.includes('Tol Jakarta - Cikampek Express & Truk Logistik'),
+  'CityScene.js missing Tol Jakarta - Cikampek Express & Truk Logistik route'
+);
+assert.ok(
+  citySceneContent.includes('Tol Becakayu Viaduct Layang'),
+  'CityScene.js missing Tol Becakayu Viaduct Layang route'
+);
+assert.ok(
+  citySceneContent.includes('Tol Ir. Wiyoto Wiyono (By-Pass Cawang -> Jatinegara -> Rawamangun -> Priok'),
+  'CityScene.js missing Tol Ir. Wiyoto Wiyono East Jakarta route'
+);
+
+console.log('✅ All 69 landmarks, Quick Wins & Tahap 1 + 2 + 3 + 4 Jakarta Timur verified successfully!');

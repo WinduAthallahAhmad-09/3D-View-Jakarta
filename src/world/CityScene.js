@@ -5431,7 +5431,33 @@ export class CityScene {
       { x1: -1185.0, z1: -160.0, x2: -1010.0, z2: -160.0, count: 4, speedBoost: 1.0 },
       // 40. Koridor Pecinan Bersejarah Glodok (Jl. Pancoran & Gajah Mada Barat)
       { x1: -120.0, z1: -620.0, x2: -120.0, z2: -750.0, count: 4, speedBoost: 0.95 },
-      { x1: -95.0, z1: -780.0, x2: -95.0, z2: -590.0, count: 4, speedBoost: 1.0 }
+      { x1: -95.0, z1: -780.0, x2: -95.0, z2: -590.0, count: 4, speedBoost: 1.0 },
+      // 41. TransJakarta Koridor 5 (Kampung Melayu <-> Jatinegara <-> Salemba <-> Ancol)
+      { x1: 580.0, z1: 420.0, x2: 420.0, z2: -120.0, count: 5, isBus: true, busColor: 0x0284c7, speedBoost: 1.1 },
+      { x1: 420.0, z1: -120.0, x2: 580.0, z2: 420.0, count: 5, isBus: true, busColor: 0x0284c7, speedBoost: 1.1 },
+      // 42. TransJakarta Koridor 7 (Kampung Rambutan <-> TMII <-> Cililitan <-> Cawang <-> Kampung Melayu)
+      { x1: 1040.0, z1: 1500.0, x2: 712.0, z2: 724.0, count: 5, isBus: true, busColor: 0x0284c7, speedBoost: 1.15 },
+      { x1: 712.0, z1: 724.0, x2: 1040.0, z2: 1500.0, count: 5, isBus: true, busColor: 0x0284c7, speedBoost: 1.15 },
+      // 43. TransJakarta Koridor 9 (Pinang Ranti <-> Garuda Tamini <-> Cawang Hub <-> Pancoran)
+      { x1: 893.0, z1: 993.0, x2: 712.0, z2: 724.0, count: 4, isBus: true, busColor: 0x0284c7, speedBoost: 1.15 },
+      { x1: 712.0, z1: 724.0, x2: 893.0, z2: 993.0, count: 4, isBus: true, busColor: 0x0284c7, speedBoost: 1.15 },
+      // 44. TransJakarta Koridor 11 (Kampung Melayu <-> Jatinegara <-> Klender <-> Buaran <-> Pulogebang)
+      { x1: 580.0, z1: 520.0, x2: 1400.0, z2: 520.0, count: 5, isBus: true, busColor: 0x0284c7, speedBoost: 1.15 },
+      { x1: 1400.0, z1: 520.0, x2: 580.0, z2: 520.0, count: 5, isBus: true, busColor: 0x0284c7, speedBoost: 1.15 },
+      // 45. Jalan Tol Jagorawi Express (Cawang Interchange <-> TMII <-> Cibubur, y=7.5)
+      { x1: 712.0, y: 7.5, z1: 724.0, x2: 1120.0, y: 6.5, z2: 1850.0, count: 8, speedBoost: 1.45 },
+      { x1: 1120.0, y: 6.5, z1: 1850.0, x2: 712.0, y: 7.5, z2: 724.0, count: 8, speedBoost: 1.45 },
+      // 46. Tol Jakarta - Cikampek Express & Truk Logistik (Cawang <-> Halim <-> Bekasi, y=7.5)
+      { x1: 712.0, y: 7.5, z1: 724.0, x2: 1450.0, y: 7.5, z2: 1150.0, count: 8, speedBoost: 1.45 },
+      { x1: 1450.0, y: 7.5, z1: 1150.0, x2: 712.0, y: 7.5, z2: 724.0, count: 8, speedBoost: 1.45 },
+      { x1: 712.0, y: 7.5, z1: 724.0, x2: 1450.0, y: 7.5, z2: 1150.0, count: 4, isTruck: true, speedBoost: 1.25 },
+      { x1: 1450.0, y: 7.5, z1: 1150.0, x2: 712.0, y: 7.5, z2: 724.0, count: 4, isTruck: true, speedBoost: 1.25 },
+      // 47. Tol Becakayu Viaduct Layang (Bekasi - Cawang - Kp. Melayu di atas Kalimalang, y=9.8)
+      { x1: 712.0, y: 9.8, z1: 600.0, x2: 1400.0, y: 9.8, z2: 720.0, count: 6, speedBoost: 1.35 },
+      { x1: 1400.0, y: 9.8, z1: 720.0, x2: 712.0, y: 9.8, z2: 600.0, count: 6, speedBoost: 1.35 },
+      // 48. Tol Ir. Wiyoto Wiyono (By-Pass Cawang -> Jatinegara -> Rawamangun -> Priok, y=9.3)
+      { x1: 712.0, y: 9.3, z1: 724.0, x2: 850.0, y: 9.3, z2: -350.0, count: 7, speedBoost: 1.4 },
+      { x1: 850.0, y: 9.3, z1: -350.0, x2: 712.0, y: 9.3, z2: 724.0, count: 7, speedBoost: 1.4 }
     ];
 
     let idx = 0;
@@ -5652,6 +5678,56 @@ export class CityScene {
     ballastMesh.receiveShadow = true;
     this.proceduralGroup.add(ballastMesh);
 
+    // =========================================================================
+    // Dynamic KRL Commuter Line Lintas Cikarang / Bekasi (DDT Jatinegara)
+    // Melintasi Manggarai/Matraman -> Stasiun Jatinegara 1910 -> Klender -> Buaran -> Cakung
+    // =========================================================================
+    const cikarangRailPoints = [
+      new THREE.Vector3(420.0, 0.48, 200.0),  // Arah Manggarai / Matraman
+      new THREE.Vector3(540.0, 0.48, 240.0),  // Tikungan Pisangan Baru
+      new THREE.Vector3(666.1, 0.48, 282.6),  // Stasiun Jatinegara 1910 (Meester Cornelis)
+      new THREE.Vector3(950.0, 0.48, 290.0),  // Stasiun Klender
+      new THREE.Vector3(1200.0, 0.48, 295.0), // Stasiun Buaran
+      new THREE.Vector3(1450.0, 0.48, 300.0)  // Stasiun Klender Baru / Cakung ke Bekasi
+    ];
+    this.cikarangRailCurve = new THREE.CatmullRomCurve3(cikarangRailPoints, false, 'catmullrom', 0.15);
+    this.cikarangRailCurveLength = this.cikarangRailCurve.getLength();
+
+    const cikarangBallastMesh = new THREE.Mesh(new THREE.BoxGeometry(1050, 0.22, 5.5), ballastMat);
+    cikarangBallastMesh.position.set(935.0, 0.22, 275.0);
+    cikarangBallastMesh.rotation.y = 0.09;
+    cikarangBallastMesh.receiveShadow = true;
+    this.proceduralGroup.add(cikarangBallastMesh);
+
+    // =========================================================================
+    // Dynamic LRT Jabodebek Lin Cibubur
+    // Melintasi Stasiun Hub Cawang -> Cililitan -> Kramat Jati -> Stasiun TMII -> Ciracas/Harjamukti
+    // Elevated Viaduct y=15.0m
+    // =========================================================================
+    const lrtCibuburPoints = [
+      new THREE.Vector3(712.3, 15.0, 723.8),   // Stasiun Hub Cawang
+      new THREE.Vector3(780.0, 15.0, 950.0),   // Cililitan / PGC
+      new THREE.Vector3(890.0, 15.0, 1220.0),  // Kramat Jati / Hek
+      new THREE.Vector3(1040.0, 15.0, 1500.0), // Stasiun TMII
+      new THREE.Vector3(1120.0, 15.0, 1820.0)  // Menuju Ciracas & Harjamukti
+    ];
+    this.lrtCibuburCurve = new THREE.CatmullRomCurve3(lrtCibuburPoints, false, 'catmullrom', 0.15);
+    this.lrtCibuburCurveLength = this.lrtCibuburCurve.getLength();
+
+    // =========================================================================
+    // Dynamic LRT Jakarta Lin 1 (Extension Rawamangun Velodrome <-> Pulomas <-> Boulevard Kelapa Gading)
+    // Melintasi Stasiun Velodrome -> Pulomas/Ria Rio -> Kayu Putih -> Boulevard Kelapa Gading
+    // Elevated Viaduct y=12.0m
+    // =========================================================================
+    const velodromeLrtPoints = [
+      new THREE.Vector3(945.5, 12.0, -57.6),   // Stasiun Velodrome Rawamangun
+      new THREE.Vector3(960.0, 12.0, -200.0),  // Pulomas / Waduk Ria Rio
+      new THREE.Vector3(1100.0, 12.0, -220.0), // Kayu Putih
+      new THREE.Vector3(1198.0, 12.0, -220.0)  // Menyambung ke Koridor Boulevard Kelapa Gading
+    ];
+    this.velodromeLrtCurve = new THREE.CatmullRomCurve3(velodromeLrtPoints, false, 'catmullrom', 0.15);
+    this.velodromeLrtCurveLength = this.velodromeLrtCurve.getLength();
+
     this.animatedTrains = [];
     const trainConfigs = [
       { id: 'krl-northbound', curve: this.krlCurve, curveLength: this.krlCurveLength, carSpacing: 17.8, trackOffset: -1.35, speed: 0.024, progress: 0.15, type: 'krl' },
@@ -5667,7 +5743,13 @@ export class CityScene {
       { id: 'krl-priok-eastbound', curve: this.priokRailCurve, curveLength: this.priokRailCurveLength, carSpacing: 17.8, trackOffset: 1.4, speed: 0.022, progress: 0.2, type: 'krl', carCount: 4 },
       { id: 'krl-priok-westbound', curve: this.priokRailCurve, curveLength: this.priokRailCurveLength, carSpacing: 17.8, trackOffset: -1.4, speed: -0.022, progress: 0.7, type: 'krl', carCount: 4 },
       { id: 'krl-tangerang-westbound', curve: this.tangerangRailCurve, curveLength: this.tangerangRailCurveLength, carSpacing: 17.8, trackOffset: -1.35, speed: 0.023, progress: 0.25, type: 'krl', carCount: 4 },
-      { id: 'krl-tangerang-eastbound', curve: this.tangerangRailCurve, curveLength: this.tangerangRailCurveLength, carSpacing: 17.8, trackOffset: 1.35, speed: -0.023, progress: 0.75, type: 'krl', carCount: 4 }
+      { id: 'krl-tangerang-eastbound', curve: this.tangerangRailCurve, curveLength: this.tangerangRailCurveLength, carSpacing: 17.8, trackOffset: 1.35, speed: -0.023, progress: 0.75, type: 'krl', carCount: 4 },
+      { id: 'krl-cikarang-eastbound', curve: this.cikarangRailCurve, curveLength: this.cikarangRailCurveLength, carSpacing: 17.8, trackOffset: 1.4, speed: 0.024, progress: 0.2, type: 'krl', carCount: 4 },
+      { id: 'krl-cikarang-westbound', curve: this.cikarangRailCurve, curveLength: this.cikarangRailCurveLength, carSpacing: 17.8, trackOffset: -1.4, speed: -0.024, progress: 0.7, type: 'krl', carCount: 4 },
+      { id: 'lrt-cibubur-southbound', curve: this.lrtCibuburCurve, curveLength: this.lrtCibuburCurveLength, carSpacing: 16.5, trackOffset: 1.4, speed: 0.026, progress: 0.15, type: 'lrt', carCount: 4 },
+      { id: 'lrt-cibubur-northbound', curve: this.lrtCibuburCurve, curveLength: this.lrtCibuburCurveLength, carSpacing: 16.5, trackOffset: -1.4, speed: -0.026, progress: 0.65, type: 'lrt', carCount: 4 },
+      { id: 'lrt-velodrome-northbound', curve: this.velodromeLrtCurve, curveLength: this.velodromeLrtCurveLength, carSpacing: 15.8, trackOffset: -1.35, speed: 0.025, progress: 0.2, type: 'lrt-jakarta', carCount: 2 },
+      { id: 'lrt-velodrome-southbound', curve: this.velodromeLrtCurve, curveLength: this.velodromeLrtCurveLength, carSpacing: 15.8, trackOffset: 1.35, speed: -0.025, progress: 0.7, type: 'lrt-jakarta', carCount: 2 }
     ];
 
     trainConfigs.forEach((cfg) => {
