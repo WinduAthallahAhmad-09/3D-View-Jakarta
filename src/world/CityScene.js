@@ -34,6 +34,7 @@ export class CityScene {
     this.buildSouthJakartaCorridor();
     this.buildSouthJakartaInfillAndParks();
     this.buildNorthJakartaInfrastructure();
+    this.buildNorthJakartaInfillAndLogistics();
     this.buildLandmarks();
     this.buildUrbanDistricts();
     this.buildStreetVegetation();
@@ -2551,6 +2552,249 @@ export class CityScene {
     mergeAndAdd(waterGeos, waterMat, false, false);
     mergeAndAdd(parkGeos, parkMat, true, false);
     mergeAndAdd(seawallGeos, seawallMat, true, false);
+  }
+
+  /**
+   * Tahap 3 Jakarta Utara: Infill Urban Fabric, Distrik Logistik Tanjung Priok & Hutan Mangrove Pesisir.
+   *
+   * Performa Ekstrem (Instanced Rendering):
+   * 1. 240+ Peti kemas kontainer dermaga Priok dirender via 1 InstancedMesh multi-warna.
+   * 2. 120+ Ruko komersial & perumahan modern Kelapa Gading / Sunter dirender via 1 InstancedMesh.
+   * 3. 16+ Gudang logistik kargo pelabuhan Priok dirender via 1 InstancedMesh.
+   * 4. 140+ Vegetasi mangrove & cemara udang pesisir Teluk Jakarta dirender via 2 InstancedMesh.
+   * Total hanya 5 draw calls untuk seluruh infill Jakarta Utara!
+   */
+  buildNorthJakartaInfillAndLogistics() {
+    const dummy = new THREE.Object3D();
+    const baseBoxGeo = new THREE.BoxGeometry(1, 1, 1);
+
+    // =========================================================================
+    // 1. TERMINAL PETI KEMAS KONTAINER PELABUHAN TANJUNG PRIOK (1 Draw Call)
+    // =========================================================================
+    const containerMat = new THREE.MeshStandardMaterial({
+      roughness: 0.5,
+      metalness: 0.35
+    });
+
+    const containerItems = [];
+    const shippingColors = [
+      new THREE.Color(0x0080a5), // Maersk Blue
+      new THREE.Color(0x006633), // Evergreen Green
+      new THREE.Color(0xeb5310), // Hapag-Lloyd Orange
+      new THREE.Color(0xd91458), // ONE Magenta
+      new THREE.Color(0x0a192f), // CMA CGM Navy
+      new THREE.Color(0x8b0000), // K-Line Crimson
+      new THREE.Color(0x1d4ed8), // Cosco Blue
+      new THREE.Color(0xcbd5e1)  // Silver Grey
+    ];
+
+    const yardBays = [
+      // Yard Timur (Koja / JICT)
+      { startX: 865, endX: 975, stepX: 22.0, startZ: -1210, endZ: -1310, stepZ: 4.8, maxTiers: 4 },
+      // Yard Barat (Terminal 1 Priok)
+      { startX: 730, endX: 810, stepX: 20.0, startZ: -1230, endZ: -1310, stepZ: 4.8, maxTiers: 3 }
+    ];
+
+    yardBays.forEach((bay) => {
+      for (let x = bay.startX; x <= bay.endX; x += bay.stepX) {
+        for (let z = bay.startZ; z <= bay.endZ; z += bay.stepZ) {
+          const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233));
+          const is40ft = hash > 0.4;
+          const len = is40ft ? 12.0 : 6.0;
+          const tiers = 1 + Math.floor(hash * bay.maxTiers);
+
+          for (let tier = 0; tier < tiers; tier++) {
+            const y = 1.3 + tier * 2.6;
+            const colorIdx = Math.floor((hash * 100 + tier * 3) % shippingColors.length);
+            containerItems.push({
+              x: x + (is40ft ? 0 : (tier % 2 === 0 ? -3 : 3)),
+              y,
+              z,
+              w: 2.44,
+              h: 2.58,
+              d: len,
+              color: shippingColors[colorIdx]
+            });
+          }
+        }
+      }
+    });
+
+    if (containerItems.length > 0) {
+      const containerMesh = new THREE.InstancedMesh(baseBoxGeo, containerMat, containerItems.length);
+      containerMesh.receiveShadow = true;
+      containerMesh.castShadow = false;
+
+      containerItems.forEach((c, idx) => {
+        dummy.position.set(c.x, c.y, c.z);
+        dummy.scale.set(c.w, c.h, c.d);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        containerMesh.setMatrixAt(idx, dummy.matrix);
+        containerMesh.setColorAt(idx, c.color);
+      });
+
+      containerMesh.instanceMatrix.needsUpdate = true;
+      if (containerMesh.instanceColor) containerMesh.instanceColor.needsUpdate = true;
+      this.proceduralGroup.add(containerMesh);
+    }
+
+    // =========================================================================
+    // 2. INFILL RUKO KOMERSIAL & RESIDENSIAL MODERN KELAPA GADING & SUNTER (1 Draw Call)
+    // =========================================================================
+    const infillMat = new THREE.MeshStandardMaterial({
+      roughness: 0.75,
+      metalness: 0.15
+    });
+
+    const infillItems = [];
+    const infillColors = [
+      new THREE.Color(0xf8fafc), // Clean white
+      new THREE.Color(0xe2e8f0), // Light slate
+      new THREE.Color(0xd7c4b7), // Warm beige
+      new THREE.Color(0x94a3b8), // Modern grey
+      new THREE.Color(0x334155), // Charcoal ruko
+      new THREE.Color(0x0f766e)  // Teal accent
+    ];
+
+    // Kelapa Gading Boulevard Shophouses (Ruko 3-4 Lantai)
+    for (let z = -280; z >= -760; z -= 32) {
+      if (Math.abs(z - (-531)) < 60) continue; // Skip Mall Kelapa Gading zone
+      const h1 = 12 + ((Math.abs(z) % 7) * 0.8);
+      infillItems.push({ x: 1165, y: h1 * 0.5, z, w: 14, h: h1, d: 18, color: infillColors[Math.abs(z) % infillColors.length] });
+      const h2 = 14 + ((Math.abs(z) % 5) * 0.7);
+      infillItems.push({ x: 1235, y: h2 * 0.5, z, w: 14, h: h2, d: 18, color: infillColors[(Math.abs(z) + 2) % infillColors.length] });
+      infillItems.push({ x: 1110, y: 4.5, z, w: 12, h: 9.0, d: 14, color: infillColors[(Math.abs(z) + 1) % infillColors.length] });
+      infillItems.push({ x: 1285, y: 4.5, z, w: 12, h: 9.0, d: 14, color: infillColors[(Math.abs(z) + 3) % infillColors.length] });
+    }
+
+    // Sunter Modern Residential & Commercial Blocks
+    for (let z = -650; z >= -860; z -= 35) {
+      infillItems.push({ x: 505, y: 5.0, z, w: 16, h: 10.0, d: 16, color: infillColors[Math.abs(z) % infillColors.length] });
+      infillItems.push({ x: 655, y: 7.0, z, w: 15, h: 14.0, d: 15, color: infillColors[(Math.abs(z) + 1) % infillColors.length] });
+      infillItems.push({ x: 795, y: 5.5, z, w: 14, h: 11.0, d: 16, color: infillColors[(Math.abs(z) + 4) % infillColors.length] });
+    }
+
+    // Pluit & Penjaringan Residential Townhouses
+    for (let z = -940; z >= -1080; z -= 34) {
+      infillItems.push({ x: -475, y: 4.5, z, w: 15, h: 9.0, d: 15, color: infillColors[Math.abs(z) % infillColors.length] });
+      infillItems.push({ x: -265, y: 5.25, z, w: 14, h: 10.5, d: 15, color: infillColors[(Math.abs(z) + 2) % infillColors.length] });
+    }
+
+    if (infillItems.length > 0) {
+      const infillMesh = new THREE.InstancedMesh(baseBoxGeo, infillMat, infillItems.length);
+      infillMesh.receiveShadow = true;
+
+      infillItems.forEach((b, idx) => {
+        dummy.position.set(b.x, b.y, b.z);
+        dummy.scale.set(b.w, b.h, b.d);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        infillMesh.setMatrixAt(idx, dummy.matrix);
+        infillMesh.setColorAt(idx, b.color);
+      });
+
+      infillMesh.instanceMatrix.needsUpdate = true;
+      if (infillMesh.instanceColor) infillMesh.instanceColor.needsUpdate = true;
+      this.proceduralGroup.add(infillMesh);
+    }
+
+    // =========================================================================
+    // 3. KOMPLEKS PERGUDANGAN LOGISTIK PELABUHAN PRIOK (1 Draw Call)
+    // =========================================================================
+    const warehouseMat = new THREE.MeshStandardMaterial({
+      color: 0x475569,
+      roughness: 0.65,
+      metalness: 0.35
+    });
+
+    const warehouseItems = [];
+    for (let x = 750; x <= 920; x += 45) {
+      for (let z = -1130; z >= -1170; z -= 30) {
+        warehouseItems.push({ x, y: 6.0, z, w: 32, h: 12.0, d: 22 });
+      }
+    }
+
+    if (warehouseItems.length > 0) {
+      const whMesh = new THREE.InstancedMesh(baseBoxGeo, warehouseMat, warehouseItems.length);
+      whMesh.receiveShadow = true;
+
+      warehouseItems.forEach((w, idx) => {
+        dummy.position.set(w.x, w.y, w.z);
+        dummy.scale.set(w.w, w.h, w.d);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        whMesh.setMatrixAt(idx, dummy.matrix);
+      });
+
+      whMesh.instanceMatrix.needsUpdate = true;
+      this.proceduralGroup.add(whMesh);
+    }
+
+    // =========================================================================
+    // 4. VEGETASI HUTAN MANGROVE & CEMARA UDANG PESISIR TELUK JAKARTA (2 Draw Calls)
+    // =========================================================================
+    const mangroveTrunkMat = new THREE.MeshStandardMaterial({
+      color: 0x3e2723,
+      roughness: 0.9
+    });
+    const mangroveFoliageMat = new THREE.MeshStandardMaterial({
+      color: 0x1b4332,
+      roughness: 0.85
+    });
+
+    const mangroveTransforms = [];
+    const addTree = (x, z, scale = 1.0) => {
+      mangroveTransforms.push({ x, z, scale });
+    };
+
+    // Sabuk Hutan Mangrove Penjaringan & Waduk Pluit
+    for (let z = -990; z >= -1130; z -= 18) {
+      addTree(-445 + Math.sin(z) * 6, z, 0.9 + Math.abs(Math.sin(z)) * 0.3);
+      addTree(-290 + Math.cos(z) * 5, z, 0.85 + Math.abs(Math.cos(z)) * 0.3);
+    }
+
+    // Garis Pantai Teluk Jakarta & Pesisir Ancol
+    for (let x = -80; x <= 360; x += 22) {
+      addTree(x, -1035 + Math.sin(x * 0.1) * 4, 1.0 + Math.abs(Math.sin(x)) * 0.35);
+    }
+
+    // Promenade Tepian Danau Sunter
+    for (let z = -660; z >= -880; z -= 24) {
+      addTree(558, z, 0.95);
+      addTree(622, z, 0.95);
+      addTree(778, z, 0.95);
+    }
+
+    if (mangroveTransforms.length > 0) {
+      const trunkGeo = new THREE.CylinderGeometry(0.24, 0.40, 3.8, 6);
+      const foliageGeo = new THREE.ConeGeometry(2.6, 5.5, 7);
+      const trunkMesh = new THREE.InstancedMesh(trunkGeo, mangroveTrunkMat, mangroveTransforms.length);
+      const foliageMesh = new THREE.InstancedMesh(foliageGeo, mangroveFoliageMat, mangroveTransforms.length);
+
+      trunkMesh.receiveShadow = true;
+      foliageMesh.receiveShadow = true;
+
+      mangroveTransforms.forEach((t, idx) => {
+        // Trunk
+        dummy.position.set(t.x, 1.9 * t.scale, t.z);
+        dummy.scale.set(t.scale, t.scale, t.scale);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        trunkMesh.setMatrixAt(idx, dummy.matrix);
+
+        // Foliage
+        dummy.position.set(t.x, (3.8 + 2.5) * t.scale, t.z);
+        dummy.scale.set(t.scale, t.scale, t.scale);
+        dummy.updateMatrix();
+        foliageMesh.setMatrixAt(idx, dummy.matrix);
+      });
+
+      trunkMesh.instanceMatrix.needsUpdate = true;
+      foliageMesh.instanceMatrix.needsUpdate = true;
+      this.proceduralGroup.add(trunkMesh);
+      this.proceduralGroup.add(foliageMesh);
+    }
   }
 
   /**

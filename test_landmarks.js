@@ -451,4 +451,30 @@ assert.ok(
   'CityScene.js missing Jl. Boulevard Raya Kelapa Gading'
 );
 
-console.log('✅ All 57 landmarks, Quick Wins & Tahap 1 + 2 Jakarta Utara verified successfully!');
+// Check 19: Tahap 3 Infill Urban Fabric, Distrik Logistik Tanjung Priok & Hutan Mangrove Pesisir
+assert.ok(
+  citySceneContent.includes('this.buildNorthJakartaInfillAndLogistics()'),
+  'CityScene.js missing buildNorthJakartaInfillAndLogistics call in init'
+);
+assert.ok(
+  citySceneContent.includes('buildNorthJakartaInfillAndLogistics()'),
+  'CityScene.js missing buildNorthJakartaInfillAndLogistics method'
+);
+assert.ok(
+  citySceneContent.includes('TERMINAL PETI KEMAS KONTAINER PELABUHAN TANJUNG PRIOK'),
+  'CityScene.js missing TERMINAL PETI KEMAS KONTAINER PELABUHAN TANJUNG PRIOK'
+);
+assert.ok(
+  citySceneContent.includes('INFILL RUKO KOMERSIAL & RESIDENSIAL MODERN KELAPA GADING & SUNTER'),
+  'CityScene.js missing INFILL RUKO KOMERSIAL & RESIDENSIAL MODERN KELAPA GADING & SUNTER'
+);
+assert.ok(
+  citySceneContent.includes('KOMPLEKS PERGUDANGAN LOGISTIK PELABUHAN PRIOK'),
+  'CityScene.js missing KOMPLEKS PERGUDANGAN LOGISTIK PELABUHAN PRIOK'
+);
+assert.ok(
+  citySceneContent.includes('VEGETASI HUTAN MANGROVE & CEMARA UDANG PESISIR TELUK JAKARTA'),
+  'CityScene.js missing VEGETASI HUTAN MANGROVE & CEMARA UDANG PESISIR TELUK JAKARTA'
+);
+
+console.log('✅ All 57 landmarks, Quick Wins & Tahap 1 + 2 + 3 Jakarta Utara verified successfully!');
