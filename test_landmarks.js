@@ -409,4 +409,46 @@ assert.ok(landmarkModelsContent.includes('createKotaIntanBridge'), 'LandmarkMode
 assert.ok(landmarkModelsContent.includes('createMallKelapaGading'), 'LandmarkModels.js missing createMallKelapaGading');
 assert.ok(landmarkModelsContent.includes('createTanjungPriokPort'), 'LandmarkModels.js missing createTanjungPriokPort');
 
-console.log('✅ All 57 landmarks, Quick Wins & Tahap 1 Jakarta Utara verified successfully!');
+// Check 18: Tahap 2 Infrastruktur Jalan Tol Layang Pelabuhan, Pesisir Teluk Jakarta, Danau Sunter & Waduk Pluit
+assert.ok(
+  citySceneContent.includes('this.buildNorthJakartaInfrastructure()'),
+  'CityScene.js missing buildNorthJakartaInfrastructure call in init'
+);
+assert.ok(
+  citySceneContent.includes('buildNorthJakartaInfrastructure()'),
+  'CityScene.js missing buildNorthJakartaInfrastructure method'
+);
+assert.ok(
+  citySceneContent.includes('Laut Jawa & Perairan Teluk Jakarta'),
+  'CityScene.js missing Laut Jawa & Perairan Teluk Jakarta'
+);
+assert.ok(
+  citySceneContent.includes('Taman Waduk Pluit'),
+  'CityScene.js missing Taman Waduk Pluit'
+);
+assert.ok(
+  citySceneContent.includes('Danau Sunter Barat'),
+  'CityScene.js missing Danau Sunter Barat'
+);
+assert.ok(
+  citySceneContent.includes('Danau Sunter Selatan / Timur'),
+  'CityScene.js missing Danau Sunter Selatan / Timur'
+);
+assert.ok(
+  citySceneContent.includes('JALAN TOL LAYANG PELABUHAN'),
+  'CityScene.js missing JALAN TOL LAYANG PELABUHAN'
+);
+assert.ok(
+  citySceneContent.includes('Jl. RE Martadinata & Jl. Lodan Raya'),
+  'CityScene.js missing Jl. RE Martadinata & Jl. Lodan Raya'
+);
+assert.ok(
+  citySceneContent.includes('Perpanjangan Boulevard Benyamin Sueb'),
+  'CityScene.js missing Perpanjangan Boulevard Benyamin Sueb'
+);
+assert.ok(
+  citySceneContent.includes('Jl. Boulevard Raya Kelapa Gading'),
+  'CityScene.js missing Jl. Boulevard Raya Kelapa Gading'
+);
+
+console.log('✅ All 57 landmarks, Quick Wins & Tahap 1 + 2 Jakarta Utara verified successfully!');

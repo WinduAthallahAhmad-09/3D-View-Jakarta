@@ -33,6 +33,7 @@ export class CityScene {
     this.buildCentralJakartaEastInfillAndDistricts();
     this.buildSouthJakartaCorridor();
     this.buildSouthJakartaInfillAndParks();
+    this.buildNorthJakartaInfrastructure();
     this.buildLandmarks();
     this.buildUrbanDistricts();
     this.buildStreetVegetation();
@@ -2318,6 +2319,238 @@ export class CityScene {
     this.streetLights.push(lampLight);
 
     this.proceduralGroup.add(poleGroup);
+  }
+
+  /**
+   * Tahap 2 Jakarta Utara: Jaringan Jalan Tol Layang Pelabuhan (Harbour Toll Road),
+   * Arteri Pesisir RE Martadinata / Lodan / Benyamin Sueb, Tata Air Danau Sunter,
+   * Waduk Pluit, serta Garis Pantai Teluk Jakarta & Laut Jawa.
+   *
+   * Performa Optimal: Seluruh geometri digabungkan (geometry merging) menjadi 9 mesh tunggal
+   * sehingga penambahan seluruh infrastruktur Jakarta Utara hanya memakan 9 draw calls.
+   */
+  buildNorthJakartaInfrastructure() {
+    const roadMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      roughness: 0.8,
+      metalness: 0.1
+    });
+    const sidewalkMat = new THREE.MeshStandardMaterial({
+      map: TextureGenerator.createSidewalkTexture(),
+      roughness: 0.8
+    });
+    const medianGrassMat = new THREE.MeshStandardMaterial({
+      color: 0x15803d,
+      roughness: 0.85
+    });
+    const viaductMat = new THREE.MeshStandardMaterial({
+      color: 0x475569,
+      roughness: 0.65
+    });
+    const barrierMat = new THREE.MeshStandardMaterial({
+      color: 0x0284c7,
+      metalness: 0.5,
+      roughness: 0.3
+    });
+    const pierMat = new THREE.MeshStandardMaterial({
+      color: 0x64748b,
+      roughness: 0.6
+    });
+    const waterMat = new THREE.MeshStandardMaterial({
+      color: 0x0369a1,
+      roughness: 0.15,
+      metalness: 0.85,
+      side: THREE.DoubleSide
+    });
+    const parkMat = new THREE.MeshStandardMaterial({
+      color: 0x166534,
+      roughness: 0.9,
+      side: THREE.DoubleSide
+    });
+    const seawallMat = new THREE.MeshStandardMaterial({
+      color: 0x64748b,
+      roughness: 0.7
+    });
+
+    const roadGeos = [];
+    const swGeos = [];
+    const medianGeos = [];
+    const viaductGeos = [];
+    const barrierGeos = [];
+    const pierGeos = [];
+    const waterGeos = [];
+    const parkGeos = [];
+    const seawallGeos = [];
+
+    const makeBox = (w, h, d, x, y, z, rotY = 0) => {
+      const g = new THREE.BoxGeometry(w, h, d);
+      if (rotY !== 0) g.rotateY(rotY);
+      g.translate(x, y, z);
+      return g;
+    };
+
+    const addRoad = (x1, z1, x2, z2, roadWidth = 20, hasMedian = false, medianWidth = 3.0) => {
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const angle = Math.atan2(dx, dz);
+      const mx = (x1 + x2) * 0.5;
+      const mz = (z1 + z2) * 0.5;
+
+      // Asphalt
+      roadGeos.push(makeBox(roadWidth, 0.25, len + 0.4, mx, 0.125, mz, angle));
+
+      // Sidewalks
+      const swWidth = 3.2;
+      [-1, 1].forEach((dir) => {
+        const perpX = Math.cos(angle) * (roadWidth * 0.5 + swWidth * 0.5) * dir;
+        const perpZ = -Math.sin(angle) * (roadWidth * 0.5 + swWidth * 0.5) * dir;
+        swGeos.push(makeBox(swWidth, 0.4, len + 0.4, mx + perpX, 0.2, mz + perpZ, angle));
+      });
+
+      // Green median
+      if (hasMedian) {
+        medianGeos.push(makeBox(medianWidth, 0.45, len + 0.2, mx, 0.225, mz, angle));
+      }
+    };
+
+    const addTollViaduct = (x1, z1, x2, z2, viaductWidth = 21, y = 8.5) => {
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const angle = Math.atan2(dx, dz);
+      const mx = (x1 + x2) * 0.5;
+      const mz = (z1 + z2) * 0.5;
+
+      // Viaduct deck slab
+      viaductGeos.push(makeBox(viaductWidth, 0.8, len + 0.5, mx, y, mz, angle));
+
+      // Safety parapets / crash barriers
+      [-1, 1].forEach((dir) => {
+        const perpX = Math.cos(angle) * (viaductWidth * 0.5 - 0.4) * dir;
+        const perpZ = -Math.sin(angle) * (viaductWidth * 0.5 - 0.4) * dir;
+        barrierGeos.push(makeBox(0.6, 1.1, len + 0.5, mx + perpX, y + 0.8, mz + perpZ, angle));
+      });
+      // Center divider barrier
+      barrierGeos.push(makeBox(0.8, 0.9, len + 0.5, mx, y + 0.7, mz, angle));
+
+      // Support piers spaced every ~45m
+      const pierCount = Math.max(1, Math.floor(len / 45));
+      for (let i = 0; i <= pierCount; i++) {
+        const t = i / pierCount;
+        const px = x1 + dx * t;
+        const pz = z1 + dz * t;
+        pierGeos.push(makeBox(2.8, y, 2.8, px, y * 0.5, pz, angle));
+        pierGeos.push(makeBox(viaductWidth * 0.85, 1.2, 3.2, px, y - 0.6, pz, angle));
+      }
+    };
+
+    const addWaterPlane = (w, d, x, z, y = 0.04) => {
+      const g = new THREE.PlaneGeometry(w, d);
+      g.rotateX(-Math.PI / 2);
+      g.translate(x, y, z);
+      waterGeos.push(g);
+    };
+
+    const addParkPlane = (w, d, x, z, y = 0.02) => {
+      const g = new THREE.PlaneGeometry(w, d);
+      g.rotateX(-Math.PI / 2);
+      g.translate(x, y, z);
+      parkGeos.push(g);
+    };
+
+    // =========================================================================
+    // 1. TATA AIR, WADUK RETENSI, DANAU SUNTER & TELUK JAKARTA
+    // =========================================================================
+    // Laut Jawa & Perairan Teluk Jakarta
+    addWaterPlane(2200, 600, 350, -1350, 0.02);
+
+    // Tanggul Laut Pesisir & Seawall Breakwater
+    seawallGeos.push(makeBox(330, 1.4, 4.5, -390, 0.7, -1045)); // Pluit - Sunda Kelapa
+    seawallGeos.push(makeBox(520, 1.4, 4.5, 95, 0.7, -1045));  // Ancol Marina revetment
+    seawallGeos.push(makeBox(390, 1.6, 5.0, 630, 0.8, -1090)); // JIS - Priok coastal dike
+    seawallGeos.push(makeBox(180, 2.0, 6.0, 830, 1.0, -1270)); // Tanjung Priok harbor breakwater
+
+    // Taman Waduk Pluit (Penampung Air Utama Jakarta Utara Barat)
+    addWaterPlane(150, 190, -367, -1077, 0.04);
+    addParkPlane(200, 240, -367, -1077, 0.02); // Taman RTH Waduk Pluit
+
+    // Danau Sunter Barat (Sentra Dayung & Olahraga Air Jakarta Utara)
+    addWaterPlane(70, 230, 590, -770, 0.04);
+    addParkPlane(96, 250, 590, -770, 0.02); // Promenade Danau Sunter Barat
+
+    // Danau Sunter Selatan / Timur (Twin Lake Sunter)
+    addWaterPlane(110, 95, 720, -760, 0.04);
+    addParkPlane(135, 120, 720, -760, 0.02); // Promenade Danau Sunter Selatan
+
+    // Terusan Aliran Air: Kali Ancol & Muara Kali Sunter & Basin Sunda Kelapa
+    addWaterPlane(16, 200, 210, -990, 0.03); // Kali Ancol
+    addWaterPlane(14, 180, 550, -990, 0.03); // Muara Kali Sunter
+    addWaterPlane(38, 125, -205, -980, 0.03); // Kolam Labuh Sunda Kelapa
+
+    // =========================================================================
+    // 2. JALAN TOL LAYANG PELABUHAN (HARBOUR TOLL ROAD / TOL IR. WIYOTO WIYONO)
+    // Elevasi viaduk layang ganda Y = 8.5m membelah pesisir dari Pluit s.d. Priok
+    // =========================================================================
+    addTollViaduct(-520, -935, -205, -940, 21, 8.5); // Segmen 1: Pluit ke Sunda Kelapa
+    addTollViaduct(-205, -940, 150, -945, 21, 8.5);  // Segmen 2: Sunda Kelapa ke Ancol
+    addTollViaduct(150, -945, 528, -955, 21, 8.5);   // Segmen 3: Ancol ke Sisi Utara JIS
+    addTollViaduct(528, -955, 830, -1180, 21, 8.5);  // Segmen 4: JIS ke Simpang Priok
+    addTollViaduct(360, -500, 830, -1180, 19, 9.0);  // Segmen 5: Cabang Tol Wiyoto Wiyono Cempaka Putih - Priok
+
+    // =========================================================================
+    // 3. JARINGAN JALAN ARTERI UTAMA PESISIR (GROUND LEVEL)
+    // =========================================================================
+    // Jl. RE Martadinata & Jl. Lodan Raya (Poros Arteri Pesisir)
+    addRoad(-380, -920, -150, -920, 18, false);
+    addRoad(-150, -920, 150, -925, 20, false);
+    addRoad(150, -925, 530, -935, 22, true, 2.5); // Depan JIS & Ancol
+    addRoad(530, -935, 830, -1160, 22, true, 2.5); // Menuju Tanjung Priok
+
+    // Perpanjangan Boulevard Benyamin Sueb (Kemayoran - Ancol / Laut)
+    addRoad(267.2, -517.0, 267.2, -925.0, 24, true, 3.5);
+
+    // Jl. Boulevard Raya Kelapa Gading (Poros Megapolitan Timur Laut)
+    addRoad(1198.0, -220.0, 1198.0, -820.0, 24, true, 4.0);
+    // Jl. Boulevard Barat Raya (Simpang MKG)
+    addRoad(950.0, -531.0, 1350.0, -531.0, 20, true, 3.0);
+
+    // Jaringan Jalan Danau Sunter (Sunter Barat, Utara & Selatan)
+    addRoad(550.0, -640.0, 550.0, -900.0, 16, false); // Danau Sunter Barat
+    addRoad(550.0, -900.0, 780.0, -900.0, 18, false); // Danau Sunter Utara (akses JIS)
+    addRoad(550.0, -640.0, 780.0, -640.0, 16, false); // Danau Sunter Selatan
+
+    // Jaringan Jalan Pluit (Akses Waduk Pluit & Sunda Kelapa)
+    addRoad(-450.0, -900.0, -450.0, -1120.0, 16, false); // Pluit Raya
+    addRoad(-450.0, -1000.0, -205.0, -920.0, 16, false); // Pluit Selatan ke Lodan
+
+    // Jaringan Jalan Pelabuhan Tanjung Priok
+    addRoad(830.0, -1160.0, 830.0, -1260.0, 22, false); // Jl. Pelabuhan Raya
+    addRoad(720.0, -1220.0, 940.0, -1220.0, 20, false); // Ring Dermaga Kargo
+
+    // =========================================================================
+    // 4. MERGE GEOMETRIES & ADD TO SCENE (Hanya 9 Draw Calls!)
+    // =========================================================================
+    const mergeAndAdd = (geos, mat, receiveShadow = true, castShadow = false) => {
+      if (!geos || geos.length === 0) return;
+      const merged = BufferGeometryUtils.mergeGeometries(geos, false);
+      if (merged) {
+        const mesh = new THREE.Mesh(merged, mat);
+        mesh.receiveShadow = receiveShadow;
+        mesh.castShadow = castShadow;
+        this.proceduralGroup.add(mesh);
+      }
+    };
+
+    mergeAndAdd(roadGeos, roadMat, true, false);
+    mergeAndAdd(swGeos, sidewalkMat, true, false);
+    mergeAndAdd(medianGeos, medianGrassMat, true, false);
+    mergeAndAdd(viaductGeos, viaductMat, true, false);
+    mergeAndAdd(barrierGeos, barrierMat, true, false);
+    mergeAndAdd(pierGeos, pierMat, true, false);
+    mergeAndAdd(waterGeos, waterMat, false, false);
+    mergeAndAdd(parkGeos, parkMat, true, false);
+    mergeAndAdd(seawallGeos, seawallMat, true, false);
   }
 
   /**
