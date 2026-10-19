@@ -613,4 +613,30 @@ assert.ok(
   'CityScene.js missing Kali Pesanggrahan'
 );
 
-console.log('✅ All 63 landmarks, Quick Wins & Tahap 1 + 2 Jakarta Barat verified successfully!');
+// Check 23: Tahap 3 Infill Urban Fabric, Distrik Residensial & Pecinan Jakarta Barat
+assert.ok(
+  citySceneContent.includes('this.buildWestJakartaInfillAndDistricts()'),
+  'CityScene.js missing buildWestJakartaInfillAndDistricts call in init'
+);
+assert.ok(
+  citySceneContent.includes('buildWestJakartaInfillAndDistricts()'),
+  'CityScene.js missing buildWestJakartaInfillAndDistricts method'
+);
+assert.ok(
+  citySceneContent.includes('RUKO PERANAKAN TIONGHOA GLODOK'),
+  'CityScene.js missing RUKO PERANAKAN TIONGHOA GLODOK'
+);
+assert.ok(
+  citySceneContent.includes('RESIDENSIAL KLUSTER MODERN PURI INDAH & KEMBANGAN'),
+  'CityScene.js missing RESIDENSIAL KLUSTER MODERN PURI INDAH & KEMBANGAN'
+);
+assert.ok(
+  citySceneContent.includes('SENTRA RUKO & PERKANTORAN MODERN KEBON JERUK'),
+  'CityScene.js missing SENTRA RUKO & PERKANTORAN MODERN KEBON JERUK'
+);
+assert.ok(
+  citySceneContent.includes('VEGETASI PERKOTAAN TROPIS JAKARTA BARAT'),
+  'CityScene.js missing VEGETASI PERKOTAAN TROPIS JAKARTA BARAT'
+);
+
+console.log('✅ All 63 landmarks, Quick Wins & Tahap 1 + 2 + 3 Jakarta Barat verified successfully!');

@@ -36,6 +36,7 @@ export class CityScene {
     this.buildNorthJakartaInfrastructure();
     this.buildNorthJakartaInfillAndLogistics();
     this.buildWestJakartaInfrastructure();
+    this.buildWestJakartaInfillAndDistricts();
     this.buildLandmarks();
     this.buildUrbanDistricts();
     this.buildStreetVegetation();
@@ -3087,6 +3088,327 @@ export class CityScene {
         // Foliage
         dummy.position.set(t.x, (3.8 + 2.5) * t.scale, t.z);
         dummy.scale.set(t.scale, t.scale, t.scale);
+        dummy.updateMatrix();
+        foliageMesh.setMatrixAt(idx, dummy.matrix);
+      });
+
+      trunkMesh.instanceMatrix.needsUpdate = true;
+      foliageMesh.instanceMatrix.needsUpdate = true;
+      this.proceduralGroup.add(trunkMesh);
+      this.proceduralGroup.add(foliageMesh);
+    }
+  }
+
+  /**
+   * Tahap 3 Jakarta Barat: Infill Urban Fabric, Distrik Residensial Puri Indah, Ruko Kebon Jeruk & Peranakan Glodok.
+   *
+   * Performa Ekstrem (Instanced Rendering):
+   * 1. 140+ Ruko Peranakan Tionghoa Glodok & Pinangsia (2-3 lantai atap genteng pelana, multi-warna).
+   * 2. 180+ Residensial modern Puri Indah, Kembangan & Meruya (townhouse & cluster minimalis).
+   * 3. 110+ Ruko komersial & sentra niaga Kebon Jeruk (Jl. Panjang & Kedoya) & Daan Mogot Pesing.
+   * 4. 150+ Vegetasi pohon tropis: Palem Raja (Puri Indah) & Angsana rindang (Jl. Panjang & Daan Mogot).
+   * Total penambahan draw calls: Hanya 6 draw calls!
+   */
+  buildWestJakartaInfillAndDistricts() {
+    const dummy = new THREE.Object3D();
+    const baseBoxGeo = new THREE.BoxGeometry(1, 1, 1);
+
+    // =========================================================================
+    // 1. RUKO PERANAKAN TIONGHOA GLODOK, PINANGSIA & PETAK SEMBILAN (2 Draw Calls)
+    // =========================================================================
+    const glodokShophouseMat = new THREE.MeshStandardMaterial({ roughness: 0.75, metalness: 0.1 });
+    const glodokRoofMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.65 });
+
+    const glodokColors = [
+      new THREE.Color(0xfef3c7), // Cream Wall
+      new THREE.Color(0xb45309), // Terracotta
+      new THREE.Color(0x991b1b), // Red Lacquer
+      new THREE.Color(0xd97706), // Ochre Yellow
+      new THREE.Color(0x0f766e), // Jade Green
+      new THREE.Color(0xf1f5f9)  // Stucco White
+    ];
+
+    const glodokBldItems = [];
+    const glodokRoofItems = [];
+
+    // Blok Glodok Barat (Pancoran, Petak Sembilan, Pinangsia)
+    for (let x = -190; x <= -60; x += 15) {
+      for (let z = -740; z <= -620; z += 16) {
+        // Jangan timpa jalan atau landmark Glodok
+        if (Math.abs(x - (-120)) < 16 && Math.abs(z - (-680)) < 24) continue;
+        if (Math.abs(x - (-95)) < 14) continue; // Jl. Gajah Mada koridor
+        if (Math.abs(z - (-640)) < 12) continue; // Jl. Mangga Besar Barat
+
+        const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233));
+        const h = 8 + hash * 6; // 8m - 14m (2-3 lantai)
+        const w = 11 + (hash * 3);
+        const d = 12 + ((1 - hash) * 3);
+        const colIdx = Math.floor(hash * glodokColors.length) % glodokColors.length;
+
+        glodokBldItems.push({
+          x: x + (hash - 0.5) * 3,
+          y: h * 0.5,
+          z: z + (hash - 0.5) * 3,
+          w,
+          h,
+          d,
+          color: glodokColors[colIdx]
+        });
+
+        // Atap pelana peranakan genteng merah
+        glodokRoofItems.push({
+          x: x + (hash - 0.5) * 3,
+          y: h + 1.2,
+          z: z + (hash - 0.5) * 3,
+          w: w + 0.8,
+          h: 2.2,
+          d: d + 0.8
+        });
+      }
+    }
+
+    if (glodokBldItems.length > 0) {
+      const bldMesh = new THREE.InstancedMesh(baseBoxGeo, glodokShophouseMat, glodokBldItems.length);
+      bldMesh.receiveShadow = true;
+      bldMesh.castShadow = true;
+
+      glodokBldItems.forEach((b, idx) => {
+        dummy.position.set(b.x, b.y, b.z);
+        dummy.scale.set(b.w, b.h, b.d);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        bldMesh.setMatrixAt(idx, dummy.matrix);
+        bldMesh.setColorAt(idx, b.color);
+      });
+
+      bldMesh.instanceMatrix.needsUpdate = true;
+      if (bldMesh.instanceColor) bldMesh.instanceColor.needsUpdate = true;
+      this.proceduralGroup.add(bldMesh);
+
+      const roofMesh = new THREE.InstancedMesh(baseBoxGeo, glodokRoofMat, glodokRoofItems.length);
+      roofMesh.receiveShadow = true;
+      roofMesh.castShadow = true;
+
+      glodokRoofItems.forEach((r, idx) => {
+        dummy.position.set(r.x, r.y, r.z);
+        dummy.scale.set(r.w, r.h, r.d);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        roofMesh.setMatrixAt(idx, dummy.matrix);
+      });
+
+      roofMesh.instanceMatrix.needsUpdate = true;
+      this.proceduralGroup.add(roofMesh);
+    }
+
+    // =========================================================================
+    // 2. RESIDENSIAL KLUSTER MODERN PURI INDAH & KEMBANGAN (1 Draw Call)
+    // =========================================================================
+    const residentialMat = new THREE.MeshStandardMaterial({
+      roughness: 0.7,
+      metalness: 0.15
+    });
+
+    const residentialColors = [
+      new THREE.Color(0xf8fafc), // Pure White
+      new THREE.Color(0xe2e8f0), // Light Gray
+      new THREE.Color(0xcbd5e1), // Slate
+      new THREE.Color(0xd97706), // Warm Timber Accent
+      new THREE.Color(0x334155), // Charcoal Gray
+      new THREE.Color(0x94a3b8)  // Modern Concrete
+    ];
+
+    const residentialItems = [];
+    const residentialZones = [
+      // Zona 1: Puri Indah Utara & Barat (sekitar Lippo Mall Puri & The St. Moritz)
+      { minX: -1280, maxX: -1110, stepX: 20, minZ: -200, maxZ: -115, stepZ: 20, baseH: 8, maxH: 14 },
+      // Zona 2: Puri Indah Selatan (sekitar Puri Indah Mall)
+      { minX: -1080, maxX: -940, stepX: 18, minZ: -190, maxZ: -120, stepZ: 18, baseH: 7, maxH: 12 },
+      // Zona 3: Kembangan Selatan / Perumahan Walikota
+      { minX: -1120, maxX: -940, stepX: 18, minZ: -40, maxZ: 60, stepZ: 18, baseH: 7, maxH: 13 },
+      // Zona 4: Meruya Utara / Kebon Jeruk Barat
+      { minX: -1100, maxX: -910, stepX: 20, minZ: 85, maxZ: 180, stepZ: 20, baseH: 7, maxH: 12 }
+    ];
+
+    residentialZones.forEach((zone) => {
+      for (let x = zone.minX; x <= zone.maxX; x += zone.stepX) {
+        for (let z = zone.minZ; z <= zone.maxZ; z += zone.stepZ) {
+          // Lewati posisi landmark #58, #59, #60
+          if (Math.abs(x - (-1040)) < 36 && Math.abs(z - (-90)) < 36) continue; // Walikota Jakbar
+          if (Math.abs(x - (-1185)) < 55 && Math.abs(z - (-75)) < 50) continue; // Lippo Mall Puri
+          if (Math.abs(x - (-1010)) < 45 && Math.abs(z - (-100)) < 40) continue; // Puri Indah Mall
+          // Lewati koridor Tol JORR W1 dan Tol Tangerang
+          if (Math.abs(x - (-1040)) < 16) continue;
+          if (Math.abs(z - (-85)) < 16) continue;
+
+          const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233));
+          const h = zone.baseH + hash * (zone.maxH - zone.baseH);
+          const w = 12 + (hash * 4);
+          const d = 13 + ((1 - hash) * 4);
+          const colIdx = Math.floor(hash * residentialColors.length) % residentialColors.length;
+
+          residentialItems.push({
+            x: x + (hash - 0.5) * 4,
+            y: h * 0.5,
+            z: z + (hash - 0.5) * 4,
+            w,
+            h,
+            d,
+            color: residentialColors[colIdx]
+          });
+        }
+      }
+    });
+
+    if (residentialItems.length > 0) {
+      const resMesh = new THREE.InstancedMesh(baseBoxGeo, residentialMat, residentialItems.length);
+      resMesh.receiveShadow = true;
+      resMesh.castShadow = true;
+
+      residentialItems.forEach((item, idx) => {
+        dummy.position.set(item.x, item.y, item.z);
+        dummy.scale.set(item.w, item.h, item.d);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        resMesh.setMatrixAt(idx, dummy.matrix);
+        resMesh.setColorAt(idx, item.color);
+      });
+
+      resMesh.instanceMatrix.needsUpdate = true;
+      if (resMesh.instanceColor) resMesh.instanceColor.needsUpdate = true;
+      this.proceduralGroup.add(resMesh);
+    }
+
+    // =========================================================================
+    // 3. SENTRA RUKO & PERKANTORAN MODERN KEBON JERUK & DAAN MOGOT (1 Draw Call)
+    // =========================================================================
+    const commercialMat = new THREE.MeshStandardMaterial({
+      roughness: 0.65,
+      metalness: 0.3
+    });
+
+    const commercialColors = [
+      new THREE.Color(0x1e293b), // Graphite Glass
+      new THREE.Color(0x334155), // Steel Slate
+      new THREE.Color(0x475569), // Corporate Blue-Gray
+      new THREE.Color(0x0284c7), // Cyan Glass
+      new THREE.Color(0xf1f5f9), // White Panel
+      new THREE.Color(0x0f766e)  // Teal Accent
+    ];
+
+    const commercialItems = [];
+
+    // Koridor Jl. Panjang & Kebon Jeruk Intercon (sekeliling RCTI & Museum MACAN)
+    for (let z = -140; z <= 120; z += 22) {
+      [-815, -735].forEach((x) => {
+        // Hindari menabrak RCTI [-785, 30] dan Museum MACAN [-775, 12]
+        if (Math.abs(x - (-785)) < 30 && Math.abs(z - 30) < 32) return;
+        if (Math.abs(x - (-775)) < 26 && Math.abs(z - 12) < 28) return;
+        if (Math.abs(z - (-45)) < 20) return; // Underpass Tol Tangerang
+
+        const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233));
+        const h = 14 + hash * 16; // 14m - 30m (4-8 lantai)
+        const colIdx = Math.floor(hash * commercialColors.length) % commercialColors.length;
+
+        commercialItems.push({
+          x,
+          y: h * 0.5,
+          z,
+          w: 16 + hash * 4,
+          h,
+          d: 15 + (1 - hash) * 4,
+          color: commercialColors[colIdx]
+        });
+      });
+    }
+
+    // Koridor Gudang & Niaga Daan Mogot Pesing
+    for (let x = -1150; x <= -680; x += 32) {
+      [-465, -400].forEach((z) => {
+        // Lewati simpang flyover pesing
+        if (Math.abs(x - (-650)) < 30 && Math.abs(z - (-420)) < 25) return;
+
+        const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233));
+        const h = 9 + hash * 8; // 9m - 17m
+        const colIdx = Math.floor(hash * commercialColors.length) % commercialColors.length;
+
+        commercialItems.push({
+          x,
+          y: h * 0.5,
+          z,
+          w: 22 + hash * 4,
+          h,
+          d: 16 + (1 - hash) * 4,
+          color: commercialColors[colIdx]
+        });
+      });
+    }
+
+    if (commercialItems.length > 0) {
+      const commMesh = new THREE.InstancedMesh(baseBoxGeo, commercialMat, commercialItems.length);
+      commMesh.receiveShadow = true;
+      commMesh.castShadow = true;
+
+      commercialItems.forEach((c, idx) => {
+        dummy.position.set(c.x, c.y, c.z);
+        dummy.scale.set(c.w, c.h, c.d);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        commMesh.setMatrixAt(idx, dummy.matrix);
+        commMesh.setColorAt(idx, c.color);
+      });
+
+      commMesh.instanceMatrix.needsUpdate = true;
+      if (commMesh.instanceColor) commMesh.instanceColor.needsUpdate = true;
+      this.proceduralGroup.add(commMesh);
+    }
+
+    // =========================================================================
+    // 4. VEGETASI PERKOTAAN TROPIS JAKARTA BARAT (Instanced Trees, 2 Draw Calls)
+    // =========================================================================
+    const palmTrunkMat = new THREE.MeshStandardMaterial({ color: 0x78716c, roughness: 0.8 });
+    const treeFoliageMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 });
+
+    const treeTransforms = [];
+
+    // Pohon Palem Raja di Median Boulevard Kembangan & Puri Indah
+    for (let x = -1180; x <= -1020; x += 18) {
+      treeTransforms.push({ x, z: -160, scale: 1.0, isPalm: true });
+      treeTransforms.push({ x, z: -80, scale: 0.95, isPalm: true });
+    }
+
+    // Pohon Peneduh Angsana sepanjang koridor Jl. Panjang (Kebon Jeruk)
+    for (let z = -140; z <= 240; z += 18) {
+      if (Math.abs(z - (-45)) < 18) continue; // Jangan di underpass tol
+      treeTransforms.push({ x: -762, z, scale: 1.1, isPalm: false });
+      treeTransforms.push({ x: -788, z, scale: 1.1, isPalm: false });
+    }
+
+    // Pohon Peneduh sepanjang Jl. Daan Mogot Pesing
+    for (let x = -1100; x <= -550; x += 26) {
+      treeTransforms.push({ x, z: -418, scale: 1.05, isPalm: false });
+    }
+
+    if (treeTransforms.length > 0) {
+      const trunkGeo = new THREE.CylinderGeometry(0.25, 0.45, 4.5, 6);
+      const foliageGeo = new THREE.SphereGeometry(2.4, 8, 8);
+      const trunkMesh = new THREE.InstancedMesh(trunkGeo, palmTrunkMat, treeTransforms.length);
+      const foliageMesh = new THREE.InstancedMesh(foliageGeo, treeFoliageMat, treeTransforms.length);
+
+      trunkMesh.receiveShadow = true;
+      foliageMesh.receiveShadow = true;
+
+      treeTransforms.forEach((t, idx) => {
+        // Trunk
+        dummy.position.set(t.x, 2.25 * t.scale, t.z);
+        dummy.scale.set(t.scale, t.scale, t.scale);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        trunkMesh.setMatrixAt(idx, dummy.matrix);
+
+        // Foliage canopy
+        dummy.position.set(t.x, 5.0 * t.scale, t.z);
+        dummy.scale.set(t.isPalm ? t.scale * 1.3 : t.scale * 1.0, t.scale * 0.85, t.isPalm ? t.scale * 1.3 : t.scale * 1.0);
         dummy.updateMatrix();
         foliageMesh.setMatrixAt(idx, dummy.matrix);
       });
