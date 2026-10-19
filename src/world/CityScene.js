@@ -37,6 +37,7 @@ export class CityScene {
     this.buildNorthJakartaInfillAndLogistics();
     this.buildWestJakartaInfrastructure();
     this.buildWestJakartaInfillAndDistricts();
+    this.buildEastJakartaInfrastructure();
     this.buildLandmarks();
     this.buildUrbanDistricts();
     this.buildStreetVegetation();
@@ -2833,6 +2834,349 @@ export class CityScene {
 
     // =========================================================================
     // 6. MERGE GEOMETRIES & ADD TO SCENE (Hanya 9 Draw Calls!)
+    // =========================================================================
+    const mergeAndAdd = (geos, mat, receiveShadow = true, castShadow = false) => {
+      if (!geos || geos.length === 0) return;
+      const merged = BufferGeometryUtils.mergeGeometries(geos, false);
+      if (merged) {
+        const mesh = new THREE.Mesh(merged, mat);
+        mesh.receiveShadow = receiveShadow;
+        mesh.castShadow = castShadow;
+        this.proceduralGroup.add(mesh);
+      }
+    };
+
+    mergeAndAdd(roadGeos, roadMat, true, false);
+    mergeAndAdd(swGeos, sidewalkMat, true, false);
+    mergeAndAdd(medianGeos, medianGrassMat, true, false);
+    mergeAndAdd(viaductGeos, viaductMat, true, false);
+    mergeAndAdd(barrierGeos, barrierMat, true, false);
+    mergeAndAdd(pierGeos, pierMat, true, false);
+    mergeAndAdd(waterGeos, waterMat, false, false);
+    mergeAndAdd(canalWallGeos, canalWallMat, true, false);
+    mergeAndAdd(bridgeGeos, bridgeMat, true, false);
+  }
+
+  /**
+   * Tahap 2 Jakarta Timur: Jaringan Jalan Tol, Arteri Utama & Koridor Tata Air KBT
+   *
+   * 1. JALAN TOL JAKARTA TIMUR:
+   *    - Tol Jagorawi (Cawang -> TMII -> Ciracas): Viaduk & at-grade expressway 8 lajur, GT Cililitan & GT TMII/Pasar Rebo.
+   *    - Tol Jakarta - Cikampek: Cawang -> Halim -> Cipinang Melayu -> Bekasi + MBZ Japek Elevated upper deck (Y=14.0m) & GT Halim Utama.
+   *    - Tol Becakayu (Bekasi - Cawang - Kampung Melayu): Viaduk layang di atas bantaran Kalimalang (Y=9.5m).
+   *    - Tol Ir. Wiyoto Wiyono (By-Pass Cawang - Rawamangun - Tanjung Priok): Koridor layang megah utara-selatan di atas Jl. DI Panjaitan & Jl. Jend. A. Yani (Y=9.0m).
+   *    - Simpang Susun Cawang Ramps & Loop Connectors.
+   * 2. POROS ARTERI UTAMA JAKARTA TIMUR:
+   *    - Jl. Matraman Raya -> Jl. Jatinegara Barat/Timur -> Jl. Otista -> Cawang.
+   *    - Jl. Pemuda & Jl. Pramuka (Poros Rawamangun ke Matraman / Salemba).
+   *    - Jl. Kolonel Sugiono & Jl. Basuki Rahmat (Casablanca Timur / Non-Tol) + Flyover Cipinang.
+   *    - Jl. DI Panjaitan & Jl. Mayjen Sutoyo (Arteri By-Pass Bawah Tol).
+   *    - Jl. Raya Pondok Gede & Akses Halim / TMII / Lubang Buaya.
+   * 3. TATA AIR & KANAL PENGENDALI BANJIR:
+   *    - Kanal Banjir Timur (KBT): Kanal megah lebar 26m dari Cipinang melengkung ke Duren Sawit, Pondok Bambu, hingga Cakung.
+   *    - Kali Malang: Saluran air baku sejajar di bawah Tol Becakayu.
+   *    - Kali Ciliwung Timur: Aliran Kampung Melayu ke Bidara Cina dan Cawang.
+   *    - Danau Retensi Waduk Ria Rio / Pulomas.
+   * 4. Jembatan-Jembatan Penyeberangan Sungai & Kanal.
+   *
+   * Performa Ekstrem (Geometry Merging):
+   * Seluruh geometri digabungkan per material menggunakan BufferGeometryUtils.mergeGeometries.
+   * Total penambahan draw calls: Hanya 9 draw calls!
+   */
+  buildEastJakartaInfrastructure() {
+    const roadMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      roughness: 0.8,
+      metalness: 0.1
+    });
+    const sidewalkMat = new THREE.MeshStandardMaterial({
+      map: TextureGenerator.createSidewalkTexture(),
+      roughness: 0.8
+    });
+    const medianGrassMat = new THREE.MeshStandardMaterial({
+      color: 0x15803d,
+      roughness: 0.85
+    });
+    const viaductMat = new THREE.MeshStandardMaterial({
+      color: 0x475569,
+      roughness: 0.65
+    });
+    const barrierMat = new THREE.MeshStandardMaterial({
+      color: 0x0284c7,
+      metalness: 0.5,
+      roughness: 0.3
+    });
+    const pierMat = new THREE.MeshStandardMaterial({
+      color: 0x64748b,
+      roughness: 0.6
+    });
+    const waterMat = new THREE.MeshStandardMaterial({
+      color: 0x0369a1,
+      roughness: 0.15,
+      metalness: 0.85,
+      side: THREE.DoubleSide
+    });
+    const canalWallMat = new THREE.MeshStandardMaterial({
+      color: 0x64748b,
+      roughness: 0.75
+    });
+    const bridgeMat = new THREE.MeshStandardMaterial({
+      color: 0x475569,
+      roughness: 0.7
+    });
+
+    const roadGeos = [];
+    const swGeos = [];
+    const medianGeos = [];
+    const viaductGeos = [];
+    const barrierGeos = [];
+    const pierGeos = [];
+    const waterGeos = [];
+    const canalWallGeos = [];
+    const bridgeGeos = [];
+
+    const makeBox = (w, h, d, x, y, z, rotY = 0) => {
+      const g = new THREE.BoxGeometry(w, h, d);
+      if (rotY !== 0) g.rotateY(rotY);
+      g.translate(x, y, z);
+      return g;
+    };
+
+    const addRoad = (x1, z1, x2, z2, roadWidth = 20, hasMedian = false, medianWidth = 3.0) => {
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const angle = Math.atan2(dx, dz);
+      const mx = (x1 + x2) * 0.5;
+      const mz = (z1 + z2) * 0.5;
+
+      // Road asphalt surface
+      roadGeos.push(makeBox(roadWidth, 0.22, len + 0.3, mx, 0.11, mz, angle));
+
+      // Sidewalks on left and right
+      const swWidth = 3.2;
+      [-1, 1].forEach((dir) => {
+        const perpX = Math.cos(angle) * (roadWidth * 0.5 + swWidth * 0.5) * dir;
+        const perpZ = -Math.sin(angle) * (roadWidth * 0.5 + swWidth * 0.5) * dir;
+        swGeos.push(makeBox(swWidth, 0.35, len + 0.3, mx + perpX, 0.175, mz + perpZ, angle));
+      });
+
+      // Center median
+      if (hasMedian && roadWidth >= 16) {
+        medianGeos.push(makeBox(medianWidth, 0.32, len, mx, 0.16, mz, angle));
+      }
+    };
+
+    const addTollViaduct = (x1, z1, x2, z2, width = 21, heightY = 8.5) => {
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const angle = Math.atan2(dx, dz);
+      const mx = (x1 + x2) * 0.5;
+      const mz = (z1 + z2) * 0.5;
+
+      // Concrete box girder deck
+      viaductGeos.push(makeBox(width, 1.6, len + 0.6, mx, heightY, mz, angle));
+
+      // Parapet and safety barriers
+      [-1, 1].forEach((dir) => {
+        const perpX = Math.cos(angle) * (width * 0.5 - 0.3) * dir;
+        const perpZ = -Math.sin(angle) * (width * 0.5 - 0.3) * dir;
+        barrierGeos.push(makeBox(0.6, 1.1, len + 0.6, mx + perpX, heightY + 1.15, mz + perpZ, angle));
+      });
+
+      // Support piers along viaduct length every ~38m
+      const pierCount = Math.max(1, Math.floor(len / 38));
+      for (let p = 0; p <= pierCount; p++) {
+        const t = (p + 0.5) / (pierCount + 1);
+        const px = x1 + dx * t;
+        const pz = z1 + dz * t;
+        pierGeos.push(makeBox(2.6, heightY, 2.6, px, heightY * 0.5, pz, angle));
+        // Crosshead hammerhead pier cap
+        pierGeos.push(makeBox(width * 0.85, 1.4, 3.2, px, heightY - 0.7, pz, angle));
+      }
+    };
+
+    const addCurvedRamp = (x1, z1, y1, x2, z2, y2, width = 9.5) => {
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const angle = Math.atan2(dx, dz);
+      const mx = (x1 + x2) * 0.5;
+      const mz = (z1 + z2) * 0.5;
+      const my = (y1 + y2) * 0.5;
+
+      viaductGeos.push(makeBox(width, 1.2, len + 0.4, mx, my, mz, angle));
+
+      [-1, 1].forEach((dir) => {
+        const perpX = Math.cos(angle) * (width * 0.5 - 0.25) * dir;
+        const perpZ = -Math.sin(angle) * (width * 0.5 - 0.25) * dir;
+        barrierGeos.push(makeBox(0.5, 0.9, len + 0.4, mx + perpX, my + 0.95, mz + perpZ, angle));
+      });
+
+      pierGeos.push(makeBox(2.2, my, 2.2, mx, my * 0.5, mz, angle));
+    };
+
+    const addRiverSegment = (x1, z1, x2, z2, width = 26, depth = 1.4) => {
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const angle = Math.atan2(dx, dz);
+      const mx = (x1 + x2) * 0.5;
+      const mz = (z1 + z2) * 0.5;
+
+      // Water surface
+      waterGeos.push(makeBox(width, 0.2, len + 0.4, mx, -0.05, mz, angle));
+
+      // Stone/Concrete canal retaining walls
+      [-1, 1].forEach((dir) => {
+        const perpX = Math.cos(angle) * (width * 0.5 + 0.6) * dir;
+        const perpZ = -Math.sin(angle) * (width * 0.5 + 0.6) * dir;
+        canalWallGeos.push(makeBox(1.2, depth + 0.4, len + 0.4, mx + perpX, 0.2, mz + perpZ, angle));
+      });
+    };
+
+    const addBridge = (x, y, z, width, height, length, rotY = 0) => {
+      bridgeGeos.push(makeBox(width, height, length, x, y, z, rotY));
+    };
+
+    // =========================================================================
+    // 1. JALAN TOL JAGORAWI (JAKARTA - BOGOR - CIAWI)
+    // Poros tol selatan pertama Indonesia: Cawang -> Cililitan -> TMII -> Ciracas/Pasar Rebo
+    // =========================================================================
+    addTollViaduct(712, 724, 780, 950, 24, 7.5);   // Segmen 1: Cawang ke Cililitan
+    addTollViaduct(780, 950, 890, 1220, 24, 6.5);  // Segmen 2: Cililitan ke Kramat Jati
+    addTollViaduct(890, 1220, 1040, 1550, 24, 6.5); // Segmen 3: Kramat Jati ke TMII Interchange
+    addTollViaduct(1040, 1550, 1120, 1850, 24, 6.5); // Segmen 4: TMII ke Ciracas / Pasar Rebo (Batas Selatan)
+
+    // Kanopi Gerbang Tol (GT Cililitan & GT TMII)
+    viaductGeos.push(makeBox(32, 1.4, 8, 770, 8.8, 930, 0.3));
+    viaductGeos.push(makeBox(32, 1.4, 8, 1020, 8.8, 1520, 0.3));
+
+    // =========================================================================
+    // 2. JALAN TOL JAKARTA - CIKAMPEK (TOL JAPEK & JAPEK ELEVATED / MBZ)
+    // Poros urat nadi Trans Jawa: Cawang -> Halim -> Cipinang Melayu -> Perbatasan Bekasi
+    // Termasuk double-decker elevated viaduct Y=14.0m
+    // =========================================================================
+    addTollViaduct(712, 724, 893, 993, 22, 7.5);    // Segmen 1: Cawang ke Halim Perdanakusuma
+    addTollViaduct(893, 993, 1150, 1080, 22, 7.5);  // Segmen 2: Halim ke Cipinang Melayu / Kalimalang
+    addTollViaduct(1150, 1080, 1450, 1150, 22, 7.5); // Segmen 3: Cipinang Melayu ke Perbatasan Bekasi
+
+    // Upper Deck MBZ / Japek Elevated Viaduct (Elevasi Y=14.0m di atas tol bawah)
+    addTollViaduct(893, 993, 1150, 1080, 18, 14.0);
+    addTollViaduct(1150, 1080, 1450, 1150, 18, 14.0);
+
+    // Kanopi Gerbang Tol Halim Utama
+    viaductGeos.push(makeBox(34, 1.4, 8, 920, 8.8, 1010, 0.42));
+
+    // =========================================================================
+    // 3. JALAN TOL BECAKAYU (BEKASI - CAWANG - KAMPUNG MELAYU)
+    // Viaduk layang ikonik di atas koridor Kalimalang (Y=9.5m):
+    // Cawang / DI Panjaitan -> Cipinang Bali -> Duren Sawit / Pondok Kelapa
+    // =========================================================================
+    addTollViaduct(712, 600, 1050, 680, 19, 9.5);  // Segmen 1: Cawang ke Cipinang Bali
+    addTollViaduct(1050, 680, 1400, 720, 19, 9.5); // Segmen 2: Cipinang Bali ke Duren Sawit / Pondok Kelapa
+
+    // =========================================================================
+    // 4. JALAN TOL IR. WIYOTO WIYONO (BY-PASS CAWANG - RAWAMANGUN - TANJUNG PRIOK)
+    // Viaduk layang utara-selatan di atas Jl. DI Panjaitan & Jl. Jend. A. Yani (Y=9.0m):
+    // Cawang -> Kebon Nanas -> Simpang Pramuka -> Velodrome Rawamangun -> Pulomas / Priok
+    // =========================================================================
+    addTollViaduct(712, 724, 720, 320, 21, 9.0);   // Segmen 1: Cawang ke Kebon Nanas
+    addTollViaduct(720, 320, 800, 50, 21, 9.0);    // Segmen 2: Kebon Nanas ke Simpang Pramuka
+    addTollViaduct(800, 50, 945, -57, 21, 9.0);    // Segmen 3: Simpang Pramuka ke Velodrome Rawamangun
+    addTollViaduct(945, -57, 850, -350, 21, 9.0);  // Segmen 4: Velodrome ke Pulomas / By-Pass Priok (Menyambung Tol Pelabuhan)
+
+    // =========================================================================
+    // 5. SIMPANG SUSUN CAWANG LOOPS & CONNECTORS
+    // Ramp lengkung menghubungkan 4 penjuru jalan tol di Cawang
+    // =========================================================================
+    addCurvedRamp(650, 724, 7.5, 712, 660, 9.5, 9.5);  // Ramp Tol Dalam Kota -> By-Pass Priok
+    addCurvedRamp(712, 660, 9.5, 780, 724, 7.5, 9.5);  // Ramp By-Pass Priok -> Tol Cikampek
+    addCurvedRamp(780, 724, 7.5, 712, 780, 9.5, 9.5);  // Ramp Tol Cikampek -> Tol Jagorawi
+    addCurvedRamp(712, 780, 9.5, 650, 724, 7.5, 9.5);  // Ramp Tol Jagorawi -> Tol Dalam Kota
+
+    // =========================================================================
+    // 6. POROS ARTERI UTAMA JAKARTA TIMUR
+    // =========================================================================
+    // A. Koridor Jl. Matraman Raya -> Jl. Jatinegara Barat/Timur -> Jl. Otista -> Cawang
+    addRoad(420, -120, 550, 80, 22, true, 3.0);   // Matraman Raya Utara (Akses Salemba)
+    addRoad(550, 80, 666, 282, 24, true, 3.5);    // Matraman ke Stasiun Jatinegara
+    addRoad(666, 282, 580, 420, 24, true, 3.5);   // Jatinegara ke Terminal Kampung Melayu
+    addRoad(580, 420, 640, 580, 22, true, 3.0);   // Kampung Melayu ke Jl. Otista
+    addRoad(640, 580, 712, 724, 24, true, 3.5);   // Jl. Otista ke Simpang Susun Cawang
+
+    // B. Koridor Jl. Pemuda & Jl. Pramuka (Poros Rawamangun ke Matraman)
+    addRoad(420, -120, 620, -90, 22, true, 3.0);  // Jl. Pramuka (Matraman ke Simpang By-Pass)
+    addRoad(620, -90, 945, -57, 24, true, 3.5);   // Jl. Pemuda Barat (Depan Velodrome Rawamangun)
+    addRoad(945, -57, 1350, -30, 22, true, 3.0);  // Jl. Pemuda Timur (Menuju Pulogadung)
+
+    // C. Koridor Jl. Kolonel Sugiono & Jl. Basuki Rahmat (Casablanca Timur / Non-Tol)
+    addRoad(450, 520, 580, 520, 22, true, 3.0);   // Sambungan Flyover Casablanca Tebet ke Kp. Melayu
+    addRoad(580, 520, 850, 520, 22, true, 3.0);   // Jl. Basuki Rahmat (Kp. Melayu ke Cipinang Besar)
+    addRoad(850, 520, 1200, 520, 22, true, 3.0);  // Jl. Kolonel Sugiono (Cipinang ke Duren Sawit)
+
+    // Flyover Cipinang (Jembatan Layang Non-Tol di atas perlintasan rel/simpang)
+    addCurvedRamp(800, 520, 0.8, 870, 520, 6.0, 11.0);
+    addCurvedRamp(870, 520, 6.0, 940, 520, 0.8, 11.0);
+
+    // D. Koridor Jl. DI Panjaitan & Jl. Mayjen Sutoyo (Arteri By-Pass Bawah Tol)
+    addRoad(720, 320, 712, 724, 22, true, 3.0);   // Kebon Nanas ke Cawang
+    addRoad(712, 724, 780, 950, 22, true, 3.0);   // Cawang ke PGC Cililitan
+    addRoad(720, 320, 800, 50, 22, true, 3.0);    // Kebon Nanas ke Pramuka
+
+    // E. Koridor Jl. Raya Pondok Gede & Akses Halim / TMII / Lubang Buaya
+    addRoad(893, 993, 1182, 1324, 18, false);     // Akses Bandara Halim ke Monumen Pancasila Sakti
+    addRoad(1182, 1324, 1040, 1551, 18, false);   // Monumen Pancasila Sakti ke Gerbang TMII
+    addRoad(1040, 1551, 1040, 1480, 20, true, 2.5); // Jl. Raya Taman Mini ke Akses Tol Jagorawi
+
+    // =========================================================================
+    // 7. TATA AIR & KANAL PENGENDALI BANJIR JAKARTA TIMUR
+    // =========================================================================
+    // A. Kanal Banjir Timur (KBT / Eastern Flood Canal)
+    // Mengalir megah dari Cipinang melengkung ke Duren Sawit, Pondok Bambu, hingga Cakung
+    addRiverSegment(850, 580, 1150, 350, 26, 1.4);  // KBT Segmen 1: Cipinang ke Duren Sawit
+    addRiverSegment(1150, 350, 1320, 100, 26, 1.4); // KBT Segmen 2: Duren Sawit ke Pondok Bambu
+    addRiverSegment(1320, 100, 1500, -250, 26, 1.4); // KBT Segmen 3: Pondok Bambu ke Pulogebang / Cakung
+
+    // Jalan Inspeksi Ganda & Jalur Hijau Tanggul KBT
+    addRoad(855, 595, 1155, 365, 8, false); // Inspeksi Sisi Timur Segmen 1
+    addRoad(845, 565, 1145, 335, 8, false); // Inspeksi Sisi Barat Segmen 1
+    addRoad(1155, 365, 1325, 115, 8, false); // Inspeksi Sisi Timur Segmen 2
+    addRoad(1145, 335, 1315, 85, 8, false);  // Inspeksi Sisi Barat Segmen 2
+
+    // B. Kali Malang (Saluran Air Baku Tarum Barat di bawah Tol Becakayu)
+    addRiverSegment(720, 600, 1050, 680, 16, 1.2);  // Kali Malang Segmen 1: Cawang ke Cipinang Melayu
+    addRiverSegment(1050, 680, 1400, 720, 16, 1.2); // Kali Malang Segmen 2: Cipinang Melayu ke Pondok Kelapa
+
+    // C. Kali Ciliwung Timur (Aliran Ciliwung Kampung Melayu - Cawang)
+    addRiverSegment(570, 380, 610, 480, 18, 1.2);   // Ciliwung Kp. Melayu ke Bidara Cina
+    addRiverSegment(610, 480, 680, 700, 18, 1.2);   // Ciliwung Bidara Cina ke Cawang
+
+    // D. Waduk Ria Rio / Pulomas (Danau Retensi Pengendali Banjir Timur Laut)
+    const riaRioWaterGeo = new THREE.CylinderGeometry(28, 28, 0.8, 24);
+    riaRioWaterGeo.scale(1.25, 1.0, 0.9);
+    riaRioWaterGeo.translate(850, -0.1, -280);
+    waterGeos.push(riaRioWaterGeo);
+
+    // Tanggul & Taman Riparian Waduk Ria Rio
+    const riaRioParkGeo = new THREE.RingGeometry(28, 36, 24);
+    riaRioParkGeo.rotateX(-Math.PI / 2);
+    riaRioParkGeo.scale(1.25, 1.0, 0.9);
+    riaRioParkGeo.translate(850, 0.15, -280);
+    medianGeos.push(riaRioParkGeo);
+
+    // =========================================================================
+    // 8. JEMBATAN-JEMBATAN PENYEBERANGAN SUNGAI & KANAL
+    // =========================================================================
+    addBridge(1020, 1.2, 450, 24, 1.4, 30, 0.65); // Jembatan KBT Casablanca (Jl. Kolonel Sugiono)
+    addBridge(1230, 1.2, 220, 24, 1.4, 30, 0.65); // Jembatan KBT Raden Inten / Duren Sawit
+    addBridge(890, 8.2, 680, 26, 1.4, 22, 0);     // Jembatan Tol Becakayu & Arteri atas Kali Malang
+    addBridge(570, 1.2, 380, 26, 1.4, 24, 0);     // Jembatan Kampung Melayu atas Kali Ciliwung
+    addBridge(712, 1.2, 640, 26, 1.4, 22, 0);     // Jembatan Arteri Otista / MT Haryono atas Ciliwung Cawang
+
+    // =========================================================================
+    // 9. MERGE GEOMETRIES & ADD TO SCENE (Hanya 9 Draw Calls!)
     // =========================================================================
     const mergeAndAdd = (geos, mat, receiveShadow = true, castShadow = false) => {
       if (!geos || geos.length === 0) return;

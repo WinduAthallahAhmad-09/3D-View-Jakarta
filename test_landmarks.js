@@ -695,4 +695,62 @@ assert.ok(landmarkModelsContent.includes('createVelodromeRawamangun'), 'Landmark
 assert.ok(landmarkModelsContent.includes('createSimpangSusunCawang'), 'LandmarkModels.js missing createSimpangSusunCawang');
 assert.ok(landmarkModelsContent.includes('createMonumenPancasilaSakti'), 'LandmarkModels.js missing createMonumenPancasilaSakti');
 
-console.log('✅ All 69 landmarks, Quick Wins & Tahap 1 Jakarta Timur verified successfully!');
+// Check 26: Tahap 2 Jaringan Jalan Tol, Arteri Utama & Koridor Tata Air KBT Jakarta Timur
+assert.ok(
+  citySceneContent.includes('this.buildEastJakartaInfrastructure()'),
+  'CityScene.js missing buildEastJakartaInfrastructure call in init'
+);
+assert.ok(
+  citySceneContent.includes('buildEastJakartaInfrastructure()'),
+  'CityScene.js missing buildEastJakartaInfrastructure method'
+);
+assert.ok(
+  citySceneContent.includes('JALAN TOL JAGORAWI'),
+  'CityScene.js missing JALAN TOL JAGORAWI'
+);
+assert.ok(
+  citySceneContent.includes('JALAN TOL JAKARTA - CIKAMPEK'),
+  'CityScene.js missing JALAN TOL JAKARTA - CIKAMPEK'
+);
+assert.ok(
+  citySceneContent.includes('JALAN TOL BECAKAYU'),
+  'CityScene.js missing JALAN TOL BECAKAYU'
+);
+assert.ok(
+  citySceneContent.includes('JALAN TOL IR. WIYOTO WIYONO'),
+  'CityScene.js missing JALAN TOL IR. WIYOTO WIYONO'
+);
+assert.ok(
+  citySceneContent.includes('SIMPANG SUSUN CAWANG LOOPS'),
+  'CityScene.js missing SIMPANG SUSUN CAWANG LOOPS'
+);
+assert.ok(
+  citySceneContent.includes('Jl. Matraman Raya'),
+  'CityScene.js missing Jl. Matraman Raya'
+);
+assert.ok(
+  citySceneContent.includes('Jl. Pemuda & Jl. Pramuka'),
+  'CityScene.js missing Jl. Pemuda & Jl. Pramuka'
+);
+assert.ok(
+  citySceneContent.includes('Jl. Kolonel Sugiono & Jl. Basuki Rahmat'),
+  'CityScene.js missing Jl. Kolonel Sugiono & Jl. Basuki Rahmat'
+);
+assert.ok(
+  citySceneContent.includes('Kanal Banjir Timur'),
+  'CityScene.js missing Kanal Banjir Timur'
+);
+assert.ok(
+  citySceneContent.includes('Kali Malang'),
+  'CityScene.js missing Kali Malang'
+);
+assert.ok(
+  citySceneContent.includes('Kali Ciliwung Timur'),
+  'CityScene.js missing Kali Ciliwung Timur'
+);
+assert.ok(
+  citySceneContent.includes('Waduk Ria Rio'),
+  'CityScene.js missing Waduk Ria Rio'
+);
+
+console.log('✅ All 69 landmarks, Quick Wins & Tahap 1 + 2 Jakarta Timur verified successfully!');
