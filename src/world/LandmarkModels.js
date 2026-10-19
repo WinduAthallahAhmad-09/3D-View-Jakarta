@@ -4584,6 +4584,697 @@ export class LandmarkModels {
 
     return group;
   }
+
+  /**
+   * 58. Kantor Walikota Jakarta Barat & Kompleks Pemerintahan Kembangan
+   * Balai kota terpadu: sayap bertingkat simetris, atap limasan piramida tembaga toska,
+   * tangga kolosal, lapangan upacara bendera Merah Putih, dan taman hijau.
+   */
+  static createKantorWalikotaJakbar() {
+    const group = new THREE.Group();
+
+    const facadeMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.5 });
+    const darkGlassMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.15, metalness: 0.85 });
+    const copperRoofMat = new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.45, metalness: 0.4 });
+    const plazaPavingMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8 });
+    const grassMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.9 });
+    const flagPoleMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.2 });
+    const flagRedMat = new THREE.MeshBasicMaterial({ color: 0xdc2626 });
+    const flagWhiteMat = new THREE.MeshBasicMaterial({ color: 0xf8fafc });
+
+    // 1. Plaza Upacara & Taman Hijau Dasar (64m x 74m)
+    const basePlaza = new THREE.Mesh(new THREE.BoxGeometry(64, 1.2, 74), plazaPavingMat);
+    basePlaza.position.set(0, 0.6, 5);
+    basePlaza.receiveShadow = true;
+    group.add(basePlaza);
+
+    // Front Green Lawns
+    [-18, 18].forEach((lx) => {
+      const lawn = new THREE.Mesh(new THREE.BoxGeometry(22, 1.3, 20), grassMat);
+      lawn.position.set(lx, 0.65, 25);
+      lawn.receiveShadow = true;
+      group.add(lawn);
+    });
+
+    // 2. Central Municipal Hall (Main Tower Block H=38m)
+    const mainBlock = new THREE.Mesh(new THREE.BoxGeometry(32, 28, 26), facadeMat);
+    mainBlock.position.set(0, 14.6, -8);
+    mainBlock.castShadow = true;
+    mainBlock.receiveShadow = true;
+    group.add(mainBlock);
+
+    // Glass Window Bands across Main Hall
+    for (let f = 5; f <= 25; f += 4) {
+      const windowBand = new THREE.Mesh(new THREE.BoxGeometry(32.4, 1.8, 22), darkGlassMat);
+      windowBand.position.set(0, f, -8);
+      group.add(windowBand);
+    }
+
+    // 3. Symmetrical East and West Wings (H=20m)
+    [-27, 27].forEach((wx) => {
+      const wing = new THREE.Mesh(new THREE.BoxGeometry(22, 18, 20), facadeMat);
+      wing.position.set(wx, 9.6, -5);
+      wing.castShadow = true;
+      wing.receiveShadow = true;
+      group.add(wing);
+
+      // Ribbon windows on wings
+      for (let wf = 4; wf <= 16; wf += 4) {
+        const wingWindow = new THREE.Mesh(new THREE.BoxGeometry(22.4, 1.5, 16), darkGlassMat);
+        wingWindow.position.set(wx, wf, -5);
+        group.add(wingWindow);
+      }
+    });
+
+    // 4. Stepped Pyramidal Copper Hipped Roof
+    const roofTier1 = new THREE.Mesh(new THREE.ConeGeometry(24, 7, 4), copperRoofMat);
+    roofTier1.rotateY(Math.PI / 4);
+    roofTier1.position.set(0, 31.6, -8);
+    roofTier1.castShadow = true;
+    group.add(roofTier1);
+
+    const roofTier2 = new THREE.Mesh(new THREE.ConeGeometry(14, 6, 4), copperRoofMat);
+    roofTier2.rotateY(Math.PI / 4);
+    roofTier2.position.set(0, 37.6, -8);
+    roofTier2.castShadow = true;
+    group.add(roofTier2);
+
+    // Spire Finial
+    const finial = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.8, 5, 8), flagPoleMat);
+    finial.position.set(0, 42.6, -8);
+    group.add(finial);
+
+    // 5. Monumental Front Entrance Portico & Grand Stairs
+    const stairs = new THREE.Mesh(new THREE.BoxGeometry(18, 2.5, 10), facadeMat);
+    stairs.position.set(0, 1.85, 8);
+    group.add(stairs);
+
+    // 4 Entrance Pillars
+    for (let px = -6; px <= 6; px += 4) {
+      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 10, 8), facadeMat);
+      pillar.position.set(px, 7.6, 6.5);
+      pillar.castShadow = true;
+      group.add(pillar);
+    }
+    const porticoCanopy = new THREE.Mesh(new THREE.BoxGeometry(18, 1.5, 6), facadeMat);
+    porticoCanopy.position.set(0, 12.8, 6.5);
+    group.add(porticoCanopy);
+
+    // 6. Tiang Bendera Upacara Merah Putih
+    const flagPole = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 16, 8), flagPoleMat);
+    flagPole.position.set(0, 8.6, 26);
+    group.add(flagPole);
+
+    const flagRed = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.2, 2.4), flagRedMat);
+    flagRed.position.set(0, 15.6, 27.2);
+    group.add(flagRed);
+
+    const flagWhite = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.2, 2.4), flagWhiteMat);
+    flagWhite.position.set(0, 14.4, 27.2);
+    group.add(flagWhite);
+
+    return group;
+  }
+
+  /**
+   * 59. Superblok Lippo Mall Puri & The St. Moritz
+   * Megasuperblok Sentra Primer Baru Barat: podium mall bertingkat luas,
+   * 6 menara pencakar langit apartemen The St. Moritz (H=120-175m), skybridge lengkung kaca, dan helipad.
+   */
+  static createLippoMallPuri() {
+    const group = new THREE.Group();
+
+    const podiumMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.45 });
+    const glassTowerMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.15, metalness: 0.88 });
+    const silverTrimMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.35, metalness: 0.6 });
+    const darkPodiumMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 });
+    const skybridgeGlassMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, metalness: 0.8, transparent: true, opacity: 0.85 });
+    const helipadMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.7 });
+    const helipadYellowMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+
+    // 1. Sprawling Commercial Mall Podium (94m x 84m x 24m)
+    const podiumBase = new THREE.Mesh(new THREE.BoxGeometry(94, 16, 84), podiumMat);
+    podiumBase.position.set(0, 8, 0);
+    podiumBase.castShadow = true;
+    podiumBase.receiveShadow = true;
+    group.add(podiumBase);
+
+    // Stepped Upper Terrace
+    const podiumUpper = new THREE.Mesh(new THREE.BoxGeometry(76, 8, 68), darkPodiumMat);
+    podiumUpper.position.set(0, 20, -2);
+    group.add(podiumUpper);
+
+    // Skylight Glass Strip
+    const skylight = new THREE.Mesh(new THREE.BoxGeometry(40, 2.5, 18), glassTowerMat);
+    skylight.position.set(0, 24.5, 0);
+    group.add(skylight);
+
+    // 2. 6 Skyscraper Residential Towers of The St. Moritz
+    const towerConfigs = [
+      { x: -30, z: -26, w: 18, d: 18, h: 172, label: "Presidential Tower" },
+      { x: -30, z: 18, w: 17, d: 17, h: 148, label: "Royal Tower" },
+      { x: 0, z: -28, w: 19, d: 18, h: 162, label: "New Amsterdam" },
+      { x: 30, z: -26, w: 18, d: 17, h: 154, label: "Amber Tower" },
+      { x: 30, z: 18, w: 17, d: 17, h: 135, label: "Ambassador Tower" },
+      { x: 0, z: 24, w: 16, d: 16, h: 120, label: "Beverly Tower" }
+    ];
+
+    towerConfigs.forEach((t, idx) => {
+      const towerGroup = new THREE.Group();
+      towerGroup.position.set(t.x, 0, t.z);
+
+      // Main Glass Shaft
+      const towerBody = new THREE.Mesh(new THREE.BoxGeometry(t.w, t.h, t.d), glassTowerMat);
+      towerBody.position.y = t.h * 0.5;
+      towerBody.castShadow = true;
+      towerBody.receiveShadow = true;
+      towerGroup.add(towerBody);
+
+      // Architectural Balcony/Mullion Bands every 12m
+      for (let y = 26; y < t.h - 10; y += 12) {
+        const floorBand = new THREE.Mesh(new THREE.BoxGeometry(t.w + 0.8, 1.2, t.d + 0.8), silverTrimMat);
+        floorBand.position.y = y;
+        towerGroup.add(floorBand);
+      }
+
+      // Sculpted Crown
+      const crown = new THREE.Mesh(new THREE.BoxGeometry(t.w * 0.85, 6, t.d * 0.85), silverTrimMat);
+      crown.position.y = t.h + 3;
+      towerGroup.add(crown);
+
+      // Helipad on the tallest tower (#0 Presidential Tower)
+      if (idx === 0) {
+        const heliBase = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, 1.2, 16), helipadMat);
+        heliBase.position.y = t.h + 6.6;
+        towerGroup.add(heliBase);
+
+        const heliRing = new THREE.Mesh(new THREE.RingGeometry(4.5, 5.2, 16), helipadYellowMat);
+        heliRing.rotateX(-Math.PI / 2);
+        heliRing.position.y = t.h + 7.3;
+        towerGroup.add(heliRing);
+      }
+
+      group.add(towerGroup);
+    });
+
+    // 3. Elevated Glass Skybridges Connecting Towers & Podium
+    const bridge1 = new THREE.Mesh(new THREE.BoxGeometry(24, 4, 4.5), skybridgeGlassMat);
+    bridge1.position.set(-15, 26, -26);
+    group.add(bridge1);
+
+    const bridge2 = new THREE.Mesh(new THREE.BoxGeometry(24, 4, 4.5), skybridgeGlassMat);
+    bridge2.position.set(15, 26, -26);
+    group.add(bridge2);
+
+    return group;
+  }
+
+  /**
+   * 60. Puri Indah Mall & Kawasan Niaga Sentra Barat
+   * Ikonik bergaya Istana Victoria (Victorian Castle): dinding bata terakota merah,
+   * kubah-kubah tembaga berwarna toska (copper green), menara jam klasik, dan gerbang lengkung.
+   */
+  static createPuriIndahMall() {
+    const group = new THREE.Group();
+
+    const brickMat = new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.75 });
+    const trimStoneMat = new THREE.MeshStandardMaterial({ color: 0xfef08a, roughness: 0.6 });
+    const toskaDomeMat = new THREE.MeshStandardMaterial({ color: 0x0d9488, metalness: 0.55, roughness: 0.35 });
+    const goldFinialMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.85, roughness: 0.2 });
+    const clockMat = new THREE.MeshBasicMaterial({ color: 0xfffbeb });
+    const plazaMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8 });
+
+    // 1. Mall Podium & Paved Courtyard
+    const basePlaza = new THREE.Mesh(new THREE.BoxGeometry(84, 1.2, 70), plazaMat);
+    basePlaza.position.set(0, 0.6, 0);
+    basePlaza.receiveShadow = true;
+    group.add(basePlaza);
+
+    // Main Victorian Brick Mall Building (72m x 56m x 18m)
+    const mainBody = new THREE.Mesh(new THREE.BoxGeometry(72, 18, 56), brickMat);
+    mainBody.position.set(0, 9.6, -2);
+    mainBody.castShadow = true;
+    mainBody.receiveShadow = true;
+    group.add(mainBody);
+
+    // Decorative Stone Stringcourses (Bands)
+    [6, 12, 18].forEach((by) => {
+      const band = new THREE.Mesh(new THREE.BoxGeometry(73, 0.8, 57), trimStoneMat);
+      band.position.set(0, by, -2);
+      group.add(band);
+    });
+
+    // 2. Grand Central Copper Dome (Toska Dome H=36m)
+    const centralDrum = new THREE.Mesh(new THREE.CylinderGeometry(9.5, 9.5, 6, 16), trimStoneMat);
+    centralDrum.position.set(0, 21.6, -2);
+    centralDrum.castShadow = true;
+    group.add(centralDrum);
+
+    const mainDome = new THREE.Mesh(new THREE.SphereGeometry(9.5, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2), toskaDomeMat);
+    mainDome.position.set(0, 24.6, -2);
+    mainDome.castShadow = true;
+    group.add(mainDome);
+
+    const mainSpire = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.6, 6, 8), goldFinialMat);
+    mainSpire.position.set(0, 37.1, -2);
+    group.add(mainSpire);
+
+    // 3. 4 Corner Castle Turrets with Toska Domes
+    const turretOffsets = [
+      [-32, -26],
+      [32, -26],
+      [-32, 22],
+      [32, 22]
+    ];
+
+    turretOffsets.forEach(([tx, tz]) => {
+      const turret = new THREE.Mesh(new THREE.CylinderGeometry(4.2, 4.5, 24, 12), brickMat);
+      turret.position.set(tx, 12.6, tz);
+      turret.castShadow = true;
+      group.add(turret);
+
+      const turretBand = new THREE.Mesh(new THREE.CylinderGeometry(4.6, 4.6, 1.2, 12), trimStoneMat);
+      turretBand.position.set(tx, 24.6, tz);
+      group.add(turretBand);
+
+      const turretDome = new THREE.Mesh(new THREE.ConeGeometry(4.6, 7.5, 12), toskaDomeMat);
+      turretDome.position.set(tx, 28.8, tz);
+      turretDome.castShadow = true;
+      group.add(turretDome);
+
+      const turretFinial = new THREE.Mesh(new THREE.SphereGeometry(0.6, 8, 8), goldFinialMat);
+      turretFinial.position.set(tx, 33.1, tz);
+      group.add(turretFinial);
+    });
+
+    // 4. Central Entrance Clock Tower (Front Entrance Portico)
+    const clockTower = new THREE.Mesh(new THREE.BoxGeometry(16, 28, 12), brickMat);
+    clockTower.position.set(0, 14.6, 26);
+    clockTower.castShadow = true;
+    group.add(clockTower);
+
+    // Grand Arched Entry Portal
+    const archPortal = new THREE.Mesh(new THREE.BoxGeometry(8, 7, 2), trimStoneMat);
+    archPortal.position.set(0, 4.1, 32.1);
+    group.add(archPortal);
+
+    // 3 Illuminated Clock Faces
+    const clockFront = new THREE.Mesh(new THREE.CircleGeometry(1.8, 16), clockMat);
+    clockFront.position.set(0, 24, 32.1);
+    group.add(clockFront);
+
+    [-8.1, 8.1].forEach((cx) => {
+      const sideClock = new THREE.Mesh(new THREE.CircleGeometry(1.6, 16), clockMat);
+      sideClock.position.set(cx, 24, 26);
+      sideClock.rotation.y = cx > 0 ? Math.PI / 2 : -Math.PI / 2;
+      group.add(sideClock);
+    });
+
+    // Clock Tower Spire
+    const towerRoof = new THREE.Mesh(new THREE.ConeGeometry(7, 9, 4), toskaDomeMat);
+    towerRoof.rotateY(Math.PI / 4);
+    towerRoof.position.set(0, 32.6, 26);
+    towerRoof.castShadow = true;
+    group.add(towerRoof);
+
+    return group;
+  }
+
+  /**
+   * 61. Pecinan Bersejarah Glodok & Pantjoran Chinatown
+   * Pusat pecinan Batavia: Gerbang Paifang beratap genteng merah melengkung dengan ornamen emas & lentera,
+   * Pantjoran Tea House 1635 bersejarah, dan Vihara Dharma Bhakti pagoda kelenteng Kim Tek Ie.
+   */
+  static createGlodokChinatown() {
+    const group = new THREE.Group();
+
+    const redLacquerMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.35 });
+    const brightRedMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.4 });
+    const goldOrnamentMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.8, roughness: 0.25 });
+    const stonePavingMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.85 });
+    const heritageWallMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.7 });
+    const darkWoodMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.8 });
+    const lanternMat = new THREE.MeshStandardMaterial({
+      color: 0xef4444,
+      emissive: 0xef4444,
+      emissiveIntensity: 0.6
+    });
+
+    // 1. Street Pavement (Jl. Pancoran / Glodok Walk)
+    const streetBase = new THREE.Mesh(new THREE.BoxGeometry(60, 0.8, 55), stonePavingMat);
+    streetBase.position.set(0, 0.4, 0);
+    streetBase.receiveShadow = true;
+    group.add(streetBase);
+
+    // 2. Monumental Paifang Chinese Archway (Gate H=18m)
+    const paifangGroup = new THREE.Group();
+    paifangGroup.position.set(0, 0.8, 16);
+
+    // 4 Red Lacquer Pillars
+    [-8, -2.8, 2.8, 8].forEach((px) => {
+      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.65, 12, 12), redLacquerMat);
+      pillar.position.set(px, 6, 0);
+      pillar.castShadow = true;
+      paifangGroup.add(pillar);
+
+      // Stone Base Plinth
+      const plinth = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.2, 1.6), stonePavingMat);
+      plinth.position.set(px, 0.6, 0);
+      paifangGroup.add(plinth);
+    });
+
+    // Cross Beams & Golden Architraves
+    const lowerBeam = new THREE.Mesh(new THREE.BoxGeometry(19, 0.9, 1.4), brightRedMat);
+    lowerBeam.position.set(0, 10.5, 0);
+    paifangGroup.add(lowerBeam);
+
+    const upperBeam = new THREE.Mesh(new THREE.BoxGeometry(13, 0.9, 1.4), brightRedMat);
+    upperBeam.position.set(0, 13.5, 0);
+    paifangGroup.add(upperBeam);
+
+    // Central Golden Plaque (Papan Nama Pantjoran Chinatown)
+    const plaque = new THREE.Mesh(new THREE.BoxGeometry(6.5, 1.8, 0.3), goldOrnamentMat);
+    plaque.position.set(0, 12, 0.8);
+    paifangGroup.add(plaque);
+
+    // Central Main Roof (Curved Chinese Gable Roof)
+    const mainRoof = new THREE.Mesh(new THREE.ConeGeometry(9.5, 3.2, 4), brightRedMat);
+    mainRoof.rotateY(Math.PI / 4);
+    mainRoof.scale.set(1.4, 0.8, 0.9);
+    mainRoof.position.set(0, 15.2, 0);
+    mainRoof.castShadow = true;
+    paifangGroup.add(mainRoof);
+
+    // Golden Roof Ridge & Upturned Horns
+    const roofRidge = new THREE.Mesh(new THREE.BoxGeometry(12, 0.4, 0.4), goldOrnamentMat);
+    roofRidge.position.set(0, 16.7, 0);
+    paifangGroup.add(roofRidge);
+
+    // Side Eaves Roofs
+    [-6.5, 6.5].forEach((sx) => {
+      const sideRoof = new THREE.Mesh(new THREE.ConeGeometry(4.2, 2.0, 4), brightRedMat);
+      sideRoof.rotateY(Math.PI / 4);
+      sideRoof.scale.set(1.3, 0.8, 0.9);
+      sideRoof.position.set(sx, 11.5, 0);
+      paifangGroup.add(sideRoof);
+    });
+
+    // Hanging Glowing Red Lanterns
+    [-5.5, -2, 2, 5.5].forEach((lx) => {
+      const lantern = new THREE.Mesh(new THREE.SphereGeometry(0.5, 10, 8), lanternMat);
+      lantern.scale.set(1, 1.3, 1);
+      lantern.position.set(lx, 9.2, 0);
+      paifangGroup.add(lantern);
+    });
+
+    group.add(paifangGroup);
+
+    // 3. Pantjoran Tea House 1635 (Colonial Dutch-Chinese Heritage Building)
+    const teaHouse = new THREE.Group();
+    teaHouse.position.set(-18, 0.8, -10);
+
+    const teaHouseBody = new THREE.Mesh(new THREE.BoxGeometry(16, 10, 20), heritageWallMat);
+    teaHouseBody.position.y = 5;
+    teaHouseBody.castShadow = true;
+    teaHouse.add(teaHouseBody);
+
+    // Dark Timber Veranda & Louvred Windows
+    const veranda = new THREE.Mesh(new THREE.BoxGeometry(16.4, 1.2, 20.4), darkWoodMat);
+    veranda.position.y = 5.2;
+    teaHouse.add(veranda);
+
+    const teaHouseRoof = new THREE.Mesh(new THREE.ConeGeometry(14, 4.5, 4), brightRedMat);
+    teaHouseRoof.rotateY(Math.PI / 4);
+    teaHouseRoof.scale.set(1.1, 1, 1.4);
+    teaHouseRoof.position.y = 12.2;
+    teaHouse.add(teaHouseRoof);
+
+    group.add(teaHouse);
+
+    // 4. Vihara Dharma Bhakti (Kim Tek Ie 1650) & Pagoda Temple
+    const viharaGroup = new THREE.Group();
+    viharaGroup.position.set(18, 0.8, -10);
+
+    const viharaBase = new THREE.Mesh(new THREE.BoxGeometry(18, 6, 20), brightRedMat);
+    viharaBase.position.y = 3;
+    viharaBase.castShadow = true;
+    viharaGroup.add(viharaBase);
+
+    // 3-Tiered Pagoda Shrine Roofs
+    [6.5, 9.5, 12.5].forEach((ry, tier) => {
+      const tierScale = 1.0 - tier * 0.22;
+      const pagodaTier = new THREE.Mesh(new THREE.ConeGeometry(12 * tierScale, 2.5, 6), brightRedMat);
+      pagodaTier.position.y = ry;
+      pagodaTier.castShadow = true;
+      viharaGroup.add(pagodaTier);
+
+      // Gold Trim
+      const goldTrim = new THREE.Mesh(new THREE.CylinderGeometry(12.2 * tierScale, 12.2 * tierScale, 0.2, 6), goldOrnamentMat);
+      goldTrim.position.y = ry - 1.2;
+      viharaGroup.add(goldTrim);
+    });
+
+    const pagodaSpire = new THREE.Mesh(new THREE.ConeGeometry(0.8, 3.5, 8), goldOrnamentMat);
+    pagodaSpire.position.y = 15.2;
+    viharaGroup.add(pagodaSpire);
+
+    group.add(viharaGroup);
+
+    return group;
+  }
+
+  /**
+   * 62. Sentra Penyiaran RCTI & MNC Studios Kebon Jeruk
+   * Kompleks penyiaran televisi swasta pertama dan terbesar: Menara RCTI (H=92m) kaca biru,
+   * deretan studio siaran hangar (Studio RCTI+), piringan satelit uplink, dan menara pemancar baja merah-putih.
+   */
+  static createMNCStudiosKebonJeruk() {
+    const group = new THREE.Group();
+
+    const blueGlassMat = new THREE.MeshStandardMaterial({
+      color: 0x1d4ed8,
+      metalness: 0.88,
+      roughness: 0.15,
+      emissive: 0x1e3a8a,
+      emissiveIntensity: 0.18
+    });
+    const whiteFacadeMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
+    const hangarMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.65 });
+    const steelTowerMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, metalness: 0.8, roughness: 0.3 });
+    const whiteSteelMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.7, roughness: 0.3 });
+    const satelliteDishMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.6, roughness: 0.3 });
+    const redBeaconMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+    const corporateBlueMat = new THREE.MeshBasicMaterial({ color: 0x2563eb });
+
+    // 1. Menara RCTI (Main Commercial & Broadcasting Office Tower H=92m)
+    const towerGroup = new THREE.Group();
+    towerGroup.position.set(-18, 0, 0);
+
+    const towerBody = new THREE.Mesh(new THREE.BoxGeometry(22, 92, 22), blueGlassMat);
+    towerBody.position.y = 46;
+    towerBody.castShadow = true;
+    towerBody.receiveShadow = true;
+    towerGroup.add(towerBody);
+
+    // Architectural White Chamfer & Mullions
+    [-11.2, 11.2].forEach((cx) => {
+      const cornerPillar = new THREE.Mesh(new THREE.BoxGeometry(1.2, 94, 1.2), whiteFacadeMat);
+      cornerPillar.position.set(cx, 47, 0);
+      towerGroup.add(cornerPillar);
+    });
+
+    // MNC Corporate Brand Band (Upper floors)
+    const brandBand = new THREE.Mesh(new THREE.BoxGeometry(22.8, 4.5, 22.8), corporateBlueMat);
+    brandBand.position.y = 82;
+    towerGroup.add(brandBand);
+
+    // Tower Sculpted Crown
+    const crown = new THREE.Mesh(new THREE.BoxGeometry(18, 5, 18), whiteFacadeMat);
+    crown.position.y = 94.5;
+    towerGroup.add(crown);
+
+    group.add(towerGroup);
+
+    // 2. Broadcast Production Soundstages & Hangars (Studio RCTI+ Concert Hall)
+    const hangarGroup = new THREE.Group();
+    hangarGroup.position.set(18, 0, 0);
+
+    // Main Mega Studio RCTI+ Hangar (42m x 22m x 52m)
+    const mainHangar = new THREE.Mesh(new THREE.BoxGeometry(42, 22, 52), hangarMat);
+    mainHangar.position.y = 11;
+    mainHangar.castShadow = true;
+    mainHangar.receiveShadow = true;
+    hangarGroup.add(mainHangar);
+
+    // Barrel Vaulted Roof Profile for Studio Acoustics
+    const vaultGeo = new THREE.CylinderGeometry(21, 21, 52, 16, 1, false, 0, Math.PI);
+    vaultGeo.rotateZ(Math.PI / 2);
+    vaultGeo.rotateY(Math.PI / 2);
+    const vaultRoof = new THREE.Mesh(vaultGeo, whiteFacadeMat);
+    vaultRoof.position.set(0, 22, 0);
+    vaultRoof.castShadow = true;
+    hangarGroup.add(vaultRoof);
+
+    // Adjacent Production Annex
+    const annex = new THREE.Mesh(new THREE.BoxGeometry(32, 12, 20), whiteFacadeMat);
+    annex.position.set(0, 6, 32);
+    hangarGroup.add(annex);
+
+    group.add(hangarGroup);
+
+    // 3. Satellite Earth Station Uplink Parabolic Dishes
+    const dishPositions = [
+      [2, 23, 20],
+      [-8, 23, 22],
+      [12, 23, 22]
+    ];
+    dishPositions.forEach(([dx, dy, dz]) => {
+      const dishGroup = new THREE.Group();
+      dishGroup.position.set(dx, dy, dz);
+
+      const dishPylon = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 2.5, 8), whiteFacadeMat);
+      dishPylon.position.y = 1.25;
+      dishGroup.add(dishPylon);
+
+      // Angled Dish Bowl facing geosynchronous satellite
+      const dish = new THREE.Mesh(new THREE.SphereGeometry(2.4, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), satelliteDishMat);
+      dish.rotation.x = -Math.PI / 3;
+      dish.position.y = 2.8;
+      dishGroup.add(dish);
+
+      group.add(dishGroup);
+    });
+
+    // 4. Steel Lattice Transmission Tower (Antena Pemancar TV H=72m)
+    const mastGroup = new THREE.Group();
+    mastGroup.position.set(-35, 0, 20);
+
+    // Alternating Red & White Segments
+    for (let s = 0; s < 6; s++) {
+      const segH = 11;
+      const rBot = 3.6 - s * 0.48;
+      const rTop = 3.6 - (s + 1) * 0.48;
+      const mat = s % 2 === 0 ? steelTowerMat : whiteSteelMat;
+
+      const seg = new THREE.Mesh(new THREE.CylinderGeometry(Math.max(0.6, rTop), rBot, segH, 4), mat);
+      seg.rotateY(Math.PI / 4);
+      seg.position.y = s * segH + segH * 0.5;
+      seg.castShadow = true;
+      mastGroup.add(seg);
+    }
+
+    // Top Antenna Spire & Red Aviation Warning Beacon
+    const mastSpire = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.4, 8, 8), whiteSteelMat);
+    mastSpire.position.y = 70;
+    mastGroup.add(mastSpire);
+
+    const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.6, 8, 8), redBeaconMat);
+    beacon.position.y = 74.2;
+    mastGroup.add(beacon);
+
+    group.add(mastGroup);
+
+    return group;
+  }
+
+  /**
+   * 63. Museum MACAN & AKR Tower Gallery West
+   * Museum seni rupa modern & kontemporer pertama di Indonesia:
+   * Menara AKR Tower (H=145m) berfasad prisma diagonal modern, podium galeri museum, dan instalasi seni patung plaza.
+   */
+  static createMuseumMACAN() {
+    const group = new THREE.Group();
+
+    const cyanGlassMat = new THREE.MeshStandardMaterial({
+      color: 0x0284c7,
+      metalness: 0.9,
+      roughness: 0.14,
+      emissive: 0x0369a1,
+      emissiveIntensity: 0.2
+    });
+    const whiteArtMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 });
+    const darkBasementMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
+    const sculptureGoldMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.8, roughness: 0.25 });
+    const pumpkinYellowMat = new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.4 });
+    const blackDotMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+    const plazaPavingMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.85 });
+
+    // 1. Paved Contemporary Sculpture Courtyard
+    const basePlaza = new THREE.Mesh(new THREE.BoxGeometry(64, 1.2, 58), plazaPavingMat);
+    basePlaza.position.set(0, 0.6, 0);
+    basePlaza.receiveShadow = true;
+    group.add(basePlaza);
+
+    // 2. AKR Tower Gallery West (High-rise Office & Residence H=145m)
+    const tower = new THREE.Mesh(new THREE.BoxGeometry(26, 142, 24), cyanGlassMat);
+    tower.position.set(-12, 71.6, -8);
+    tower.castShadow = true;
+    tower.receiveShadow = true;
+    group.add(tower);
+
+    // Diagonal Geometric Faceted Fins on AKR Tower
+    for (let f = 30; f < 135; f += 20) {
+      const fin = new THREE.Mesh(new THREE.BoxGeometry(26.8, 1.4, 24.8), whiteArtMat);
+      fin.position.set(-12, f, -8);
+      group.add(fin);
+    }
+
+    // Sculpted Angled Crown (Prismatic Glass Peak)
+    const prismCrown = new THREE.Mesh(new THREE.ConeGeometry(17, 10, 4), cyanGlassMat);
+    prismCrown.rotateY(Math.PI / 4);
+    prismCrown.position.set(-12, 147.6, -8);
+    group.add(prismCrown);
+
+    // 3. Museum MACAN Cultural Gallery Podium (Levels 1 to 5)
+    const museumPodium = new THREE.Mesh(new THREE.BoxGeometry(32, 22, 34), whiteArtMat);
+    museumPodium.position.set(14, 11.6, 6);
+    museumPodium.castShadow = true;
+    museumPodium.receiveShadow = true;
+    group.add(museumPodium);
+
+    // Cantilevered Upper Exhibition Gallery
+    const cantileverGallery = new THREE.Mesh(new THREE.BoxGeometry(28, 9, 30), darkBasementMat);
+    cantileverGallery.position.set(16, 26.6, 8);
+    cantileverGallery.castShadow = true;
+    group.add(cantileverGallery);
+
+    // Panoramic Museum Glass Wall
+    const galleryWindow = new THREE.Mesh(new THREE.BoxGeometry(28.4, 4.5, 12), cyanGlassMat);
+    galleryWindow.position.set(16, 26.6, 17);
+    group.add(galleryWindow);
+
+    // 4. Outdoor Modern Sculpture Installation & Yayoi Kusama Pumpkin Homage
+    const sculptureGroup = new THREE.Group();
+    sculptureGroup.position.set(14, 1.2, -14);
+
+    // Plinth
+    const plinth = new THREE.Mesh(new THREE.BoxGeometry(6, 1.2, 6), darkBasementMat);
+    plinth.position.y = 0.6;
+    sculptureGroup.add(plinth);
+
+    // Pumpkin Bulb Body (Homage to Yayoi Kusama)
+    const pumpkin = new THREE.Mesh(new THREE.SphereGeometry(2.2, 16, 12), pumpkinYellowMat);
+    pumpkin.scale.set(1.2, 0.85, 1.2);
+    pumpkin.position.y = 2.4;
+    pumpkin.castShadow = true;
+    sculptureGroup.add(pumpkin);
+
+    // Pumpkin Stem
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 1.2, 8), blackDotMat);
+    stem.position.y = 4.2;
+    sculptureGroup.add(stem);
+
+    // Abstract Steel Ring Sculpture
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.45, 12, 24), sculptureGoldMat);
+    ring.rotation.x = Math.PI / 3;
+    ring.position.set(-18, 4.5, 14);
+    ring.castShadow = true;
+    group.add(ring);
+
+    group.add(sculptureGroup);
+
+    return group;
+  }
 }
 
 

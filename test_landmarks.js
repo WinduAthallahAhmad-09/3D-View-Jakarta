@@ -4,8 +4,8 @@ import { JAKARTA_LANDMARKS } from './src/config/landmarks.js';
 
 console.log('Running test_landmarks.js verification...');
 
-// Check 1: Exactly 57 landmarks
-assert.strictEqual(JAKARTA_LANDMARKS.length, 57, `Expected 57 landmarks, got ${JAKARTA_LANDMARKS.length}`);
+// Check 1: Exactly 63 landmarks
+assert.strictEqual(JAKARTA_LANDMARKS.length, 63, `Expected 63 landmarks, got ${JAKARTA_LANDMARKS.length}`);
 
 // Check 2: Unique IDs and valid properties
 const seenIds = new Set();
@@ -73,6 +73,16 @@ const jakutTahap1Anchors = [
   'tanjung-priok'
 ];
 
+// West Jakarta Tahap 1 anchors (#58 s.d. #63)
+const jakbarTahap1Anchors = [
+  'walikota-jakarta-barat',
+  'lippo-mall-puri',
+  'puri-indah-mall',
+  'glodok-chinatown',
+  'mnc-studios-kebon-jeruk',
+  'museum-macan'
+];
+
 // Check 4: Check that CityScene.js maps builders for all landmarks
 const citySceneContent = fs.readFileSync('./src/world/CityScene.js', 'utf-8');
 JAKARTA_LANDMARKS.forEach((lm) => {
@@ -84,7 +94,7 @@ JAKARTA_LANDMARKS.forEach((lm) => {
 
 // Check 5: Check that index.html includes tour buttons for all anchors
 const indexHtmlContent = fs.readFileSync('./index.html', 'utf-8');
-[...southAnchors, ...jakpusEastAnchors, ...southTahap1Anchors, ...jakutTahap1Anchors].forEach((id) => {
+[...southAnchors, ...jakpusEastAnchors, ...southTahap1Anchors, ...jakutTahap1Anchors, ...jakbarTahap1Anchors].forEach((id) => {
   assert.ok(
     indexHtmlContent.includes(`data-tour-id="${id}"`),
     `index.html missing tour button for "${id}"`
@@ -531,4 +541,30 @@ assert.ok(
   'CityScene.js missing RE Martadinata port logistics truck route'
 );
 
-console.log('✅ All 57 landmarks, Quick Wins & Tahap 1 + 2 + 3 + 4 Jakarta Utara verified successfully!');
+// Check 21: Tahap 1 Jakarta Barat Anchor Landmarks (#58 s.d. #63)
+jakbarTahap1Anchors.forEach((id) => {
+  const lm = JAKARTA_LANDMARKS.find((l) => l.id === id);
+  assert.ok(lm, `Missing West Jakarta Tahap 1 anchor landmark: ${id}`);
+  assert.ok(lm.position[0] < -100, `Landmark ${id} X position ${lm.position[0]} should be west of Thamrin/Bundaran HI (X < -100)`);
+});
+
+// Specific checks for Kembangan & Kebon Jeruk western coordinates
+['walikota-jakarta-barat', 'lippo-mall-puri', 'puri-indah-mall'].forEach((id) => {
+  const lm = JAKARTA_LANDMARKS.find((l) => l.id === id);
+  assert.ok(lm.position[0] < -900, `Landmark ${id} X position ${lm.position[0]} should be in Sentra Primer Barat / Kembangan (X < -900)`);
+});
+
+['mnc-studios-kebon-jeruk', 'museum-macan'].forEach((id) => {
+  const lm = JAKARTA_LANDMARKS.find((l) => l.id === id);
+  assert.ok(lm.position[0] < -700, `Landmark ${id} X position ${lm.position[0]} should be in Kebon Jeruk (X < -700)`);
+});
+
+// Check builder methods in LandmarkModels.js
+assert.ok(landmarkModelsContent.includes('createKantorWalikotaJakbar'), 'LandmarkModels.js missing createKantorWalikotaJakbar');
+assert.ok(landmarkModelsContent.includes('createLippoMallPuri'), 'LandmarkModels.js missing createLippoMallPuri');
+assert.ok(landmarkModelsContent.includes('createPuriIndahMall'), 'LandmarkModels.js missing createPuriIndahMall');
+assert.ok(landmarkModelsContent.includes('createGlodokChinatown'), 'LandmarkModels.js missing createGlodokChinatown');
+assert.ok(landmarkModelsContent.includes('createMNCStudiosKebonJeruk'), 'LandmarkModels.js missing createMNCStudiosKebonJeruk');
+assert.ok(landmarkModelsContent.includes('createMuseumMACAN'), 'LandmarkModels.js missing createMuseumMACAN');
+
+console.log('✅ All 63 landmarks, Quick Wins & Tahap 1 Jakarta Barat verified successfully!');

@@ -1284,6 +1284,141 @@ export const JAKARTA_LANDMARKS = [
       "Menghubungkan jaringan kereta api rel logistik barang langsung dari pelabuhan ke pedalaman Pulau Jawa.",
       "Dapat disandari oleh kapal kontainer generasi ultra-large container vessel (ULCV) berkapasitas ribuan TEUs."
     ]
+  },
+  // =====================================================
+  // ZONA 8: JAKARTA BARAT BARU (KEMBANGAN, PURI INDAH, KEBON JERUK & GLODOK)
+  // =====================================================
+  {
+    id: "walikota-jakarta-barat",
+    name: "Kompleks Kantor Walikota Jakarta Barat",
+    shortName: "Kantor Walikota Jakbar",
+    category: "Pusat Pemerintahan & Layanan Publik",
+    tagline: "Pusat Administrasi Kota Administrasi Jakarta Barat di Kembangan",
+    height: "55 meter (Gedung Utama Kubah Piramida)",
+    year: "1999",
+    architect: "Pemerintah Provinsi DKI Jakarta",
+    location: "Jl. Raya Kembangan No. 2, Kembangan Selatan, Jakarta Barat",
+    coordinates: { lat: -6.1870, lng: 106.7490 },
+    position: [-1040.0, 0, -90.0],
+    labelHeight: 65,
+    cameraPosition: [-1040.0, 85, -15],
+    cameraTarget: [-1040.0, 25, -90.0],
+    description: "Kompleks pusat pemerintahan dan pelayanan publik terpadu Kota Administrasi Jakarta Barat. Menampilkan gedung balai kota bertingkat megah dengan atap kubah piramida ganda berundak, sayap perkantoran dinas, plaza upacara bendera, dan akses langsung ke interchange Tol JORR W1 dan Tol Jakarta-Tangerang.",
+    facts: [
+      "Menjadi pusat komando administrasi untuk 8 kecamatan dan 56 kelurahan di Jakarta Barat.",
+      "Kawasan Sentra Primer Baru Barat (SPBB) Kembangan dirancang sebagai pusat pertumbuhan ekonomi baru di barat Jakarta sejak dekade 1990-an.",
+      "Dilengkapi fasilitas Ruang Terbuka Hijau (RTH) dan kolam retensi penampung air hujan."
+    ]
+  },
+  {
+    id: "lippo-mall-puri",
+    name: "Superblok Lippo Mall Puri & The St. Moritz",
+    shortName: "Lippo Mall Puri",
+    category: "Pusat Bisnis & Superblok Mewah",
+    tagline: "Megasuperblok Terpadu Terbesar di Sentra Primer Baru Barat",
+    height: "175 meter (6 Menara The St. Moritz 45 lantai)",
+    year: "2014",
+    architect: "DP Architects (Singapore) & Lippo Group",
+    location: "Jl. Puri Indah Raya Blok U1, Puri Indah, Kembangan, Jakarta Barat",
+    coordinates: { lat: -6.1885, lng: 106.7385 },
+    position: [-1185.0, 0, -75.0],
+    labelHeight: 90,
+    cameraPosition: [-1185.0, 110, 10],
+    cameraTarget: [-1185.0, 35, -75.0],
+    description: "Superblok gaya hidup megapolitan termegah di koridor Jakarta Barat. Menggabungkan pusat perbelanjaan Lippo Mall Puri dengan 6 menara pencakar langit apartemen mewah The St. Moritz (New Amsterdam, Royal Tower, Presidential Suite), fasad modern dengan skybridge lengkung kaca, dan plaza terbuka gastronomi.",
+    facts: [
+      "The St. Moritz merupakan kompleks 11-in-1 pertama di Jakarta Barat yang memadukan mall, hotel bintang lima, residensial, dan helipad.",
+      "Memiliki atrium kaca raksasa dengan instalasi seni dan pencahayaan parametrik modern.",
+      "Merupakan salah satu destinasi belanja premium paling bergengsi di luar koridor Thamrin-Sudirman."
+    ]
+  },
+  {
+    id: "puri-indah-mall",
+    name: "Puri Indah Mall & Kawasan Niaga Sentra Barat",
+    shortName: "Puri Indah Mall",
+    category: "Pusat Perbelanjaan & Ikon Arsitektur",
+    tagline: "Ikon Legendaris Bergaya Istana Klasik Victoria dengan Kubah Toska",
+    height: "38 meter (Kubah Tembaga Toska & Gerbang Kastil)",
+    year: "1997",
+    architect: "Pondok Indah Group (Metropolitan Kentjana)",
+    location: "Jl. Puri Agung No. 1, Kembangan Selatan, Jakarta Barat",
+    coordinates: { lat: -6.1865, lng: 106.7515 },
+    position: [-1010.0, 0, -100.0],
+    labelHeight: 52,
+    cameraPosition: [-1010.0, 75, -20],
+    cameraTarget: [-1010.0, 20, -100.0],
+    description: "Pionir pusat perbelanjaan keluarga prestisius di Jakarta Barat yang terkenal dengan gaya arsitektur istana Victoria (*Victorian Castle*). Ditandai dengan dinding bata terakota merah, kubah-kubah tembaga berwarna toska (*copper green dome*), menara jam klasik, dan kanopi gerbang lengkung megah.",
+    facts: [
+      "Dirancang oleh pengembang yang sama dengan Pondok Indah Mall (PIM) di Jakarta Selatan.",
+      "Telah berdiri sejak tahun 1997 dan menjadi ikon arsitektur paling dikenal di kawasan Kembangan.",
+      "Terhubung dengan kawasan residensial mewah Puri Indah dan pusat kuliner legendaris pesisir barat."
+    ]
+  },
+  {
+    id: "glodok-chinatown",
+    name: "Pecinan Bersejarah Glodok & Pantjoran Chinatown",
+    shortName: "Pecinan Glodok",
+    category: "Cagar Budaya & Sentra Perdagangan",
+    tagline: "Pusat Pecinan Tertua di Indonesia, Pantjoran Tea House 1635 & Vihara Dharma Bhakti",
+    height: "24 meter (Gapura Paifang & Pagoda Vihara)",
+    year: "1650 / 1755",
+    architect: "Masyarakat Tionghoa Batavia & Pemerintah Provinsi DKI Jakarta",
+    location: "Jl. Pancoran, Glodok, Taman Sari, Jakarta Barat",
+    coordinates: { lat: -6.1425, lng: 106.8145 },
+    position: [-120.0, 0, -680.0],
+    labelHeight: 42,
+    cameraPosition: [-120.0, 60, -605],
+    cameraTarget: [-120.0, 15, -680.0],
+    description: "Kawasan pecinan tertua dan terbesar di Indonesia yang menjadi pusat denyut budaya Tionghoa di Batavia sejak pertengahan abad ke-17. Ditandai dengan Gapura Paifang tradisional beratap genteng merah melengkung, kedai teh bersejarah Pantjoran Tea House 1635, Vihara Dharma Bhakti (Kim Tek Ie 1650), kawasan gang legendaris Petak Sembilan, serta sentra perdagangan elektronik Glodok.",
+    facts: [
+      "Vihara Dharma Bhakti (Kim Tek Ie) dibangun pada tahun 1650 dan merupakan kelenteng tertua di Jakarta.",
+      "Pantjoran Tea House menempati gedung apotek tua abad ke-17 peninggalan Kapitein der Chinezen Gan Djie yang menyediakan teh gratis (*Tradisi Teh Pantjoran*).",
+      "Kawasan ini menjadi pusat festival perayaan Tahun Baru Imlek dan Cap Go Meh termegah di Jakarta."
+    ]
+  },
+  {
+    id: "mnc-studios-kebon-jeruk",
+    name: "Sentra Penyiaran RCTI & MNC Studios Kebon Jeruk",
+    shortName: "RCTI & MNC Studios",
+    category: "Industri Kreatif & Penyiaran Nasional",
+    tagline: "Kompleks Penyiaran Televisi Nasional Terbesar di Indonesia & Menara RCTI",
+    height: "92 meter (Menara RCTI 22 lantai & Studio Hangar)",
+    year: "1989",
+    architect: "PT Rajawali Citra Televisi Indonesia (MNC Group)",
+    location: "Jl. Raya Perjuangan No. 1, Kebon Jeruk, Jakarta Barat",
+    coordinates: { lat: -6.1925, lng: 106.7675 },
+    position: [-785.0, 0, 30.0],
+    labelHeight: 70,
+    cameraPosition: [-785.0, 85, 110],
+    cameraTarget: [-785.0, 30, 30.0],
+    description: "Kompleks pusat penyiaran televisi swasta pertama dan terbesar di Indonesia yang menjadi pionir industri pertelevisian nasional sejak 1989. Menampilkan Menara RCTI berkaca biru modern setinggi 92 meter, deretan studio siaran hangar berteknologi tinggi (Studio 1 hingga 14 termasuk RCTI+ Concert Hall), serta menara transmisi baja ikonik di koridor Kebon Jeruk.",
+    facts: [
+      "RCTI diresmikan oleh Presiden Soeharto pada 24 Agustus 1989 sebagai stasiun televisi swasta pertama di Indonesia.",
+      "Studio RCTI+ di kompleks ini merupakan salah satu studio televisi indoor terbesar di Asia Tenggara dengan kapasitas ribuan penonton.",
+      "Menjadikan Kebon Jeruk sebagai pusat gravitasi utama industri media dan hiburan di barat Jakarta."
+    ]
+  },
+  {
+    id: "museum-macan",
+    name: "Museum MACAN & AKR Tower Gallery West",
+    shortName: "Museum MACAN",
+    category: "Seni Rupa Modern & Ikon Kontemporer",
+    tagline: "Museum Seni Modern & Kontemporer Bertaraf Internasional Pertama di Indonesia",
+    height: "145 meter (AKR Tower Gallery West 36 lantai)",
+    year: "2017",
+    architect: "MET Studio Design London & Arcadis",
+    location: "AKR Tower Level M, Jl. Panjang No. 5, Kebon Jeruk, Jakarta Barat",
+    coordinates: { lat: -6.1910, lng: 106.7680 },
+    position: [-775.0, 0, 12.0],
+    labelHeight: 82,
+    cameraPosition: [-775.0, 95, 95],
+    cameraTarget: [-775.0, 35, 12.0],
+    description: "Museum seni modern dan kontemporer bertaraf internasional pertama di Indonesia yang menaungi karya mahakarya perupa terkemuka dunia dan maestro Nusantara (Raden Saleh, Affandi, Yayoi Kusama). Berlokasi di gedung pencakar langit megah AKR Tower Gallery West dengan arsitektur fasad prisma kaca diagonal yang memantulkan cakrawala barat Jakarta.",
+    facts: [
+      "Masuk dalam daftar 'World's 100 Greatest Places' majalah TIME pada tahun 2018.",
+      "Koleksi terkenalnya mencakup karya instalasi 'Infinity Mirrored Room' karya seniman legendaris Jepang Yayoi Kusama.",
+      "AKR Tower merupakan ikon arsitektur pencakar langit paling modern di sepanjang koridor Jalan Panjang."
+    ]
   }
 ];
 

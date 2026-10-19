@@ -2858,7 +2858,13 @@ export class CityScene {
       "sunda-kelapa": () => LandmarkModels.createSundaKelapaPort(),
       "jembatan-kota-intan": () => LandmarkModels.createKotaIntanBridge(),
       "mall-kelapa-gading": () => LandmarkModels.createMallKelapaGading(),
-      "tanjung-priok": () => LandmarkModels.createTanjungPriokPort()
+      "tanjung-priok": () => LandmarkModels.createTanjungPriokPort(),
+      "walikota-jakarta-barat": () => LandmarkModels.createKantorWalikotaJakbar(),
+      "lippo-mall-puri": () => LandmarkModels.createLippoMallPuri(),
+      "puri-indah-mall": () => LandmarkModels.createPuriIndahMall(),
+      "glodok-chinatown": () => LandmarkModels.createGlodokChinatown(),
+      "mnc-studios-kebon-jeruk": () => LandmarkModels.createMNCStudiosKebonJeruk(),
+      "museum-macan": () => LandmarkModels.createMuseumMACAN()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {
