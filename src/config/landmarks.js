@@ -1419,6 +1419,141 @@ export const JAKARTA_LANDMARKS = [
       "Koleksi terkenalnya mencakup karya instalasi 'Infinity Mirrored Room' karya seniman legendaris Jepang Yayoi Kusama.",
       "AKR Tower merupakan ikon arsitektur pencakar langit paling modern di sepanjang koridor Jalan Panjang."
     ]
+  },
+  // =====================================================
+  // ZONA 8: JAKARTA TIMUR (HUB INTERMODA, SEJARAH & BUDAYA)
+  // =====================================================
+  {
+    id: "stasiun-jatinegara",
+    name: "Stasiun Hub Terbesar Jatinegara (Meester Cornelis 1910)",
+    shortName: "Stasiun Jatinegara",
+    category: "Cagar Budaya & Hub Kereta Api",
+    tagline: "Simpul Bersejarah Meester Cornelis 1910 & Percabangan Jalur Dwiganda DDT",
+    height: "28 meter (Menara Jam & Kanopi Baja Lengkung)",
+    year: "1910",
+    architect: "Ir. S. Snuyf (Staatsspoorwegen)",
+    location: "Jl. Raya Bekasi Barat, Jatinegara, Jakarta Timur",
+    coordinates: { lat: -6.2149, lng: 106.8703 },
+    position: [666.1, 0, 282.6],
+    labelHeight: 45,
+    cameraPosition: [666.1, 65, 360],
+    cameraTarget: [666.1, 15, 282.6],
+    description: "Stasiun hub perkeretaapian bersejarah peninggalan era kolonial Hindia Belanda karya Ir. S. Snuyf tahun 1910 dengan gaya arsitektur Indische Art Nouveau. Memiliki atap pelana kembar dengan menara jam klasik, kanopi baja lengkung peron pulau, serta emplasemen 8 jalur rel yang melayani KRL Commuter Line Cikarang dan KA Jarak Jauh KAI.",
+    facts: [
+      "Dahulu bernama Stasiun Meester Cornelis dan menjadi pintu gerbang utama kereta api dari arah timur Pulau Jawa menuju Batavia.",
+      "Merupakan simpul percabangan jalur dwiganda (Double-Double Track / DDT) Manggarai-Cikarang.",
+      "Gedung stasiun heritage telah ditetapkan sebagai Cagar Budaya Indonesia yang dipadukan harmonis dengan bangunan stasiun modern bertingkat."
+    ]
+  },
+  {
+    id: "bandara-halim-perdanakusuma",
+    name: "Bandara Internasional Halim Perdanakusuma (HLP)",
+    shortName: "Bandara Halim",
+    category: "Infrastruktur Penerbangan & Pertahanan",
+    tagline: "Pangkalan Udara Utama TNI-AU & Gerbang Kenegaraan dengan Runway 3.000 Meter",
+    height: "32 meter (Menara ATC & Hanggar Skadron 17)",
+    year: "1924 / Revitalisasi 2022",
+    architect: "TNI Angkatan Udara & Kementerian Perhubungan RI",
+    location: "Jl. Halim Perdana Kusuma, Makasar, Jakarta Timur",
+    coordinates: { lat: -6.2650, lng: 106.8864 },
+    position: [893.2, 0, 993.0],
+    labelHeight: 55,
+    cameraPosition: [893.2, 85, 1075],
+    cameraTarget: [893.2, 20, 993.0],
+    description: "Pangkalan udara militer dan bandara penerbangan komersial/kenegaraan bersejarah di timur Jakarta. Menampilkan landasan pacu Runway 06/24 sepanjang 3.000 meter berorientasi 065.25°, apron pesawat kepresidenan Skadron Udara 17 VIP TNI-AU, menara pemandu lalu lintas udara (ATC Tower), serta terminal penumpang bernuansa kearifan lokal Nusantara.",
+    facts: [
+      "Dahulu dikenal sebagai Lapangan Terbang Tjililitan (didirikan tahun 1924) sebelum dinamai pahlawan nasional Marsekal Muda Agustinus Adisutjipto dan Abdul Halim Perdanakusuma.",
+      "Menjadi gerbang kedatangan resmi kepala negara dunia, penerbangan VVIP kepresidenan RI, serta evakuasi logistik kemanusiaan darurat.",
+      "Memiliki fasilitas pangkalan tempur militer terpadu dan hanggar pemeliharaan pesawat angkut berat C-130 Hercules."
+    ]
+  },
+  {
+    id: "taman-mini-indonesia-indah",
+    name: "Taman Mini Indonesia Indah (TMII)",
+    shortName: "Taman Mini (TMII)",
+    category: "Cagar Budaya & Taman Wisata Nasional",
+    tagline: "Megakompleks Miniatur Kepulauan Nusantara 150 Ha, Keong Emas & Kereta Gantung",
+    height: "45 meter (Teater IMAX Keong Emas & Menara Kastel)",
+    year: "1975 / Revitalisasi 2022",
+    architect: "Biro Arsitektur Nusa Consult & Kementerian PUPR",
+    location: "Jl. Raya Taman Mini, Ceger, Cipayung, Jakarta Timur",
+    coordinates: { lat: -6.3044, lng: 106.8968 },
+    position: [1040.2, 0, 1551.5],
+    labelHeight: 65,
+    cameraPosition: [1040.2, 90, 1635],
+    cameraTarget: [1040.2, 20, 1551.5],
+    description: "Megakompleks taman cagar budaya dan miniatur kepulauan Nusantara seluas 150 hektare yang merangkum kebhinekaan suku bangsa dan budaya Indonesia. Menampilkan Danau Archipelago dengan gugusan pulau miniatur NKRI di atas air, Teater IMAX Keong Emas berkubah spiral keemasan, Kastel Istana Anak-Anak Indonesia merah bata, dan lintasan Kereta Gantung.",
+    facts: [
+      "Gagasan pembangunannya diprakarsai oleh Ibu Tien Soeharto pada tahun 1970 untuk membangkitkan rasa bangga terhadap kebudayaan Nusantara.",
+      "Teater Keong Emas merupakan teater IMAX modern pertama di Indonesia yang diresmikan pada 20 April 1984.",
+      "Telah direvitalisasi total menyambut KTT G20 pada tahun 2022 dengan konsep ramah lingkungan (green park) bebas kendaraan emisi fosil."
+    ]
+  },
+  {
+    id: "jakarta-international-velodrome",
+    name: "Jakarta International Velodrome Rawamangun",
+    shortName: "Velodrome Rawamangun",
+    category: "Olahraga Dunia & Arsitektur Ikonik",
+    tagline: "Arena Balap Sepeda Indoor UCI Category 1 & Skybridge Integrasi LRT Jakarta",
+    height: "35 meter (Kubah Membran Elips PTFE 120m × 80m)",
+    year: "2018 (Asian Games XVIII)",
+    architect: "Schurmann Architects & Cox Architecture",
+    location: "Jl. Pemuda No. 6, Rawamangun, Pulo Gadung, Jakarta Timur",
+    coordinates: { lat: -6.1909, lng: 106.8901 },
+    position: [945.5, 0, -57.6],
+    labelHeight: 52,
+    cameraPosition: [945.5, 75, 25],
+    cameraTarget: [945.5, 18, -57.6],
+    description: "Arena balap sepeda indoor bertaraf olimpiade internasional bersertifikasi UCI Category 1 yang dibangun untuk Asian Games 2018. Memiliki atap membran melengkung elips berteknologi membran PTFE (120m x 80m), fasad kaca transparan aerodinamis, lintasan kayu pinus Siberia sepanjang 250 meter berkemiringan 42 derajat, dan jembatan layang skybridge langsung ke Stasiun LRT Velodrome.",
+    facts: [
+      "Diakui oleh Union Cycliste Internationale (UCI) sebagai salah satu velodrome indoor terbaik dan tercepat di belahan bumi selatan.",
+      "Menggunakan kayu pinus khusus impor bersertifikasi ekologis dari hutan Siberia Rusia yang memberikan grip sempurna pada ban sepeda balap.",
+      "Menjadi simpul intermodal transit awal LRT Jakarta Lin 1 menuju kawasan Kelapa Gading."
+    ]
+  },
+  {
+    id: "simpang-susun-cawang",
+    name: "Simpang Susun Cawang & Cawang Intermodal Hub",
+    shortName: "Simpang Susun Cawang",
+    category: "Infrastruktur Tol & Transit Intermoda",
+    tagline: "Spaghetti Junction 4 Tingkat Tersibuk & Simpul Percabangan LRT Jabodebek",
+    height: "26 meter (Viaduk Layang 4 Tingkat & Stasiun LRT Cawang)",
+    year: "1987 / LRT 2023",
+    architect: "PT Jasa Marga & PT Adhi Karya",
+    location: "Persimpangan Cawang, Kramat Jati, Jakarta Timur",
+    coordinates: { lat: -6.2460, lng: 106.8736 },
+    position: [712.3, 0, 723.8],
+    labelHeight: 48,
+    cameraPosition: [712.3, 75, 805],
+    cameraTarget: [712.3, 18, 723.8],
+    description: "Simpul pertemuan jalan tol empat tingkat (spaghetti junction) terbesar dan tersibuk di Asia Tenggara. Menghubungkan empat jalan tol arteri utama: Tol Dalam Kota (Cawang-Grogol), Tol Jagorawi (arah Bogor), Tol Jakarta-Cikampek (arah Jawa Barat/Trans Jawa), dan Tol By-Pass Ir. Wiyoto Wiyono (arah Tanjung Priok), terpadu dengan Stasiun Hub Layang LRT Jabodebek Cawang.",
+    facts: [
+      "Menjadi titik sentral distribusi jutaan kendaraan komuter dan angkutan logistik antarkota setiap harinya.",
+      "Merupakan simpul percabangan utama LRT Jabodebek yang membagi lintas layanan menuju Lin Cibubur (Harjamukti) dan Lin Bekasi (Jatimulya).",
+      "Dilengkapi jembatan lengkung lengkung beton bentang panjang yang melompati jalur tol di bawahnya."
+    ]
+  },
+  {
+    id: "monumen-pancasila-sakti",
+    name: "Monumen Pancasila Sakti Lubang Buaya",
+    shortName: "Pancasila Sakti",
+    category: "Monumen Nasional & Memorial Sejarah",
+    tagline: "Memorial 7 Pahlawan Revolusi, Burung Garuda Tembaga Raksasa & Sumur Maut",
+    height: "22 meter (Dinding Relief Andesit & Garuda Tembaga)",
+    year: "1969 / Peresmian 1973",
+    architect: "Edhi Sunarso & Saptono (Pematung Nasional)",
+    location: "Jl. Raya Pondok Gede, Lubang Buaya, Cipayung, Jakarta Timur",
+    coordinates: { lat: -6.2883, lng: 106.9069 },
+    position: [1182.3, 0, 1324.1],
+    labelHeight: 42,
+    cameraPosition: [1182.3, 60, 1395],
+    cameraTarget: [1182.3, 14, 1324.1],
+    description: "Kompleks monumen memorial sejarah nasional seluas 14,6 hektare yang didedikasikan untuk mengenang perjuangan dan pengorbanan para Pahlawan Revolusi. Menampilkan plaza upacara marmer dengan dinding andesit berrelief sejarah, 7 patung perunggu Pahlawan Revolusi berlatar burung Garuda raksasa setinggi 17 meter, Sumur Maut bersejarah, dan Museum Paseban.",
+    facts: [
+      "Patung 7 Pahlawan Revolusi dipahat oleh seniman legendaris Indonesia Saptono dan Edhi Sunarso (pembuat Patung Selamat Datang Bundaran HI).",
+      "Sumur Maut asli berkedalaman 12 meter dengan diameter 75 centimeter dilestarikan di dalam cungkup cungkup marmer kehormatan.",
+      "Menjadi lokasi upacara kenegaraan Hari Kesaktian Pancasila setiap tanggal 1 Oktober yang dipimpin langsung oleh Presiden Republik Indonesia."
+    ]
   }
 ];
 

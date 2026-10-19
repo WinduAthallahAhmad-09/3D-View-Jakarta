@@ -5275,6 +5275,830 @@ export class LandmarkModels {
 
     return group;
   }
+
+  /**
+   * 64. Stasiun Hub Terbesar Jatinegara (Meester Cornelis 1910)
+   * Arsitektur Indische Art Nouveau karya Ir. S. Snuyf: Menara jam kembar, kanopi baja lengkung peron,
+   * emplasemen jalur dwiganda DDT, dan integrasi gedung baru.
+   */
+  static createStasiunJatinegara() {
+    const group = new THREE.Group();
+
+    const stuccoMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.65 });
+    const stonePavingMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.85 });
+    const terracottaMat = new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.75 });
+    const steelArchMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.3 });
+    const zincRoofMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.5, roughness: 0.4 });
+    const clockMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3, emissive: 0xfef08a, emissiveIntensity: 0.35 });
+    const ballastMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 });
+    const steelRailMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.25 });
+    const modernGlassMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.15, metalness: 0.9 });
+
+    // 1. Station Forecourt Plaza & Pavement
+    const basePavement = new THREE.Mesh(new THREE.BoxGeometry(72, 1.0, 56), stonePavingMat);
+    basePavement.position.set(0, 0.5, 0);
+    basePavement.receiveShadow = true;
+    group.add(basePavement);
+
+    // 2. Central Heritage Station Hall (Meester Cornelis 1910)
+    const centralHall = new THREE.Mesh(new THREE.BoxGeometry(36, 12, 18), stuccoMat);
+    centralHall.position.set(0, 6.5, 10);
+    centralHall.castShadow = true;
+    centralHall.receiveShadow = true;
+    group.add(centralHall);
+
+    // Steep Art Nouveau Gambrel/Dutch Gabled Roof
+    const hallRoof = new THREE.Mesh(new THREE.ConeGeometry(24, 6.5, 4), terracottaMat);
+    hallRoof.rotateY(Math.PI / 4);
+    hallRoof.scale.set(1.15, 0.9, 0.65);
+    hallRoof.position.set(0, 15.5, 10);
+    hallRoof.castShadow = true;
+    group.add(hallRoof);
+
+    // Front Arched Portico Concourse
+    const portico = new THREE.Mesh(new THREE.BoxGeometry(22, 7.5, 6), stuccoMat);
+    portico.position.set(0, 4.25, 20);
+    portico.castShadow = true;
+    group.add(portico);
+
+    // 3. Twin Symmetrical Clock Towers on Left & Right Wings
+    [-18, 18].forEach((tx) => {
+      const tower = new THREE.Mesh(new THREE.BoxGeometry(9, 22, 12), stuccoMat);
+      tower.position.set(tx, 11.5, 10);
+      tower.castShadow = true;
+      tower.receiveShadow = true;
+      group.add(tower);
+
+      // Pyramid Gable Roof on Towers
+      const towerRoof = new THREE.Mesh(new THREE.ConeGeometry(7.5, 6, 4), terracottaMat);
+      towerRoof.rotateY(Math.PI / 4);
+      towerRoof.position.set(tx, 25.5, 10);
+      towerRoof.castShadow = true;
+      group.add(towerRoof);
+
+      // Classic Round Clock Face
+      const clock = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 0.4, 16), clockMat);
+      clock.rotateX(Math.PI / 2);
+      clock.position.set(tx, 18.5, 16.2);
+      group.add(clock);
+    });
+
+    // 4. Arched Steel Train Shed Platform Canopies (Over Island Platforms)
+    [-10, 10].forEach((px) => {
+      // Curved train shed canopy
+      const archGeo = new THREE.CylinderGeometry(8.5, 8.5, 50, 16, 1, true, 0, Math.PI);
+      archGeo.rotateZ(Math.PI / 2);
+      archGeo.rotateY(Math.PI / 2);
+      const canopy = new THREE.Mesh(archGeo, zincRoofMat);
+      canopy.position.set(px, 12.0, -12);
+      canopy.castShadow = true;
+      group.add(canopy);
+
+      // Support Arch Trusses
+      for (let z = -32; z <= 8; z += 12) {
+        const truss = new THREE.Mesh(new THREE.TorusGeometry(8.4, 0.35, 6, 16, Math.PI), steelArchMat);
+        truss.rotateZ(Math.PI / 2);
+        truss.rotateY(Math.PI / 2);
+        truss.position.set(px, 12.0, z);
+        group.add(truss);
+      }
+    });
+
+    // 5. Double-Double Track (DDT) Rail Emplacement with 6 Parallel Steel Tracks
+    const ballastBed = new THREE.Mesh(new THREE.BoxGeometry(48, 0.4, 54), ballastMat);
+    ballastBed.position.set(0, 0.8, -12);
+    ballastBed.receiveShadow = true;
+    group.add(ballastBed);
+
+    [-18, -12, -6, 6, 12, 18].forEach((rx) => {
+      [-0.7, 0.7].forEach((subOffset) => {
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.22, 54), steelRailMat);
+        rail.position.set(rx + subOffset, 1.1, -12);
+        group.add(rail);
+      });
+    });
+
+    // 6. Modern Elevated Concourse Bridge (Integrasi Gedung Baru Jatinegara 2 Lantai)
+    const modernConcourse = new THREE.Mesh(new THREE.BoxGeometry(42, 6, 12), modernGlassMat);
+    modernConcourse.position.set(0, 14.5, -4);
+    modernConcourse.castShadow = true;
+    group.add(modernConcourse);
+
+    return group;
+  }
+
+  /**
+   * 65. Bandara Internasional Halim Perdanakusuma (HLP)
+   * Pangkalan udara TNI-AU & gerbang kenegaraan: Terminal VIP bernuansa Nusantara,
+   * Menara ATC dengan radome radar, hanggar Skadron 17, pesawat kepresidenan di apron, dan Runway 06/24 berarah 065.25°.
+   */
+  static createBandaraHalim() {
+    const group = new THREE.Group();
+
+    const asphaltMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8, metalness: 0.1 });
+    const terminalWhiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
+    const roofNusantaraMat = new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.5, metalness: 0.3 });
+    const atcGlassMat = new THREE.MeshStandardMaterial({
+      color: 0x0284c7,
+      roughness: 0.15,
+      metalness: 0.88,
+      emissive: 0x0369a1,
+      emissiveIntensity: 0.25
+    });
+    const concreteMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.7 });
+    const hangarMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.7, roughness: 0.35 });
+    const airplaneWhiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, metalness: 0.6, roughness: 0.2 });
+    const flagRedMat = new THREE.MeshBasicMaterial({ color: 0xdc2626 });
+    const runwayMarkingMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const beaconMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+
+    // 1. Apron Ground Plane
+    const apron = new THREE.Mesh(new THREE.BoxGeometry(110, 0.6, 90), asphaltMat);
+    apron.position.set(0, 0.3, 0);
+    apron.receiveShadow = true;
+    group.add(apron);
+
+    // 2. Runway 06/24 Strip (Heading 065.25°)
+    const runwayGroup = new THREE.Group();
+    runwayGroup.position.set(24, 0.4, 28);
+    runwayGroup.rotation.y = -0.42; // Corresponds to ~065.25 heading
+
+    const runwayMesh = new THREE.Mesh(new THREE.BoxGeometry(22, 0.4, 130), asphaltMat);
+    runwayMesh.receiveShadow = true;
+    runwayGroup.add(runwayMesh);
+
+    // White Centerline Dashes
+    for (let z = -55; z <= 55; z += 12) {
+      const dash = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.1, 7), runwayMarkingMat);
+      dash.position.set(0, 0.22, z);
+      runwayGroup.add(dash);
+    }
+
+    // Threshold Piano Key Stripes
+    [-58, 58].forEach((tz) => {
+      for (let x = -8; x <= 8; x += 2.2) {
+        const stripe = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.1, 6), runwayMarkingMat);
+        stripe.position.set(x, 0.22, tz);
+        runwayGroup.add(stripe);
+      }
+    });
+
+    group.add(runwayGroup);
+
+    // 3. Passenger & VIP Presidential Terminal
+    const terminalGroup = new THREE.Group();
+    terminalGroup.position.set(-22, 0.6, -18);
+
+    const terminalBody = new THREE.Mesh(new THREE.BoxGeometry(52, 9, 26), terminalWhiteMat);
+    terminalBody.position.y = 4.5;
+    terminalBody.castShadow = true;
+    terminalBody.receiveShadow = true;
+    terminalGroup.add(terminalBody);
+
+    // Slanted Nusantara Pitched Roof
+    const roof1 = new THREE.Mesh(new THREE.ConeGeometry(32, 6, 4), roofNusantaraMat);
+    roof1.rotateY(Math.PI / 4);
+    roof1.scale.set(1.2, 0.8, 0.7);
+    roof1.position.set(-12, 11.5, 0);
+    roof1.castShadow = true;
+    terminalGroup.add(roof1);
+
+    const roof2 = new THREE.Mesh(new THREE.ConeGeometry(24, 5.5, 4), roofNusantaraMat);
+    roof2.rotateY(Math.PI / 4);
+    roof2.scale.set(1.1, 0.8, 0.7);
+    roof2.position.set(14, 11.2, 0);
+    roof2.castShadow = true;
+    terminalGroup.add(roof2);
+
+    // Boarding Gate Canopies & Jet Bridges
+    [-14, 2, 18].forEach((gx) => {
+      const jetBridge = new THREE.Mesh(new THREE.BoxGeometry(4.5, 3.2, 12), concreteMat);
+      jetBridge.position.set(gx, 4.5, 15);
+      terminalGroup.add(jetBridge);
+    });
+
+    group.add(terminalGroup);
+
+    // 4. Air Traffic Control (ATC) Tower (H=32m)
+    const atcGroup = new THREE.Group();
+    atcGroup.position.set(22, 0.6, -26);
+
+    // Tower Shaft
+    const towerShaft = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 3.2, 26, 8), concreteMat);
+    towerShaft.position.y = 13;
+    towerShaft.castShadow = true;
+    atcGroup.add(towerShaft);
+
+    // Control Cab Room (Glazed Hexagon)
+    const cab = new THREE.Mesh(new THREE.CylinderGeometry(4.8, 3.8, 4.5, 8), atcGlassMat);
+    cab.position.y = 28;
+    cab.castShadow = true;
+    atcGroup.add(cab);
+
+    // Roof & Spherical Radome
+    const cabRoof = new THREE.Mesh(new THREE.CylinderGeometry(5.2, 5.2, 0.6, 8), concreteMat);
+    cabRoof.position.y = 30.5;
+    atcGroup.add(cabRoof);
+
+    const radome = new THREE.Mesh(new THREE.SphereGeometry(1.6, 12, 12), terminalWhiteMat);
+    radome.position.y = 32.2;
+    atcGroup.add(radome);
+
+    const atcBeacon = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 8), beaconMat);
+    atcBeacon.position.y = 34.0;
+    atcGroup.add(atcBeacon);
+
+    group.add(atcGroup);
+
+    // 5. Skadron 17 VIP Presidential Hangar
+    const hangar = new THREE.Mesh(new THREE.BoxGeometry(32, 14, 28), hangarMat);
+    hangar.position.set(-42, 7.6, 15);
+    hangar.castShadow = true;
+    group.add(hangar);
+
+    const hangarArchGeo = new THREE.CylinderGeometry(16, 16, 28, 16, 1, false, 0, Math.PI);
+    hangarArchGeo.rotateZ(Math.PI / 2);
+    hangarArchGeo.rotateY(Math.PI / 2);
+    const hangarArch = new THREE.Mesh(hangarArchGeo, hangarMat);
+    hangarArch.position.set(-42, 14.6, 15);
+    group.add(hangarArch);
+
+    // 6. VIP Presidential Aircraft (Boeing 737 / BBJ Indonesia One) on Apron
+    const plane = new THREE.Group();
+    plane.position.set(-8, 2.5, 4);
+    plane.rotation.y = 0.25;
+
+    // Fuselage
+    const fuselage = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.3, 19, 12), airplaneWhiteMat);
+    fuselage.rotateX(Math.PI / 2);
+    fuselage.castShadow = true;
+    plane.add(fuselage);
+
+    // Nose Cone
+    const nose = new THREE.Mesh(new THREE.ConeGeometry(1.3, 3.5, 12), airplaneWhiteMat);
+    nose.rotateX(-Math.PI / 2);
+    nose.position.set(0, 0, 11);
+    plane.add(nose);
+
+    // Red-White Republic of Indonesia Stripe
+    const redStripe = new THREE.Mesh(new THREE.BoxGeometry(2.7, 0.35, 12), flagRedMat);
+    redStripe.position.set(0, 0.4, 1);
+    plane.add(redStripe);
+
+    // Swept Wings
+    const wings = new THREE.Mesh(new THREE.BoxGeometry(17, 0.25, 3.8), airplaneWhiteMat);
+    wings.position.set(0, -0.2, 0);
+    wings.castShadow = true;
+    plane.add(wings);
+
+    // Tail Fin (Vertical Stabilizer)
+    const tail = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4.2, 3.0), flagRedMat);
+    tail.position.set(0, 2.2, -8.5);
+    plane.add(tail);
+
+    group.add(plane);
+
+    return group;
+  }
+
+  /**
+   * 66. Taman Mini Indonesia Indah (TMII)
+   * Megakompleks miniatur kebudayaan Nusantara 150 Ha: Danau Archipelago dengan gugusan miniatur pulau NKRI,
+   * Teater IMAX Keong Emas berkubah spiral keemasan, Kastel Istana Anak-Anak merah bata, dan pilon kereta gantung.
+   */
+  static createTamanMiniIndonesiaIndah() {
+    const group = new THREE.Group();
+
+    const parkGreenMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 });
+    const waterBlueMat = new THREE.MeshStandardMaterial({
+      color: 0x0284c7,
+      roughness: 0.15,
+      metalness: 0.85,
+      side: THREE.DoubleSide
+    });
+    const islandGreenMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.8 });
+    const goldShellMat = new THREE.MeshStandardMaterial({
+      color: 0xd97706,
+      metalness: 0.85,
+      roughness: 0.25,
+      emissive: 0xb45309,
+      emissiveIntensity: 0.2
+    });
+    const brickRedMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.65 });
+    const spireMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.45 });
+    const cableSteelMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8, roughness: 0.3 });
+    const gondolaMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.35 });
+
+    // 1. Lush Green Parkland Base
+    const parkBase = new THREE.Mesh(new THREE.BoxGeometry(110, 0.6, 95), parkGreenMat);
+    parkBase.position.set(0, 0.3, 0);
+    parkBase.receiveShadow = true;
+    group.add(parkBase);
+
+    // 2. Danau Miniatur Kepulauan Indonesia (Archipelago Lake)
+    const lake = new THREE.Mesh(new THREE.CylinderGeometry(36, 36, 0.4, 32), waterBlueMat);
+    lake.scale.set(1.35, 1.0, 0.95);
+    lake.position.set(6, 0.55, 6);
+    group.add(lake);
+
+    // Miniatur 5 Pulau Besar Nusantara (NKRI Islands)
+    // Pulau Sumatra
+    const sumatra = new THREE.Mesh(new THREE.BoxGeometry(5, 0.6, 20), islandGreenMat);
+    sumatra.position.set(-24, 0.85, 4);
+    sumatra.rotation.y = 0.45;
+    group.add(sumatra);
+
+    // Pulau Jawa
+    const jawa = new THREE.Mesh(new THREE.BoxGeometry(19, 0.6, 4.5), islandGreenMat);
+    jawa.position.set(-6, 0.85, 18);
+    jawa.rotation.y = -0.15;
+    group.add(jawa);
+
+    // Pulau Kalimantan
+    const kalimantan = new THREE.Mesh(new THREE.BoxGeometry(11, 0.6, 11), islandGreenMat);
+    kalimantan.position.set(-4, 0.85, 2);
+    kalimantan.rotation.y = 0.2;
+    group.add(kalimantan);
+
+    // Pulau Sulawesi
+    const sulawesi = new THREE.Mesh(new THREE.BoxGeometry(6, 0.6, 12), islandGreenMat);
+    sulawesi.position.set(12, 0.85, 5);
+    sulawesi.rotation.y = -0.3;
+    group.add(sulawesi);
+
+    // Pulau Papua
+    const papua = new THREE.Mesh(new THREE.BoxGeometry(14, 0.6, 8), islandGreenMat);
+    papua.position.set(32, 0.85, 6);
+    papua.rotation.y = 0.15;
+    group.add(papua);
+
+    // 3. Teater IMAX Keong Emas (Golden Snail Dome) at [-34, 0, -22]
+    const keongGroup = new THREE.Group();
+    keongGroup.position.set(-34, 0.6, -22);
+
+    // Spiral Golden Snail Shell Geometries
+    const shellBase = new THREE.Mesh(new THREE.SphereGeometry(12, 24, 16, 0, Math.PI * 1.6, 0, Math.PI * 0.55), goldShellMat);
+    shellBase.scale.set(1.4, 0.9, 1.1);
+    shellBase.position.y = 0;
+    shellBase.castShadow = true;
+    keongGroup.add(shellBase);
+
+    // Inner Spiral Crest
+    const crest = new THREE.Mesh(new THREE.TorusGeometry(8, 2.2, 8, 24, Math.PI * 1.2), goldShellMat);
+    crest.rotation.x = Math.PI / 2.4;
+    crest.position.set(2, 6.5, -1);
+    crest.castShadow = true;
+    keongGroup.add(crest);
+
+    // IMAX Entrance Portico
+    const imaxEntry = new THREE.Mesh(new THREE.BoxGeometry(12, 3.5, 7), parkGreenMat);
+    imaxEntry.position.set(-8, 1.75, 10);
+    keongGroup.add(imaxEntry);
+
+    group.add(keongGroup);
+
+    // 4. Istana Anak-Anak Indonesia (Red Brick Fairy-Tale Castle) at [32, 0, -20]
+    const castleGroup = new THREE.Group();
+    castleGroup.position.set(32, 0.6, -20);
+
+    const castleMain = new THREE.Mesh(new THREE.BoxGeometry(22, 11, 16), brickRedMat);
+    castleMain.position.y = 5.5;
+    castleMain.castShadow = true;
+    castleMain.receiveShadow = true;
+    castleGroup.add(castleMain);
+
+    // Central Castle Keep Tower
+    const keepTower = new THREE.Mesh(new THREE.CylinderGeometry(3.5, 4.0, 16, 12), brickRedMat);
+    keepTower.position.set(0, 16, 0);
+    keepTower.castShadow = true;
+    castleGroup.add(keepTower);
+
+    const keepSpire = new THREE.Mesh(new THREE.ConeGeometry(4.2, 10, 12), spireMat);
+    keepSpire.position.set(0, 29, 0);
+    keepSpire.castShadow = true;
+    castleGroup.add(keepSpire);
+
+    // 4 Corner Turrets
+    [[-11, -8], [-11, 8], [11, -8], [11, 8]].forEach(([cx, cz]) => {
+      const turret = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 2.0, 14, 8), brickRedMat);
+      turret.position.set(cx, 10, cz);
+      turret.castShadow = true;
+      castleGroup.add(turret);
+
+      const turretSpire = new THREE.Mesh(new THREE.ConeGeometry(2.2, 6, 8), spireMat);
+      turretSpire.position.set(cx, 20, cz);
+      castleGroup.add(turretSpire);
+    });
+
+    group.add(castleGroup);
+
+    // 5. Kereta Gantung (Cable Car) Pylons & Cabin traversing Archipelago Lake
+    [-38, 38].forEach((px) => {
+      const pylon = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.7, 24, 6), cableSteelMat);
+      pylon.position.set(px, 12, 6);
+      pylon.castShadow = true;
+      group.add(pylon);
+
+      const crossArm = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.5, 0.5), cableSteelMat);
+      crossArm.position.set(px, 23.5, 6);
+      group.add(crossArm);
+    });
+
+    // Cable Line across Lake
+    const cable = new THREE.Mesh(new THREE.BoxGeometry(76, 0.08, 0.08), cableSteelMat);
+    cable.position.set(0, 23.5, 6);
+    group.add(cable);
+
+    // Suspended Gondola Cabins
+    [-12, 14].forEach((gx) => {
+      const hanger = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 2.2, 4), cableSteelMat);
+      hanger.position.set(gx, 22.4, 6);
+      group.add(hanger);
+
+      const gondola = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.8, 1.5), gondolaMat);
+      gondola.position.set(gx, 20.8, 6);
+      group.add(gondola);
+    });
+
+    return group;
+  }
+
+  /**
+   * 67. Jakarta International Velodrome Rawamangun
+   * Arena balap sepeda indoor UCI Category 1: Atap membran elips PTFE lengkung aerodinamis,
+   * fasad kaca transparan, trek kayu pinus Siberia, dan skybridge integrasi ke Stasiun LRT Velodrome.
+   */
+  static createVelodromeRawamangun() {
+    const group = new THREE.Group();
+
+    const plazaMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.75 });
+    const membraneRoofMat = new THREE.MeshStandardMaterial({
+      color: 0xf8fafc,
+      roughness: 0.32,
+      metalness: 0.15,
+      side: THREE.DoubleSide
+    });
+    const aeroGlassMat = new THREE.MeshStandardMaterial({
+      color: 0x0284c7,
+      roughness: 0.12,
+      metalness: 0.9,
+      transparent: true,
+      opacity: 0.78
+    });
+    const siberianPineMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.65 });
+    const steelTrussMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8, roughness: 0.3 });
+    const lrtStationMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.45 });
+
+    // 1. Olympic Plaza Pedestrian Ground
+    const plaza = new THREE.Mesh(new THREE.BoxGeometry(84, 0.8, 68), plazaMat);
+    plaza.position.set(0, 0.4, 0);
+    plaza.receiveShadow = true;
+    group.add(plaza);
+
+    // 2. Velodrome Elliptic Outer Bowl (Podium & Aero Glazed Facade)
+    const veloGroup = new THREE.Group();
+    veloGroup.position.set(-6, 0, 0);
+
+    // Lower Concrete Incline Podium
+    const bowlPodium = new THREE.Mesh(new THREE.CylinderGeometry(29, 31, 7, 32), plazaMat);
+    bowlPodium.scale.set(1.42, 1.0, 0.95);
+    bowlPodium.position.y = 3.9;
+    bowlPodium.receiveShadow = true;
+    veloGroup.add(bowlPodium);
+
+    // Aerodynamic Glazed Curtain Wall
+    const glassCurtain = new THREE.Mesh(new THREE.CylinderGeometry(30, 29, 14, 32), aeroGlassMat);
+    glassCurtain.scale.set(1.42, 1.0, 0.95);
+    glassCurtain.position.y = 13.5;
+    glassCurtain.castShadow = true;
+    veloGroup.add(glassCurtain);
+
+    // 3. Signature PTFE Membrane Elliptic Saddle Roof
+    const roofGeo = new THREE.CylinderGeometry(31, 30.5, 4.5, 32, 1, false);
+    roofGeo.scale(1.44, 0.65, 0.96);
+    const roof = new THREE.Mesh(roofGeo, membraneRoofMat);
+    roof.position.y = 21.0;
+    roof.castShadow = true;
+    veloGroup.add(roof);
+
+    // Sweeping Aerodynamic Roof Truss Arch
+    const archTruss = new THREE.Mesh(new THREE.TorusGeometry(32, 0.6, 8, 32, Math.PI), steelTrussMat);
+    archTruss.rotateZ(Math.PI / 2);
+    archTruss.scale.set(0.35, 1.44, 0.95);
+    archTruss.position.set(0, 21.5, 0);
+    veloGroup.add(archTruss);
+
+    // 4. Interior Banked Siberian Pine Cycling Track (Visible through glass)
+    const trackRing = new THREE.Mesh(new THREE.TorusGeometry(20, 2.2, 6, 24), siberianPineMat);
+    trackRing.rotateX(Math.PI / 2);
+    trackRing.scale.set(1.35, 0.85, 1.0);
+    trackRing.position.set(0, 7.8, 0);
+    veloGroup.add(trackRing);
+
+    group.add(veloGroup);
+
+    // 5. Skybridge Integrasi ke Stasiun LRT Jakarta Velodrome (Sisi Timur)
+    const skybridge = new THREE.Mesh(new THREE.BoxGeometry(32, 3.2, 4.8), steelTrussMat);
+    skybridge.position.set(24, 8.5, 8);
+    skybridge.castShadow = true;
+    group.add(skybridge);
+
+    const bridgeGlass = new THREE.Mesh(new THREE.BoxGeometry(31.6, 2.6, 5.0), aeroGlassMat);
+    bridgeGlass.position.set(24, 8.8, 8);
+    group.add(bridgeGlass);
+
+    // Stasiun LRT Velodrome Elevated Box
+    const lrtStation = new THREE.Mesh(new THREE.BoxGeometry(16, 7.5, 36), lrtStationMat);
+    lrtStation.position.set(40, 8.5, 8);
+    lrtStation.castShadow = true;
+    group.add(lrtStation);
+
+    // LRT Viaduct Columns
+    [-10, 10].forEach((sz) => {
+      const pier = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.4, 9, 8), plazaMat);
+      pier.position.set(40, 4.5, 8 + sz);
+      group.add(pier);
+    });
+
+    return group;
+  }
+
+  /**
+   * 68. Simpang Susun Cawang & Cawang Intermodal Hub
+   * Spaghetti junction 4 tingkat tersibuk di Asia Tenggara: Pertemuan 4 jalan tol utama
+   * (Tol Dalam Kota, Tol Jagorawi, Tol Jakarta-Cikampek, Tol Ir. Wiyoto Wiyono) dan Stasiun Hub Layang LRT Jabodebek.
+   */
+  static createSimpangSusunCawang() {
+    const group = new THREE.Group();
+
+    const roadMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8, metalness: 0.1 });
+    const viaductDeckMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.65 });
+    const pierMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.7 });
+    const grassIslandMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 });
+    const lrtBoxMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
+    const lrtRedStripeMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.45 });
+    const railMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85 });
+
+    // 1. Ground Level Intersection & Green Cloverleaf Islands
+    const groundInterchange = new THREE.Mesh(new THREE.BoxGeometry(86, 0.6, 86), grassIslandMat);
+    groundInterchange.position.set(0, 0.3, 0);
+    groundInterchange.receiveShadow = true;
+    group.add(groundInterchange);
+
+    // Ground Arterial Roads (Jl. MT Haryono & Jl. DI Panjaitan)
+    const atGradeEW = new THREE.Mesh(new THREE.BoxGeometry(86, 0.2, 22), roadMat);
+    atGradeEW.position.set(0, 0.42, 0);
+    group.add(atGradeEW);
+
+    const atGradeNS = new THREE.Mesh(new THREE.BoxGeometry(22, 0.22, 86), roadMat);
+    atGradeNS.position.set(0, 0.43, 0);
+    group.add(atGradeNS);
+
+    // 2. Level 2 Elevated Highway (Tol Dalam Kota Cawang - Grogol, Y=6.5m)
+    const lvl2Deck = new THREE.Mesh(new THREE.BoxGeometry(86, 1.4, 12), viaductDeckMat);
+    lvl2Deck.position.set(0, 6.5, -4);
+    lvl2Deck.castShadow = true;
+    group.add(lvl2Deck);
+
+    [-30, 0, 30].forEach((px) => {
+      const pier = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.6, 6.5, 8), pierMat);
+      pier.position.set(px, 3.25, -4);
+      group.add(pier);
+    });
+
+    // 3. Level 3 Elevated Highway (Tol Jagorawi arah Bogor <-> Tol Wiyoto Wiyono arah Priok, Y=12.5m)
+    const lvl3Deck = new THREE.Mesh(new THREE.BoxGeometry(12, 1.4, 86), viaductDeckMat);
+    lvl3Deck.position.set(4, 12.5, 0);
+    lvl3Deck.castShadow = true;
+    group.add(lvl3Deck);
+
+    [-30, 0, 30].forEach((pz) => {
+      const pier = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.6, 12.5, 8), pierMat);
+      pier.position.set(4, 6.25, pz);
+      group.add(pier);
+    });
+
+    // 4. Level 4 Sweeping Curved Interchange Ramp (Flyover Melingkar Y=18m)
+    const rampCurvePoints = [
+      new THREE.Vector3(-38, 7, 24),
+      new THREE.Vector3(-18, 13, 26),
+      new THREE.Vector3(12, 18, 14),
+      new THREE.Vector3(26, 15, -12),
+      new THREE.Vector3(38, 10, -32)
+    ];
+    const rampCurve = new THREE.CatmullRomCurve3(rampCurvePoints);
+    const rampGeo = new THREE.TubeGeometry(rampCurve, 32, 3.2, 8, false);
+    rampGeo.scale(1.0, 0.25, 1.0);
+    const curvedRamp = new THREE.Mesh(rampGeo, viaductDeckMat);
+    curvedRamp.castShadow = true;
+    group.add(curvedRamp);
+
+    // High Piers supporting Ramp Curve
+    [[-18, 13, 26], [12, 18, 14], [26, 15, -12]].forEach(([px, py, pz]) => {
+      const pier = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.5, py, 8), pierMat);
+      pier.position.set(px, py * 0.5, pz);
+      group.add(pier);
+    });
+
+    // 5. Stasiun LRT Jabodebek Cawang Intermodal Hub (Y=15.0m Elevated Box)
+    const lrtStationGroup = new THREE.Group();
+    lrtStationGroup.position.set(-24, 15.0, -18);
+
+    const stationBox = new THREE.Mesh(new THREE.BoxGeometry(46, 7.5, 16), lrtBoxMat);
+    stationBox.castShadow = true;
+    lrtStationGroup.add(stationBox);
+
+    // Red Accent Line
+    const redStripe = new THREE.Mesh(new THREE.BoxGeometry(46.4, 0.9, 16.4), lrtRedStripeMat);
+    redStripe.position.y = 1.8;
+    lrtStationGroup.add(redStripe);
+
+    // Track Deck passing through station
+    const trackDeck = new THREE.Mesh(new THREE.BoxGeometry(54, 1.2, 7.5), viaductDeckMat);
+    trackDeck.position.y = -1.2;
+    lrtStationGroup.add(trackDeck);
+
+    [-2, 2].forEach((tx) => {
+      const track = new THREE.Mesh(new THREE.BoxGeometry(54, 0.25, 1.0), railMat);
+      track.position.set(0, -0.5, tx);
+      lrtStationGroup.add(track);
+    });
+
+    // Massive Portal Pillars for LRT Station
+    [-16, 16].forEach((cx) => {
+      const col = new THREE.Mesh(new THREE.BoxGeometry(2.5, 15, 14), pierMat);
+      col.position.set(cx, -7.5, 0);
+      lrtStationGroup.add(col);
+    });
+
+    group.add(lrtStationGroup);
+
+    return group;
+  }
+
+  /**
+   * 69. Monumen Pancasila Sakti Lubang Buaya
+   * Memorial 7 Pahlawan Revolusi: Plaza upacara marmer, dinding relief andesit sejarah 1965,
+   * 7 patung perunggu pahlawan berlatar Burung Garuda raksasa 17m tembaga, dan cungkup Sumur Maut.
+   */
+  static createMonumenPancasilaSakti() {
+    const group = new THREE.Group();
+
+    const plazaStoneMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.85 });
+    const blackGraniteMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.4, metalness: 0.8 });
+    const andesiteReliefMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8 });
+    const copperGarudaMat = new THREE.MeshStandardMaterial({
+      color: 0xd97706,
+      metalness: 0.88,
+      roughness: 0.22,
+      emissive: 0xb45309,
+      emissiveIntensity: 0.18
+    });
+    const bronzeHeroMat = new THREE.MeshStandardMaterial({ color: 0x451a03, metalness: 0.75, roughness: 0.4 });
+    const whiteMarbleMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35 });
+    const roofTileMat = new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.75 });
+    const lawnMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 });
+
+    // 1. Memorial Park Lawn & Ceremonial Plaza
+    const memorialBase = new THREE.Mesh(new THREE.BoxGeometry(70, 0.6, 58), lawnMat);
+    memorialBase.position.set(0, 0.3, 0);
+    memorialBase.receiveShadow = true;
+    group.add(memorialBase);
+
+    // Granite Ceremonial Parade Plaza
+    const plaza = new THREE.Mesh(new THREE.BoxGeometry(54, 0.8, 38), plazaStoneMat);
+    plaza.position.set(0, 0.5, 4);
+    plaza.receiveShadow = true;
+    group.add(plaza);
+
+    // Stepped Black Granite Plinth for the Statues
+    const plinth = new THREE.Mesh(new THREE.BoxGeometry(38, 1.6, 12), blackGraniteMat);
+    plinth.position.set(0, 1.4, -4);
+    plinth.castShadow = true;
+    plinth.receiveShadow = true;
+    group.add(plinth);
+
+    // 2. Andesite Historical Relief Wall (Dinding Relief Sejarah G30S/PKI)
+    const reliefWall = new THREE.Mesh(new THREE.BoxGeometry(36, 10, 2.4), andesiteReliefMat);
+    reliefWall.position.set(0, 6.5, -9);
+    reliefWall.castShadow = true;
+    group.add(reliefWall);
+
+    // Relief Wall Carved Frieze Mouldings
+    const wallCap = new THREE.Mesh(new THREE.BoxGeometry(37, 0.8, 2.8), andesiteReliefMat);
+    wallCap.position.set(0, 11.8, -9);
+    group.add(wallCap);
+
+    // 3. Central Pylon & Giant Copper Garuda Pancasila (H=17m)
+    const pylon = new THREE.Mesh(new THREE.BoxGeometry(3.6, 18, 2.4), whiteMarbleMat);
+    pylon.position.set(0, 10.5, -8.5);
+    pylon.castShadow = true;
+    group.add(pylon);
+
+    // Giant Copper Garuda Sculpture atop/in-front of pylon
+    const garudaGroup = new THREE.Group();
+    garudaGroup.position.set(0, 15.5, -7.0);
+
+    // Garuda Body & Heraldic Shield (Pancasila)
+    const garudaBody = new THREE.Mesh(new THREE.BoxGeometry(3.2, 4.2, 1.4), copperGarudaMat);
+    garudaBody.castShadow = true;
+    garudaGroup.add(garudaBody);
+
+    // Proud Eagle Head facing East (right)
+    const eagleHead = new THREE.Mesh(new THREE.ConeGeometry(1.0, 2.0, 8), copperGarudaMat);
+    eagleHead.rotateZ(-Math.PI / 3);
+    eagleHead.position.set(1.4, 2.6, 0);
+    garudaGroup.add(eagleHead);
+
+    // Sweeping Wings (17 Sacred Flight Feathers Wingspan ~14m)
+    [-1, 1].forEach((dir) => {
+      const wingGeo = new THREE.BoxGeometry(6.5, 2.8, 0.6);
+      wingGeo.rotateZ(dir * 0.35);
+      const wing = new THREE.Mesh(wingGeo, copperGarudaMat);
+      wing.position.set(dir * 4.2, 1.6, -0.2);
+      wing.castShadow = true;
+      garudaGroup.add(wing);
+    });
+
+    // Tail Feathers (8 Sacred Tail Feathers)
+    const tailFeathers = new THREE.Mesh(new THREE.BoxGeometry(2.4, 3.2, 0.5), copperGarudaMat);
+    tailFeathers.position.set(0, -2.8, -0.2);
+    garudaGroup.add(tailFeathers);
+
+    group.add(garudaGroup);
+
+    // 4. Seven Bronze Statues of the Revolutionary Heroes (7 Pahlawan Revolusi)
+    // Ahmad Yani in center (taller, in front), flanked by 6 comrades
+    const heroPositions = [
+      { x: 0, z: -2.5, isCommander: true },   // Jenderal TNI Anumerta Ahmad Yani (Center)
+      { x: -5, z: -3.2, isCommander: false },  // Letjen Suprapto
+      { x: 5, z: -3.2, isCommander: false },   // Letjen S. Parman
+      { x: -10, z: -3.8, isCommander: false }, // Letjen M.T. Haryono
+      { x: 10, z: -3.8, isCommander: false },  // Mayjen D.I. Panjaitan
+      { x: -14, z: -4.4, isCommander: false }, // Mayjen Sutoyo Siswomiharjo
+      { x: 14, z: -4.4, isCommander: false }   // Kapten Pierre Tendean
+    ];
+
+    heroPositions.forEach((h) => {
+      const heroGroup = new THREE.Group();
+      heroGroup.position.set(h.x, 2.2, h.z);
+
+      const hScale = h.isCommander ? 1.15 : 1.0;
+
+      // Small Bronze Plinth
+      const baseBox = new THREE.Mesh(new THREE.BoxGeometry(1.6 * hScale, 0.4, 1.6 * hScale), blackGraniteMat);
+      baseBox.position.y = 0.2;
+      heroGroup.add(baseBox);
+
+      // Hero Figure (Military Uniformed Torso & Head)
+      const torso = new THREE.Mesh(new THREE.BoxGeometry(1.2 * hScale, 2.4 * hScale, 0.8 * hScale), bronzeHeroMat);
+      torso.position.y = 1.5 * hScale;
+      torso.castShadow = true;
+      heroGroup.add(torso);
+
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.38 * hScale, 8, 8), bronzeHeroMat);
+      head.position.y = 2.9 * hScale;
+      heroGroup.add(head);
+
+      // Military Officer Cap
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.55 * hScale, 0.45 * hScale, 0.3 * hScale, 8), bronzeHeroMat);
+      cap.position.y = 3.2 * hScale;
+      heroGroup.add(cap);
+
+      group.add(heroGroup);
+    });
+
+    // 5. Cungkup Sumur Maut (Historic Well Shrine Pavilion at [22, 0, 12])
+    const wellShrine = new THREE.Group();
+    wellShrine.position.set(22, 0.5, 12);
+
+    // Marble Base
+    const wellBase = new THREE.Mesh(new THREE.BoxGeometry(12, 0.6, 12), whiteMarbleMat);
+    wellBase.position.y = 0.3;
+    wellShrine.add(wellBase);
+
+    // Sumur Maut Well Opening (Diameter 1.5m)
+    const wellCylinder = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.4, 1.2, 16), whiteMarbleMat);
+    wellCylinder.position.y = 0.9;
+    wellShrine.add(wellCylinder);
+
+    // Cungkup Pavilion Octagonal Roof
+    const pavilionRoof = new THREE.Mesh(new THREE.ConeGeometry(5.5, 3.2, 8), roofTileMat);
+    pavilionRoof.position.y = 6.2;
+    pavilionRoof.castShadow = true;
+    wellShrine.add(pavilionRoof);
+
+    // 4 Corner Wooden/Stone Pillars
+    [[-3.5, -3.5], [-3.5, 3.5], [3.5, -3.5], [3.5, 3.5]].forEach(([px, pz]) => {
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.3, 4.8, 8), whiteMarbleMat);
+      col.position.set(px, 2.7, pz);
+      wellShrine.add(col);
+    });
+
+    group.add(wellShrine);
+
+    return group;
+  }
 }
 
 

@@ -3487,7 +3487,13 @@ export class CityScene {
       "puri-indah-mall": () => LandmarkModels.createPuriIndahMall(),
       "glodok-chinatown": () => LandmarkModels.createGlodokChinatown(),
       "mnc-studios-kebon-jeruk": () => LandmarkModels.createMNCStudiosKebonJeruk(),
-      "museum-macan": () => LandmarkModels.createMuseumMACAN()
+      "museum-macan": () => LandmarkModels.createMuseumMACAN(),
+      "stasiun-jatinegara": () => LandmarkModels.createStasiunJatinegara(),
+      "bandara-halim-perdanakusuma": () => LandmarkModels.createBandaraHalim(),
+      "taman-mini-indonesia-indah": () => LandmarkModels.createTamanMiniIndonesiaIndah(),
+      "jakarta-international-velodrome": () => LandmarkModels.createVelodromeRawamangun(),
+      "simpang-susun-cawang": () => LandmarkModels.createSimpangSusunCawang(),
+      "monumen-pancasila-sakti": () => LandmarkModels.createMonumenPancasilaSakti()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {
