@@ -35,6 +35,7 @@ export class CityScene {
     this.buildSouthJakartaInfillAndParks();
     this.buildNorthJakartaInfrastructure();
     this.buildNorthJakartaInfillAndLogistics();
+    this.buildWestJakartaInfrastructure();
     this.buildLandmarks();
     this.buildUrbanDistricts();
     this.buildStreetVegetation();
@@ -2552,6 +2553,306 @@ export class CityScene {
     mergeAndAdd(waterGeos, waterMat, false, false);
     mergeAndAdd(parkGeos, parkMat, true, false);
     mergeAndAdd(seawallGeos, seawallMat, true, false);
+  }
+
+  /**
+   * Tahap 2 Jakarta Barat: Jaringan Jalan Tol, Arteri Utama & Koridor Tata Air
+   *
+   * 1. Jalan Tol Jakarta - Tangerang:
+   *    - Dari Simpang Susun Tomang [-418, -224] melewati Kebon Jeruk [-785, -45],
+   *      Simpang Susun Kembangan [-1040, -85], hingga Karang Tengah [-1350, -85].
+   * 2. Jalan Tol Lingkar Luar Barat (JORR W1 / W2N):
+   *    - Viaduk layang melintang dari Cengkareng / Bandara [-1040, -450] melintasi Kembangan [-1040, -85]
+   *      menuju Meruya / Joglo [-1040, 280].
+   * 3. Simpang Susun Kembangan (Interchange Tol Jakarta-Tangerang x Tol JORR W1):
+   *    - Ramp layang multi-tingkat (trumpet & cloverleaf loops) menghubungkan kedua jalan tol.
+   * 4. Poros Arteri Utama Jakarta Barat:
+   *    - Jl. Daan Mogot: Simpang Grogol [-484, -403] ke Pesing [-650, -420] & Cengkareng [-1250, -450] + Flyover Pesing.
+   *    - Jl. Panjang (Arteri Kebon Jeruk): Kedoya [-775, -420] -> Kebon Jeruk [-775, 12] -> Permata Hijau [-775, 320].
+   *    - Jl. Puri Indah Raya & Boulevard Kembangan: Lingkar Sentra Bisnis Primer Barat.
+   *    - Koridor Pecinan Glodok: Jl. Pancoran, Jl. Gajah Mada & Pintu Besar Selatan.
+   * 5. Tata Air & Kanal Pengendali Banjir:
+   *    - Kali Angke & Cengkareng Drain: Membelah Kembangan & Pesing ke arah laut utara.
+   *    - Kali Pesanggrahan: Mengalir antara Kembangan dan Kebon Jeruk.
+   *    - Jembatan-jembatan penyeberangan sungai tol dan arteri.
+   *
+   * Performa Ekstrem (Geometry Merging):
+   * Seluruh geometri digabungkan per material menggunakan BufferGeometryUtils.mergeGeometries.
+   * Total penambahan draw calls: Hanya 9 draw calls!
+   */
+  buildWestJakartaInfrastructure() {
+    const roadMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      roughness: 0.8,
+      metalness: 0.1
+    });
+    const sidewalkMat = new THREE.MeshStandardMaterial({
+      map: TextureGenerator.createSidewalkTexture(),
+      roughness: 0.8
+    });
+    const medianGrassMat = new THREE.MeshStandardMaterial({
+      color: 0x15803d,
+      roughness: 0.85
+    });
+    const viaductMat = new THREE.MeshStandardMaterial({
+      color: 0x475569,
+      roughness: 0.65
+    });
+    const barrierMat = new THREE.MeshStandardMaterial({
+      color: 0x0284c7,
+      metalness: 0.5,
+      roughness: 0.3
+    });
+    const pierMat = new THREE.MeshStandardMaterial({
+      color: 0x64748b,
+      roughness: 0.6
+    });
+    const waterMat = new THREE.MeshStandardMaterial({
+      color: 0x0369a1,
+      roughness: 0.15,
+      metalness: 0.85,
+      side: THREE.DoubleSide
+    });
+    const canalWallMat = new THREE.MeshStandardMaterial({
+      color: 0x64748b,
+      roughness: 0.75
+    });
+    const bridgeMat = new THREE.MeshStandardMaterial({
+      color: 0x475569,
+      roughness: 0.7
+    });
+
+    const roadGeos = [];
+    const swGeos = [];
+    const medianGeos = [];
+    const viaductGeos = [];
+    const barrierGeos = [];
+    const pierGeos = [];
+    const waterGeos = [];
+    const canalWallGeos = [];
+    const bridgeGeos = [];
+
+    const makeBox = (w, h, d, x, y, z, rotY = 0) => {
+      const g = new THREE.BoxGeometry(w, h, d);
+      if (rotY !== 0) g.rotateY(rotY);
+      g.translate(x, y, z);
+      return g;
+    };
+
+    const addRoad = (x1, z1, x2, z2, roadWidth = 20, hasMedian = false, medianWidth = 3.0) => {
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const angle = Math.atan2(dx, dz);
+      const mx = (x1 + x2) * 0.5;
+      const mz = (z1 + z2) * 0.5;
+
+      // Asphalt
+      roadGeos.push(makeBox(roadWidth, 0.25, len + 0.4, mx, 0.125, mz, angle));
+
+      // Sidewalks
+      const swWidth = 3.2;
+      [-1, 1].forEach((dir) => {
+        const perpX = Math.cos(angle) * (roadWidth * 0.5 + swWidth * 0.5) * dir;
+        const perpZ = -Math.sin(angle) * (roadWidth * 0.5 + swWidth * 0.5) * dir;
+        swGeos.push(makeBox(swWidth, 0.4, len + 0.4, mx + perpX, 0.2, mz + perpZ, angle));
+      });
+
+      // Green median
+      if (hasMedian) {
+        medianGeos.push(makeBox(medianWidth, 0.45, len + 0.2, mx, 0.225, mz, angle));
+      }
+    };
+
+    const addTollViaduct = (x1, z1, x2, z2, viaductWidth = 22, y = 8.5) => {
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const angle = Math.atan2(dx, dz);
+      const mx = (x1 + x2) * 0.5;
+      const mz = (z1 + z2) * 0.5;
+
+      // Viaduct deck slab
+      viaductGeos.push(makeBox(viaductWidth, 0.8, len + 0.5, mx, y, mz, angle));
+
+      // Safety parapets / crash barriers
+      [-1, 1].forEach((dir) => {
+        const perpX = Math.cos(angle) * (viaductWidth * 0.5 - 0.4) * dir;
+        const perpZ = -Math.sin(angle) * (viaductWidth * 0.5 - 0.4) * dir;
+        barrierGeos.push(makeBox(0.6, 1.1, len + 0.5, mx + perpX, y + 0.8, mz + perpZ, angle));
+      });
+      // Center divider barrier
+      barrierGeos.push(makeBox(0.8, 0.9, len + 0.5, mx, y + 0.7, mz, angle));
+
+      // Support piers spaced every ~45m
+      const pierCount = Math.max(1, Math.floor(len / 45));
+      for (let i = 0; i <= pierCount; i++) {
+        const t = i / pierCount;
+        const px = x1 + dx * t;
+        const pz = z1 + dz * t;
+        pierGeos.push(makeBox(2.8, y, 2.8, px, y * 0.5, pz, angle));
+        pierGeos.push(makeBox(viaductWidth * 0.85, 1.2, 3.2, px, y - 0.6, pz, angle));
+      }
+    };
+
+    const addCurvedRamp = (x1, z1, y1, x2, z2, y2, rampWidth = 9.0) => {
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const angle = Math.atan2(dx, dz);
+      const mx = (x1 + x2) * 0.5;
+      const mz = (z1 + z2) * 0.5;
+      const my = (y1 + y2) * 0.5;
+
+      viaductGeos.push(makeBox(rampWidth, 0.65, len + 0.4, mx, my, mz, angle));
+
+      [-1, 1].forEach((dir) => {
+        const perpX = Math.cos(angle) * (rampWidth * 0.5 - 0.3) * dir;
+        const perpZ = -Math.sin(angle) * (rampWidth * 0.5 - 0.3) * dir;
+        barrierGeos.push(makeBox(0.5, 0.9, len + 0.4, mx + perpX, my + 0.6, mz + perpZ, angle));
+      });
+
+      if (my >= 3.5) {
+        pierGeos.push(makeBox(2.0, my, 2.0, mx, my * 0.5, mz, angle));
+      }
+    };
+
+    const addRiverSegment = (x1, z1, x2, z2, riverWidth = 18, wallWidth = 1.0) => {
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const angle = Math.atan2(dx, dz);
+      const mx = (x1 + x2) * 0.5;
+      const mz = (z1 + z2) * 0.5;
+
+      const g = new THREE.PlaneGeometry(riverWidth, len + 0.4);
+      g.rotateX(-Math.PI / 2);
+      g.rotateY(angle);
+      g.translate(mx, 0.04, mz);
+      waterGeos.push(g);
+
+      [-1, 1].forEach((dir) => {
+        const perpX = Math.cos(angle) * (riverWidth * 0.5 + wallWidth * 0.5) * dir;
+        const perpZ = -Math.sin(angle) * (riverWidth * 0.5 + wallWidth * 0.5) * dir;
+        canalWallGeos.push(makeBox(wallWidth, 0.6, len + 0.4, mx + perpX, 0.3, mz + perpZ, angle));
+      });
+    };
+
+    const addBridge = (x, y, z, w, h, d, rotY = 0) => {
+      bridgeGeos.push(makeBox(w, h, d, x, y, z, rotY));
+    };
+
+    // =========================================================================
+    // 1. JALAN TOL JAKARTA - TANGERANG (KORIDOR UTAMA BARAT)
+    // Dari Simpang Susun Tomang [-418, -224] meluncur barat melewati Kebon Jeruk,
+    // Simpang Susun Kembangan [-1040, -85], hingga Karang Tengah / Batas Barat [-1350, -85]
+    // =========================================================================
+    addTollViaduct(-418, -224, -600, -135, 22, 7.5);   // Segmen 1: Tomang ke Tanjung Duren Barat
+    addTollViaduct(-600, -135, -785, -45, 22, 7.5);    // Segmen 2: Tanjung Duren ke Kebon Jeruk (Depan RCTI & Museum MACAN)
+    addTollViaduct(-785, -45, -1040, -85, 22, 7.5);    // Segmen 3: Kebon Jeruk ke Interchange Kembangan
+    addTollViaduct(-1040, -85, -1350, -85, 22, 7.5);   // Segmen 4: Kembangan ke Karang Tengah (Batas Barat Peta)
+
+    // Gerbang Tol Kebon Jeruk & Kembangan (Kanopi Gerbang Tol)
+    viaductGeos.push(makeBox(28, 1.2, 8, -750, 9.8, -45, -0.32)); // Kanopi GT Kebon Jeruk 1 & 2
+    viaductGeos.push(makeBox(28, 1.2, 8, -1120, 9.8, -85, 0));    // Kanopi GT Kembangan / Karang Tengah
+
+    // =========================================================================
+    // 2. JALAN TOL LINGKAR LUAR JAKARTA BARAT (TOL JORR W1 / LINGKAR LUAR BARAT)
+    // Viaduk layang utara-selatan melintasi Kembangan / Puri:
+    // Menghubungkan Cengkareng / Bandara [-1040, -450] -> Kembangan [-1040, -85] -> Meruya/Joglo [-1040, 280]
+    // Level elevasi Y = 9.5m s.d. 11.2m di atas Tol Jakarta-Tangerang
+    // =========================================================================
+    addTollViaduct(-1040, -450, -1040, -180, 22, 9.5);  // Segmen 1: Rawa Buaya / Cengkareng ke Kembangan Utara
+    addTollViaduct(-1040, -180, -1040, 20, 22, 11.2);   // Segmen 2: Melintasi Simpang Susun Kembangan (Atas Tol Tangerang)
+    addTollViaduct(-1040, 20, -1040, 280, 22, 9.5);     // Segmen 3: Kembangan Selatan ke Meruya / Joglo (Batas Selatan)
+
+    // =========================================================================
+    // 3. SIMPANG SUSUN KEMBANGAN (INTERCHANGE JORR W1 x TOL JAKARTA-TANGERANG)
+    // 4 Curved Loop & Flyover Slip Ramps Menghubungkan Kedua Jalan Tol
+    // =========================================================================
+    addCurvedRamp(-1120, -85, 7.5, -1040, -170, 9.5, 9.5); // Ramp Tangerang -> JORR Utara (Bandara)
+    addCurvedRamp(-1120, -85, 7.5, -1040, 10, 9.5, 9.5);   // Ramp Tangerang -> JORR Selatan (Pondok Indah)
+    addCurvedRamp(-960, -85, 7.5, -1040, -170, 9.5, 9.5);  // Ramp Tomang/Pusat -> JORR Utara
+    addCurvedRamp(-960, -85, 7.5, -1040, 10, 9.5, 9.5);    // Ramp Tomang/Pusat -> JORR Selatan
+
+    // =========================================================================
+    // 4. POROS ARTERI UTAMA JAKARTA BARAT
+    // =========================================================================
+    // A. Jl. Daan Mogot (Poros Barat Grogol -> Pesing -> Cengkareng)
+    addRoad(-484, -403, -650, -420, 24, true, 3.5); // Simpang Grogol ke Pesing
+    addRoad(-650, -420, -880, -435, 24, true, 3.5); // Pesing ke Taman Kota
+    addRoad(-880, -435, -1250, -450, 24, true, 3.5); // Taman Kota ke Cengkareng / Daan Mogot Barat
+
+    // Flyover Pesing (Jembatan Layang Perlintasan Rel Pesing H=5.5m)
+    addCurvedRamp(-580, -415, 0.8, -650, -420, 5.5, 11.0);
+    addCurvedRamp(-650, -420, 5.5, -720, -425, 0.8, 11.0);
+
+    // B. Koridor Jalan Panjang (Arteri Poros Utara-Selatan Kebon Jeruk)
+    // Menghubungkan Kedoya / Daan Mogot [-775, -420] melewati Kebon Jeruk [-775, 12] ke Permata Hijau [-775, 320]
+    addRoad(-775, -420, -775, -160, 22, true, 3.0); // Kedoya ke Kebon Jeruk Utara
+    addRoad(-775, -160, -775, 80, 22, true, 3.0);   // Di depan RCTI [-785, 30] & Museum MACAN [-775, 12]
+    addRoad(-775, 80, -775, 320, 22, true, 3.0);    // Kebon Jeruk Selatan ke Permata Hijau
+
+    // Underpass / Persimpangan Arteri Kebon Jeruk di Bawah Tol Tangerang
+    addRoad(-830, -45, -720, -45, 18, false); // Jl. Perjuangan & Akses Tol Kebon Jeruk
+
+    // C. Jl. Puri Indah Raya & Boulevard Kembangan (Ring Sentra Primer Barat)
+    addRoad(-1040, -85, -1185, -75, 22, true, 3.0);   // Akses Interchange Kembangan ke Lippo Mall Puri
+    addRoad(-1185, -75, -1185, -160, 20, false);      // Sisi Barat Lippo Mall Puri & The St. Moritz
+    addRoad(-1185, -160, -1010, -160, 22, true, 3.0); // Boulevard Kembangan Selatan
+    addRoad(-1010, -160, -1010, -80, 20, false);       // Sisi Timur Puri Indah Mall
+    addRoad(-1010, -80, -1040, -85, 22, true, 3.0);   // Jl. Puri Agung ke Walikota Jakbar
+    addRoad(-1040, -85, -1040, -30, 20, false);        // Akses Gerbang Kantor Walikota Jakarta Barat
+
+    // D. Koridor Pecinan Bersejarah Glodok
+    addRoad(-120, -620, -120, -750, 16, false); // Jl. Pancoran (Kawasan Cagar Budaya & Kuliner Pecinan)
+    addRoad(-95, -590, -95, -780, 22, true, 2.5); // Jl. Gajah Mada & Pintu Besar Selatan (Sisi Glodok)
+    addRoad(-160, -660, -80, -660, 16, false); // Jl. Kemenangan / Petak Sembilan
+    addRoad(-120, -640, -320, -640, 18, false); // Jl. Mangga Besar Raya Barat
+
+    // =========================================================================
+    // 5. TATA AIR & KANAL PENGENDALI BANJIR JAKARTA BARAT
+    // =========================================================================
+    // Kali Angke & Cengkareng Drain (Aliran Sungai Alami Membelah Barat ke Laut)
+    addRiverSegment(-970, 200, -970, -30, 20, 1.2);   // Meruya ke Kembangan
+    addRiverSegment(-970, -30, -950, -220, 20, 1.2);  // Kembangan ke Kedoya
+    addRiverSegment(-950, -220, -890, -420, 22, 1.2); // Kedoya ke Pesing
+    addRiverSegment(-890, -420, -890, -780, 26, 1.4); // Cengkareng Drain ke Laut
+
+    // Kali Pesanggrahan (Membelah Kebon Jeruk & Kembangan)
+    addRiverSegment(-840, 260, -840, 30, 18, 1.0);   // Kebon Jeruk Selatan
+    addRiverSegment(-840, 30, -840, -180, 18, 1.0);  // Samping MNC Studios & MACAN
+    addRiverSegment(-840, -180, -840, -380, 18, 1.0); // Menuju Kedoya Utara
+
+    // Jembatan-Jembatan Penyeberangan Sungai:
+    addBridge(-970, 8.2, -85, 24, 1.4, 26, 0); // Jembatan Tol Tangerang atas Kali Angke
+    addBridge(-890, 1.2, -435, 26, 1.4, 28, 0); // Jembatan Daan Mogot Pesing atas Kali Angke
+    addBridge(-840, 1.2, 15, 24, 1.4, 22, 0); // Jembatan Arteri Jl. Panjang atas Kali Pesanggrahan
+    addBridge(-840, 1.2, -45, 24, 1.4, 24, 0); // Jembatan Tol Tangerang atas Kali Pesanggrahan
+
+    // =========================================================================
+    // 6. MERGE GEOMETRIES & ADD TO SCENE (Hanya 9 Draw Calls!)
+    // =========================================================================
+    const mergeAndAdd = (geos, mat, receiveShadow = true, castShadow = false) => {
+      if (!geos || geos.length === 0) return;
+      const merged = BufferGeometryUtils.mergeGeometries(geos, false);
+      if (merged) {
+        const mesh = new THREE.Mesh(merged, mat);
+        mesh.receiveShadow = receiveShadow;
+        mesh.castShadow = castShadow;
+        this.proceduralGroup.add(mesh);
+      }
+    };
+
+    mergeAndAdd(roadGeos, roadMat, true, false);
+    mergeAndAdd(swGeos, sidewalkMat, true, false);
+    mergeAndAdd(medianGeos, medianGrassMat, true, false);
+    mergeAndAdd(viaductGeos, viaductMat, true, false);
+    mergeAndAdd(barrierGeos, barrierMat, true, false);
+    mergeAndAdd(pierGeos, pierMat, true, false);
+    mergeAndAdd(waterGeos, waterMat, false, false);
+    mergeAndAdd(canalWallGeos, canalWallMat, true, false);
+    mergeAndAdd(bridgeGeos, bridgeMat, true, false);
   }
 
   /**

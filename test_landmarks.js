@@ -567,4 +567,50 @@ assert.ok(landmarkModelsContent.includes('createGlodokChinatown'), 'LandmarkMode
 assert.ok(landmarkModelsContent.includes('createMNCStudiosKebonJeruk'), 'LandmarkModels.js missing createMNCStudiosKebonJeruk');
 assert.ok(landmarkModelsContent.includes('createMuseumMACAN'), 'LandmarkModels.js missing createMuseumMACAN');
 
-console.log('✅ All 63 landmarks, Quick Wins & Tahap 1 Jakarta Barat verified successfully!');
+// Check 22: Tahap 2 Jaringan Jalan Tol, Arteri Utama & Koridor Tata Air Jakarta Barat
+assert.ok(
+  citySceneContent.includes('this.buildWestJakartaInfrastructure()'),
+  'CityScene.js missing buildWestJakartaInfrastructure call in init'
+);
+assert.ok(
+  citySceneContent.includes('buildWestJakartaInfrastructure()'),
+  'CityScene.js missing buildWestJakartaInfrastructure method'
+);
+assert.ok(
+  citySceneContent.includes('JALAN TOL JAKARTA - TANGERANG'),
+  'CityScene.js missing JALAN TOL JAKARTA - TANGERANG'
+);
+assert.ok(
+  citySceneContent.includes('JALAN TOL LINGKAR LUAR JAKARTA BARAT'),
+  'CityScene.js missing JALAN TOL LINGKAR LUAR JAKARTA BARAT'
+);
+assert.ok(
+  citySceneContent.includes('SIMPANG SUSUN KEMBANGAN'),
+  'CityScene.js missing SIMPANG SUSUN KEMBANGAN'
+);
+assert.ok(
+  citySceneContent.includes('Jl. Daan Mogot'),
+  'CityScene.js missing Jl. Daan Mogot'
+);
+assert.ok(
+  citySceneContent.includes('Flyover Pesing'),
+  'CityScene.js missing Flyover Pesing'
+);
+assert.ok(
+  citySceneContent.includes('Koridor Jalan Panjang'),
+  'CityScene.js missing Koridor Jalan Panjang'
+);
+assert.ok(
+  citySceneContent.includes('Jl. Puri Indah Raya & Boulevard Kembangan'),
+  'CityScene.js missing Jl. Puri Indah Raya & Boulevard Kembangan'
+);
+assert.ok(
+  citySceneContent.includes('Kali Angke & Cengkareng Drain'),
+  'CityScene.js missing Kali Angke & Cengkareng Drain'
+);
+assert.ok(
+  citySceneContent.includes('Kali Pesanggrahan'),
+  'CityScene.js missing Kali Pesanggrahan'
+);
+
+console.log('✅ All 63 landmarks, Quick Wins & Tahap 1 + 2 Jakarta Barat verified successfully!');
