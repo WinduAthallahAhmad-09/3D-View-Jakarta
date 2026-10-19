@@ -639,4 +639,34 @@ assert.ok(
   'CityScene.js missing VEGETASI PERKOTAAN TROPIS JAKARTA BARAT'
 );
 
-console.log('✅ All 63 landmarks, Quick Wins & Tahap 1 + 2 + 3 Jakarta Barat verified successfully!');
+// Check 24: Tahap 4 Transit Dinamis & Sirkulasi Multimoda Jakarta Barat
+assert.ok(
+  citySceneContent.includes('this.tangerangRailCurve = new THREE.CatmullRomCurve3'),
+  'CityScene.js missing tangerangRailCurve'
+);
+assert.ok(
+  citySceneContent.includes("'krl-tangerang-westbound'"),
+  'CityScene.js missing krl-tangerang-westbound'
+);
+assert.ok(
+  citySceneContent.includes("'krl-tangerang-eastbound'"),
+  'CityScene.js missing krl-tangerang-eastbound'
+);
+assert.ok(
+  citySceneContent.includes('TransJakarta Koridor 3 (Kalideres <-> Grogol <-> Monas via Jl. Daan Mogot)'),
+  'CityScene.js missing TransJakarta Koridor 3 route'
+);
+assert.ok(
+  citySceneContent.includes('TransJakarta Koridor 8 (Lebak Bulus <-> Kebon Jeruk <-> Harmoni via Jl. Panjang)'),
+  'CityScene.js missing TransJakarta Koridor 8 route'
+);
+assert.ok(
+  citySceneContent.includes('Tol Jakarta - Tangerang Express Viaduct (Tomang <-> Kebon Jeruk <-> Kembangan'),
+  'CityScene.js missing Tol Jakarta - Tangerang route'
+);
+assert.ok(
+  citySceneContent.includes('Tol Lingkar Luar Barat (JORR W1 Viaduct'),
+  'CityScene.js missing Tol JORR W1 route'
+);
+
+console.log('✅ All 63 landmarks, Quick Wins & Tahap 1 + 2 + 3 + 4 Jakarta Barat verified successfully!');

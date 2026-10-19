@@ -4689,7 +4689,28 @@ export class CityScene {
       { x1: 830.0, y: 0.15, z1: -1160.0, x2: -350.0, y: 0.15, z2: -920.0, count: 5, isTruck: true, speedBoost: 1.0 },
       // 33. Boulevard Raya Kelapa Gading (Dual Carriageway Flanking LRT Viaduct)
       { x1: 1192.0, z1: -220.0, x2: 1192.0, z2: -820.0, count: 6 },
-      { x1: 1204.0, z1: -820.0, x2: 1204.0, z2: -220.0, count: 6 }
+      { x1: 1204.0, z1: -820.0, x2: 1204.0, z2: -220.0, count: 6 },
+      // 34. TransJakarta Koridor 3 (Kalideres <-> Grogol <-> Monas via Jl. Daan Mogot)
+      { x1: -484.0, z1: -403.0, x2: -1250.0, z2: -450.0, count: 5, isBus: true, busColor: 0x0284c7, speedBoost: 1.15 },
+      { x1: -1250.0, z1: -450.0, x2: -484.0, z2: -403.0, count: 5, isBus: true, busColor: 0x0284c7, speedBoost: 1.15 },
+      // 35. TransJakarta Koridor 8 (Lebak Bulus <-> Kebon Jeruk <-> Harmoni via Jl. Panjang)
+      { x1: -775.0, z1: 300.0, x2: -775.0, z2: -400.0, count: 5, isBus: true, busColor: 0x0284c7, speedBoost: 1.15 },
+      { x1: -775.0, z1: -400.0, x2: -775.0, z2: 300.0, count: 5, isBus: true, busColor: 0x0284c7, speedBoost: 1.15 },
+      // 36. Tol Jakarta - Tangerang Express Viaduct (Tomang <-> Kebon Jeruk <-> Kembangan, y=7.9)
+      { x1: -418.0, y: 7.9, z1: -224.0, x2: -1350.0, y: 7.9, z2: -85.0, count: 7, speedBoost: 1.5 },
+      { x1: -1350.0, y: 7.9, z1: -85.0, x2: -418.0, y: 7.9, z2: -224.0, count: 7, speedBoost: 1.5 },
+      // 37. Tol Jakarta - Tangerang - Armada Truk Logistik (y=7.9)
+      { x1: -418.0, y: 7.9, z1: -224.0, x2: -1350.0, y: 7.9, z2: -85.0, count: 4, isTruck: true, speedBoost: 1.25 },
+      { x1: -1350.0, y: 7.9, z1: -85.0, x2: -418.0, y: 7.9, z2: -224.0, count: 4, isTruck: true, speedBoost: 1.25 },
+      // 38. Tol Lingkar Luar Barat (JORR W1 Viaduct, y=9.9)
+      { x1: -1040.0, y: 9.9, z1: 260.0, x2: -1040.0, y: 9.9, z2: -420.0, count: 6, speedBoost: 1.45 },
+      { x1: -1040.0, y: 9.9, z1: -420.0, x2: -1040.0, y: 9.9, z2: 260.0, count: 6, speedBoost: 1.45 },
+      // 39. Boulevard Puri Indah & Kembangan Ring Road
+      { x1: -1040.0, z1: -85.0, x2: -1185.0, z2: -75.0, count: 4, speedBoost: 1.0 },
+      { x1: -1185.0, z1: -160.0, x2: -1010.0, z2: -160.0, count: 4, speedBoost: 1.0 },
+      // 40. Koridor Pecinan Bersejarah Glodok (Jl. Pancoran & Gajah Mada Barat)
+      { x1: -120.0, z1: -620.0, x2: -120.0, z2: -750.0, count: 4, speedBoost: 0.95 },
+      { x1: -95.0, z1: -780.0, x2: -95.0, z2: -590.0, count: 4, speedBoost: 1.0 }
     ];
 
     let idx = 0;
@@ -4888,6 +4909,28 @@ export class CityScene {
     this.priokRailCurve = new THREE.CatmullRomCurve3(priokRailPoints, false, 'catmullrom', 0.15);
     this.priokRailCurveLength = this.priokRailCurve.getLength();
 
+    // =========================================================================
+    // Dynamic KRL Commuter Line Lintas Tangerang (Brown Line)
+    // Melintasi jalur Duri -> Simpang Grogol Barat -> Stasiun Pesing -> Rawa Buaya -> Tangerang
+    // =========================================================================
+    const tangerangRailPoints = [
+      new THREE.Vector3(-320.0, 0.48, -400.0), // Arah Stasiun Duri
+      new THREE.Vector3(-484.0, 0.48, -412.0), // Simpang Grogol Barat
+      new THREE.Vector3(-650.0, 0.48, -425.0), // Stasiun Pesing (di bawah Flyover Pesing)
+      new THREE.Vector3(-880.0, 0.48, -440.0), // Stasiun Taman Kota
+      new THREE.Vector3(-1080.0, 0.48, -446.0), // Stasiun Bojong Indah / Rawa Buaya
+      new THREE.Vector3(-1260.0, 0.48, -452.0)  // Menuju Kalideres & Tangerang
+    ];
+    this.tangerangRailCurve = new THREE.CatmullRomCurve3(tangerangRailPoints, false, 'catmullrom', 0.15);
+    this.tangerangRailCurveLength = this.tangerangRailCurve.getLength();
+
+    const ballastMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.85 });
+    const ballastMesh = new THREE.Mesh(new THREE.BoxGeometry(940, 0.22, 5.5), ballastMat);
+    ballastMesh.position.set(-790.0, 0.22, -430.0);
+    ballastMesh.rotation.y = 0.055;
+    ballastMesh.receiveShadow = true;
+    this.proceduralGroup.add(ballastMesh);
+
     this.animatedTrains = [];
     const trainConfigs = [
       { id: 'krl-northbound', curve: this.krlCurve, curveLength: this.krlCurveLength, carSpacing: 17.8, trackOffset: -1.35, speed: 0.024, progress: 0.15, type: 'krl' },
@@ -4901,7 +4944,9 @@ export class CityScene {
       { id: 'lrt-jkt-northbound', curve: this.lrtJakartaCurve, curveLength: this.lrtJakartaCurveLength, carSpacing: 15.8, trackOffset: -1.35, speed: 0.026, progress: 0.15, type: 'lrt-jakarta', carCount: 2 },
       { id: 'lrt-jkt-southbound', curve: this.lrtJakartaCurve, curveLength: this.lrtJakartaCurveLength, carSpacing: 15.8, trackOffset: 1.35, speed: -0.026, progress: 0.65, type: 'lrt-jakarta', carCount: 2 },
       { id: 'krl-priok-eastbound', curve: this.priokRailCurve, curveLength: this.priokRailCurveLength, carSpacing: 17.8, trackOffset: 1.4, speed: 0.022, progress: 0.2, type: 'krl', carCount: 4 },
-      { id: 'krl-priok-westbound', curve: this.priokRailCurve, curveLength: this.priokRailCurveLength, carSpacing: 17.8, trackOffset: -1.4, speed: -0.022, progress: 0.7, type: 'krl', carCount: 4 }
+      { id: 'krl-priok-westbound', curve: this.priokRailCurve, curveLength: this.priokRailCurveLength, carSpacing: 17.8, trackOffset: -1.4, speed: -0.022, progress: 0.7, type: 'krl', carCount: 4 },
+      { id: 'krl-tangerang-westbound', curve: this.tangerangRailCurve, curveLength: this.tangerangRailCurveLength, carSpacing: 17.8, trackOffset: -1.35, speed: 0.023, progress: 0.25, type: 'krl', carCount: 4 },
+      { id: 'krl-tangerang-eastbound', curve: this.tangerangRailCurve, curveLength: this.tangerangRailCurveLength, carSpacing: 17.8, trackOffset: 1.35, speed: -0.023, progress: 0.75, type: 'krl', carCount: 4 }
     ];
 
     trainConfigs.forEach((cfg) => {
