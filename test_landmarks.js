@@ -753,4 +753,34 @@ assert.ok(
   'CityScene.js missing Waduk Ria Rio'
 );
 
-console.log('✅ All 69 landmarks, Quick Wins & Tahap 1 + 2 Jakarta Timur verified successfully!');
+// Check 27: Tahap 3 Infill Urban Fabric, Distrik Residensial & Sentra Budaya/Komersial Jakarta Timur
+assert.ok(
+  citySceneContent.includes('this.buildEastJakartaInfillAndDistricts()'),
+  'CityScene.js missing buildEastJakartaInfillAndDistricts call in init'
+);
+assert.ok(
+  citySceneContent.includes('buildEastJakartaInfillAndDistricts()'),
+  'CityScene.js missing buildEastJakartaInfillAndDistricts method'
+);
+assert.ok(
+  citySceneContent.includes('RUKO KOMERSIAL & SENTRA USAHA RAWAMANGUN'),
+  'CityScene.js missing RUKO KOMERSIAL & SENTRA USAHA RAWAMANGUN'
+);
+assert.ok(
+  citySceneContent.includes('DISTRIK RESIDENSIAL MODERN DUREN SAWIT'),
+  'CityScene.js missing DISTRIK RESIDENSIAL MODERN DUREN SAWIT'
+);
+assert.ok(
+  citySceneContent.includes('KAWASAN INDUSTRI PULOGADUNG'),
+  'CityScene.js missing KAWASAN INDUSTRI PULOGADUNG'
+);
+assert.ok(
+  citySceneContent.includes('VEGETASI PERKOTAAN TROPIS JAKARTA TIMUR'),
+  'CityScene.js missing VEGETASI PERKOTAAN TROPIS JAKARTA TIMUR'
+);
+assert.ok(
+  citySceneContent.includes('Sabuk Hijau Tanggul Kanal Banjir Timur'),
+  'CityScene.js missing Sabuk Hijau Tanggul Kanal Banjir Timur'
+);
+
+console.log('✅ All 69 landmarks, Quick Wins & Tahap 1 + 2 + 3 Jakarta Timur verified successfully!');

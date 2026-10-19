@@ -38,6 +38,7 @@ export class CityScene {
     this.buildWestJakartaInfrastructure();
     this.buildWestJakartaInfillAndDistricts();
     this.buildEastJakartaInfrastructure();
+    this.buildEastJakartaInfillAndDistricts();
     this.buildLandmarks();
     this.buildUrbanDistricts();
     this.buildStreetVegetation();
@@ -3751,6 +3752,376 @@ export class CityScene {
         trunkMesh.setMatrixAt(idx, dummy.matrix);
 
         // Foliage canopy
+        dummy.position.set(t.x, 5.0 * t.scale, t.z);
+        dummy.scale.set(t.isPalm ? t.scale * 1.3 : t.scale * 1.0, t.scale * 0.85, t.isPalm ? t.scale * 1.3 : t.scale * 1.0);
+        dummy.updateMatrix();
+        foliageMesh.setMatrixAt(idx, dummy.matrix);
+      });
+
+      trunkMesh.instanceMatrix.needsUpdate = true;
+      foliageMesh.instanceMatrix.needsUpdate = true;
+      this.proceduralGroup.add(trunkMesh);
+      this.proceduralGroup.add(foliageMesh);
+    }
+  }
+
+  /**
+   * Tahap 3 Jakarta Timur: Infill Urban Fabric, Distrik Residensial & Sentra Budaya/Komersial
+   *
+   * 1. 160+ Ruko komersial & koridor bisnis Rawamangun (Balai Pustaka & Pemuda), Jatinegara, dan Otista Cawang.
+   * 2. 210+ Residensial modern Duren Sawit, Pondok Bambu & Cipinang (townhouse & perumahan asri).
+   * 3. 28+ Fasilitas industri & pergudangan logistik Kawasan Industri Pulogadung (PT JIEP) & Hanggar Halim.
+   * 4. 180+ Vegetasi perkotaan tropis: Sabuk Hijau Kanal Banjir Timur (KBT), Palem By-Pass DI Panjaitan & Hutan Kota TMII.
+   * Total penambahan draw calls: Hanya 5 draw calls!
+   */
+  buildEastJakartaInfillAndDistricts() {
+    const dummy = new THREE.Object3D();
+    const baseBoxGeo = new THREE.BoxGeometry(1, 1, 1);
+
+    // =========================================================================
+    // 1. RUKO KOMERSIAL & SENTRA USAHA RAWAMANGUN, JATINEGARA & OTISTA (1 Draw Call)
+    // =========================================================================
+    const commMat = new THREE.MeshStandardMaterial({ roughness: 0.65, metalness: 0.2 });
+
+    const commColors = [
+      new THREE.Color(0xfef3c7), // Cream
+      new THREE.Color(0xf1f5f9), // White Stucco
+      new THREE.Color(0xd97706), // Warm Ochre
+      new THREE.Color(0x0284c7), // Modern Cyan Glass
+      new THREE.Color(0x334155), // Slate Gray
+      new THREE.Color(0xb45309)  // Terracotta
+    ];
+
+    const commItems = [];
+
+    // Blok A: Kawasan Komersial & Kuliner Rawamangun / Jl. Balai Pustaka & Pemuda
+    for (let x = 860; x <= 1040; x += 18) {
+      for (let z = -120; z <= 20; z += 18) {
+        // Jangan timpa Velodrome Rawamangun atau jalan utama Pemuda
+        if (Math.hypot(x - 945.5, z - (-57.6)) < 42) continue;
+        if (Math.abs(z - (-57.6)) < 15) continue; // Koridor Jl. Pemuda
+
+        const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233));
+        const h = 11 + hash * 12; // 3-6 lantai (11m - 23m)
+        const w = 12 + hash * 4;
+        const d = 13 + (1 - hash) * 4;
+        const colIdx = Math.floor(hash * commColors.length) % commColors.length;
+
+        commItems.push({
+          x: x + (hash - 0.5) * 3,
+          y: h * 0.5,
+          z: z + (hash - 0.5) * 3,
+          w,
+          h,
+          d,
+          color: commColors[colIdx]
+        });
+      }
+    }
+
+    // Blok B: Sentra Perdagangan & Pasar Jatinegara
+    for (let x = 600; x <= 720; x += 16) {
+      for (let z = 220; z <= 360; z += 18) {
+        // Jangan timpa Stasiun Jatinegara atau rel
+        if (Math.hypot(x - 666.1, z - 282.6) < 45) continue;
+        if (Math.abs(z - 282.6) < 14) continue;
+
+        const hash = Math.abs(Math.sin(x * 7.123 + z * 91.456));
+        const h = 10 + hash * 8; // 3-4 lantai
+        const w = 11 + hash * 3;
+        const d = 12 + (1 - hash) * 3;
+        const colIdx = Math.floor(hash * commColors.length) % commColors.length;
+
+        commItems.push({
+          x: x + (hash - 0.5) * 2,
+          y: h * 0.5,
+          z: z + (hash - 0.5) * 2,
+          w,
+          h,
+          d,
+          color: commColors[colIdx]
+        });
+      }
+    }
+
+    // Blok C: Koridor Bisnis & Transit Otista - Cawang
+    for (let x = 620; x <= 740; x += 18) {
+      for (let z = 540; z <= 690; z += 20) {
+        // Jangan timpa Simpang Susun Cawang
+        if (Math.hypot(x - 712.3, z - 723.8) < 55) continue;
+        if (Math.abs(x - 640) < 14) continue; // Jl. Otista
+
+        const hash = Math.abs(Math.sin(x * 33.22 + z * 17.88));
+        const h = 12 + hash * 16; // 4-7 lantai
+        const w = 13 + hash * 4;
+        const d = 14 + (1 - hash) * 4;
+        const colIdx = Math.floor(hash * commColors.length) % commColors.length;
+
+        commItems.push({
+          x: x + (hash - 0.5) * 3,
+          y: h * 0.5,
+          z: z + (hash - 0.5) * 3,
+          w,
+          h,
+          d,
+          color: commColors[colIdx]
+        });
+      }
+    }
+
+    if (commItems.length > 0) {
+      const commMesh = new THREE.InstancedMesh(baseBoxGeo, commMat, commItems.length);
+      commMesh.receiveShadow = true;
+      commMesh.castShadow = true;
+
+      commItems.forEach((c, idx) => {
+        dummy.position.set(c.x, c.y, c.z);
+        dummy.scale.set(c.w, c.h, c.d);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        commMesh.setMatrixAt(idx, dummy.matrix);
+        commMesh.setColorAt(idx, c.color);
+      });
+
+      commMesh.instanceMatrix.needsUpdate = true;
+      if (commMesh.instanceColor) commMesh.instanceColor.needsUpdate = true;
+      this.proceduralGroup.add(commMesh);
+    }
+
+    // =========================================================================
+    // 2. DISTRIK RESIDENSIAL MODERN DUREN SAWIT, PONDOK BAMBU & CIPINANG (1 Draw Call)
+    // =========================================================================
+    const resMat = new THREE.MeshStandardMaterial({ roughness: 0.7, metalness: 0.1 });
+    const resColors = [
+      new THREE.Color(0xfef3c7), // Warm Vanilla
+      new THREE.Color(0xe2e8f0), // Modern Slate White
+      new THREE.Color(0xd4d4d8), // Concrete Gray
+      new THREE.Color(0xfef08a), // Pastel Yellow
+      new THREE.Color(0xfbcfe8), // Soft Warm Rose
+      new THREE.Color(0xccfbf1)  // Mint White
+    ];
+
+    const resItems = [];
+
+    // Distrik Duren Sawit & Pondok Bambu (Sisi Barat & Timur KBT)
+    for (let x = 1080; x <= 1380; x += 18) {
+      for (let z = 180; z <= 560; z += 20) {
+        // Jangan timpa Kanal Banjir Timur
+        if (Math.abs(x - (1150 - (z - 350) * 0.5)) < 24) continue;
+        if (Math.abs(z - 520) < 15) continue; // Jl. Kolonel Sugiono
+
+        const hash = Math.abs(Math.sin(x * 19.456 + z * 41.789));
+        const h = 7.5 + hash * 5.5; // 2-3 lantai townhouse
+        const w = 11 + hash * 3;
+        const d = 12 + (1 - hash) * 3;
+        const colIdx = Math.floor(hash * resColors.length) % resColors.length;
+
+        resItems.push({
+          x: x + (hash - 0.5) * 3,
+          y: h * 0.5,
+          z: z + (hash - 0.5) * 3,
+          w,
+          h,
+          d,
+          color: resColors[colIdx]
+        });
+      }
+    }
+
+    // Kawasan Residensial Cipinang & Kebon Nanas
+    for (let x = 740; x <= 880; x += 18) {
+      for (let z = 280; z <= 480; z += 18) {
+        if (Math.abs(x - 720) < 16) continue; // By-Pass DI Panjaitan
+        if (Math.abs(z - 520) < 15) continue; // Jl. Basuki Rahmat
+
+        const hash = Math.abs(Math.sin(x * 29.11 + z * 63.77));
+        const h = 8 + hash * 7; // 2-3 lantai
+        const w = 11 + hash * 3;
+        const d = 12 + (1 - hash) * 3;
+        const colIdx = Math.floor(hash * resColors.length) % resColors.length;
+
+        resItems.push({
+          x: x + (hash - 0.5) * 2,
+          y: h * 0.5,
+          z: z + (hash - 0.5) * 2,
+          w,
+          h,
+          d,
+          color: resColors[colIdx]
+        });
+      }
+    }
+
+    if (resItems.length > 0) {
+      const resMesh = new THREE.InstancedMesh(baseBoxGeo, resMat, resItems.length);
+      resMesh.receiveShadow = true;
+      resMesh.castShadow = true;
+
+      resItems.forEach((r, idx) => {
+        dummy.position.set(r.x, r.y, r.z);
+        dummy.scale.set(r.w, r.h, r.d);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        resMesh.setMatrixAt(idx, dummy.matrix);
+        resMesh.setColorAt(idx, r.color);
+      });
+
+      resMesh.instanceMatrix.needsUpdate = true;
+      if (resMesh.instanceColor) resMesh.instanceColor.needsUpdate = true;
+      this.proceduralGroup.add(resMesh);
+    }
+
+    // =========================================================================
+    // 3. KAWASAN INDUSTRI PULOGADUNG (PT JIEP) & HANGGAR LOGISTIK (1 Draw Call)
+    // =========================================================================
+    const factoryMat = new THREE.MeshStandardMaterial({ roughness: 0.55, metalness: 0.45 });
+    const factoryColors = [
+      new THREE.Color(0x334155), // Industrial Slate
+      new THREE.Color(0x475569), // Factory Steel Gray
+      new THREE.Color(0x0284c7), // Corporate Blue Warehouse
+      new THREE.Color(0x64748b), // Galvanized Zinc
+      new THREE.Color(0xf1f5f9)  // Clean Logistics White
+    ];
+
+    const factoryItems = [];
+
+    // Kompleks Kawasan Industri Pulogadung (JIEP) di timur laut
+    for (let x = 1200; x <= 1450; x += 45) {
+      for (let z = -140; z <= 40; z += 45) {
+        if (Math.abs(z - (-30)) < 16) continue; // Jl. Pemuda ujung timur
+
+        const hash = Math.abs(Math.sin(x * 51.23 + z * 19.87));
+        const w = 32 + hash * 12; // 32m - 44m lebar gudang pabrik
+        const d = 34 + (1 - hash) * 12; // 34m - 46m panjang
+        const h = 12 + hash * 5; // 12m - 17m tinggi hanggar pabrik
+        const colIdx = Math.floor(hash * factoryColors.length) % factoryColors.length;
+
+        factoryItems.push({
+          x: x + (hash - 0.5) * 5,
+          y: h * 0.5,
+          z: z + (hash - 0.5) * 5,
+          w,
+          h,
+          d,
+          color: factoryColors[colIdx]
+        });
+      }
+    }
+
+    // Kompleks Aviasi & Barak Militer Halim
+    for (let x = 800; x <= 1020; x += 40) {
+      for (let z = 880; z <= 1120; z += 45) {
+        // Jangan timpa Runway atau Bandara Halim
+        if (Math.hypot(x - 893.2, z - 993.0) < 55) continue;
+        if (Math.abs(x - (z * 0.42 + 450)) < 22) continue; // Runway clearance
+
+        const hash = Math.abs(Math.sin(x * 43.11 + z * 87.22));
+        const w = 26 + hash * 8;
+        const d = 30 + (1 - hash) * 8;
+        const h = 10 + hash * 4;
+        const colIdx = Math.floor(hash * factoryColors.length) % factoryColors.length;
+
+        factoryItems.push({
+          x: x + (hash - 0.5) * 4,
+          y: h * 0.5,
+          z: z + (hash - 0.5) * 4,
+          w,
+          h,
+          d,
+          color: factoryColors[colIdx]
+        });
+      }
+    }
+
+    if (factoryItems.length > 0) {
+      const factMesh = new THREE.InstancedMesh(baseBoxGeo, factoryMat, factoryItems.length);
+      factMesh.receiveShadow = true;
+      factMesh.castShadow = true;
+
+      factoryItems.forEach((f, idx) => {
+        dummy.position.set(f.x, f.y, f.z);
+        dummy.scale.set(f.w, f.h, f.d);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        factMesh.setMatrixAt(idx, dummy.matrix);
+        factMesh.setColorAt(idx, f.color);
+      });
+
+      factMesh.instanceMatrix.needsUpdate = true;
+      if (factMesh.instanceColor) factMesh.instanceColor.needsUpdate = true;
+      this.proceduralGroup.add(factMesh);
+    }
+
+    // =========================================================================
+    // 4. VEGETASI PERKOTAAN TROPIS JAKARTA TIMUR (Instanced Trees, 2 Draw Calls)
+    // =========================================================================
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78716c, roughness: 0.8 });
+    const foliageMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 });
+
+    const treeTransforms = [];
+
+    // Sabuk Hijau Tanggul Kanal Banjir Timur (KBT)
+    // Berjejer di sepanjang kedua tepi kanal
+    const kbtWaypoints = [
+      [850, 580], [950, 500], [1050, 420], [1150, 350],
+      [1230, 230], [1320, 100], [1410, -80], [1500, -250]
+    ];
+    for (let i = 0; i < kbtWaypoints.length - 1; i++) {
+      const [x1, z1] = kbtWaypoints[i];
+      const [x2, z2] = kbtWaypoints[i + 1];
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const angle = Math.atan2(dx, dz);
+      const steps = Math.max(2, Math.floor(len / 22));
+
+      for (let s = 0; s < steps; s++) {
+        const t = (s + 0.5) / steps;
+        const tx = x1 + dx * t;
+        const tz = z1 + dz * t;
+        // Pohon di tanggul barat & timur kanal
+        const perpX = Math.cos(angle) * 16;
+        const perpZ = -Math.sin(angle) * 16;
+        treeTransforms.push({ x: tx + perpX, z: tz + perpZ, scale: 1.15, isPalm: false });
+        treeTransforms.push({ x: tx - perpX, z: tz - perpZ, scale: 1.15, isPalm: false });
+      }
+    }
+
+    // Pohon Palem Raja di By-Pass DI Panjaitan & Cawang
+    for (let z = 60; z <= 700; z += 24) {
+      treeTransforms.push({ x: 712, z, scale: 1.1, isPalm: true });
+    }
+
+    // Hutan Kota & Lanskap Hijau Lingkar Luar TMII & Cipayung
+    for (let a = 0; a < Math.PI * 2; a += Math.PI / 8) {
+      const tx = 1040.2 + Math.cos(a) * 62;
+      const tz = 1551.5 + Math.sin(a) * 58;
+      treeTransforms.push({ x: tx, z: tz, scale: 1.25, isPalm: false });
+    }
+
+    // Penghijauan Taman Sekitar Monumen Pancasila Sakti
+    for (let a = 0; a < Math.PI * 2; a += Math.PI / 6) {
+      const tx = 1182.3 + Math.cos(a) * 44;
+      const tz = 1324.1 + Math.sin(a) * 38;
+      treeTransforms.push({ x: tx, z: tz, scale: 1.2, isPalm: false });
+    }
+
+    if (treeTransforms.length > 0) {
+      const trunkGeo = new THREE.CylinderGeometry(0.25, 0.45, 4.5, 6);
+      const foliageGeo = new THREE.SphereGeometry(2.5, 8, 8);
+      const trunkMesh = new THREE.InstancedMesh(trunkGeo, trunkMat, treeTransforms.length);
+      const foliageMesh = new THREE.InstancedMesh(foliageGeo, foliageMat, treeTransforms.length);
+
+      trunkMesh.receiveShadow = true;
+      foliageMesh.receiveShadow = true;
+
+      treeTransforms.forEach((t, idx) => {
+        dummy.position.set(t.x, 2.25 * t.scale, t.z);
+        dummy.scale.set(t.scale, t.scale, t.scale);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        trunkMesh.setMatrixAt(idx, dummy.matrix);
+
         dummy.position.set(t.x, 5.0 * t.scale, t.z);
         dummy.scale.set(t.isPalm ? t.scale * 1.3 : t.scale * 1.0, t.scale * 0.85, t.isPalm ? t.scale * 1.3 : t.scale * 1.0);
         dummy.updateMatrix();
