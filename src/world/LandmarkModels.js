@@ -3849,6 +3849,587 @@ export class LandmarkModels {
 
     return group;
   }
+
+  /**
+   * 52. Jakarta International Stadium (JIS)
+   * Megastruktur stadion bertaraf internasional dengan kapasitas 82.000 penonton, atap buka-tutup (retractable roof), fasad parametrik perak, dan ramp melayang.
+   */
+  static createJISStadium() {
+    const group = new THREE.Group();
+
+    const facadeMat = new THREE.MeshStandardMaterial({
+      color: 0xe2e8f0,
+      metalness: 0.85,
+      roughness: 0.35,
+      emissive: 0x38bdf8,
+      emissiveIntensity: 0.12
+    });
+    const podiumMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.75 });
+    const roofTrussMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, metalness: 0.7, roughness: 0.3 });
+    const pitchMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 });
+    const seatsMat = new THREE.MeshStandardMaterial({ color: 0xe11d48, roughness: 0.65 });
+    const floodlightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+    // 1. Concrete Concourse Podium
+    const podium = new THREE.Mesh(new THREE.BoxGeometry(140, 6, 110), podiumMat);
+    podium.position.y = 3;
+    podium.receiveShadow = true;
+    group.add(podium);
+
+    // 2. Grand Elevated Pedestrian Ramps (West & East Ramps)
+    [-76, 76].forEach((rx) => {
+      const rampGeo = new THREE.BoxGeometry(18, 2, 42);
+      rampGeo.rotateX(0.18 * (rx < 0 ? -1 : 1));
+      const ramp = new THREE.Mesh(rampGeo, podiumMat);
+      ramp.position.set(rx, 4.5, 0);
+      group.add(ramp);
+    });
+
+    // 3. Elliptical Stadium Outer Facade Bowl
+    const bowlGeo = new THREE.CylinderGeometry(52, 44, 48, 36, 1, true);
+    bowlGeo.scale(1.15, 1.0, 0.95);
+    const bowl = new THREE.Mesh(bowlGeo, facadeMat);
+    bowl.position.y = 30;
+    bowl.castShadow = true;
+    bowl.receiveShadow = true;
+    group.add(bowl);
+
+    // Facade Louver Rib Rings
+    for (let ry = 12; ry <= 50; ry += 8) {
+      const ringGeo = new THREE.TorusGeometry(49, 0.6, 8, 36);
+      ringGeo.rotateX(Math.PI / 2);
+      ringGeo.scale(1.15, 0.95, 1.0);
+      const ring = new THREE.Mesh(ringGeo, roofTrussMat);
+      ring.position.y = ry;
+      group.add(ring);
+    }
+
+    // 4. Interior Seating Bowl & Pitch
+    const pitch = new THREE.Mesh(new THREE.PlaneGeometry(62, 42), pitchMat);
+    pitch.rotateX(-Math.PI / 2);
+    pitch.position.y = 6.2;
+    pitch.receiveShadow = true;
+    group.add(pitch);
+
+    // Tiered Lower Seating Ring
+    const seatsGeo = new THREE.CylinderGeometry(38, 32, 10, 24, 1, true);
+    seatsGeo.scale(1.12, 1.0, 0.94);
+    const seats = new THREE.Mesh(seatsGeo, seatsMat);
+    seats.position.y = 11;
+    group.add(seats);
+
+    // 5. Retractable Roof Perimeter Steel Trusses
+    const roofRingGeo = new THREE.TorusGeometry(53, 1.6, 8, 36);
+    roofRingGeo.rotateX(Math.PI / 2);
+    roofRingGeo.scale(1.15, 0.95, 1.0);
+    const roofRing = new THREE.Mesh(roofRingGeo, roofTrussMat);
+    roofRing.position.y = 54;
+    roofRing.castShadow = true;
+    group.add(roofRing);
+
+    // Retractable Sliding Roof Leaves
+    const roofLeaf1 = new THREE.Mesh(new THREE.BoxGeometry(45, 1.2, 70), roofTrussMat);
+    roofLeaf1.position.set(-20, 55.5, 0);
+    group.add(roofLeaf1);
+
+    const roofLeaf2 = new THREE.Mesh(new THREE.BoxGeometry(45, 1.2, 70), roofTrussMat);
+    roofLeaf2.position.set(20, 55.5, 0);
+    group.add(roofLeaf2);
+
+    // 6. Stadium Floodlight Gantry LED Beams
+    [-46, 46].forEach((fx) => {
+      [-36, 36].forEach((fz) => {
+        const lightGantry = new THREE.Mesh(new THREE.BoxGeometry(7, 1.2, 3), floodlightMat);
+        lightGantry.position.set(fx, 56.5, fz);
+        group.add(lightGantry);
+      });
+    });
+
+    return group;
+  }
+
+  /**
+   * 53. Taman Impian Jaya Ancol & Dunia Fantasi (Dufan)
+   * Kawasan rekreasi tepi laut: Kastil Dufan, Kincir Ria Bianglala (R=20m), lintasan Halilintar Roller-Coaster, dan promenade pesisir.
+   */
+  static createAncolDufan() {
+    const group = new THREE.Group();
+
+    const castleWallMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.65 });
+    const spireMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4, metalness: 0.3 });
+    const ferrisSteelMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.8, roughness: 0.25 });
+    const coasterTrackMat = new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.7, roughness: 0.3 });
+    const sandBeachMat = new THREE.MeshStandardMaterial({ color: 0xfef08a, roughness: 0.95 });
+    const oceanWaterMat = new THREE.MeshStandardMaterial({ color: 0x0369a1, roughness: 0.15, metalness: 0.85 });
+
+    // 1. Coastal Sand Beach & Ocean Water
+    const beach = new THREE.Mesh(new THREE.PlaneGeometry(120, 50), sandBeachMat);
+    beach.rotateX(-Math.PI / 2);
+    beach.position.set(0, 0.1, -30);
+    beach.receiveShadow = true;
+    group.add(beach);
+
+    const sea = new THREE.Mesh(new THREE.PlaneGeometry(120, 45), oceanWaterMat);
+    sea.rotateX(-Math.PI / 2);
+    sea.position.set(0, 0.05, -75);
+    group.add(sea);
+
+    // 2. Dunia Fantasi Fairy-tale Castle
+    const castlePodium = new THREE.Mesh(new THREE.BoxGeometry(36, 12, 22), castleWallMat);
+    castlePodium.position.set(-28, 6, 0);
+    castlePodium.castShadow = true;
+    group.add(castlePodium);
+
+    // Central Tower with Spire
+    const centralTower = new THREE.Mesh(new THREE.CylinderGeometry(3.5, 4.0, 18, 12), castleWallMat);
+    centralTower.position.set(-28, 20, 0);
+    group.add(centralTower);
+
+    const mainSpire = new THREE.Mesh(new THREE.ConeGeometry(4.2, 12, 12), spireMat);
+    mainSpire.position.set(-28, 34, 0);
+    group.add(mainSpire);
+
+    // Corner Turrets
+    [[-42, -7], [-42, 7], [-14, -7], [-14, 7]].forEach(([tx, tz]) => {
+      const turret = new THREE.Mesh(new THREE.CylinderGeometry(2.0, 2.2, 16, 8), castleWallMat);
+      turret.position.set(tx, 14, tz);
+      group.add(turret);
+
+      const turretSpire = new THREE.Mesh(new THREE.ConeGeometry(2.4, 7, 8), spireMat);
+      turretSpire.position.set(tx, 25.5, tz);
+      group.add(turretSpire);
+    });
+
+    // 3. Bianglala Giant Ferris Wheel (Center Y=25m, Radius=19m)
+    const wheelCenter = new THREE.Vector3(26, 25, 0);
+
+    // A-frame Support Legs
+    [-1, 1].forEach((dir) => {
+      const legGeo = new THREE.CylinderGeometry(0.45, 0.65, 27, 8);
+      legGeo.rotateZ(dir * 0.32);
+      const leg = new THREE.Mesh(legGeo, ferrisSteelMat);
+      leg.position.set(wheelCenter.x + dir * 5.5, 13.5, 0);
+      group.add(leg);
+    });
+
+    // Dual Outer Rings
+    [-0.8, 0.8].forEach((oz) => {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(19, 0.28, 8, 32), ferrisSteelMat);
+      ring.position.set(wheelCenter.x, wheelCenter.y, oz);
+      group.add(ring);
+    });
+
+    // 16 Spokes & Gondolas
+    const gondolaColors = [0xef4444, 0xf59e0b, 0x10b981, 0x06b6d4, 0x8b5cf6, 0xec4899];
+    for (let i = 0; i < 16; i++) {
+      const angle = (i / 16) * Math.PI * 2;
+      const spoke = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 19, 6), ferrisSteelMat);
+      spoke.position.set(wheelCenter.x + (Math.cos(angle) * 19) / 2, wheelCenter.y + (Math.sin(angle) * 19) / 2, 0);
+      spoke.rotation.z = angle + Math.PI / 2;
+      group.add(spoke);
+
+      const gondolaMat = new THREE.MeshStandardMaterial({
+        color: gondolaColors[i % gondolaColors.length],
+        metalness: 0.5,
+        roughness: 0.3
+      });
+      const gondola = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.8, 1.4), gondolaMat);
+      gondola.position.set(wheelCenter.x + Math.cos(angle) * 19, wheelCenter.y + Math.sin(angle) * 19, 0);
+      group.add(gondola);
+    }
+
+    // 4. Halilintar Roller Coaster Looping Steel Track
+    const coasterCurvePoints = [
+      new THREE.Vector3(-10, 3, 22),
+      new THREE.Vector3(0, 16, 26),
+      new THREE.Vector3(12, 24, 20),
+      new THREE.Vector3(18, 14, 14),
+      new THREE.Vector3(14, 3, 8),
+      new THREE.Vector3(0, 7, 10),
+      new THREE.Vector3(-8, 14, 18),
+      new THREE.Vector3(-10, 3, 22)
+    ];
+    const coasterCurve = new THREE.CatmullRomCurve3(coasterCurvePoints, true);
+    const coasterTrackGeo = new THREE.TubeGeometry(coasterCurve, 48, 0.45, 8, true);
+    const coasterTrack = new THREE.Mesh(coasterTrackGeo, coasterTrackMat);
+    group.add(coasterTrack);
+
+    return group;
+  }
+
+  /**
+   * 54. Pelabuhan Bersejarah Sunda Kelapa & Museum Bahari
+   * Pelabuhan tertua di Jakarta: Kapal layar tradisional Pinisi, dermaga batu andesit, Menara Syahbandar miring (1839), dan gudang rempah VOC.
+   */
+  static createSundaKelapaPort() {
+    const group = new THREE.Group();
+
+    const wharfStoneMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.85 });
+    const woodHullMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.7 });
+    const woodDeckMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.8 });
+    const sailCanvasMat = new THREE.MeshStandardMaterial({ color: 0xfef08a, roughness: 0.6, side: THREE.DoubleSide });
+    const colonialStuccoMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.65 });
+    const vocRoofTileMat = new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.75 });
+    const copperDomeMat = new THREE.MeshStandardMaterial({ color: 0x0d9488, metalness: 0.6, roughness: 0.35 });
+    const harborWaterMat = new THREE.MeshStandardMaterial({ color: 0x0e7490, roughness: 0.2, metalness: 0.8 });
+
+    // 1. Water Basin & Wharf Dock
+    const basin = new THREE.Mesh(new THREE.PlaneGeometry(90, 48), harborWaterMat);
+    basin.rotateX(-Math.PI / 2);
+    basin.position.set(0, 0.1, 8);
+    group.add(basin);
+
+    const wharf = new THREE.Mesh(new THREE.BoxGeometry(92, 1.8, 22), wharfStoneMat);
+    wharf.position.set(0, 0.9, -15);
+    wharf.receiveShadow = true;
+    group.add(wharf);
+
+    // Mooring Bollards along dock edge
+    for (let bx = -40; bx <= 40; bx += 16) {
+      const bollard = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.32, 0.8, 8), wharfStoneMat);
+      bollard.position.set(bx, 2.2, -4.5);
+      group.add(bollard);
+    }
+
+    // 2. Two Traditional Wooden Pinisi Schooners moored along dock
+    [-22, 20].forEach((px) => {
+      const shipGroup = new THREE.Group();
+      shipGroup.position.set(px, 1.2, 8);
+
+      // Wooden Hull (slender with raked clipper bow)
+      const hullGeo = new THREE.BoxGeometry(8, 3.2, 26);
+      const hull = new THREE.Mesh(hullGeo, woodHullMat);
+      hull.position.y = 1.0;
+      hull.castShadow = true;
+      shipGroup.add(hull);
+
+      const deck = new THREE.Mesh(new THREE.BoxGeometry(7.4, 0.4, 25.4), woodDeckMat);
+      deck.position.y = 2.7;
+      shipGroup.add(deck);
+
+      // Bowsprit pole extending forward
+      const bowsprit = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 9, 6), woodHullMat);
+      bowsprit.rotateX(Math.PI / 3);
+      bowsprit.position.set(0, 3.8, 16);
+      shipGroup.add(bowsprit);
+
+      // Main Mast (H=22m) & Fore Mast (H=18m)
+      [
+        { mz: 3, h: 22 },
+        { mz: -6, h: 18 }
+      ].forEach((m) => {
+        const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.28, m.h, 8), woodHullMat);
+        mast.position.set(0, 2.7 + m.h / 2, m.mz);
+        mast.rotateX(-0.06);
+        shipGroup.add(mast);
+
+        // Billowing Canvas Sails
+        const sail = new THREE.Mesh(new THREE.PlaneGeometry(5.2, m.h * 0.65), sailCanvasMat);
+        sail.position.set(0.1, 2.7 + m.h * 0.55, m.mz - 2.2);
+        sail.rotateY(0.15);
+        shipGroup.add(sail);
+      });
+
+      group.add(shipGroup);
+    });
+
+    // 3. Museum Bahari (Historic VOC Spice Warehouses)
+    const warehouse = new THREE.Mesh(new THREE.BoxGeometry(55, 9, 16), colonialStuccoMat);
+    warehouse.position.set(-15, 5.5, -28);
+    warehouse.castShadow = true;
+    group.add(warehouse);
+
+    const whRoofGeo = new THREE.ConeGeometry(32, 6, 4);
+    whRoofGeo.rotateY(Math.PI / 4);
+    whRoofGeo.scale(1.0, 1.0, 0.42);
+    const whRoof = new THREE.Mesh(whRoofGeo, vocRoofTileMat);
+    whRoof.position.set(-15, 13, -28);
+    group.add(whRoof);
+
+    // 4. Menara Syahbandar (1839 Dutch Leaning Watchtower)
+    const towerGroup = new THREE.Group();
+    towerGroup.position.set(28, 0, -28);
+    towerGroup.rotation.z = -0.045;
+
+    const baseTower = new THREE.Mesh(new THREE.BoxGeometry(7, 14, 7), colonialStuccoMat);
+    baseTower.position.y = 7;
+    baseTower.castShadow = true;
+    towerGroup.add(baseTower);
+
+    const lanternDome = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 3.2, 4, 8), copperDomeMat);
+    lanternDome.position.y = 16;
+    towerGroup.add(lanternDome);
+
+    group.add(towerGroup);
+
+    return group;
+  }
+
+  /**
+   * 55. Jembatan Angkat Kota Intan & Kawasan Kali Besar Utara
+   * Jembatan jungkit kayu merah (1628) peninggalan VOC Belanda di atas Kali Besar dengan mekanisme tuas penarik kayu.
+   */
+  static createKotaIntanBridge() {
+    const group = new THREE.Group();
+
+    const timberRedMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.75 });
+    const stoneAbutmentMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.85 });
+    const chainMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85, roughness: 0.3 });
+    const canalWaterMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.2, metalness: 0.8 });
+
+    // 1. Kali Besar Canal Water Surface
+    const canal = new THREE.Mesh(new THREE.PlaneGeometry(28, 55), canalWaterMat);
+    canal.rotateX(-Math.PI / 2);
+    canal.position.y = 0.05;
+    group.add(canal);
+
+    // 2. Stone Abutments on Canal Banks
+    [-11, 11].forEach((ax) => {
+      const abutment = new THREE.Mesh(new THREE.BoxGeometry(6, 2.5, 42), stoneAbutmentMat);
+      abutment.position.set(ax, 1.25, 0);
+      abutment.receiveShadow = true;
+      group.add(abutment);
+    });
+
+    // 3. Red Timber Bascule Deck Spans (Two leaves inclined slightly)
+    const deckEast = new THREE.Mesh(new THREE.BoxGeometry(9, 0.45, 5.2), timberRedMat);
+    deckEast.position.set(4.2, 2.3, 0);
+    deckEast.rotation.z = -0.06;
+    deckEast.castShadow = true;
+    group.add(deckEast);
+
+    const deckWest = new THREE.Mesh(new THREE.BoxGeometry(9, 0.45, 5.2), timberRedMat);
+    deckWest.position.set(-4.2, 2.3, 0);
+    deckWest.rotation.z = 0.06;
+    deckWest.castShadow = true;
+    group.add(deckWest);
+
+    // Timber Side Railings
+    [-2.5, 2.5].forEach((rz) => {
+      const railEast = new THREE.Mesh(new THREE.BoxGeometry(9, 0.9, 0.15), timberRedMat);
+      railEast.position.set(4.2, 3.0, rz);
+      group.add(railEast);
+
+      const railWest = new THREE.Mesh(new THREE.BoxGeometry(9, 0.9, 0.15), timberRedMat);
+      railWest.position.set(-4.2, 3.0, rz);
+      group.add(railWest);
+    });
+
+    // 4. Dutch Gallows Tower & Balance Lifting Beams (Rangka Tuas Angkat)
+    [-7.5, 7.5].forEach((gx) => {
+      // Twin vertical timber posts
+      [-2.6, 2.6].forEach((gz) => {
+        const post = new THREE.Mesh(new THREE.BoxGeometry(0.45, 7.5, 0.45), timberRedMat);
+        post.position.set(gx, 5.8, gz);
+        post.castShadow = true;
+        group.add(post);
+      });
+
+      // Top Crossbeam
+      const topBeam = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 5.6), timberRedMat);
+      topBeam.position.set(gx, 9.6, 0);
+      group.add(topBeam);
+
+      // Diagonal Lifting Balance Levers
+      [-2.6, 2.6].forEach((gz) => {
+        const lever = new THREE.Mesh(new THREE.BoxGeometry(7.2, 0.35, 0.35), timberRedMat);
+        lever.position.set(gx + (gx > 0 ? -1.2 : 1.2), 10.4, gz);
+        lever.rotation.z = gx > 0 ? -0.25 : 0.25;
+        group.add(lever);
+
+        // Suspension Chain link
+        const chain = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 7.2, 6), chainMat);
+        chain.position.set(gx + (gx > 0 ? -3.8 : 3.8), 6.5, gz);
+        chain.rotation.z = gx > 0 ? 0.28 : -0.28;
+        group.add(chain);
+      });
+    });
+
+    return group;
+  }
+
+  /**
+   * 56. Sentra Bisnis Kelapa Gading (Mall Kelapa Gading 1-5 & La Piazza)
+   * Superblok komersial terbesar di utara-timur: podium mall modern bertingkat, kanopi atrium piramida kaca, dan menara jam klasik La Piazza Campanile.
+   */
+  static createMallKelapaGading() {
+    const group = new THREE.Group();
+
+    const mallFacadeMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.55 });
+    const glassAtriumMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.15, metalness: 0.85 });
+    const brickTowerMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.7 });
+    const copperSpireMat = new THREE.MeshStandardMaterial({ color: 0x0d9488, metalness: 0.65, roughness: 0.3 });
+    const clockFaceMat = new THREE.MeshBasicMaterial({ color: 0xfffbeb });
+
+    // 1. Multi-Tier Commercial Podium (MKG 1 to 5)
+    const podiumMain = new THREE.Mesh(new THREE.BoxGeometry(95, 18, 65), mallFacadeMat);
+    podiumMain.position.set(0, 9, 0);
+    podiumMain.castShadow = true;
+    podiumMain.receiveShadow = true;
+    group.add(podiumMain);
+
+    // Terraced Upper Level
+    const upperDeck = new THREE.Mesh(new THREE.BoxGeometry(70, 7, 45), mallFacadeMat);
+    upperDeck.position.set(0, 21.5, -5);
+    group.add(upperDeck);
+
+    // 2. Central Glass Pyramid Skylight Atrium
+    const pyramidGeo = new THREE.ConeGeometry(14, 9, 4);
+    pyramidGeo.rotateY(Math.PI / 4);
+    const pyramid = new THREE.Mesh(pyramidGeo, glassAtriumMat);
+    pyramid.position.set(0, 29.5, -5);
+    group.add(pyramid);
+
+    // Glass Skywalk connecting mall wings
+    const skybridge = new THREE.Mesh(new THREE.BoxGeometry(32, 4.5, 6), glassAtriumMat);
+    skybridge.position.set(0, 14, 34);
+    group.add(skybridge);
+
+    // 3. La Piazza Campanile Clock Tower (H=36m)
+    const towerGroup = new THREE.Group();
+    towerGroup.position.set(-36, 0, 24);
+
+    const towerBody = new THREE.Mesh(new THREE.BoxGeometry(8, 28, 8), brickTowerMat);
+    towerBody.position.y = 14;
+    towerBody.castShadow = true;
+    towerGroup.add(towerBody);
+
+    // 4 Illuminated Clock Faces
+    [-4.05, 4.05].forEach((cx) => {
+      const clock = new THREE.Mesh(new THREE.CircleGeometry(1.6, 16), clockFaceMat);
+      clock.position.set(cx, 24, 0);
+      clock.rotation.y = cx > 0 ? Math.PI / 2 : -Math.PI / 2;
+      towerGroup.add(clock);
+    });
+    [-4.05, 4.05].forEach((cz) => {
+      const clock = new THREE.Mesh(new THREE.CircleGeometry(1.6, 16), clockFaceMat);
+      clock.position.set(0, 24, cz);
+      clock.rotation.y = cz > 0 ? 0 : Math.PI;
+      towerGroup.add(clock);
+    });
+
+    // Belfry Arches & Spire
+    const belfry = new THREE.Mesh(new THREE.BoxGeometry(7.2, 5, 7.2), mallFacadeMat);
+    belfry.position.y = 30.5;
+    towerGroup.add(belfry);
+
+    const spire = new THREE.Mesh(new THREE.ConeGeometry(4.5, 9, 4), copperSpireMat);
+    spire.rotateY(Math.PI / 4);
+    spire.position.y = 37.5;
+    towerGroup.add(spire);
+
+    group.add(towerGroup);
+
+    return group;
+  }
+
+  /**
+   * 57. Pelabuhan Samudera Tanjung Priok & Stasiun Bersejarah Priok
+   * Pelabuhan laut terdalam tersibuk: Stasiun Art Deco 1914 kubah busur baja, Quay Container Cranes oranye-putih (H=48m), dan susunan kontainer kargo.
+   */
+  static createTanjungPriokPort() {
+    const group = new THREE.Group();
+
+    const quayConcreteMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.85 });
+    const stationStuccoMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.65 });
+    const steelArchMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8, roughness: 0.3 });
+    const craneOrangeMat = new THREE.MeshStandardMaterial({ color: 0xea580c, metalness: 0.6, roughness: 0.4 });
+    const craneWhiteMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.5, roughness: 0.4 });
+    const oceanWaterMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.15, metalness: 0.85 });
+
+    // 1. Deep Ocean Harbor Water & Concrete Wharf Quay
+    const harbor = new THREE.Mesh(new THREE.PlaneGeometry(130, 45), oceanWaterMat);
+    harbor.rotateX(-Math.PI / 2);
+    harbor.position.set(0, 0.1, -40);
+    group.add(harbor);
+
+    const wharf = new THREE.Mesh(new THREE.BoxGeometry(130, 2.5, 45), quayConcreteMat);
+    wharf.position.set(0, 1.25, -2);
+    wharf.receiveShadow = true;
+    group.add(wharf);
+
+    // 2. 3 Quay Container Cranes (Ship-to-Shore Cranes H=46m)
+    [-38, 0, 38].forEach((cx) => {
+      const craneGroup = new THREE.Group();
+      craneGroup.position.set(cx, 2.5, -16);
+
+      // Gantry Lower Legs
+      [-5, 5].forEach((lx) => {
+        const leg = new THREE.Mesh(new THREE.BoxGeometry(1.4, 22, 1.4), craneOrangeMat);
+        leg.position.set(lx, 11, 0);
+        leg.castShadow = true;
+        craneGroup.add(leg);
+      });
+
+      // Upper Machine House / Cab
+      const cab = new THREE.Mesh(new THREE.BoxGeometry(12, 6, 8), craneWhiteMat);
+      cab.position.set(0, 25, 0);
+      craneGroup.add(cab);
+
+      // Massive Outstretched Sea Boom (Arm extending over ocean)
+      const boom = new THREE.Mesh(new THREE.BoxGeometry(2.2, 2.2, 36), craneOrangeMat);
+      boom.position.set(0, 28, -14);
+      boom.castShadow = true;
+      craneGroup.add(boom);
+
+      // Backreach Counterweight Arm
+      const backBoom = new THREE.Mesh(new THREE.BoxGeometry(2.0, 2.0, 16), craneOrangeMat);
+      backBoom.position.set(0, 28, 11);
+      craneGroup.add(backBoom);
+
+      // A-frame Upper Pylon
+      const pylon = new THREE.Mesh(new THREE.ConeGeometry(5, 12, 4), craneWhiteMat);
+      pylon.position.set(0, 35, 0);
+      craneGroup.add(pylon);
+
+      group.add(craneGroup);
+    });
+
+    // 3. Stacks of Colorful 20ft & 40ft Shipping Containers
+    const containerColors = [0x0284c7, 0x047857, 0xf97316, 0xbe123c, 0x475569];
+    let colIdx = 0;
+    for (let cRow = -32; cRow <= 32; cRow += 16) {
+      for (let cZ = 6; cZ <= 16; cZ += 5) {
+        for (let cTier = 0; cTier < 3; cTier++) {
+          const cMat = new THREE.MeshStandardMaterial({
+            color: containerColors[(colIdx++) % containerColors.length],
+            metalness: 0.6,
+            roughness: 0.4
+          });
+          const container = new THREE.Mesh(new THREE.BoxGeometry(12, 2.6, 4.2), cMat);
+          container.position.set(cRow, 3.8 + cTier * 2.6, cZ);
+          container.castShadow = true;
+          group.add(container);
+        }
+      }
+    }
+
+    // 4. Stasiun Tanjung Priok (Art Deco 1914 Heritage Station)
+    const stationGroup = new THREE.Group();
+    stationGroup.position.set(0, 0, 36);
+
+    const stationTerminal = new THREE.Mesh(new THREE.BoxGeometry(58, 12, 24), stationStuccoMat);
+    stationTerminal.position.y = 6;
+    stationTerminal.castShadow = true;
+    stationGroup.add(stationTerminal);
+
+    // Monumental Barrel Vault Steel-and-Glass Train Shed Roof
+    const vaultGeo = new THREE.CylinderGeometry(14, 14, 52, 24, 1, false, 0, Math.PI);
+    vaultGeo.rotateZ(Math.PI / 2);
+    const vaultRoof = new THREE.Mesh(vaultGeo, steelArchMat);
+    vaultRoof.position.set(0, 12, 0);
+    vaultRoof.castShadow = true;
+    stationGroup.add(vaultRoof);
+
+    // Classical Station Facade Portico
+    const portico = new THREE.Mesh(new THREE.BoxGeometry(24, 14, 4), stationStuccoMat);
+    portico.position.set(0, 7, 13);
+    stationGroup.add(portico);
+
+    group.add(stationGroup);
+
+    return group;
+  }
 }
 
 

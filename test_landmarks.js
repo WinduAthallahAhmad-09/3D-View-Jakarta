@@ -4,8 +4,8 @@ import { JAKARTA_LANDMARKS } from './src/config/landmarks.js';
 
 console.log('Running test_landmarks.js verification...');
 
-// Check 1: Exactly 51 landmarks
-assert.strictEqual(JAKARTA_LANDMARKS.length, 51, `Expected 51 landmarks, got ${JAKARTA_LANDMARKS.length}`);
+// Check 1: Exactly 57 landmarks
+assert.strictEqual(JAKARTA_LANDMARKS.length, 57, `Expected 57 landmarks, got ${JAKARTA_LANDMARKS.length}`);
 
 // Check 2: Unique IDs and valid properties
 const seenIds = new Set();
@@ -53,7 +53,27 @@ jakpusEastAnchors.forEach((id) => {
   assert.ok(lm.position[0] > 100, `Landmark ${id} X position ${lm.position[0]} should be east of Monas/Thamrin (X > 100)`);
 });
 
-// Check 4: Check that CityScene.js maps builders for all 45 landmarks
+// South Jakarta Tahap 1 anchors (#46 s.d. #51)
+const southTahap1Anchors = [
+  'patung-dirgantara-pancoran',
+  'menara-saidah',
+  'south-quarter-simatupang',
+  'pondok-indah-mall',
+  'stasiun-mrt-fatmawati',
+  'kemang-village-lifestyle'
+];
+
+// North Jakarta Tahap 1 anchors (#52 s.d. #57)
+const jakutTahap1Anchors = [
+  'jis-stadium',
+  'ancol-dufan',
+  'sunda-kelapa',
+  'jembatan-kota-intan',
+  'mall-kelapa-gading',
+  'tanjung-priok'
+];
+
+// Check 4: Check that CityScene.js maps builders for all landmarks
 const citySceneContent = fs.readFileSync('./src/world/CityScene.js', 'utf-8');
 JAKARTA_LANDMARKS.forEach((lm) => {
   assert.ok(
@@ -64,7 +84,7 @@ JAKARTA_LANDMARKS.forEach((lm) => {
 
 // Check 5: Check that index.html includes tour buttons for all anchors
 const indexHtmlContent = fs.readFileSync('./index.html', 'utf-8');
-[...southAnchors, ...jakpusEastAnchors].forEach((id) => {
+[...southAnchors, ...jakpusEastAnchors, ...southTahap1Anchors, ...jakutTahap1Anchors].forEach((id) => {
   assert.ok(
     indexHtmlContent.includes(`data-tour-id="${id}"`),
     `index.html missing tour button for "${id}"`
@@ -215,15 +235,6 @@ assert.ok(
 );
 
 // Check 11: Tahap 1 Anchor Landmarks Jakarta Selatan (#46 s.d. #51)
-const southTahap1Anchors = [
-  'patung-dirgantara-pancoran',
-  'menara-saidah',
-  'south-quarter-simatupang',
-  'pondok-indah-mall',
-  'stasiun-mrt-fatmawati',
-  'kemang-village-lifestyle'
-];
-
 southTahap1Anchors.forEach((id) => {
   const lm = JAKARTA_LANDMARKS.find((l) => l.id === id);
   assert.ok(lm, `Missing South Jakarta Tahap 1 anchor landmark: ${id}`);
@@ -381,4 +392,21 @@ assert.ok(citySceneContent.includes('BufferGeometryUtils.mergeGeometries(roofGeo
 assert.ok(citySceneContent.includes('new THREE.InstancedMesh(trunkGeo, trunkMat, treeTransforms.length)'), 'CityScene.js missing trunk InstancedMesh');
 assert.ok(citySceneContent.includes('new THREE.InstancedMesh(foliageGeo, foliageMat, treeTransforms.length)'), 'CityScene.js missing foliage InstancedMesh');
 
-console.log('✅ All 51 landmarks, Quick Wins & Tahap 2 (Draw Calls Drop 96%) verified successfully!');
+// Check 17: Tahap 1 Anchor Landmarks Jakarta Utara (#52 s.d. #57)
+jakutTahap1Anchors.forEach((id) => {
+  const lm = JAKARTA_LANDMARKS.find((l) => l.id === id);
+  assert.ok(lm, `Missing North Jakarta Tahap 1 anchor landmark: ${id}`);
+  assert.ok(lm.name, `Missing name for ${id}`);
+  assert.ok(lm.position && lm.position.length === 3, `Invalid position for ${id}`);
+  assert.ok(lm.position[2] < -500, `Landmark ${id} Z position ${lm.position[2]} should be in Jakarta Utara (Z < -500)`);
+  assert.ok(citySceneContent.includes(`"${id}": () =>`), `CityScene.js missing builder mapping for ${id}`);
+});
+
+assert.ok(landmarkModelsContent.includes('createJISStadium'), 'LandmarkModels.js missing createJISStadium');
+assert.ok(landmarkModelsContent.includes('createAncolDufan'), 'LandmarkModels.js missing createAncolDufan');
+assert.ok(landmarkModelsContent.includes('createSundaKelapaPort'), 'LandmarkModels.js missing createSundaKelapaPort');
+assert.ok(landmarkModelsContent.includes('createKotaIntanBridge'), 'LandmarkModels.js missing createKotaIntanBridge');
+assert.ok(landmarkModelsContent.includes('createMallKelapaGading'), 'LandmarkModels.js missing createMallKelapaGading');
+assert.ok(landmarkModelsContent.includes('createTanjungPriokPort'), 'LandmarkModels.js missing createTanjungPriokPort');
+
+console.log('✅ All 57 landmarks, Quick Wins & Tahap 1 Jakarta Utara verified successfully!');

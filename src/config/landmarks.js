@@ -1149,6 +1149,141 @@ export const JAKARTA_LANDMARKS = [
       "Menara hunian Kemang Village merupakan salah satu kluster apartemen tertinggi di kawasan Jakarta Selatan bagian tengah.",
       "Terletak di tengah kantong kebudayaan, galeri seni kontemporer, dan sentra kuliner legendaris kawasan Kemang."
     ]
+  },
+  // =====================================================
+  // ZONA 7: JAKARTA UTARA (PESISIR TELUK JAKARTA & PELABUHAN)
+  // =====================================================
+  {
+    id: "jis-stadium",
+    name: "Jakarta International Stadium (JIS)",
+    shortName: "Stadion JIS",
+    category: "Ikon Olahraga & Megastruktur",
+    tagline: "Stadion Atap Buka-Tutup Terbesar di Asia & Mahakarya Arsitektur Pesisir Utara",
+    height: "73 meter (Kapasitas 82.000 Penonton)",
+    year: "2022",
+    architect: "Buro Happold & PT Jakarta Propertindo (Jakpro)",
+    location: "Jl. Papanggo, Tanjung Priok, Jakarta Utara",
+    coordinates: { lat: -6.1248, lng: 106.8605 },
+    position: [528.0, 0, -995.0],
+    labelHeight: 85,
+    cameraPosition: [528.0, 120, -900],
+    cameraTarget: [528.0, 35, -995.0],
+    description: "Megastruktur stadion multifungsi bertaraf internasional dengan kapasitas 82.000 penonton. Dilengkapi atap buka-tutup (retractable roof) terbesar di Asia, fasad berpori parametrik yang membiaskan cahaya senja, ramp concourse melayang megah di sisi barat dan timur, serta lapangan berstandar FIFA dengan rumput hibrida.",
+    facts: [
+      "Memiliki atap buka-tutup dengan bentang terbesar di benua Asia (bentang 120 meter).",
+      "Merupakan stadion bersertifikasi Green Building Platinum pertama di Indonesia.",
+      "Menjadi ikon kebanggaan baru Jakarta Utara yang menghubungkan kawasan Sunter dan Tanjung Priok."
+    ]
+  },
+  {
+    id: "ancol-dufan",
+    name: "Taman Impian Jaya Ancol & Dunia Fantasi (Dufan)",
+    shortName: "Dufan & Ancol",
+    category: "Taman Hiburan & Rekreasi Bahari",
+    tagline: "Destinasi Wisata Pesisir Bahari & Taman Hiburan Terbesar di Jakarta",
+    height: "48 meter (Kincir Ria Bianglala R=20m & Menara Kastil Dufan)",
+    year: "1966 / 1985",
+    architect: "Ir. Soekarno, Ciputra, & Lembaga Arsitektur Dufan",
+    location: "Jl. Lodan Timur No. 7, Ancol, Pademangan, Jakarta Utara",
+    coordinates: { lat: -6.1245, lng: 106.8335 },
+    position: [147.0, 0, -999.0],
+    labelHeight: 60,
+    cameraPosition: [147.0, 85, -915],
+    cameraTarget: [147.0, 25, -999.0],
+    description: "Kawasan resor rekreasi tepi pantai terpadu seluas 552 hektare di tepi Teluk Jakarta. Menampilkan gerbang kastil dongeng Dunia Fantasi (Dufan), kincir ria raksasa Bianglala yang berputar menghadap laut, lintasan roller-coaster Halilintar yang meliuk dramatis, pantai pasir putih Pantai Karnaval, serta dermaga Marina Ancol.",
+    facts: [
+      "Diresmikan sebagai kawasan rekreasi terpadu tepi laut tertua dan terbesar di Indonesia atas gagasan Presiden Soekarno.",
+      "Bianglala Dufan setinggi lebih dari 45 meter memberikan pemandangan panorama Teluk Jakarta dan cakrawala gedung pencakar langit Jakarta.",
+      "Menjadi pusat festival tahunan kembang api malam tahun baru terbesar di Indonesia."
+    ]
+  },
+  {
+    id: "sunda-kelapa",
+    name: "Pelabuhan Bersejarah Sunda Kelapa & Museum Bahari",
+    shortName: "Pelabuhan Sunda Kelapa",
+    category: "Cagar Budaya Maritim & Sejarah",
+    tagline: "Pelabuhan Tertua Jakarta Tempat Bersandarnya Kapal Layar Kayu Tradisional Pinisi",
+    height: "18 meter (Menara Miring Syahbandar & Gudang Rempah VOC)",
+    year: "1527 / Abad ke-12",
+    architect: "Kerajaan Sunda Pajajaran & VOC Hindia Belanda",
+    location: "Jl. Maritim No. 1, Penjaringan, Jakarta Utara",
+    coordinates: { lat: -6.1265, lng: 106.8085 },
+    position: [-205.0, 0, -971.0],
+    labelHeight: 35,
+    cameraPosition: [-205.0, 50, -895],
+    cameraTarget: [-205.0, 12, -971.0],
+    description: "Pelabuhan maritim legendaris berusia lebih dari lima abad tempat lahirnya kota Jakarta (Jayakarta). Ditandai dengan deretan kapal layar kayu tradisional Pinisi dari Sulawesi Selatan yang bersandar di dermaga batu andesit, Menara Syahbandar miring peninggalan 1839, serta gudang rempah VOC abad ke-17 yang kini menjadi Museum Bahari.",
+    facts: [
+      "Menjadi salah satu pelabuhan aktif tertua di dunia yang masih mengoperasikan bongkar muat kapal layar kayu tradisional tanpa derek otomatis.",
+      "Menara Syahbandar dibangun di atas bastion benteng Culemborg dan memiliki kemiringan beberapa derajat akibat penurunan tanah di pesisir utara.",
+      "Merupakan cikal bakal berdirinya kota Batavia pada tahun 1619 oleh VOC."
+    ]
+  },
+  {
+    id: "jembatan-kota-intan",
+    name: "Jembatan Angkat Kota Intan & Kawasan Kali Besar Utara",
+    shortName: "Jembatan Kota Intan",
+    category: "Cagar Budaya & Monumen Bersejarah",
+    tagline: "Jembatan Gantung Angkat Kayu Bersejarah Abad ke-17 Warisan Kolonial Belanda",
+    height: "8,5 meter (Rangka Tuas Angkat Kayu Merah)",
+    year: "1628",
+    architect: "Pemerintah Kolonial VOC (Engelse Brug)",
+    location: "Jl. Nelayan Timur, Roa Malaka, Tambora / Penjaringan, Jakarta Utara",
+    coordinates: { lat: -6.1340, lng: 106.8122 },
+    position: [-153.0, 0, -864.0],
+    labelHeight: 28,
+    cameraPosition: [-153.0, 35, -805],
+    cameraTarget: [-153.0, 6, -864.0],
+    description: "Satu-satunya jembatan angkat kayu peninggalan Belanda yang tersisa di Indonesia. Dibangun pada tahun 1628 dengan gaya arsitektur khas kincir air Belanda berkelir merah tua (*Engelse Brug*). Menghubungkan benteng timur dan barat Batavia melintasi Kali Besar dengan mekanisme roda gigi tuas penarik kayu untuk meloloskan perahu rempah VOC.",
+    facts: [
+      "Merupakan jembatan tertua di Jakarta yang masih berdiri kokoh sejak era Gubernur Jenderal VOC Jan Pieterszoon Coen.",
+      "Berfungsi ganda sebagai pos pengawasan bea cukai dan pertahanan militer kota Batavia utara.",
+      "Menjadi objek cagar budaya nasional dan simbol kejayaan tata air kanal Batavia lama."
+    ]
+  },
+  {
+    id: "mall-kelapa-gading",
+    name: "Sentra Bisnis Kelapa Gading (Mall Kelapa Gading 1-5 & La Piazza)",
+    shortName: "Mall Kelapa Gading",
+    category: "Superblok Komersial & Gaya Hidup",
+    tagline: "Superblok Ritel Terbesar di Pesisir Timur Laut Jakarta & Menara Jam La Piazza",
+    height: "36 meter (Menara Jam Campanile La Piazza & Atrium Kaca)",
+    year: "1990",
+    architect: "Summarecon Agung & Wimberly Allison Tong & Goo (WATG)",
+    location: "Jl. Boulevard Raya, Kelapa Gading Timur, Jakarta Utara",
+    coordinates: { lat: -6.1575, lng: 106.9080 },
+    position: [1198.0, 0, -531.0],
+    labelHeight: 55,
+    cameraPosition: [1198.0, 85, -445],
+    cameraTarget: [1198.0, 20, -531.0],
+    description: "Superblok pusat gaya hidup dan komersial paling prestisius di Jakarta Utara dengan luas lebih dari 150.000 m². Menghubungkan MKG 1 hingga 5 dengan jembatan penghubung layang terpadu, kanopi kubah kaca atrium piramida, koridor kuliner terbuka Gading Walk, serta menara jam bergaya Italia klasik La Piazza Campanile.",
+    facts: [
+      "Salah satu superblok mall terluas di Indonesia yang terintegrasi langsung dengan stasiun LRT Jakarta Boulevard Utara.",
+      "Menjadi pusat kuliner multikultural paling padat dan beragam di wilayah pesisir timur laut Jakarta.",
+      "Pusat penyelenggaraan Jakarta Fashion & Food Festival (JF3) tahunan berskala internasional."
+    ]
+  },
+  {
+    id: "tanjung-priok",
+    name: "Pelabuhan Samudera Tanjung Priok & Stasiun Bersejarah Priok",
+    shortName: "Pelabuhan Tanjung Priok",
+    category: "Simpul Logistik Nasional & Pelabuhan Laut Dalam",
+    tagline: "Pelabuhan Laut Tersibuk di Indonesia dengan Stasiun Megah Art Deco 1914",
+    height: "48 meter (Quay Container Crane Raksasa & Kubah Baja Stasiun)",
+    year: "1885 / 1914",
+    architect: "Ir. C.W. Koch (Stasiun Priok) & Pelindo II",
+    location: "Jl. Pelabuhan Raya, Tanjung Priok, Jakarta Utara",
+    coordinates: { lat: -6.1080, lng: 106.8820 },
+    position: [831.0, 0, -1233.0],
+    labelHeight: 65,
+    cameraPosition: [831.0, 95, -1140],
+    cameraTarget: [831.0, 25, -1233.0],
+    description: "Gerbang logistik maritim tersibuk dan terbesar di Indonesia yang menangani lebih dari 50% arus kargo perdagangan nasional. Menampilkan deretan derek raksasa kontainer (Quay Cranes) oranye-putih di atas dermaga laut dalam, ribuan peti kemas warna-warni, serta monumen arsitektur monumental Stasiun Tanjung Priok bergaya Art Deco dengan atap kanopi busur baja melengkung megah.",
+    facts: [
+      "Stasiun Tanjung Priok dibangun pada tahun 1914 dengan kubah kanopi busur baja bentang lebar tanpa tiang penyangga tengah, menjadikannya stasiun termegah di Asia Tenggara pada masanya.",
+      "Menghubungkan jaringan kereta api rel logistik barang langsung dari pelabuhan ke pedalaman Pulau Jawa.",
+      "Dapat disandari oleh kapal kontainer generasi ultra-large container vessel (ULCV) berkapasitas ribuan TEUs."
+    ]
   }
 ];
 

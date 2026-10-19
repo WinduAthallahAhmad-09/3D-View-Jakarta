@@ -2375,7 +2375,13 @@ export class CityScene {
       "south-quarter-simatupang": () => LandmarkModels.createSouthQuarterTowers(),
       "pondok-indah-mall": () => LandmarkModels.createPondokIndahMall(),
       "stasiun-mrt-fatmawati": () => LandmarkModels.createStasiunMRTFatmawati(),
-      "kemang-village-lifestyle": () => LandmarkModels.createKemangVillage()
+      "kemang-village-lifestyle": () => LandmarkModels.createKemangVillage(),
+      "jis-stadium": () => LandmarkModels.createJISStadium(),
+      "ancol-dufan": () => LandmarkModels.createAncolDufan(),
+      "sunda-kelapa": () => LandmarkModels.createSundaKelapaPort(),
+      "jembatan-kota-intan": () => LandmarkModels.createKotaIntanBridge(),
+      "mall-kelapa-gading": () => LandmarkModels.createMallKelapaGading(),
+      "tanjung-priok": () => LandmarkModels.createTanjungPriokPort()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {
