@@ -2324,6 +2324,160 @@ export class LandmarkModels {
     return group;
   }
 
+  /**
+   * Single car for LRT Jakarta (Lin 1 Kelapa Gading - Velodrome)
+   * Modern Hyundai Rotem light-rail EMU with distinctive white & scarlet red livery,
+   * smoked aerodynamic panoramic glass, roof-mounted HVAC, pantograph, and LED destination screen.
+   */
+  static createSingleLRTJakartaCar(c, cars = 2) {
+    const carLen = 15.5;
+
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35 });
+    const scarletRedMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.35 });
+    const darkGlassMat = new THREE.MeshStandardMaterial({
+      color: 0x0f172a,
+      roughness: 0.15,
+      metalness: 0.85
+    });
+    const stainlessMat = new THREE.MeshStandardMaterial({
+      color: 0xe2e8f0,
+      metalness: 0.85,
+      roughness: 0.25
+    });
+    const bogieMat = new THREE.MeshStandardMaterial({
+      color: 0x334155,
+      metalness: 0.6,
+      roughness: 0.7
+    });
+    const pantographMat = new THREE.MeshStandardMaterial({
+      color: 0xd97706,
+      metalness: 0.8,
+      roughness: 0.3
+    });
+    const headlightMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+    const taillightMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+
+    const carGroup = new THREE.Group();
+
+    // 1. Sleek Lower Carbody (Stainless steel skirt)
+    const lowerBody = new THREE.Mesh(new THREE.BoxGeometry(2.65, 0.75, carLen), stainlessMat);
+    lowerBody.position.set(0, 0.85, 0);
+    carGroup.add(lowerBody);
+
+    // 2. Main Cabin Body (Pearl white with bold scarlet red accent band)
+    const cabin = new THREE.Mesh(new THREE.BoxGeometry(2.65, 1.85, carLen), whiteMat);
+    cabin.position.set(0, 2.15, 0);
+    carGroup.add(cabin);
+
+    // Scarlet Red Belt Stripe (Livery LRT Jakarta)
+    const stripe = new THREE.Mesh(new THREE.BoxGeometry(2.68, 0.42, carLen), scarletRedMat);
+    stripe.position.set(0, 1.48, 0);
+    carGroup.add(stripe);
+
+    // 3. Panoramic Tinted Passenger Windows (continuous smoked ribbon)
+    [-1.34, 1.34].forEach((sideX) => {
+      const windowStrip = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.85, carLen - 2.8), darkGlassMat);
+      windowStrip.position.set(sideX, 2.25, 0);
+      carGroup.add(windowStrip);
+
+      // Automated sliding plug doors (4 per side)
+      for (let d = -4.5; d <= 4.5; d += 3.0) {
+        const door = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.7, 1.35), scarletRedMat);
+        door.position.set(sideX, 1.95, d);
+        carGroup.add(door);
+      }
+    });
+
+    // 4. Roof Profile with HVAC pods
+    const roof = new THREE.Mesh(new THREE.CylinderGeometry(1.33, 1.33, carLen, 16, 1, false, 0, Math.PI), whiteMat);
+    roof.rotation.z = Math.PI;
+    roof.rotation.y = Math.PI / 2;
+    roof.position.set(0, 3.05, 0);
+    carGroup.add(roof);
+
+    // Rooftop Air Conditioning pods
+    [-3.8, 3.8].forEach((rz) => {
+      const hvac = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.42, 3.2), stainlessMat);
+      hvac.position.set(0, 3.25, rz);
+      carGroup.add(hvac);
+    });
+
+    // 5. Driver Cab ends (Lead car c === 0 or End car c === cars - 1)
+    const isFront = (c === 0);
+    const isRear = (c === cars - 1);
+
+    if (isFront || isRear) {
+      const cabDir = isFront ? 1 : -1;
+      const cabZ = (carLen * 0.5 + 0.5) * cabDir;
+
+      // Aerodynamic sloped nose
+      const nose = new THREE.Mesh(new THREE.BoxGeometry(2.65, 2.2, 1.2), scarletRedMat);
+      nose.position.set(0, 2.05, cabZ);
+      carGroup.add(nose);
+
+      // Curved panoramic front windshield
+      const frontWindshield = new THREE.Mesh(new THREE.BoxGeometry(2.35, 1.05, 0.25), darkGlassMat);
+      frontWindshield.position.set(0, 2.45, cabZ + 0.55 * cabDir);
+      carGroup.add(frontWindshield);
+
+      // Headlights & Taillights
+      [-0.85, 0.85].forEach((lx) => {
+        const light = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.18, 0.15), isFront ? headlightMat : taillightMat);
+        light.position.set(lx, 1.35, cabZ + 0.62 * cabDir);
+        carGroup.add(light);
+      });
+    }
+
+    // 6. Single-arm Pantograph on roof of lead car
+    if (c === 0) {
+      const pantoBase = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.2, 1.2), pantographMat);
+      pantoBase.position.set(0, 3.48, 1.2);
+      carGroup.add(pantoBase);
+
+      const pantoArm = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.4), pantographMat);
+      pantoArm.rotation.x = 0.55;
+      pantoArm.position.set(0, 4.05, 1.55);
+      carGroup.add(pantoArm);
+
+      const pantoHead = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.06, 0.25), pantographMat);
+      pantoHead.position.set(0, 4.65, 1.95);
+      carGroup.add(pantoHead);
+    }
+
+    // 7. Bogies & Steel Wheel Sets
+    [-4.8, 4.8].forEach((bz) => {
+      const bogieFrame = new THREE.Mesh(new THREE.BoxGeometry(2.35, 0.35, 2.8), bogieMat);
+      bogieFrame.position.set(0, 0.45, bz);
+      carGroup.add(bogieFrame);
+
+      [-1.15, 1.15].forEach((wx) => {
+        [-0.85, 0.85].forEach((wz) => {
+          const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.22, 16), stainlessMat);
+          wheel.rotation.z = Math.PI / 2;
+          wheel.position.set(wx, 0.38, bz + wz);
+          carGroup.add(wheel);
+        });
+      });
+    });
+
+    return carGroup;
+  }
+
+  static createLRTJakartaTrain(cars = 2) {
+    const group = new THREE.Group();
+    const carLen = 15.5;
+    const gap = 0.85;
+
+    for (let c = 0; c < cars; c++) {
+      const car = this.createSingleLRTJakartaCar(c, cars);
+      const cz = (c - (cars - 1) / 2) * (carLen + gap);
+      car.position.set(0, 0, cz);
+      group.add(car);
+    }
+
+    return group;
+  }
+
 
   /**
    * 34. Gedung Sekretariat Jenderal ASEAN

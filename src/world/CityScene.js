@@ -3873,8 +3873,43 @@ export class CityScene {
     this.proceduralGroup.add(group);
   }
 
-  createVehicleMesh(isBus, color) {
+  createVehicleMesh(isBus, color, isTruck = false, truckContainerColor = 0xeb5310) {
     const vehicle = new THREE.Group();
+
+    if (isTruck) {
+      // Tractor head (cab)
+      const cabGeo = new THREE.BoxGeometry(2.5, 2.6, 3.2);
+      const cabMat = new THREE.MeshStandardMaterial({ color, metalness: 0.6, roughness: 0.3 });
+      const cab = new THREE.Mesh(cabGeo, cabMat);
+      cab.position.set(0, 1.4, 4.4);
+      vehicle.add(cab);
+
+      // Chassis flatbed
+      const chassisGeo = new THREE.BoxGeometry(2.5, 0.6, 12.2);
+      const chassisMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+      const chassis = new THREE.Mesh(chassisGeo, chassisMat);
+      chassis.position.set(0, 0.6, 0);
+      vehicle.add(chassis);
+
+      // Container on chassis
+      const contGeo = new THREE.BoxGeometry(2.44, 2.58, 11.6);
+      const contMat = new THREE.MeshStandardMaterial({ color: truckContainerColor, roughness: 0.5, metalness: 0.35 });
+      const cont = new THREE.Mesh(contGeo, contMat);
+      cont.position.set(0, 2.2, -0.4);
+      vehicle.add(cont);
+
+      // Headlight & Taillight
+      const hl = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.25, 0.1), new THREE.MeshBasicMaterial({ color: 0xffedd5 }));
+      hl.position.set(0, 0.9, 6.05);
+      vehicle.add(hl);
+
+      const tl = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.25, 0.1), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
+      tl.position.set(0, 0.9, -6.15);
+      vehicle.add(tl);
+
+      return vehicle;
+    }
+
     const bodyGeo = isBus
       ? new THREE.BoxGeometry(2.6, 2.6, 9.2)
       : new THREE.BoxGeometry(2.0, 1.4, 4.2);
@@ -4010,7 +4045,22 @@ export class CityScene {
       { x1: -520.0, z1: 990.0, x2: -460.0, z2: 700.0, count: 6 },
       // 28. Flyover Non-Tol Pangeran Antasari (Kemang, y=9.0)
       { x1: -85.0, y: 9.0, z1: 680.0, x2: -85.0, y: 9.0, z2: 900.0, count: 4, speedBoost: 1.25 },
-      { x1: -85.0, y: 9.0, z1: 900.0, x2: -85.0, y: 9.0, z2: 680.0, count: 4, speedBoost: 1.25 }
+      { x1: -85.0, y: 9.0, z1: 900.0, x2: -85.0, y: 9.0, z2: 680.0, count: 4, speedBoost: 1.25 },
+      // 29. TransJakarta Koridor 5 (Ancol Hub <-> Benyamin Sueb / Kemayoran)
+      { x1: 267.2, z1: -920.0, x2: 267.2, z2: -520.0, count: 4, isBus: true, busColor: 0x0284c7, speedBoost: 1.1 },
+      { x1: 267.2, z1: -520.0, x2: 267.2, z2: -920.0, count: 4, isBus: true, busColor: 0x0284c7, speedBoost: 1.1 },
+      // 30. TransJakarta Koridor 12 (Pluit <-> Ancol <-> Tanjung Priok)
+      { x1: -350.0, z1: -922.0, x2: 830.0, z2: -1162.0, count: 4, isBus: true, busColor: 0x0284c7, speedBoost: 1.1 },
+      { x1: 830.0, z1: -1158.0, x2: -350.0, z2: -918.0, count: 4, isBus: true, busColor: 0x0284c7, speedBoost: 1.1 },
+      // 31. Tol Pelabuhan Viaduct - Armada Truk Trailer Kontainer (y=8.5, speedBoost=1.2)
+      { x1: -480.0, y: 8.5, z1: -935.0, x2: 820.0, y: 8.5, z2: -1175.0, count: 5, isTruck: true, speedBoost: 1.2 },
+      { x1: 820.0, y: 8.5, z1: -1175.0, x2: -480.0, y: 8.5, z2: -935.0, count: 5, isTruck: true, speedBoost: 1.2 },
+      // 32. Jl. RE Martadinata - Armada Truk Logistik Pelabuhan (y=0.15)
+      { x1: -350.0, y: 0.15, z1: -920.0, x2: 830.0, y: 0.15, z2: -1160.0, count: 5, isTruck: true, speedBoost: 1.0 },
+      { x1: 830.0, y: 0.15, z1: -1160.0, x2: -350.0, y: 0.15, z2: -920.0, count: 5, isTruck: true, speedBoost: 1.0 },
+      // 33. Boulevard Raya Kelapa Gading (Dual Carriageway Flanking LRT Viaduct)
+      { x1: 1192.0, z1: -220.0, x2: 1192.0, z2: -820.0, count: 6 },
+      { x1: 1204.0, z1: -820.0, x2: 1204.0, z2: -220.0, count: 6 }
     ];
 
     let idx = 0;
@@ -4022,10 +4072,14 @@ export class CityScene {
 
       for (let j = 0; j < route.count; j++) {
         const isBus = route.isBus || (idx % 6 === 0);
+        const isTruck = route.isTruck || false;
         const busColor = route.busColor || 0x0284c7;
+        const truckContainerColor = [0x0080a5, 0x006633, 0xeb5310, 0xd91458, 0x1d4ed8, 0x8b0000][(idx + j) % 6];
         const vehicle = this.createVehicleMesh(
           isBus,
-          isBus ? busColor : colors[idx % colors.length]
+          isBus ? busColor : colors[idx % colors.length],
+          isTruck,
+          truckContainerColor
         );
 
         const t = j / route.count;
@@ -4041,7 +4095,7 @@ export class CityScene {
           dx,
           dz,
           progress: t,
-          speed: ((isBus ? 0.065 : 0.095) + (idx % 4) * 0.014) * (route.speedBoost || 1.0)
+          speed: ((isTruck ? 0.055 : (isBus ? 0.065 : 0.095)) + (idx % 4) * 0.014) * (route.speedBoost || 1.0)
         });
 
         this.proceduralGroup.add(vehicle);
@@ -4151,6 +4205,60 @@ export class CityScene {
     this.senenRailCurve = new THREE.CatmullRomCurve3(senenTrackPoints, false, 'catmullrom', 0.15);
     this.senenRailCurveLength = this.senenRailCurve.getLength();
 
+    // =========================================================================
+    // Dynamic Kereta LRT Jakarta (Lin 1 Kelapa Gading - Velodrome)
+    // Viaduk layang median Jl. Boulevard Raya Kelapa Gading (y=11.5m, track y=12.0m)
+    // =========================================================================
+    const lrtViaductMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.65 });
+    const lrtParapetMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.4 });
+    const lrtPierMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.6 });
+
+    // Track deck box: panjang 600m
+    const lrtDeck = new THREE.Mesh(new THREE.BoxGeometry(7.5, 0.7, 600), lrtViaductMat);
+    lrtDeck.position.set(1198.0, 11.5, -520.0);
+    lrtDeck.receiveShadow = true;
+    this.proceduralGroup.add(lrtDeck);
+
+    // Parapets
+    [-3.8, 3.8].forEach((px) => {
+      const p = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.9, 600), lrtParapetMat);
+      p.position.set(1198.0 + px, 12.0, -520.0);
+      this.proceduralGroup.add(p);
+    });
+
+    // Support pillars every 40m
+    for (let pz = -220; pz >= -820; pz -= 40) {
+      const pier = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.4, 11.5, 8), lrtPierMat);
+      pier.position.set(1198.0, 5.75, pz);
+      pier.receiveShadow = true;
+      this.proceduralGroup.add(pier);
+    }
+
+    const lrtJktTrackPoints = [
+      new THREE.Vector3(1198.0, 12.0, -220.0),
+      new THREE.Vector3(1198.0, 12.0, -380.0),
+      new THREE.Vector3(1198.0, 12.0, -531.0), // Mall Kelapa Gading / Stasiun Boulevard Utara
+      new THREE.Vector3(1198.0, 12.0, -680.0),
+      new THREE.Vector3(1198.0, 12.0, -820.0)
+    ];
+    this.lrtJakartaCurve = new THREE.CatmullRomCurve3(lrtJktTrackPoints, false, 'catmullrom', 0.15);
+    this.lrtJakartaCurveLength = this.lrtJakartaCurve.getLength();
+
+    // =========================================================================
+    // Dynamic KRL Commuter Line Lintas Tanjung Priok (Pink Line)
+    // Melintasi jalur Kampung Bandan -> Ancol -> JIS -> Stasiun Tanjung Priok 1914
+    // =========================================================================
+    const priokRailPoints = [
+      new THREE.Vector3(-150.0, 0.48, -840.0), // Kota / Kampung Bandan
+      new THREE.Vector3(50.0, 0.48, -890.0),
+      new THREE.Vector3(150.0, 0.48, -925.0),  // Stasiun Ancol
+      new THREE.Vector3(528.0, 0.48, -940.0),  // JIS / Sunter
+      new THREE.Vector3(720.0, 0.48, -1060.0),
+      new THREE.Vector3(831.0, 0.48, -1230.0)  // Stasiun Tanjung Priok 1914 Art Deco
+    ];
+    this.priokRailCurve = new THREE.CatmullRomCurve3(priokRailPoints, false, 'catmullrom', 0.15);
+    this.priokRailCurveLength = this.priokRailCurve.getLength();
+
     this.animatedTrains = [];
     const trainConfigs = [
       { id: 'krl-northbound', curve: this.krlCurve, curveLength: this.krlCurveLength, carSpacing: 17.8, trackOffset: -1.35, speed: 0.024, progress: 0.15, type: 'krl' },
@@ -4160,7 +4268,11 @@ export class CityScene {
       { id: 'kai-antarkota-northbound', curve: this.senenRailCurve, curveLength: this.senenRailCurveLength, carSpacing: 18.2, trackOffset: -1.7, speed: 0.022, progress: 0.1, type: 'kai' },
       { id: 'kai-antarkota-southbound', curve: this.senenRailCurve, curveLength: this.senenRailCurveLength, carSpacing: 18.2, trackOffset: 1.7, speed: -0.022, progress: 0.6, type: 'kai' },
       { id: 'lrt-eastbound', curve: this.lrtCurve, curveLength: this.lrtCurveLength, carSpacing: 16.5, trackOffset: 1.4, speed: 0.026, progress: 0.15, type: 'lrt' },
-      { id: 'lrt-westbound', curve: this.lrtCurve, curveLength: this.lrtCurveLength, carSpacing: 16.5, trackOffset: -1.4, speed: -0.026, progress: 0.65, type: 'lrt' }
+      { id: 'lrt-westbound', curve: this.lrtCurve, curveLength: this.lrtCurveLength, carSpacing: 16.5, trackOffset: -1.4, speed: -0.026, progress: 0.65, type: 'lrt' },
+      { id: 'lrt-jkt-northbound', curve: this.lrtJakartaCurve, curveLength: this.lrtJakartaCurveLength, carSpacing: 15.8, trackOffset: -1.35, speed: 0.026, progress: 0.15, type: 'lrt-jakarta', carCount: 2 },
+      { id: 'lrt-jkt-southbound', curve: this.lrtJakartaCurve, curveLength: this.lrtJakartaCurveLength, carSpacing: 15.8, trackOffset: 1.35, speed: -0.026, progress: 0.65, type: 'lrt-jakarta', carCount: 2 },
+      { id: 'krl-priok-eastbound', curve: this.priokRailCurve, curveLength: this.priokRailCurveLength, carSpacing: 17.8, trackOffset: 1.4, speed: 0.022, progress: 0.2, type: 'krl', carCount: 4 },
+      { id: 'krl-priok-westbound', curve: this.priokRailCurve, curveLength: this.priokRailCurveLength, carSpacing: 17.8, trackOffset: -1.4, speed: -0.022, progress: 0.7, type: 'krl', carCount: 4 }
     ];
 
     trainConfigs.forEach((cfg) => {
@@ -4174,7 +4286,8 @@ export class CityScene {
         cars: []
       };
 
-      for (let c = 0; c < 4; c++) {
+      const numCars = cfg.carCount || 4;
+      for (let c = 0; c < numCars; c++) {
         let carMesh;
         if (cfg.type === 'mrt') {
           carMesh = LandmarkModels.createSingleMRTRatanggaCar(c, 4);
@@ -4182,6 +4295,8 @@ export class CityScene {
           carMesh = LandmarkModels.createSingleKAIAntarkotaCar(c, 4);
         } else if (cfg.type === 'lrt') {
           carMesh = LandmarkModels.createSingleLRTJabodebekCar(c, 4);
+        } else if (cfg.type === 'lrt-jakarta') {
+          carMesh = LandmarkModels.createSingleLRTJakartaCar(c, 2);
         } else {
           carMesh = LandmarkModels.createSingleKRLCar(c, 4);
         }

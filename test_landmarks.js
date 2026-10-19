@@ -477,4 +477,58 @@ assert.ok(
   'CityScene.js missing VEGETASI HUTAN MANGROVE & CEMARA UDANG PESISIR TELUK JAKARTA'
 );
 
-console.log('✅ All 57 landmarks, Quick Wins & Tahap 1 + 2 + 3 Jakarta Utara verified successfully!');
+// Check 20: Tahap 4 Transit Dinamis & Sirkulasi Multimoda Jakarta Utara
+assert.ok(
+  landmarkModelsContent.includes('createSingleLRTJakartaCar'),
+  'LandmarkModels.js missing createSingleLRTJakartaCar'
+);
+assert.ok(
+  landmarkModelsContent.includes('createLRTJakartaTrain'),
+  'LandmarkModels.js missing createLRTJakartaTrain'
+);
+assert.ok(
+  citySceneContent.includes('this.lrtJakartaCurve = new THREE.CatmullRomCurve3'),
+  'CityScene.js missing lrtJakartaCurve'
+);
+assert.ok(
+  citySceneContent.includes('this.priokRailCurve = new THREE.CatmullRomCurve3'),
+  'CityScene.js missing priokRailCurve'
+);
+assert.ok(
+  citySceneContent.includes("'lrt-jkt-northbound'"),
+  'CityScene.js missing lrt-jkt-northbound'
+);
+assert.ok(
+  citySceneContent.includes("'lrt-jkt-southbound'"),
+  'CityScene.js missing lrt-jkt-southbound'
+);
+assert.ok(
+  citySceneContent.includes("'krl-priok-eastbound'"),
+  'CityScene.js missing krl-priok-eastbound'
+);
+assert.ok(
+  citySceneContent.includes("'krl-priok-westbound'"),
+  'CityScene.js missing krl-priok-westbound'
+);
+assert.ok(
+  citySceneContent.includes('LandmarkModels.createSingleLRTJakartaCar(c, 2)'),
+  'CityScene.js missing call to LandmarkModels.createSingleLRTJakartaCar'
+);
+assert.ok(
+  citySceneContent.includes('TransJakarta Koridor 5 (Ancol Hub <-> Benyamin Sueb / Kemayoran)'),
+  'CityScene.js missing TransJakarta Koridor 5 route'
+);
+assert.ok(
+  citySceneContent.includes('TransJakarta Koridor 12 (Pluit <-> Ancol <-> Tanjung Priok)'),
+  'CityScene.js missing TransJakarta Koridor 12 route'
+);
+assert.ok(
+  citySceneContent.includes('Tol Pelabuhan Viaduct - Armada Truk Trailer Kontainer'),
+  'CityScene.js missing Tol Pelabuhan container truck route'
+);
+assert.ok(
+  citySceneContent.includes('Jl. RE Martadinata - Armada Truk Logistik Pelabuhan'),
+  'CityScene.js missing RE Martadinata port logistics truck route'
+);
+
+console.log('✅ All 57 landmarks, Quick Wins & Tahap 1 + 2 + 3 + 4 Jakarta Utara verified successfully!');
