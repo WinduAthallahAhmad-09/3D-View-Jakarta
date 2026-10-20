@@ -5,7 +5,7 @@ import { JAKARTA_LANDMARKS } from './src/config/landmarks.js';
 console.log('Running test_landmarks.js verification...');
 
 // Check 1: Exactly 69 landmarks
-assert.strictEqual(JAKARTA_LANDMARKS.length, 69, `Expected 69 landmarks, got ${JAKARTA_LANDMARKS.length}`);
+assert.strictEqual(JAKARTA_LANDMARKS.length, 75, `Expected 75 landmarks, got ${JAKARTA_LANDMARKS.length}`);
 
 // Check 2: Unique IDs and valid properties
 const seenIds = new Set();
@@ -853,4 +853,57 @@ assert.ok(
   'CityScene.js missing Tol Ir. Wiyoto Wiyono East Jakarta route'
 );
 
-console.log('✅ All 69 landmarks, Quick Wins & Tahap 1 + 2 + 3 + 4 Jakarta Timur verified successfully!');
+// Check 29: Tahap 1 Void A (Jakarta Barat Tengah) Anchor Landmarks (#70 s.d. #75)
+const voidAAnchors = [
+  'rs-graha-kedoya',
+  'wang-residence-kedoya',
+  'ipeka-puri-greenville',
+  'sentra-kuliner-greenville',
+  'sentra-pos-pengumben',
+  'taman-cattleya-tomang'
+];
+
+voidAAnchors.forEach((id) => {
+  const lm = JAKARTA_LANDMARKS.find((l) => l.id === id);
+  assert.ok(lm, `Missing Void A Tahap 1 anchor landmark: ${id}`);
+  assert.ok(lm.position[0] < -500, `Landmark ${id} X position ${lm.position[0]} should be in West Jakarta Void A (X < -500)`);
+  assert.ok(lm.position[2] >= -300 && lm.position[2] <= 300, `Landmark ${id} Z position ${lm.position[2]} should be in Void A range (-300 <= Z <= 300)`);
+});
+
+// Specific position checks
+const graha = JAKARTA_LANDMARKS.find((l) => l.id === 'rs-graha-kedoya');
+assert.deepStrictEqual(graha.position, [-775.0, 0, -260.0], 'rs-graha-kedoya invalid position');
+
+const wang = JAKARTA_LANDMARKS.find((l) => l.id === 'wang-residence-kedoya');
+assert.deepStrictEqual(wang.position, [-790.0, 0, -95.0], 'wang-residence-kedoya invalid position');
+
+const ipeka = JAKARTA_LANDMARKS.find((l) => l.id === 'ipeka-puri-greenville');
+assert.deepStrictEqual(ipeka.position, [-710.0, 0, -210.0], 'ipeka-puri-greenville invalid position');
+
+const kuliner = JAKARTA_LANDMARKS.find((l) => l.id === 'sentra-kuliner-greenville');
+assert.deepStrictEqual(kuliner.position, [-680.0, 0, -160.0], 'sentra-kuliner-greenville invalid position');
+
+const posPengumben = JAKARTA_LANDMARKS.find((l) => l.id === 'sentra-pos-pengumben');
+assert.deepStrictEqual(posPengumben.position, [-775.0, 0, 210.0], 'sentra-pos-pengumben invalid position');
+
+const cattleya = JAKARTA_LANDMARKS.find((l) => l.id === 'taman-cattleya-tomang');
+assert.deepStrictEqual(cattleya.position, [-530.0, 0, -110.0], 'taman-cattleya-tomang invalid position');
+
+// Check builder methods in LandmarkModels.js
+assert.ok(landmarkModelsContent.includes('createRSGrahaKedoya'), 'LandmarkModels.js missing createRSGrahaKedoya');
+assert.ok(landmarkModelsContent.includes('createWangResidenceKedoya'), 'LandmarkModels.js missing createWangResidenceKedoya');
+assert.ok(landmarkModelsContent.includes('createIPEKAGreenville'), 'LandmarkModels.js missing createIPEKAGreenville');
+assert.ok(landmarkModelsContent.includes('createSentraKulinerGreenville'), 'LandmarkModels.js missing createSentraKulinerGreenville');
+assert.ok(landmarkModelsContent.includes('createSentraPosPengumben'), 'LandmarkModels.js missing createSentraPosPengumben');
+assert.ok(landmarkModelsContent.includes('createTamanCattleyaTomang'), 'LandmarkModels.js missing createTamanCattleyaTomang');
+
+// Check builders in CityScene.js
+assert.ok(citySceneContent.includes('"rs-graha-kedoya": () => LandmarkModels.createRSGrahaKedoya()'), 'CityScene.js missing rs-graha-kedoya builder');
+assert.ok(citySceneContent.includes('"wang-residence-kedoya": () => LandmarkModels.createWangResidenceKedoya()'), 'CityScene.js missing wang-residence-kedoya builder');
+assert.ok(citySceneContent.includes('"ipeka-puri-greenville": () => LandmarkModels.createIPEKAGreenville()'), 'CityScene.js missing ipeka-puri-greenville builder');
+assert.ok(citySceneContent.includes('"sentra-kuliner-greenville": () => LandmarkModels.createSentraKulinerGreenville()'), 'CityScene.js missing sentra-kuliner-greenville builder');
+assert.ok(citySceneContent.includes('"sentra-pos-pengumben": () => LandmarkModels.createSentraPosPengumben()'), 'CityScene.js missing sentra-pos-pengumben builder');
+assert.ok(citySceneContent.includes('"taman-cattleya-tomang": () => LandmarkModels.createTamanCattleyaTomang()'), 'CityScene.js missing taman-cattleya-tomang builder');
+
+console.log('✅ All 75 landmarks, Quick Wins, Jakarta Timur & Tahap 1 Void A verified successfully!');
+

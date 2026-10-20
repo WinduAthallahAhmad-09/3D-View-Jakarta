@@ -6099,6 +6099,598 @@ export class LandmarkModels {
 
     return group;
   }
+
+  /**
+   * 70. Rumah Sakit Graha Kedoya
+   * Menara kembar rumah sakit modern 10 lantai: Podium IGD berkanopi drop-off,
+   * fasad kaca cyan bergaris putih, pusat diagnostik, dan landasan helipad medis di atap.
+   */
+  static createRSGrahaKedoya() {
+    const group = new THREE.Group();
+
+    const whiteWallMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.45 });
+    const cyanGlassMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.15, metalness: 0.85, transparent: true, opacity: 0.82 });
+    const medicalRedMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.35 });
+    const steelDarkMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
+    const tarmacMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.85 });
+    const yellowStripeMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.4 });
+    const lawnMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 });
+
+    // 1. Ground Plaza & Perimeter Driveway
+    const ground = new THREE.Mesh(new THREE.BoxGeometry(64, 0.6, 56), tarmacMat);
+    ground.position.set(0, 0.3, 0);
+    ground.receiveShadow = true;
+    group.add(ground);
+
+    const greenPatch = new THREE.Mesh(new THREE.BoxGeometry(60, 0.7, 10), lawnMat);
+    greenPatch.position.set(0, 0.35, -20);
+    group.add(greenPatch);
+
+    // 2. Podium IGD & Diagnostic Center (Lantai 1-3)
+    const podium = new THREE.Mesh(new THREE.BoxGeometry(54, 8, 42), whiteWallMat);
+    podium.position.set(0, 4.3, 0);
+    podium.castShadow = true;
+    podium.receiveShadow = true;
+    group.add(podium);
+
+    // Glass curtain on podium front
+    const podiumGlass = new THREE.Mesh(new THREE.BoxGeometry(50, 5, 1.2), cyanGlassMat);
+    podiumGlass.position.set(0, 4.5, 21.2);
+    group.add(podiumGlass);
+
+    // Emergency Drop-off Canopy (Kanopi IGD)
+    const canopy = new THREE.Mesh(new THREE.BoxGeometry(22, 1.2, 12), whiteWallMat);
+    canopy.position.set(0, 5.2, 26);
+    canopy.castShadow = true;
+    group.add(canopy);
+
+    [-9, 9].forEach((px) => {
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.4, 5.2, 8), steelDarkMat);
+      post.position.set(px, 2.6, 31);
+      group.add(post);
+    });
+
+    // Red Emergency Sign Slab
+    const emergencySign = new THREE.Mesh(new THREE.BoxGeometry(16, 1.4, 0.4), medicalRedMat);
+    emergencySign.position.set(0, 5.9, 26.5);
+    group.add(emergencySign);
+
+    // 3. Twin Hospital Towers (East & West Wings, 10 Floors)
+    [-14, 14].forEach((tx, idx) => {
+      const tower = new THREE.Mesh(new THREE.BoxGeometry(22, 28, 30), whiteWallMat);
+      tower.position.set(tx, 22.0, 0);
+      tower.castShadow = true;
+      group.add(tower);
+
+      // Vertical Window Strips (Cyan Glass)
+      const windowStrip = new THREE.Mesh(new THREE.BoxGeometry(18, 24, 30.6), cyanGlassMat);
+      windowStrip.position.set(tx, 22.0, 0);
+      group.add(windowStrip);
+
+      // Parapet trim on tower top
+      const trim = new THREE.Mesh(new THREE.BoxGeometry(22.8, 1.0, 30.8), steelDarkMat);
+      trim.position.set(tx, 36.5, 0);
+      group.add(trim);
+    });
+
+    // 4. Central Connecting Skybridge Atrium
+    const skybridge = new THREE.Mesh(new THREE.BoxGeometry(10, 18, 18), cyanGlassMat);
+    skybridge.position.set(0, 20.0, 0);
+    skybridge.castShadow = true;
+    group.add(skybridge);
+
+    // 5. Red Cross Medical Emblem on Center Bridge
+    const crossV = new THREE.Mesh(new THREE.BoxGeometry(1.6, 6.0, 0.4), medicalRedMat);
+    crossV.position.set(0, 20.0, 9.3);
+    group.add(crossV);
+
+    const crossH = new THREE.Mesh(new THREE.BoxGeometry(6.0, 1.6, 0.4), medicalRedMat);
+    crossH.position.set(0, 20.0, 9.3);
+    group.add(crossH);
+
+    // 6. Helipad Medis di Atap Menara Timur (tx = 14)
+    const helipadPlatform = new THREE.Mesh(new THREE.CylinderGeometry(8.5, 9.0, 1.2, 16), steelDarkMat);
+    helipadPlatform.position.set(14, 37.5, 0);
+    helipadPlatform.castShadow = true;
+    group.add(helipadPlatform);
+
+    // Helipad Yellow Circle Ring
+    const heliRing = new THREE.Mesh(new THREE.RingGeometry(6.5, 7.2, 24), yellowStripeMat);
+    heliRing.rotateX(-Math.PI / 2);
+    heliRing.position.set(14, 38.12, 0);
+    group.add(heliRing);
+
+    // Helipad White "H" Letter
+    const hBar1 = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 5.0), whiteWallMat);
+    hBar1.rotateX(-Math.PI / 2);
+    hBar1.position.set(12.5, 38.14, 0);
+    group.add(hBar1);
+
+    const hBar2 = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 5.0), whiteWallMat);
+    hBar2.rotateX(-Math.PI / 2);
+    hBar2.position.set(15.5, 38.14, 0);
+    group.add(hBar2);
+
+    const hCross = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 1.0), whiteWallMat);
+    hCross.rotateX(-Math.PI / 2);
+    hCross.position.set(14, 38.15, 0);
+    group.add(hCross);
+
+    return group;
+  }
+
+  /**
+   * 71. Wang Residence & Apartemen Kedoya
+   * Pencakar langit residensial mewah 28 lantai: Arsitektur kontemporer tropis,
+   * podium taman resort, elevated infinity pool, balkon kaca bertingkat, dan penthouse sky villa.
+   */
+  static createWangResidenceKedoya() {
+    const group = new THREE.Group();
+
+    const towerWallMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.35, metalness: 0.1 });
+    const tintedGlassMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.1, metalness: 0.9, transparent: true, opacity: 0.88 });
+    const timberFinMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.65 });
+    const bronzeMetalMat = new THREE.MeshStandardMaterial({ color: 0x78350f, metalness: 0.8, roughness: 0.3 });
+    const poolWaterMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, metalness: 0.85, transparent: true, opacity: 0.85 });
+    const grassLawnMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 });
+    const pavingMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.75 });
+
+    // 1. Ground Plaza & Resort Landscape
+    const ground = new THREE.Mesh(new THREE.BoxGeometry(56, 0.8, 52), pavingMat);
+    ground.position.set(0, 0.4, 0);
+    ground.receiveShadow = true;
+    group.add(ground);
+
+    // Green Landscape Garden Berm
+    const gardenBerm = new THREE.Mesh(new THREE.BoxGeometry(52, 1.2, 16), grassLawnMat);
+    gardenBerm.position.set(0, 0.6, 16);
+    group.add(gardenBerm);
+
+    // 2. Multi-tier Resort Lifestyle Podium (Lantai 1-4, H=12m)
+    const podium = new THREE.Mesh(new THREE.BoxGeometry(44, 12, 38), towerWallMat);
+    podium.position.set(0, 6.4, -4);
+    podium.castShadow = true;
+    podium.receiveShadow = true;
+    group.add(podium);
+
+    // Timber Louvres on Podium Facade
+    for (let fz = -18; fz <= 12; fz += 6) {
+      const louvre = new THREE.Mesh(new THREE.BoxGeometry(44.4, 0.6, 1.2), timberFinMat);
+      louvre.position.set(0, 8.5, fz);
+      group.add(louvre);
+    }
+
+    // Elevated Infinity Pool Deck on Podium Roof
+    const pool = new THREE.Mesh(new THREE.BoxGeometry(24, 0.4, 10), poolWaterMat);
+    pool.position.set(6, 12.6, 6);
+    group.add(pool);
+
+    const poolDeck = new THREE.Mesh(new THREE.BoxGeometry(28, 0.2, 14), timberFinMat);
+    poolDeck.position.set(6, 12.4, 6);
+    group.add(poolDeck);
+
+    // 3. Main Luxury Tower Shaft (28 Floors, H=88m)
+    const towerShaft = new THREE.Mesh(new THREE.BoxGeometry(26, 76, 22), towerWallMat);
+    towerShaft.position.set(0, 50.0, -6);
+    towerShaft.castShadow = true;
+    group.add(towerShaft);
+
+    // Central Tinted Curtain Glass Core
+    const glassCore = new THREE.Mesh(new THREE.BoxGeometry(24, 78, 20.4), tintedGlassMat);
+    glassCore.position.set(0, 50.0, -6);
+    group.add(glassCore);
+
+    // Vertical Bronze Architectural Fins
+    [-11, -3.5, 3.5, 11].forEach((fx) => {
+      const fin = new THREE.Mesh(new THREE.BoxGeometry(0.8, 82, 23.2), bronzeMetalMat);
+      fin.position.set(fx, 52.0, -6);
+      fin.castShadow = true;
+      group.add(fin);
+    });
+
+    // Cantilevered Private Balconies on Front Facade
+    for (let by = 20; by <= 80; by += 8) {
+      const balcony = new THREE.Mesh(new THREE.BoxGeometry(22, 0.6, 3.2), towerWallMat);
+      balcony.position.set(0, by, 5.5);
+      balcony.castShadow = true;
+      group.add(balcony);
+
+      const glassRail = new THREE.Mesh(new THREE.BoxGeometry(22, 1.1, 0.2), tintedGlassMat);
+      glassRail.position.set(0, by + 0.6, 7.0);
+      group.add(glassRail);
+    }
+
+    // 4. Stepped Penthouse Sky Villa & Rooftop Crown (H=95m s.d. 104m)
+    const penthouse = new THREE.Mesh(new THREE.BoxGeometry(22, 8, 18), towerWallMat);
+    penthouse.position.set(0, 92.0, -6);
+    penthouse.castShadow = true;
+    group.add(penthouse);
+
+    const penthouseGlass = new THREE.Mesh(new THREE.BoxGeometry(20, 6, 18.4), tintedGlassMat);
+    penthouseGlass.position.set(0, 92.0, -6);
+    group.add(penthouseGlass);
+
+    // Rooftop Sky Garden Pergola Beams
+    [-8, -4, 0, 4, 8].forEach((px) => {
+      const beam = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.2, 16), bronzeMetalMat);
+      beam.position.set(px, 97.0, -6);
+      group.add(beam);
+    });
+
+    return group;
+  }
+
+  /**
+   * 72. Kompleks Edukasi Kristen IPEKA Greenville
+   * Kampus pendidikan terpadu 5 lantai: Sayap akademik modular, atap pelana modern,
+   * aula auditorium serbaguna, dan lapangan olahraga FIBA di halaman terbuka.
+   */
+  static createIPEKAGreenville() {
+    const group = new THREE.Group();
+
+    const academicWallMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.5 });
+    const roofTerracottaMat = new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.7 });
+    const blueTrimMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.4 });
+    const windowGlassMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, metalness: 0.7 });
+    const courtMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.75 });
+    const courtLinesMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
+    const plazaPavingMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.8 });
+
+    // 1. Campus Paved Base
+    const ground = new THREE.Mesh(new THREE.BoxGeometry(68, 0.6, 56), plazaPavingMat);
+    ground.position.set(0, 0.3, 0);
+    ground.receiveShadow = true;
+    group.add(ground);
+
+    // 2. Main Academic Wing (L-Shape Building, 5 Floors, H=18m)
+    // Wing North-South
+    const wingA = new THREE.Mesh(new THREE.BoxGeometry(16, 16, 42), academicWallMat);
+    wingA.position.set(-18, 8.3, 0);
+    wingA.castShadow = true;
+    wingA.receiveShadow = true;
+    group.add(wingA);
+
+    // Continuous Window Ribbons Wing A
+    const windowsA = new THREE.Mesh(new THREE.BoxGeometry(16.4, 12, 38), windowGlassMat);
+    windowsA.position.set(-18, 8.5, 0);
+    group.add(windowsA);
+
+    // Gabled Roof Wing A
+    const roofA = new THREE.Mesh(new THREE.ConeGeometry(12, 4.5, 4), roofTerracottaMat);
+    roofA.rotateY(Math.PI / 4);
+    roofA.scale.set(1.0, 1.0, 3.5);
+    roofA.position.set(-18, 18.5, 0);
+    roofA.castShadow = true;
+    group.add(roofA);
+
+    // Wing East-West
+    const wingB = new THREE.Mesh(new THREE.BoxGeometry(34, 16, 14), academicWallMat);
+    wingB.position.set(6, 8.3, -14);
+    wingB.castShadow = true;
+    group.add(wingB);
+
+    const windowsB = new THREE.Mesh(new THREE.BoxGeometry(30, 12, 14.4), windowGlassMat);
+    windowsB.position.set(6, 8.5, -14);
+    group.add(windowsB);
+
+    const roofB = new THREE.Mesh(new THREE.ConeGeometry(10, 4.5, 4), roofTerracottaMat);
+    roofB.rotateY(Math.PI / 4);
+    roofB.scale.set(3.0, 1.0, 1.0);
+    roofB.position.set(6, 18.5, -14);
+    roofB.castShadow = true;
+    group.add(roofB);
+
+    // 3. Multi-Purpose Auditorium & Sports Hall
+    const hall = new THREE.Mesh(new THREE.BoxGeometry(22, 12, 20), academicWallMat);
+    hall.position.set(12, 6.3, 12);
+    hall.castShadow = true;
+    group.add(hall);
+
+    // Curved Barrel Arch Roof for Hall
+    const hallRoof = new THREE.Mesh(new THREE.CylinderGeometry(11, 11, 22, 16, 1, false, 0, Math.PI), blueTrimMat);
+    hallRoof.rotateZ(Math.PI / 2);
+    hallRoof.position.set(12, 12.3, 12);
+    hallRoof.castShadow = true;
+    group.add(hallRoof);
+
+    // 4. Central Open-Air Synthetic Sports Court
+    const court = new THREE.Mesh(new THREE.BoxGeometry(18, 0.15, 26), courtMat);
+    court.position.set(3, 0.68, 6);
+    court.receiveShadow = true;
+    group.add(court);
+
+    // Court White Perimeter Line
+    const courtBorder = new THREE.Mesh(new THREE.BoxGeometry(16.5, 0.16, 24.5), courtLinesMat);
+    courtBorder.position.set(3, 0.69, 6);
+    group.add(courtBorder);
+
+    const courtInner = new THREE.Mesh(new THREE.BoxGeometry(15.5, 0.17, 23.5), courtMat);
+    courtInner.position.set(3, 0.70, 6);
+    group.add(courtInner);
+
+    // Basketball Hoops
+    [-5, 5].forEach((hz) => {
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 3.6, 8), blueTrimMat);
+      pole.position.set(3, 2.4, 6 + hz * 2.2);
+      group.add(pole);
+
+      const board = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.0, 0.1), courtLinesMat);
+      board.position.set(3, 3.8, 6 + hz * 2.2);
+      group.add(board);
+    });
+
+    return group;
+  }
+
+  /**
+   * 73. Sentra Wisata Kuliner Greenville & Taman Ratu
+   * Kawasan gastronomi legendaris 4 lantai: Deretan ruko kuliner tematik,
+   * kafe alfresco, kanopi tenda warna-warni, neon signage malam, dan promenade pejalan kaki.
+   */
+  static createSentraKulinerGreenville() {
+    const group = new THREE.Group();
+
+    const pavingMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8 });
+    const asphaltMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
+    const wallColors = [0xfef08a, 0xfecdd3, 0xa7f3d0, 0xe0e7ff, 0xfde047, 0xfbcfe8];
+    const awningColors = [0xdc2626, 0x16a34a, 0xd97706, 0x0284c7, 0x7c3aed];
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.65 });
+    const neonGlowMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xd97706, emissiveIntensity: 0.6 });
+
+    // 1. Street & Pedestrian Promenade Base
+    const ground = new THREE.Mesh(new THREE.BoxGeometry(66, 0.5, 50), asphaltMat);
+    ground.position.set(0, 0.25, 0);
+    ground.receiveShadow = true;
+    group.add(ground);
+
+    const promenade = new THREE.Mesh(new THREE.BoxGeometry(66, 0.65, 14), pavingMat);
+    promenade.position.set(0, 0.32, 0);
+    promenade.receiveShadow = true;
+    group.add(promenade);
+
+    // 2. North Shophouse Row (4 Interconnected Gastronomy Buildings)
+    [-24, -8, 8, 24].forEach((rx, idx) => {
+      const wallMat = new THREE.MeshStandardMaterial({ color: wallColors[idx % wallColors.length], roughness: 0.55 });
+      const awningMat = new THREE.MeshStandardMaterial({ color: awningColors[idx % awningColors.length], roughness: 0.4 });
+
+      // Shophouse Box (3-4 Floors, H=14m)
+      const shop = new THREE.Mesh(new THREE.BoxGeometry(14, 14, 14), wallMat);
+      shop.position.set(rx, 7.3, -15);
+      shop.castShadow = true;
+      group.add(shop);
+
+      // Pitched Tile Roof
+      const roof = new THREE.Mesh(new THREE.ConeGeometry(10, 3.5, 4), roofMat);
+      roof.rotateY(Math.PI / 4);
+      roof.scale.set(1.4, 0.8, 1.4);
+      roof.position.set(rx, 15.5, -15);
+      roof.castShadow = true;
+      group.add(roof);
+
+      // Colorful Fabric Awning Canopy over Alfresco Entrance
+      const awning = new THREE.Mesh(new THREE.BoxGeometry(12, 0.3, 3.5), awningMat);
+      awning.position.set(rx, 4.2, -6.5);
+      awning.rotateX(0.2);
+      awning.castShadow = true;
+      group.add(awning);
+
+      // Glowing Neon Signboard
+      const sign = new THREE.Mesh(new THREE.BoxGeometry(8, 1.4, 0.4), neonGlowMat);
+      sign.position.set(rx, 6.0, -7.8);
+      group.add(sign);
+
+      // Outdoor Cafe Table & Umbrella
+      const table = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 0.8, 8), roofMat);
+      table.position.set(rx, 0.72, -4);
+      group.add(table);
+
+      const umbrella = new THREE.Mesh(new THREE.ConeGeometry(1.8, 1.0, 8), awningMat);
+      umbrella.position.set(rx, 2.4, -4);
+      group.add(umbrella);
+    });
+
+    // 3. South Shophouse Row (Facing Promenade)
+    [-24, -8, 8, 24].forEach((rx, idx) => {
+      const wallMat = new THREE.MeshStandardMaterial({ color: wallColors[(idx + 2) % wallColors.length], roughness: 0.55 });
+      const awningMat = new THREE.MeshStandardMaterial({ color: awningColors[(idx + 3) % awningColors.length], roughness: 0.4 });
+
+      const shop = new THREE.Mesh(new THREE.BoxGeometry(14, 14, 14), wallMat);
+      shop.position.set(rx, 7.3, 15);
+      shop.castShadow = true;
+      group.add(shop);
+
+      const roof = new THREE.Mesh(new THREE.ConeGeometry(10, 3.5, 4), roofMat);
+      roof.rotateY(Math.PI / 4);
+      roof.scale.set(1.4, 0.8, 1.4);
+      roof.position.set(rx, 15.5, 15);
+      roof.castShadow = true;
+      group.add(roof);
+
+      const awning = new THREE.Mesh(new THREE.BoxGeometry(12, 0.3, 3.5), awningMat);
+      awning.position.set(rx, 4.2, 6.5);
+      awning.rotateX(-0.2);
+      awning.castShadow = true;
+      group.add(awning);
+
+      const sign = new THREE.Mesh(new THREE.BoxGeometry(8, 1.4, 0.4), neonGlowMat);
+      sign.position.set(rx, 6.0, 7.8);
+      group.add(sign);
+    });
+
+    return group;
+  }
+
+  /**
+   * 74. Sentra Niaga Pos Pengumben & Sukabumi Selatan
+   * Pusat desain interior, marmer & perbankan 6 lantai: Double-height glass showroom,
+   * corporate banking wing, gerbang kanopi arsitektural, dan simpul arteri strategis.
+   */
+  static createSentraPosPengumben() {
+    const group = new THREE.Group();
+
+    const corporateMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5, metalness: 0.3 });
+    const whitePanelMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
+    const blueGlassMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.12, metalness: 0.85, transparent: true, opacity: 0.85 });
+    const goldAccentMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.75, roughness: 0.3 });
+    const pavingMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.8 });
+
+    // 1. Commercial Base Plaza
+    const base = new THREE.Mesh(new THREE.BoxGeometry(56, 0.6, 46), pavingMat);
+    base.position.set(0, 0.3, 0);
+    base.receiveShadow = true;
+    group.add(base);
+
+    // 2. Double-Height Interior Showroom Podium (Lantai 1-2, H=9m)
+    const showroomPodium = new THREE.Mesh(new THREE.BoxGeometry(46, 9, 34), whitePanelMat);
+    showroomPodium.position.set(0, 4.8, 0);
+    showroomPodium.castShadow = true;
+    group.add(showroomPodium);
+
+    // Expansive Panoramic Glass Showroom Windows
+    const showroomGlass = new THREE.Mesh(new THREE.BoxGeometry(44, 7, 34.4), blueGlassMat);
+    showroomGlass.position.set(0, 4.8, 0);
+    group.add(showroomGlass);
+
+    // Interior Marble / Ceramic Displays visible through glass
+    [-12, 0, 12].forEach((dx) => {
+      const pedestal = new THREE.Mesh(new THREE.BoxGeometry(4, 2, 4), goldAccentMat);
+      pedestal.position.set(dx, 1.8, 10);
+      group.add(pedestal);
+    });
+
+    // 3. Corporate Banking & Business Wing (Lantai 3-6, H=24m)
+    const upperTower = new THREE.Mesh(new THREE.BoxGeometry(36, 15, 26), corporateMat);
+    upperTower.position.set(0, 16.8, -2);
+    upperTower.castShadow = true;
+    group.add(upperTower);
+
+    // Vertical Blue Glass Ribbon Windows
+    const towerGlass = new THREE.Mesh(new THREE.BoxGeometry(32, 12, 26.6), blueGlassMat);
+    towerGlass.position.set(0, 16.8, -2);
+    group.add(towerGlass);
+
+    // Architectural Gold Crown Fin
+    const crown = new THREE.Mesh(new THREE.BoxGeometry(37, 1.2, 27), goldAccentMat);
+    crown.position.set(0, 24.8, -2);
+    group.add(crown);
+
+    // 4. Cantilevered Entrance Portico / Drop-Off Canopy
+    const portico = new THREE.Mesh(new THREE.BoxGeometry(18, 1.0, 10), whitePanelMat);
+    portico.position.set(0, 5.5, 20);
+    portico.castShadow = true;
+    group.add(portico);
+
+    [-8, 8].forEach((px) => {
+      const col = new THREE.Mesh(new THREE.BoxGeometry(0.8, 5.5, 0.8), goldAccentMat);
+      col.position.set(px, 2.75, 24);
+      group.add(col);
+    });
+
+    return group;
+  }
+
+  /**
+   * 75. Taman Cattleya (Taman Metropolitan Tomang Barat)
+   * Paru-paru kota 3 hektare: Danau retensi air melingkar dengan air mancur aerator,
+   * jembatan kayu promenade, plaza amfiteater bundar, pepohonan trembesi purba, dan bunga Cattleya.
+   */
+  static createTamanCattleyaTomang() {
+    const group = new THREE.Group();
+
+    const lawnMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 });
+    const waterMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.12, metalness: 0.85, transparent: true, opacity: 0.88 });
+    const stoneRevetmentMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8 });
+    const woodBridgeMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.7 });
+    const fountainSprayMat = new THREE.MeshStandardMaterial({ color: 0xe0f2fe, roughness: 0.1, metalness: 0.9, transparent: true, opacity: 0.92 });
+    const treeTrunkMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.9 });
+    const treeLeavesMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.75 });
+    const flowerPinkMat = new THREE.MeshStandardMaterial({ color: 0xec4899, roughness: 0.6 });
+    const plazaPavingMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.75 });
+
+    // 1. Expansive 3-Hectare Park Lawn Base
+    const parkBase = new THREE.Mesh(new THREE.BoxGeometry(78, 0.6, 70), lawnMat);
+    parkBase.position.set(0, 0.3, 0);
+    parkBase.receiveShadow = true;
+    group.add(parkBase);
+
+    // 2. Natural Organic Retention Lake (Danau Cattleya)
+    const lakeGeo = new THREE.CylinderGeometry(18, 20, 0.35, 24);
+    lakeGeo.scale(1.35, 1.0, 0.95);
+    const lake = new THREE.Mesh(lakeGeo, waterMat);
+    lake.position.set(-6, 0.5, 0);
+    group.add(lake);
+
+    // Stone Revetment Rim around Lake
+    const lakeRim = new THREE.Mesh(new THREE.TorusGeometry(19, 0.6, 6, 24), stoneRevetmentMat);
+    lakeRim.rotateX(Math.PI / 2);
+    lakeRim.scale.set(1.35, 0.95, 1.0);
+    lakeRim.position.set(-6, 0.6, 0);
+    group.add(lakeRim);
+
+    // 3. Central Water Fountain Aerator (Air Mancur Danau)
+    const fountainPlume = new THREE.Mesh(new THREE.ConeGeometry(1.2, 7.5, 8), fountainSprayMat);
+    fountainPlume.position.set(-6, 4.0, 0);
+    group.add(fountainPlume);
+
+    const fountainRing = new THREE.Mesh(new THREE.TorusGeometry(3.5, 0.4, 6, 16), fountainSprayMat);
+    fountainRing.rotateX(Math.PI / 2);
+    fountainRing.position.set(-6, 1.2, 0);
+    group.add(fountainRing);
+
+    // 4. Curved Wooden Promenade Bridge crossing Lake Bay
+    const bridgeCurvePoints = [
+      new THREE.Vector3(-24, 0.7, -10),
+      new THREE.Vector3(-18, 1.8, -14),
+      new THREE.Vector3(-10, 0.7, -15)
+    ];
+    const bridgeCurve = new THREE.CatmullRomCurve3(bridgeCurvePoints);
+    const bridgeGeo = new THREE.TubeGeometry(bridgeCurve, 16, 1.4, 6, false);
+    bridgeGeo.scale(1.0, 0.2, 1.0);
+    const bridge = new THREE.Mesh(bridgeGeo, woodBridgeMat);
+    bridge.position.y = 0.4;
+    bridge.castShadow = true;
+    group.add(bridge);
+
+    // 5. Circular Amphitheater Plaza
+    const plaza = new THREE.Mesh(new THREE.CylinderGeometry(8, 8.5, 0.4, 20), plazaPavingMat);
+    plaza.position.set(22, 0.5, 8);
+    plaza.receiveShadow = true;
+    group.add(plaza);
+
+    const plazaMonument = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.6, 6, 8), stoneRevetmentMat);
+    plazaMonument.position.set(22, 3.5, 8);
+    plazaMonument.castShadow = true;
+    group.add(plazaMonument);
+
+    // 6. Ancient Rain Trees (Pohon Trembesi Rindang)
+    const treePositions = [
+      [-26, 18], [-28, -20], [-8, 22], [14, 22], [28, -8], [24, -22], [6, -24], [-6, -26]
+    ];
+
+    treePositions.forEach(([tx, tz]) => {
+      // Trunk
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.8, 5.5, 8), treeTrunkMat);
+      trunk.position.set(tx, 2.75, tz);
+      trunk.castShadow = true;
+      group.add(trunk);
+
+      // Wide Umbrella Canopy
+      const canopy = new THREE.Mesh(new THREE.SphereGeometry(4.2, 8, 8), treeLeavesMat);
+      canopy.scale.set(1.4, 0.75, 1.4);
+      canopy.position.set(tx, 6.8, tz);
+      canopy.castShadow = true;
+      group.add(canopy);
+    });
+
+    // 7. Cattleya Orchid Flower Beds (Pink & Purple Patches)
+    [[-14, 16], [16, -14], [22, -2], [4, 18]].forEach(([fx, fz]) => {
+      const flowerBed = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.8, 0.3, 12), flowerPinkMat);
+      flowerBed.position.set(fx, 0.65, fz);
+      group.add(flowerBed);
+    });
+
+    return group;
+  }
 }
 
 

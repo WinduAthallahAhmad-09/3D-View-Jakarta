@@ -4208,7 +4208,13 @@ export class CityScene {
       "taman-mini-indonesia-indah": () => LandmarkModels.createTamanMiniIndonesiaIndah(),
       "jakarta-international-velodrome": () => LandmarkModels.createVelodromeRawamangun(),
       "simpang-susun-cawang": () => LandmarkModels.createSimpangSusunCawang(),
-      "monumen-pancasila-sakti": () => LandmarkModels.createMonumenPancasilaSakti()
+      "monumen-pancasila-sakti": () => LandmarkModels.createMonumenPancasilaSakti(),
+      "rs-graha-kedoya": () => LandmarkModels.createRSGrahaKedoya(),
+      "wang-residence-kedoya": () => LandmarkModels.createWangResidenceKedoya(),
+      "ipeka-puri-greenville": () => LandmarkModels.createIPEKAGreenville(),
+      "sentra-kuliner-greenville": () => LandmarkModels.createSentraKulinerGreenville(),
+      "sentra-pos-pengumben": () => LandmarkModels.createSentraPosPengumben(),
+      "taman-cattleya-tomang": () => LandmarkModels.createTamanCattleyaTomang()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {

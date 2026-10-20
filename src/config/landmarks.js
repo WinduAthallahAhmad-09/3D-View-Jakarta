@@ -1554,6 +1554,138 @@ export const JAKARTA_LANDMARKS = [
       "Sumur Maut asli berkedalaman 12 meter dengan diameter 75 centimeter dilestarikan di dalam cungkup cungkup marmer kehormatan.",
       "Menjadi lokasi upacara kenegaraan Hari Kesaktian Pancasila setiap tanggal 1 Oktober yang dipimpin langsung oleh Presiden Republik Indonesia."
     ]
+  },
+  {
+    id: "rs-graha-kedoya",
+    name: "Rumah Sakit Graha Kedoya",
+    shortName: "RS Graha Kedoya",
+    category: "Kesehatan & Rumah Sakit Umum",
+    tagline: "Pusat Medis Modern Akreditasi Paripurna & Menara Kembar Layanan Terpadu",
+    height: "45 meter (Menara Kembar 10 Lantai & Helipad Medis)",
+    year: "2010",
+    architect: "PT Megatama Mandiri & Graha Kedoya",
+    location: "Jl. Panjang Arteri No. 26, Kedoya Utara, Kebon Jeruk, Jakarta Barat",
+    coordinates: { lat: -6.1802, lng: 106.7645 },
+    position: [-775.0, 0, -260.0],
+    labelHeight: 48,
+    cameraPosition: [-775.0, 65, -195.0],
+    cameraTarget: [-775.0, 18, -260.0],
+    description: "Rumah sakit swasta tipe B terkemuka di koridor arteri Jl. Panjang dengan fasilitas medis modern terlengkap di Jakarta Barat. Menampilkan arsitektur menara kembar modern berlantai 10 dengan fasad kaca cyan bergaris putih, instalasi gawat darurat (IGD) berkanopi luas, pusat diagnostik canggih, dan landasan helipad medis di atap menara.",
+    facts: [
+      "Menjadi fasilitas rujukan medis darurat utama bagi pengguna jalan tol Jakarta-Tangerang dan koridor Kebon Jeruk.",
+      "Memiliki pusat keunggulan kardiovaskular, bedah ortopedi, dan pusat hemodialisis dengan teknologi mutakhir.",
+      "Terletak persis di tepi arteri Jl. Panjang dengan akses langsung jalur TransJakarta Koridor 8."
+    ]
+  },
+  {
+    id: "wang-residence-kedoya",
+    name: "Wang Residence & Apartemen Kedoya",
+    shortName: "Wang Residence",
+    category: "Residensial Mewah & Superblok Vertikal",
+    tagline: "Puncak Kemewahan Hunian Vertikal Privat & Sky Garden Koridor Kebon Jeruk",
+    height: "108 meter (Menara Residensial Mewah 28 Lantai)",
+    year: "2017",
+    architect: "Citicon Perkasa & SCDA Architects",
+    location: "Jl. Panjang No. 99, Kedoya Selatan, Kebon Jeruk, Jakarta Barat",
+    coordinates: { lat: -6.1895, lng: 106.7635 },
+    position: [-790.0, 0, -95.0],
+    labelHeight: 54,
+    cameraPosition: [-790.0, 95, -25.0],
+    cameraTarget: [-790.0, 40, -95.0],
+    description: "Kompleks apartemen hunian privat mewah setinggi 28 lantai yang menjadi tengara vertikal paling mencolok di Kebon Jeruk. Mengusung arsitektur tropis kontemporer rancangan arsitek internasional dengan podium taman resort, kolam renang infinity elevated, kisi-kisi louvre vertikal elegan, dan penthouse sky villa berpemandangan panorama Jakarta Barat.",
+    facts: [
+      "Menawarkan konsep resort living dengan rasio ruang terbuka hijau privat mencapai 60% dari total lahan.",
+      "Menjadi ikon pencakar langit residensial tertinggi di koridor arteri Jl. Panjang antara Kedoya dan Kebon Jeruk.",
+      "Memiliki lift privat ganda langsung menuju setiap unit penthouse eksklusif."
+    ]
+  },
+  {
+    id: "ipeka-puri-greenville",
+    name: "Kompleks Edukasi Kristen IPEKA Greenville",
+    shortName: "Sekolah IPEKA Greenville",
+    category: "Edukasi & Kampus Terpadu",
+    tagline: "Kampus Terpadu Berwawasan Global, Gedung Modular Modern & Sport Hall",
+    height: "24 meter (Gedung Akademik 5 Lantai & Auditorium)",
+    year: "1979 / Revitalisasi 2016",
+    architect: "Yayasan IPEKA & Denton Corker Marshall Associates",
+    location: "Jl. Greenville Blok D No. 1, Duri Kepa, Kebon Jeruk, Jakarta Barat",
+    coordinates: { lat: -6.1832, lng: 106.7695 },
+    position: [-710.0, 0, -210.0],
+    labelHeight: 38,
+    cameraPosition: [-710.0, 50, -150.0],
+    cameraTarget: [-710.0, 12, -210.0],
+    description: "Kompleks kampus pendidikan Kristen terpadu unggulan di jantung permukiman asri Greenville. Terdiri dari blok gedung akademik modern 5 lantai berkanopi kisi-kisi pelindung surya, aula serbaguna auditorium besar, lapangan olahraga bertaraf internasional, serta plaza komunitas edukasi berwawasan lingkungan.",
+    facts: [
+      "Salah satu kampus IPEKA paling bersejarah dan menjadi perintis pendidikan berprestasi di kawasan Jakarta Barat.",
+      "Memiliki fasilitas laboratorium sains, ruang musik akustik, serta lapangan basket indoor berstandar FIBA.",
+      "Menjadi pusat simpul aktivitas sosial dan edukasi warga perumahan Greenville, Kedoya, dan Tanjung Duren."
+    ]
+  },
+  {
+    id: "sentra-kuliner-greenville",
+    name: "Sentra Wisata Kuliner Greenville & Taman Ratu",
+    shortName: "Kuliner Greenville",
+    category: "Pusat Niaga, Gaya Hidup & Gastronomi",
+    tagline: "Surga Gastronomi Legendaris Jakarta Barat, Ruko Kopi Alfresco & Neon Night Market",
+    height: "18 meter (Kompleks Shophouse Tematik 4 Lantai)",
+    year: "1985 / Revitalisasi 2021",
+    architect: "Konsorsium Pengembang Kawasan Greenville",
+    location: "Jl. Greenville Raya & Jl. Taman Ratu Indah, Duri Kepa, Kebon Jeruk, Jakarta Barat",
+    coordinates: { lat: -6.1858, lng: 106.7715 },
+    position: [-680.0, 0, -160.0],
+    labelHeight: 36,
+    cameraPosition: [-680.0, 45, -100.0],
+    cameraTarget: [-680.0, 10, -160.0],
+    description: "Kawasan kuliner legendaris paling terkenal di Jakarta Barat yang memadukan puluhan ruko gastronomi peranakan, kafe kopi spesialis alfresco, restoran seafood malam, dan jajanan tempo dulu. Menampilkan deretan ruko 4 lantai dengan fasad terakota, kanopi tenda warna-warni, pencahayaan papan reklame neon malam hari, serta pedestrian promenade yang semarak.",
+    facts: [
+      "Telah menjadi destinasi wisata kuliner favorit warga ibu kota selama lebih dari 4 dekade sejak era 1980-an.",
+      "Terkenal dengan hidangan seafood segar khas pesisir, bakmi tradisional peranakan, hingga dessert modern artisan.",
+      "Mengintegrasikan zona pedestrian rindang dengan kantong parkir komunal dan sirkulasi kendaraan santai."
+    ]
+  },
+  {
+    id: "sentra-pos-pengumben",
+    name: "Sentra Niaga Pos Pengumben & Sukabumi Selatan",
+    shortName: "Sentra Pos Pengumben",
+    category: "Komersial, Bisnis & Arteri Distribusi",
+    tagline: "Pusat Desain Interior, Showroom Keramik Terpadu & Simpul Bisnis Selatan-Barat",
+    height: "28 meter (Gedung Bisnis Perbankan & Showroom 6 Lantai)",
+    year: "1995 / Modernisasi 2019",
+    architect: "Dinas Tata Ruang DKI & Arsitek Swasta",
+    location: "Jl. Raya Pos Pengumben, Sukabumi Selatan, Kebon Jeruk, Jakarta Barat",
+    coordinates: { lat: -6.2070, lng: 106.7645 },
+    position: [-775.0, 0, 210.0],
+    labelHeight: 42,
+    cameraPosition: [-775.0, 55, 275.0],
+    cameraTarget: [-775.0, 14, 210.0],
+    description: "Pusat niaga dan showroom interior terkemuka yang menjadi gerbang selatan Jakarta Barat menuju Permata Hijau dan Kebayoran Lama. Memadukan gedung perkantoran perbankan 6 lantai, showroom keramik dan sanitari arsitektural terbesar, deretan ruko material modern, dan flyover persimpangan arteri strategis Jl. Panjang.",
+    facts: [
+      "Dikenal sebagai pusat perdagangan bahan bangunan premium, marmer, dan perlengkapan interior arsitektur nomor satu di Jakarta Barat.",
+      "Menjadi titik temu mobilitas antara Jakarta Barat (Kebon Jeruk/Joglo) dan Jakarta Selatan (Kebayoran/Permata Hijau).",
+      "Dilengkapi halte transit TransJakarta Koridor 8 yang menghubungkan wilayah perumahan ke pusat perkantoran Sudirman."
+    ]
+  },
+  {
+    id: "taman-cattleya-tomang",
+    name: "Taman Cattleya (Taman Metropolitan Tomang Barat)",
+    shortName: "Taman Cattleya",
+    category: "Ruang Terbuka Hijau & Ekosistem Perkotaan",
+    tagline: "Oase Hijau 3 Hektare, Danau Retensi Alami & Paru-Paru Kota Jakarta Barat",
+    height: "12 meter (Plaza Monumen & Kanopi Pohon Trembesi Purba)",
+    year: "2007 (Revitalisasi Taman Kota DKI)",
+    architect: "Dinas Pertamanan dan Hutan Kota DKI Jakarta",
+    location: "Jl. Letjen S. Parman / Simpang Tomang Barat, Palmerah, Jakarta Barat",
+    coordinates: { lat: -6.1815, lng: 106.7830 },
+    position: [-530.0, 0, -110.0],
+    labelHeight: 32,
+    cameraPosition: [-530.0, 45, -50.0],
+    cameraTarget: [-530.0, 8, -110.0],
+    description: "Taman kota metropolitan publik seluas 31.945 meter persegi (3,2 hektare) yang berfungsi sebagai paru-paru hijau dan daerah tangkapan air alami di pertemuan Tomang dan Tanjung Duren. Memiliki danau buatan dengan air mancur aerator, jembatan lengkung dermaga kayu, jogging track mengelilingi danau, plaza panggung terbuka, serta ratusan pohon trembesi dan bunga anggrek Cattleya.",
+    facts: [
+      "Dinamai dari genus bunga anggrek tropis Cattleya yang menjadi salah satu koleksi tanaman hias unggulan taman ini.",
+      "Danau buatan di tengah taman berfungsi ganda sebagai pengendali banjir lokal yang menampung limpasan air hujan dari kawasan Tomang.",
+      "Merupakan salah satu taman kota paling populer untuk olahraga lari pagi, rekreasi keluarga, dan pemotretan bertema alam di Jakarta Barat."
+    ]
   }
 ];
 
