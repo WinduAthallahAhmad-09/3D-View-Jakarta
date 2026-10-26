@@ -5591,7 +5591,25 @@ export class CityScene {
       { x1: 1400.0, y: 9.8, z1: 720.0, x2: 712.0, y: 9.8, z2: 600.0, count: 6, speedBoost: 1.35 },
       // 48. Tol Ir. Wiyoto Wiyono (By-Pass Cawang -> Jatinegara -> Rawamangun -> Priok, y=9.3)
       { x1: 712.0, y: 9.3, z1: 724.0, x2: 850.0, y: 9.3, z2: -350.0, count: 7, speedBoost: 1.4 },
-      { x1: 850.0, y: 9.3, z1: -350.0, x2: 712.0, y: 9.3, z2: 724.0, count: 7, speedBoost: 1.4 }
+      { x1: 850.0, y: 9.3, z1: -350.0, x2: 712.0, y: 9.3, z2: 724.0, count: 7, speedBoost: 1.4 },
+      // 49. Feeder Mikrotrans & Arteri Jl. Greenville Raya (Tanjung Duren <-> Sentra Kuliner <-> Jl. Panjang)
+      { x1: -580.0, z1: -180.0, x2: -775.0, z2: -180.0, count: 4, speedBoost: 1.05 },
+      { x1: -775.0, z1: -180.0, x2: -580.0, z2: -180.0, count: 4, speedBoost: 1.05 },
+      // 50. Koridor Arteri Jl. Kedoya Raya & Sunrise Garden (RS Graha Kedoya <-> Sunrise Garden <-> Puri Kencana)
+      { x1: -775.0, z1: -260.0, x2: -950.0, z2: -220.0, count: 4, speedBoost: 1.1 },
+      { x1: -950.0, z1: -220.0, x2: -775.0, z2: -260.0, count: 4, speedBoost: 1.1 },
+      // 51. TransJakarta Feeder & Arteri 4-Lajur Jl. Pos Pengumben Raya (Palmerah <-> Sentra Pos Pengumben <-> Joglo)
+      { x1: -580.0, z1: 210.0, x2: -1040.0, z2: 210.0, count: 6, isBus: true, busColor: 0x0284c7, speedBoost: 1.2 },
+      { x1: -1040.0, z1: 210.0, x2: -580.0, z2: 210.0, count: 6, isBus: true, busColor: 0x0284c7, speedBoost: 1.2 },
+      // 52. Sirkulasi Arteri Jl. Perjuangan & Akses Underpass Tol Kebon Jeruk (MNC Studios & MACAN)
+      { x1: -650.0, z1: -45.0, x2: -920.0, z2: -45.0, count: 5, speedBoost: 1.15 },
+      { x1: -920.0, z1: -45.0, x2: -650.0, z2: -45.0, count: 5, speedBoost: 1.15 },
+      // 53. Sirkulasi Jl. Kebon Jeruk Raya / Kemanggisan Ilir (BINUS Kemanggisan <-> Sukabumi Utara <-> Jl. Panjang)
+      { x1: -480.0, z1: 20.0, x2: -775.0, z2: 50.0, count: 4, speedBoost: 1.05 },
+      { x1: -775.0, z1: 50.0, x2: -480.0, z2: 20.0, count: 4, speedBoost: 1.05 },
+      // 54. Sirkulasi Lingkar Taman Cattleya & Simpang Tomang Barat (S. Parman <-> Tanjung Duren)
+      { x1: -480.0, z1: -110.0, x2: -580.0, z2: -110.0, count: 4, speedBoost: 1.1 },
+      { x1: -580.0, z1: -110.0, x2: -480.0, z2: -110.0, count: 4, speedBoost: 1.1 }
     ];
 
     let idx = 0;
@@ -5632,6 +5650,36 @@ export class CityScene {
         this.proceduralGroup.add(vehicle);
         idx++;
       }
+    });
+
+    // Halte Busway TransJakarta Koridor 8 di Sepanjang Koridor Jl. Panjang (Void A)
+    const tjShelterMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.35, metalness: 0.5 });
+    const tjGlassMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.15, transparent: true, opacity: 0.75 });
+    const tjPlatformMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.7 });
+
+    const shelterPositions = [
+      { name: "Halte Kedoya Green Garden", x: -775.0, z: -230.0 },
+      { name: "Halte Kebon Jeruk (MACAN)", x: -775.0, z: 0.0 },
+      { name: "Halte Pos Pengumben", x: -775.0, z: 180.0 }
+    ];
+
+    shelterPositions.forEach((sh) => {
+      // Concrete Raised Platform
+      const plat = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.7, 18), tjPlatformMat);
+      plat.position.set(sh.x, 0.35, sh.z);
+      plat.receiveShadow = true;
+      this.proceduralGroup.add(plat);
+
+      // Steel Canopy Roof
+      const roof = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.4, 18.4), tjShelterMat);
+      roof.position.set(sh.x, 3.8, sh.z);
+      roof.castShadow = true;
+      this.proceduralGroup.add(roof);
+
+      // Glass Enclosure Walls
+      const glass = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2.8, 16), tjGlassMat);
+      glass.position.set(sh.x, 2.1, sh.z);
+      this.proceduralGroup.add(glass);
     });
 
     // Circular Roundabout Traffic orbiting Bundaran HI (0,0), Patung Kuda (-3,-215), Bundaran Senayan (-316,478), Bundaran PIM (-515,915), & Pancoran (248,492)

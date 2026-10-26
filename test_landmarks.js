@@ -981,7 +981,50 @@ assert.ok(
   'CityScene.js missing Void A street trees'
 );
 
-console.log('✅ All 75 landmarks, Quick Wins, Jakarta Timur & Tahap 1 + 2 + 3 Void A verified successfully!');
+// Check 32: Tahap 4 Transit Dinamis & Sirkulasi Multimoda Void A
+assert.ok(
+  citySceneContent.includes('Feeder Mikrotrans & Arteri Jl. Greenville Raya'),
+  'CityScene.js missing Greenville Raya feeder route'
+);
+assert.ok(
+  citySceneContent.includes('Koridor Arteri Jl. Kedoya Raya & Sunrise Garden'),
+  'CityScene.js missing Kedoya Raya & Sunrise Garden route'
+);
+assert.ok(
+  citySceneContent.includes('TransJakarta Feeder & Arteri 4-Lajur Jl. Pos Pengumben Raya'),
+  'CityScene.js missing Pos Pengumben 4-lane feeder route'
+);
+assert.ok(
+  citySceneContent.includes('Sirkulasi Arteri Jl. Perjuangan & Akses Underpass Tol Kebon Jeruk'),
+  'CityScene.js missing Jl. Perjuangan underpass route'
+);
+assert.ok(
+  citySceneContent.includes('Sirkulasi Jl. Kebon Jeruk Raya / Kemanggisan Ilir'),
+  'CityScene.js missing Jl. Kebon Jeruk Raya route'
+);
+assert.ok(
+  citySceneContent.includes('Sirkulasi Lingkar Taman Cattleya & Simpang Tomang Barat'),
+  'CityScene.js missing Lingkar Taman Cattleya route'
+);
+assert.ok(
+  citySceneContent.includes('Halte Busway TransJakarta Koridor 8 di Sepanjang Koridor Jl. Panjang (Void A)'),
+  'CityScene.js missing TransJakarta Koridor 8 shelters'
+);
+assert.ok(
+  citySceneContent.includes('Halte Kedoya Green Garden'),
+  'CityScene.js missing Halte Kedoya Green Garden'
+);
+assert.ok(
+  citySceneContent.includes('Halte Kebon Jeruk (MACAN)'),
+  'CityScene.js missing Halte Kebon Jeruk (MACAN)'
+);
+assert.ok(
+  citySceneContent.includes('Halte Pos Pengumben'),
+  'CityScene.js missing Halte Pos Pengumben'
+);
+
+console.log('✅ All 75 landmarks, Quick Wins, Jakarta Timur & ALL 4 TAHAP VOID A COMPLETED SUCCESSFULLY!');
+
 
 
 
