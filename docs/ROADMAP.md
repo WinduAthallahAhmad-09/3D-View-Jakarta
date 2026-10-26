@@ -7,11 +7,11 @@ Repo: `WinduAthallahAhmad-09/3D-View-Jakarta` (branch `main`)
 
 - **81 landmark anchor** (#01 Monas s.d. #81 Cengkareng Business City) di `src/config/landmarks.js`.
 - **82 tombol tour** (81 landmark + tampilan aerial) di `index.html`; seluruh ID landmark memiliki tombol dan builder model.
-- **Satu skrip verifikasi statis** di `test_landmarks.js`, dijalankan dengan `npm test`. Saat ini menjalankan 2.181 assertion yang memeriksa data, metadata, builder, tombol tour, batas deviasi posisi, serta integrasi dataset OSM dan infill Void B. Ini **bukan 33 unit test suite** dan belum mencakup render, interaksi, atau performa.
+- **Satu skrip verifikasi statis** di `test_landmarks.js`, dijalankan dengan `npm test`. Saat ini menjalankan 2.203 assertion yang memeriksa data, metadata, builder, tombol tour, batas deviasi posisi, serta integrasi dataset OSM, infill, dan transit Void B. Ini **bukan 33 unit test suite** dan belum mencakup render, interaksi, atau performa.
 - Kawasan inti Jakarta Pusat, Jakarta Selatan, dan Jakarta Utara selesai.
 - Jakarta Timur selesai 4 tahap.
 - Void A (Jakarta Barat Tengah) selesai 4 tahap.
-- Void B (Jakarta Barat Laut) selesai Tahap 1–3: 6 anchor #76–#81, Kanal Mookervaart, ekstensi Daan Mogot, serta infill permukiman dan kawasan industri.
+- Void B (Jakarta Barat Laut) selesai Tahap 1–4: 6 anchor #76–#81, Kanal Mookervaart, ekstensi Daan Mogot, infill permukiman dan kawasan industri, serta integrasi halte TransJakarta Koridor 3 dan viaduk KA Bandara.
 
 ### Dataset OSM
 
@@ -38,7 +38,7 @@ Catatan regenerasi: ambil way jalan (`highway`) dan kanal (`waterway`, termasuk 
 | Void B | Tahap 1: 6 anchor Kalideres–Cengkareng | Selesai |
 | Void B | Tahap 2: Kanal Mookervaart & Daan Mogot | Selesai |
 | Void B | Tahap 3: infill permukiman & industri | Selesai |
-| Void B | Tahap 4: TransJakarta Koridor 3 & KA Bandara | Direncanakan |
+| Void B | Tahap 4: TransJakarta Koridor 3 & KA Bandara | Selesai |
 | Void C | Meruya, Kembangan Selatan, Joglo, Kreo | Direncanakan |
 | Void D | Kamal Muara, Teluk Gong, Kapuk, Muara Baru | Direncanakan |
 | Void E | Cilincing, Marunda, Rorotan, KBN Cakung | Direncanakan |
@@ -58,6 +58,10 @@ Catatan regenerasi: ambil way jalan (`highway`) dan kanal (`waterway`, termasuk 
 - Penempatan bangunan memakai mask koridor seluruh jalan OSM, kanal, konektor Tahap 2, dan akses industri, ditambah enam exclusion zone anchor. Ruko di sepanjang jalan OSM mengikuti rantai way yang disambung terlebih dahulu agar deret tidak terputus di setiap persimpangan.
 - Seluruh massa bangunan dirender sebagai lima `InstancedMesh` (badan rumah, ruko, atap rumah+ruko, gudang, atap gudang), ditambah dua mesh jalan/bahu hasil merge dan dua `InstancedMesh` pohon. Total penambahan Tahap 3 adalah **9 draw call** tanpa `PointLight` baru.
 - PJU Tahap 2 memakai material emissive bersama dan digabung ke dalam mesh, tanpa `PointLight` tambahan. Vegetasi Tahap 2 dirender sebagai dua `InstancedMesh`; total penambahan Tahap 2 adalah 10 draw call.
+- Tahap 4 menambahkan **Halte Rawa Buaya** (x ≈ -1.140) dan **Halte Pesakih** (x ≈ -1.190) di bahu selatan Jl. Daan Mogot, masing-masing berupa peron, kanopi, dinding kaca, dan empat kolom baja yang digabung ke lima mesh.
+- Viaduk **KA Bandara** bercabang dari Stasiun Rawa Buaya sepanjang **759 unit** dengan kemiringan bertahap y 0,6 → 8,0, melintasi Kali Mookervaart lewat jembatan girder, dan berakhir di portal gerbang setinggi 15 unit bertanda `KA BANDARA`. Jalur dirender dari sampel kurva: deck, rel, kabel kontak, tiang katener, dan pier yang otomatis menghindari kanal. Dua kereta Railink dua gerbong berjalan bolak-balik di jalur ganda.
+- Seluruh elemen transit Tahap 4 digabung menjadi **6 mesh statis** (beton, kanopi, kaca, baja halte, baja viaduk, papan portal) ditambah **8 mesh gerbong** (2 kereta × 2 gerbong × badan+kaca), sehingga penambahannya **14 draw call** dan **nol `PointLight`**. Setiap gerbong memakai geometri gabungan dengan warna per-vertex.
+- Jarak bebas viaduk terverifikasi programatik: minimum **2,34 unit** ke atap gudang kawasan industri (koridor x ≈ -1.040 s.d. -1.022) dan **10,41 unit** ke RSUD Cengkareng; halte berjarak lebih dari 8 unit dari Danau Rawa Buaya dan 25 unit dari Mall Daan Mogot.
 - Shadow frustum kini mengikuti target kamera dengan snapping 40 unit, sehingga cakupan bayangan konsisten di seluruh kota. Grid diperluas menjadi **3.000 unit / 150 divisi** (±1.500) untuk mencakup Void B.
 
 ## Kebijakan akurasi posisi
@@ -72,8 +76,8 @@ Kebijakan ini didokumentasikan pula di header `src/config/landmarks.js`.
 
 ## Klaim yang belum terverifikasi
 
-- **"60 FPS" belum tercapai pada perangkat uji.** Baseline runtime 2026-10-26 di Chrome (viewport 831×785, Intel UHD Graphics via ANGLE/D3D11): pandangan Danau Rawa Buaya **13,9 FPS / 411 draw call per frame**, Bundaran HI **9,8 FPS / 1.206 draw call per frame**. Baseline ini diambil sebelum Tahap 3; Tahap 2 menambah 10 draw call dan Tahap 3 menambah 9 draw call, sehingga bukan penyebab utama. Optimasi menyeluruh tetap menjadi gerbang performa F4. Beban statis mencakup 647 kendaraan (614 rute + 33 roundabout), sekitar 192 PointLight PJU, dan 81 label DOM.
-- **Verifikasi visual Tahap 3 belum dilakukan lewat screenshot browser.** Permukaan in-app browser berstatus `hidden` saat verifikasi, sehingga penempatan diperiksa secara programatik di dalam halaman: jumlah instance, tidak ada tumpang-tindih AABB rumah/gudang, dan jarak bebas terhadap jalan OSM (rumah 5,4 unit, ruko 1,4 unit, gudang 32,7 unit). Pemeriksaan visual manual masih diperlukan.
+- **"60 FPS" belum tercapai pada perangkat uji.** Baseline runtime 2026-10-26 di Chrome (viewport 831×785, Intel UHD Graphics via ANGLE/D3D11): pandangan Danau Rawa Buaya **13,9 FPS / 411 draw call per frame**, Bundaran HI **9,8 FPS / 1.206 draw call per frame**. Baseline ini diambil sebelum Tahap 3; Tahap 2 menambah 10 draw call, Tahap 3 menambah 9 draw call, dan Tahap 4 menambah 14 draw call (6 mesh transit + 8 mesh gerbong), sehingga bukan penyebab utama. Optimasi menyeluruh tetap menjadi gerbang performa F4. Beban statis mencakup 647 kendaraan (614 rute + 33 roundabout), sekitar 192 PointLight PJU, dan 81 label DOM.
+- **Verifikasi visual Tahap 3–4 belum dilakukan lewat screenshot browser.** Permukaan in-app browser berstatus `hidden` saat verifikasi, sehingga penempatan diperiksa secara programatik di dalam halaman. Tahap 3: jumlah instance, tidak ada tumpang-tindih AABB rumah/gudang, dan jarak bebas terhadap jalan OSM (rumah 5,4 unit, ruko 1,4 unit, gudang 32,7 unit). Tahap 4: enam mesh transit, dua kereta KA Bandara (2 gerbong masing-masing), panjang kurva 759 unit tanpa sampel NaN, jarak bebas viaduk ke gudang ≥2,34 unit dan ke RSUD 10,41 unit, serta papan portal bertekstur `KA BANDARA`. Pemeriksaan visual manual masih diperlukan.
 - **"33/33 unit test suites" tidak didukung repo.** Yang tersedia adalah satu skrip verifikasi statis.
 - Belum ada tes render, interaksi kamera, atau regresi visual.
 

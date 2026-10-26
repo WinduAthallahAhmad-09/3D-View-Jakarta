@@ -1217,7 +1217,36 @@ voidBLandmarkIds.forEach(id => {
   assert.ok(infillMethod.includes(`'${name}'`), `Void B infill missing shophouse corridor ${name}`);
 });
 
-console.log(`✅ All 81 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-3 Void B COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 36: Void B Tahap 4 — halte TransJakarta Koridor 3 & percabangan KA Bandara
+assert.ok(citySceneContent.includes('this.buildVoidBTransit();'), 'CityScene.js does not call buildVoidBTransit');
+assert.ok(citySceneContent.includes('buildVoidBTransit() {'), 'CityScene.js missing buildVoidBTransit');
+
+const transitMethodStart = citySceneContent.indexOf('buildVoidBTransit() {');
+const transitMethodEnd = citySceneContent.indexOf('Tahap 3 Jakarta Timur', transitMethodStart);
+assert.ok(transitMethodStart > 0 && transitMethodEnd > transitMethodStart, 'Cannot isolate buildVoidBTransit');
+const transitMethod = citySceneContent.slice(transitMethodStart, transitMethodEnd);
+
+assert.ok(!transitMethod.includes('new THREE.PointLight'), 'Void B transit must not add PointLights');
+assert.ok(transitMethod.includes('VOID_B_OSM.waterways'), 'Void B transit does not use the OSM canal geometry');
+assert.ok(transitMethod.includes('mergeGeometries'), 'Void B transit must merge static geometry');
+assert.ok(transitMethod.includes('voidBTransitStats'), 'Void B transit does not record stats');
+assert.ok(transitMethod.includes('halte: halteStops.length'), 'Void B transit stats must count both halte');
+assert.ok(transitMethod.includes('bandaraCars: 2'), 'Void B transit stats must record the two-car Railink consist');
+assert.ok(transitMethod.includes('Halte Rawa Buaya'), 'Void B transit missing Halte Rawa Buaya');
+assert.ok(transitMethod.includes('Halte Pesakih'), 'Void B transit missing Halte Pesakih');
+assert.ok(transitMethod.includes('this.bandaraRailCurve = new THREE.CatmullRomCurve3'), 'Void B transit missing KA Bandara curve');
+assert.ok(transitMethod.includes('this.bandaraRailCurveLength = this.bandaraRailCurve.getLength()'), 'Void B transit missing KA Bandara curve length');
+assert.ok(transitMethod.includes('new THREE.Vector3(-1090, 0.6, -438)'), 'KA Bandara branch must start at Stasiun Rawa Buaya');
+assert.ok(transitMethod.includes('new THREE.Vector3(-1020, 8.0, -680)'), 'KA Bandara branch must use the clear corridor east of the F2 industrial cluster');
+assert.ok(transitMethod.includes('new THREE.Vector3(-1480, 8.0, -770)'), 'KA Bandara branch must end at the northwest portal');
+assert.ok(transitMethod.includes('KA BANDARA'), 'KA Bandara portal is missing its sign');
+assert.ok(landmarkModelsFresh.includes('static createSingleKABandaraCar(c, cars = 2)'), 'LandmarkModels missing createSingleKABandaraCar');
+assert.ok(citySceneContent.includes('LandmarkModels.createSingleKABandaraCar(c, 2)'), 'CityScene.js does not create KA Bandara cars');
+assert.ok(citySceneContent.includes("type: 'ka-bandara'"), 'buildTraffic missing ka-bandara train type');
+assert.ok(citySceneContent.includes("id: 'ka-bandara-outbound'"), 'buildTraffic missing ka-bandara outbound consist');
+assert.ok(citySceneContent.includes("id: 'ka-bandara-inbound'"), 'buildTraffic missing ka-bandara inbound consist');
+
+console.log(`✅ All 81 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

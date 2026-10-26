@@ -40,6 +40,7 @@ export class CityScene {
     this.buildWestJakartaInfillAndDistricts();
     this.buildVoidBDaanMogot();
     this.buildVoidBInfillAndIndustry();
+    this.buildVoidBTransit();
     this.buildEastJakartaInfrastructure();
     this.buildEastJakartaInfillAndDistricts();
     this.buildLandmarks();
@@ -4797,6 +4798,279 @@ export class CityScene {
   }
 
   /**
+   * Void B Tahap 4: Transit TransJakarta Koridor 3 & percabangan KA Bandara
+   *
+   * 1. Dua halte busway di bahu selatan Jl. Daan Mogot: Rawa Buaya dan Pesakih.
+   * 2. Viaduk layang KA Bandara dari Stasiun Rawa Buaya, jembatan Kanal
+   *    Mookervaart, dan portal KA BANDARA di sisi barat laut.
+   * 3. Rel, catenary, pilar, dan kanopi digabung menjadi enam draw call statis.
+   *    Kereta Railink dua gerbong dirender terpisah mengikuti kurva viaduk.
+   */
+  buildVoidBTransit() {
+    const concreteGeos = [];
+    const canopyGeos = [];
+    const glassGeos = [];
+    const halteSteelGeos = [];
+    const viaductSteelGeos = [];
+
+    const makeBox = (w, h, d, x, y, z, rotY = 0, target = concreteGeos) => {
+      const geo = new THREE.BoxGeometry(w, h, d);
+      if (rotY !== 0) geo.rotateY(rotY);
+      geo.translate(x, y, z);
+      target.push(geo);
+    };
+
+    const addMerged = (geos, material, name, castShadow = false) => {
+      if (geos.length === 0) return;
+      const merged = BufferGeometryUtils.mergeGeometries(geos, false);
+      if (!merged) return;
+      const mesh = new THREE.Mesh(merged, material);
+      mesh.name = name;
+      mesh.castShadow = castShadow;
+      mesh.receiveShadow = true;
+      this.proceduralGroup.add(mesh);
+    };
+
+    // =========================================================================
+    // 1. HALTE BUSWAY KORIDOR 3 DI BAHU SELATAN DAAN MOGOT
+    // =========================================================================
+    const daanCenterZ = (x) => -435 + ((x + 880) / (-370)) * (-15);
+    const daanAngle = Math.atan2(-370, -15);
+    const daanNormalX = Math.cos(daanAngle);
+    const daanNormalZ = -Math.sin(daanAngle);
+
+    const halteStops = [
+      { name: 'Halte Rawa Buaya', x: -1140 },
+      { name: 'Halte Pesakih', x: -1190 }
+    ];
+
+    halteStops.forEach((stop) => {
+      const cx = stop.x + daanNormalX * 16.8;
+      const cz = daanCenterZ(stop.x) + daanNormalZ * 16.8;
+
+      makeBox(3.6, 0.7, 18, cx, 0.35, cz, daanAngle);
+      makeBox(4.2, 0.4, 18.4, cx, 3.8, cz, daanAngle, canopyGeos);
+
+      [-2.0, 2.0].forEach((side) => {
+        makeBox(
+          0.16, 0.55, 18.4,
+          cx + daanNormalX * side, 3.55, cz + daanNormalZ * side,
+          daanAngle, canopyGeos
+        );
+      });
+
+      [-1.55, 1.55].forEach((side) => {
+        makeBox(
+          0.1, 2.5, 14.5,
+          cx + daanNormalX * side, 2.15, cz + daanNormalZ * side,
+          daanAngle, glassGeos
+        );
+      });
+
+      [-1.7, 1.7].forEach((lx) => {
+        [-8.4, 8.4].forEach((lz) => {
+          const px = cx + daanNormalX * lx + Math.sin(daanAngle) * lz;
+          const pz = cz + daanNormalZ * lx + Math.cos(daanAngle) * lz;
+          makeBox(0.18, 3.3, 0.18, px, 2.35, pz, 0, halteSteelGeos);
+        });
+      });
+    });
+
+    // =========================================================================
+    // 2. VIADUK LAYANG KA BANDARA SOEKARNO-HATTA (RAILINK)
+    // Titik awal di jalur timur Stasiun Rawa Buaya, memanjat ke y=8 lalu
+    // menyusuri celah bebas di timur klaster industri dan utara gudang.
+    // =========================================================================
+    this.bandaraRailCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-1090, 0.6, -438),
+      new THREE.Vector3(-1093, 1.4, -448),
+      new THREE.Vector3(-1097, 3.0, -458),
+      new THREE.Vector3(-1098, 4.6, -472),
+      new THREE.Vector3(-1096, 6.0, -496),
+      new THREE.Vector3(-1089, 6.4, -520),
+      new THREE.Vector3(-1085, 7.2, -552),
+      new THREE.Vector3(-1072, 7.9, -584),
+      new THREE.Vector3(-1042, 8.0, -608),
+      new THREE.Vector3(-1024, 8.0, -645),
+      new THREE.Vector3(-1020, 8.0, -680),
+      new THREE.Vector3(-1030, 8.0, -712),
+      new THREE.Vector3(-1058, 8.0, -734),
+      new THREE.Vector3(-1140, 8.0, -744),
+      new THREE.Vector3(-1300, 8.0, -755),
+      new THREE.Vector3(-1420, 8.0, -765),
+      new THREE.Vector3(-1480, 8.0, -770)
+    ], false, 'catmullrom', 0.15);
+    this.bandaraRailCurveLength = this.bandaraRailCurve.getLength();
+
+    const canal = VOID_B_OSM.waterways[0];
+    const distToCanal = (x, z) => {
+      let best = Infinity;
+      for (let i = 0; i < canal.points.length - 1; i++) {
+        const [ax, az] = canal.points[i];
+        const [bx, bz] = canal.points[i + 1];
+        const dx = bx - ax;
+        const dz = bz - az;
+        const lenSq = dx * dx + dz * dz;
+        let t = lenSq > 0 ? ((x - ax) * dx + (z - az) * dz) / lenSq : 0;
+        t = Math.max(0, Math.min(1, t));
+        best = Math.min(best, Math.hypot(x - (ax + dx * t), z - (az + dz * t)));
+      }
+      return best;
+    };
+
+    const samples = this.bandaraRailCurve.getSpacedPoints(140);
+    for (let i = 0; i < samples.length - 1; i++) {
+      const a = samples[i];
+      const b = samples[i + 1];
+      const dx = b.x - a.x;
+      const dz = b.z - a.z;
+      const len = Math.hypot(dx, dz);
+      if (len < 1e-4) continue;
+      const angle = Math.atan2(dx, dz);
+      const mx = (a.x + b.x) * 0.5;
+      const my = (a.y + b.y) * 0.5;
+      const mz = (a.z + b.z) * 0.5;
+
+      // Dek girder beton hanya muncul setelah jalur meninggalkan ballast stasiun.
+      if (my > 1.4) {
+        makeBox(6.0, 0.7, len + 0.25, mx, my - 0.6, mz, angle);
+      }
+
+      [-1.4, 1.4].forEach((off) => {
+        const nx = (-dz / len) * off;
+        const nz = (dx / len) * off;
+        makeBox(0.16, 0.2, len + 0.25, mx + nx, my - 0.18, mz + nz, angle, viaductSteelGeos);
+        if (my > 2.5) {
+          makeBox(0.05, 0.05, len + 0.2, mx + nx, my + 5.75, mz + nz, angle, viaductSteelGeos);
+        }
+      });
+    }
+
+    // Pilar pier berkala, dilewati di atas Kanal Mookervaart.
+    for (let i = 6; i < samples.length - 6; i += 12) {
+      const p = samples[i];
+      if (p.y < 2.6) continue;
+      if (distToCanal(p.x, p.z) < canal.width * 0.5 + 5) continue;
+      const h = p.y - 0.95;
+      if (h < 1.4) continue;
+      makeBox(2.6, h, 2.6, p.x, h * 0.5, p.z);
+      makeBox(4.6, 0.5, 4.6, p.x, h + 0.25, p.z);
+    }
+
+    // Jembatan baja di atas Kanal Mookervaart: dua girder memanjang.
+    let canalSampleIndex = -1;
+    let canalSampleDist = Infinity;
+    samples.forEach((p, idx) => {
+      const d = distToCanal(p.x, p.z);
+      if (d < canalSampleDist) {
+        canalSampleDist = d;
+        canalSampleIndex = idx;
+      }
+    });
+    if (canalSampleIndex > 0 && canalSampleIndex < samples.length - 1) {
+      const c = samples[canalSampleIndex];
+      const a = samples[canalSampleIndex - 1];
+      const b = samples[canalSampleIndex + 1];
+      const angle = Math.atan2(b.x - a.x, b.z - a.z);
+      const nx = Math.cos(angle);
+      const nz = -Math.sin(angle);
+      [-2.2, 2.2].forEach((off) => {
+        makeBox(0.7, 1.0, 30, c.x + nx * off, c.y - 1.35, c.z + nz * off, angle);
+      });
+    }
+
+    // Catenary: tiang ganda, cross beam, dan kabel kontak di atas tiap rel.
+    for (let i = 4; i < samples.length - 4; i += 12) {
+      const p = samples[i];
+      if (p.y < 2.5) continue;
+      const a = samples[i - 1];
+      const b = samples[i + 1];
+      const angle = Math.atan2(b.x - a.x, b.z - a.z);
+      const nx = Math.cos(angle);
+      const nz = -Math.sin(angle);
+      [-1, 1].forEach((side) => {
+        makeBox(0.16, 5.9, 0.16, p.x + nx * 2.9 * side, p.y + 2.95, p.z + nz * 2.9 * side, 0, viaductSteelGeos);
+      });
+      makeBox(5.8, 0.16, 0.16, p.x, p.y + 5.95, p.z, angle, viaductSteelGeos);
+    }
+
+    // =========================================================================
+    // 3. PORTAL & PAPAN NAMA KA BANDARA
+    // =========================================================================
+    const portal = samples[samples.length - 1];
+    const portalPrev = samples[samples.length - 3];
+    const portalAngle = Math.atan2(portal.x - portalPrev.x, portal.z - portalPrev.z);
+    const portalNx = Math.cos(portalAngle);
+    const portalNz = -Math.sin(portalAngle);
+
+    [-6.2, 6.2].forEach((off) => {
+      makeBox(1.0, 15, 1.0, portal.x + portalNx * off, 7.5, portal.z + portalNz * off, 0, viaductSteelGeos);
+    });
+    makeBox(13.4, 0.8, 1.0, portal.x, 14.6, portal.z, portalAngle, viaductSteelGeos);
+
+    const signCanvas = document.createElement('canvas');
+    signCanvas.width = 512;
+    signCanvas.height = 128;
+    const signCtx = signCanvas.getContext('2d');
+    signCtx.fillStyle = '#0f3d6e';
+    signCtx.fillRect(0, 0, 512, 128);
+    signCtx.strokeStyle = '#f8fafc';
+    signCtx.lineWidth = 8;
+    signCtx.strokeRect(6, 6, 500, 116);
+    signCtx.fillStyle = '#ffffff';
+    signCtx.font = 'bold 64px Arial';
+    signCtx.textAlign = 'center';
+    signCtx.textBaseline = 'middle';
+    signCtx.fillText('KA BANDARA', 256, 68);
+    const signTexture = new THREE.CanvasTexture(signCanvas);
+    signTexture.colorSpace = THREE.SRGBColorSpace;
+    const portalSign = new THREE.Mesh(
+      new THREE.PlaneGeometry(8, 2),
+      new THREE.MeshBasicMaterial({ map: signTexture, side: THREE.DoubleSide })
+    );
+    portalSign.position.set(portal.x, 16.1, portal.z);
+    portalSign.rotation.y = Math.PI / 2;
+    portalSign.name = 'voidb-transit-portal-sign';
+    this.proceduralGroup.add(portalSign);
+
+    addMerged(
+      concreteGeos,
+      new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.78 }),
+      'voidb-transit-concrete',
+      true
+    );
+    addMerged(
+      canopyGeos,
+      new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.45, roughness: 0.35 }),
+      'voidb-transit-canopy',
+      true
+    );
+    addMerged(
+      glassGeos,
+      new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.15, transparent: true, opacity: 0.7 }),
+      'voidb-transit-glass'
+    );
+    addMerged(
+      halteSteelGeos,
+      new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.7, roughness: 0.4 }),
+      'voidb-transit-halte-steel'
+    );
+    addMerged(
+      viaductSteelGeos,
+      new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8, roughness: 0.3 }),
+      'voidb-transit-viaduct-steel',
+      true
+    );
+
+    this.voidBTransitStats = {
+      halte: halteStops.length,
+      bandaraLength: Math.round(this.bandaraRailCurveLength),
+      bandaraCars: 2,
+      drawCalls: 6
+    };
+  }
+
+  /**
    * Tahap 3 Jakarta Timur: Infill Urban Fabric, Distrik Residensial & Sentra Budaya/Komersial
    *
    * 1. 160+ Ruko komersial & koridor bisnis Rawamangun (Balai Pustaka & Pemuda), Jatinegara, dan Otista Cawang.
@@ -6840,7 +7114,9 @@ export class CityScene {
       { id: 'lrt-cibubur-southbound', curve: this.lrtCibuburCurve, curveLength: this.lrtCibuburCurveLength, carSpacing: 16.5, trackOffset: 1.4, speed: 0.026, progress: 0.15, type: 'lrt', carCount: 4 },
       { id: 'lrt-cibubur-northbound', curve: this.lrtCibuburCurve, curveLength: this.lrtCibuburCurveLength, carSpacing: 16.5, trackOffset: -1.4, speed: -0.026, progress: 0.65, type: 'lrt', carCount: 4 },
       { id: 'lrt-velodrome-northbound', curve: this.velodromeLrtCurve, curveLength: this.velodromeLrtCurveLength, carSpacing: 15.8, trackOffset: -1.35, speed: 0.025, progress: 0.2, type: 'lrt-jakarta', carCount: 2 },
-      { id: 'lrt-velodrome-southbound', curve: this.velodromeLrtCurve, curveLength: this.velodromeLrtCurveLength, carSpacing: 15.8, trackOffset: 1.35, speed: -0.025, progress: 0.7, type: 'lrt-jakarta', carCount: 2 }
+      { id: 'lrt-velodrome-southbound', curve: this.velodromeLrtCurve, curveLength: this.velodromeLrtCurveLength, carSpacing: 15.8, trackOffset: 1.35, speed: -0.025, progress: 0.7, type: 'lrt-jakarta', carCount: 2 },
+      { id: 'ka-bandara-outbound', curve: this.bandaraRailCurve, curveLength: this.bandaraRailCurveLength, carSpacing: 19.8, trackOffset: -1.4, speed: 0.02, progress: 0.18, type: 'ka-bandara', carCount: 2 },
+      { id: 'ka-bandara-inbound', curve: this.bandaraRailCurve, curveLength: this.bandaraRailCurveLength, carSpacing: 19.8, trackOffset: 1.4, speed: -0.02, progress: 0.68, type: 'ka-bandara', carCount: 2 }
     ];
 
     trainConfigs.forEach((cfg) => {
@@ -6865,6 +7141,8 @@ export class CityScene {
           carMesh = LandmarkModels.createSingleLRTJabodebekCar(c, 4);
         } else if (cfg.type === 'lrt-jakarta') {
           carMesh = LandmarkModels.createSingleLRTJakartaCar(c, 2);
+        } else if (cfg.type === 'ka-bandara') {
+          carMesh = LandmarkModels.createSingleKABandaraCar(c, 2);
         } else {
           carMesh = LandmarkModels.createSingleKRLCar(c, 4);
         }

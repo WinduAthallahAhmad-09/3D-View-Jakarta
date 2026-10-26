@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { TextureGenerator } from './TextureGenerator.js';
 
 /**
@@ -1836,6 +1837,105 @@ export class LandmarkModels {
       gangway.position.set(0, 1.9, carLen * 0.5 + gap * 0.5);
       carGroup.add(gangway);
     }
+
+    return carGroup;
+  }
+
+  /**
+   * KA Bandara Soekarno-Hatta (Railink) car
+   * Two-car airport express set with white-blue livery, red accent line,
+   * dark tinted windows, and a pantograph on the leading car.
+   * Opaque details are merged into one vertex-colored mesh per car to keep
+   * the whole consist at two draw calls per car.
+   */
+  static createSingleKABandaraCar(c, cars = 2) {
+    const carLen = 18.8;
+    const gap = 1.0;
+
+    const opaqueGeos = [];
+    const glassGeos = [];
+
+    const paint = (geo, hex, x, y, z, target = opaqueGeos) => {
+      const color = new THREE.Color(hex);
+      const count = geo.attributes.position.count;
+      const colors = new Float32Array(count * 3);
+      for (let i = 0; i < count; i++) {
+        colors[i * 3] = color.r;
+        colors[i * 3 + 1] = color.g;
+        colors[i * 3 + 2] = color.b;
+      }
+      geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      geo.translate(x, y, z);
+      target.push(geo);
+    };
+
+    const box = (w, h, d, hex, x, y, z, target) => {
+      paint(new THREE.BoxGeometry(w, h, d), hex, x, y, z, target);
+    };
+
+    // White body, roof cap, and air-conditioning pod
+    box(3.1, 2.9, carLen, 0xf8fafc, 0, 2.25, 0);
+    box(3.0, 0.24, carLen * 0.98, 0xe2e8f0, 0, 3.82, 0);
+    box(2.4, 0.32, carLen * 0.28, 0xdbeafe, 0, 4.1, 0);
+
+    // Railink blue band and red pinstripe
+    box(3.16, 0.55, carLen * 0.99, 0x1d4ed8, 0, 1.55, 0);
+    box(3.17, 0.14, carLen * 0.99, 0xdc2626, 0, 1.92, 0);
+
+    // Blue passenger doors on both sides
+    [-1, 1].forEach((side) => {
+      [-carLen * 0.28, carLen * 0.28].forEach((dz) => {
+        box(0.06, 2.1, 2.2, 0x1e40af, side * 1.57, 2.15, dz);
+      });
+    });
+
+    // Bogies
+    [-carLen * 0.32, carLen * 0.32].forEach((bz) => {
+      box(2.6, 0.7, 3.6, 0x1e293b, 0, 0.55, bz);
+    });
+
+    // Pantograph on the leading car
+    if (c === 0) {
+      [-0.8, 0.8].forEach((px) => {
+        box(0.12, 2.0, 0.12, 0x475569, px, 4.6, carLen * 0.22);
+      });
+      box(2.0, 0.12, 0.12, 0x475569, 0, 5.6, carLen * 0.22);
+    }
+
+    // Driver cab glazing and headlights
+    const cabZ = c === 0 ? -carLen * 0.5 - 0.05 : (c === cars - 1 ? carLen * 0.5 + 0.05 : null);
+    if (cabZ !== null) {
+      paint(new THREE.BoxGeometry(2.5, 1.0, 0.1), 0x0f172a, 0, 2.62, cabZ, glassGeos);
+      [-0.9, 0.9].forEach((hx) => {
+        box(0.42, 0.22, 0.08, 0xfef08a, hx, 1.2, cabZ);
+      });
+    }
+
+    // Gangway bellow between the two cars
+    if (c < cars - 1) {
+      box(2.0, 2.5, gap + 0.1, 0x334155, 0, 1.95, carLen * 0.5 + gap * 0.5);
+    }
+
+    // Continuous tinted side windows
+    [-1, 1].forEach((side) => {
+      paint(new THREE.BoxGeometry(0.08, 0.8, carLen * 0.8), 0x0f172a, side * 1.56, 2.62, 0, glassGeos);
+    });
+
+    const carGroup = new THREE.Group();
+
+    const body = new THREE.Mesh(
+      BufferGeometryUtils.mergeGeometries(opaqueGeos, false),
+      new THREE.MeshStandardMaterial({ vertexColors: true, metalness: 0.35, roughness: 0.42 })
+    );
+    body.castShadow = true;
+    body.receiveShadow = true;
+    carGroup.add(body);
+
+    const glass = new THREE.Mesh(
+      BufferGeometryUtils.mergeGeometries(glassGeos, false),
+      new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.9, roughness: 0.12 })
+    );
+    carGroup.add(glass);
 
     return carGroup;
   }
