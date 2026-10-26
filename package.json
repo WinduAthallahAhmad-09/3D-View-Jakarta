@@ -5,7 +5,8 @@
   "description": "Interactive 3D View of Jakarta City with realistic landmarks and buildings",
   "type": "module",
   "scripts": {
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "test": "node test_landmarks.js"
   },
   "dependencies": {
     "three": "^0.160.0",

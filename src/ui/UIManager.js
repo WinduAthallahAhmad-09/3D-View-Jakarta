@@ -41,6 +41,7 @@ export class UIManager {
   }
 
   init() {
+    this.syncLandmarkCounters();
     this.populateHomescreenDirectory();
     this.initScrollReveal();
     this.initAccordions();
@@ -55,8 +56,14 @@ export class UIManager {
     this.bindGoogleTilesEvents();
   }
 
+  syncLandmarkCounters() {
+    document.querySelectorAll('[data-landmark-count]').forEach((el) => {
+      el.textContent = String(JAKARTA_LANDMARKS.length);
+    });
+  }
+
   /**
-   * Populate the 23-landmark directory on the Homescreen using minimalist-ui bento cards
+   * Populate the landmark directory on the Homescreen using minimalist-ui bento cards
    */
   populateHomescreenDirectory() {
     const grid = document.getElementById('homescreen-landmark-grid');

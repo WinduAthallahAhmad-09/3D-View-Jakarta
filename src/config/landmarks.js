@@ -1,9 +1,13 @@
 /**
- * Comprehensive Geospatial Configuration of Central & South Jakarta (Jakarta Pusat & Segitiga Emas)
- * Strictly projected from real OpenStreetMap GPS coordinates using a uniform metric projection
- * centered at Bundaran Hotel Indonesia (-6.194957°, 106.823048° -> [0, 0, 0]):
+ * Geospatial configuration for 81 Jakarta landmarks across all city regions.
+ * Scene coordinates use a uniform metric projection centered at Bundaran Hotel Indonesia
+ * (-6.194957°, 106.823048° -> [0, 0, 0]):
  *   X = (lng - 106.823048) * 14100.0   (~7.81 meters per scene unit)
  *   Z = (lat - (-6.194957)) * -14180.0 (~7.81 meters per scene unit)
+ *
+ * The GPS projection is the reference frame, but a number of landmark positions are
+ * intentionally adjusted to align with procedural roads and surrounding geometry.
+ * See docs/ROADMAP.md for the position-accuracy policy and current deviations.
  */
 
 export const MAP_PROJECTION = {
@@ -523,7 +527,7 @@ export const JAKARTA_LANDMARKS = [
     ]
   },
   // =====================================================
-  // ZONA 4: JAKARTA BARAT (GROGOL, TOMANG, TANJUNG DUREN & SLIPI)
+  // ZONA 4B: JAKARTA BARAT (GROGOL, TOMANG, TANJUNG DUREN & SLIPI)
   // =====================================================
   {
     id: "podomoro-city-central-park",
@@ -1151,7 +1155,7 @@ export const JAKARTA_LANDMARKS = [
     ]
   },
   // =====================================================
-  // ZONA 7: JAKARTA UTARA (PESISIR TELUK JAKARTA & PELABUHAN)
+  // ZONA 7B: JAKARTA UTARA (PESISIR TELUK JAKARTA & PELABUHAN)
   // =====================================================
   {
     id: "jis-stadium",
@@ -1421,7 +1425,7 @@ export const JAKARTA_LANDMARKS = [
     ]
   },
   // =====================================================
-  // ZONA 8: JAKARTA TIMUR (HUB INTERMODA, SEJARAH & BUDAYA)
+  // ZONA 8B: JAKARTA TIMUR (HUB INTERMODA, SEJARAH & BUDAYA)
   // =====================================================
   {
     id: "stasiun-jatinegara",

@@ -1,10 +1,19 @@
 import assert from 'node:assert';
 import fs from 'node:fs';
-import { JAKARTA_LANDMARKS } from './src/config/landmarks.js';
+import { JAKARTA_LANDMARKS, projectGpsToScene } from './src/config/landmarks.js';
+
+let assertionCount = 0;
+['ok', 'equal', 'strictEqual', 'deepStrictEqual', 'notDeepStrictEqual', 'throws'].forEach((method) => {
+  const original = assert[method];
+  assert[method] = (...args) => {
+    assertionCount++;
+    return original.apply(assert, args);
+  };
+});
 
 console.log('Running test_landmarks.js verification...');
 
-// Check 1: Exactly 69 landmarks
+// Check 1: Exactly 81 landmarks
 assert.strictEqual(JAKARTA_LANDMARKS.length, 81, `Expected 81 landmarks, got ${JAKARTA_LANDMARKS.length}`);
 
 // Check 2: Unique IDs and valid properties
@@ -102,12 +111,30 @@ JAKARTA_LANDMARKS.forEach((lm) => {
   );
 });
 
-// Check 5: Check that index.html includes tour buttons for all anchors
+// Check 5: Every landmark has exactly one tour button, plus the aerial view
 const indexHtmlContent = fs.readFileSync('./index.html', 'utf-8');
-[...southAnchors, ...jakpusEastAnchors, ...southTahap1Anchors, ...jakutTahap1Anchors, ...jakbarTahap1Anchors, ...jaktimTahap1Anchors].forEach((id) => {
+const tourIds = [...indexHtmlContent.matchAll(/data-tour-id="([^"]+)"/g)].map((m) => m[1]);
+JAKARTA_LANDMARKS.forEach((lm) => {
   assert.ok(
-    indexHtmlContent.includes(`data-tour-id="${id}"`),
-    `index.html missing tour button for "${id}"`
+    tourIds.includes(lm.id),
+    `index.html missing tour button for "${lm.id}"`
+  );
+});
+assert.ok(tourIds.includes('aerial'), 'index.html missing aerial tour button');
+assert.strictEqual(
+  tourIds.length,
+  JAKARTA_LANDMARKS.length + 1,
+  `Expected ${JAKARTA_LANDMARKS.length + 1} tour buttons, got ${tourIds.length}`
+);
+
+// Check 5b: Scene positions stay within the documented artistic adjustment tolerance
+const MAX_GPS_DEVIATION = 450;
+JAKARTA_LANDMARKS.forEach((lm) => {
+  const [projectedX, projectedZ] = projectGpsToScene(lm.coordinates.lat, lm.coordinates.lng);
+  const deviation = Math.hypot(lm.position[0] - projectedX, lm.position[2] - projectedZ);
+  assert.ok(
+    deviation <= MAX_GPS_DEVIATION,
+    `Landmark "${lm.id}" deviates ${deviation.toFixed(1)} units from GPS projection (max ${MAX_GPS_DEVIATION})`
   );
 });
 
@@ -1059,7 +1086,7 @@ voidBLandmarkIds.forEach(id => {
   assert.ok(indexHtmlFresh.includes(`data-tour-id="${id}"`), `index.html missing tour button for ${id}`);
 });
 
-console.log('✅ All 81 landmarks, Quick Wins, Jakarta Timur, Void A & Tahap 1 Void B COMPLETED SUCCESSFULLY!');
+console.log(`✅ All 81 landmarks, Quick Wins, Jakarta Timur, Void A & Tahap 1 Void B COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

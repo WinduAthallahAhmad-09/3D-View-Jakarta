@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { TextureGenerator } from './TextureGenerator.js';
 
 /**
- * Geometrically faithful 3D architectural models of 19+ iconic Jakarta landmarks
+ * Geometrically faithful 3D architectural models of Jakarta's 81 landmarks
  * designed using real-world Google Maps & architectural references.
  */
 export class LandmarkModels {

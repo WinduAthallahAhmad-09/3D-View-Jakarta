@@ -2,6 +2,8 @@
 
 Website eksplorasi interaktif 3D Kota Jakarta dengan bangunan-bangunan yang mirip kondisi nyata saat ini. Dibangun menggunakan teknologi WebGL modern (**Three.js**), **100% gratis** tanpa memerlukan API key berbayar ataupun pendaftaran kartu kredit.
 
+**Status saat ini:** 81 landmark anchor dengan verifikasi statis, 9 Voids dalam roadmap. Lihat [docs/ROADMAP.md](docs/ROADMAP.md) untuk status per wilayah dan catatan batasan.
+
 ---
 
 ## 🌟 Fitur Utama
@@ -33,23 +35,26 @@ Website eksplorasi interaktif 3D Kota Jakarta dengan bangunan-bangunan yang miri
 
 ## 🚀 Cara Menjalankan Website
 
-Proyek ini menggunakan format ES Modules standar modern yang sangat ringan dan siap dijalankan langsung:
+Proyek ini memakai ES Modules dan tidak memerlukan build step. Three.js dimuat melalui CDN.
 
-### Opsi 1: Menggunakan Vite / Node.js (Rekomendasi)
 ```bash
-# Jalankan development server lokal
-npx vite
-# atau
+# Jalankan server lokal (Node.js)
 npm run dev
 ```
-Buka browser di alamat `http://localhost:5173`.
+Buka `http://localhost:8000`.
 
-### Opsi 2: Menggunakan Live Server / Python HTTP Server
+Alternatif tanpa Node.js:
 ```bash
-# Menggunakan Python
 python -m http.server 8000
-# Lalu buka http://localhost:8000 di browser
 ```
+
+## ✅ Verifikasi
+
+```bash
+npm test
+```
+
+Perintah ini menjalankan satu skrip verifikasi statis untuk 81 landmark: jumlah dan ID unik, kelengkapan metadata, ketersediaan builder, kelengkapan tombol tour, serta batas penyimpangan posisi terhadap proyeksi GPS. Ini bukan pengganti pengujian render atau performa di browser.
 
 ---
 
@@ -77,17 +82,23 @@ Jika Anda ingin menambahkan lebih banyak gedung nyata Jakarta (seperti Menara As
 ```
 JAKARTA 3D VIEW/
 ├── index.html                  # Antarmuka utama (Glassmorphism UI, 3D Canvas, Dock)
-├── package.json                # Konfigurasi proyek & scripts
+├── package.json                # Konfigurasi proyek & scripts (dev, test)
+├── server.js                   # HTTP server statis lokal (port 8000)
+├── test_landmarks.js           # Verifikasi statis data & integrasi landmark
 ├── README.md                   # Dokumentasi lengkap
+├── docs/
+│   └── ROADMAP.md              # Status terverifikasi & roadmap 9 Voids
 ├── public/
 │   └── models/                 # Slot folder untuk menyimpan file 3D .glb kustom
 └── src/
     ├── main.js                 # Entry point & inisialisasi aplikasi
     ├── config/
-    │   └── landmarks.js        # Konfigurasi koordinat spasial & metadata landmark Jakarta
+    │   └── landmarks.js        # Konfigurasi koordinat spasial & metadata 81 landmark
+    ├── data/
+    │   └── jakarta_osm.json    # Geometri OSM Jakarta (jalan, bangunan, air, taman, rel)
     ├── world/
     │   ├── CityScene.js        # Perakitan lanskap koridor jalan, gedung, lalu lintas, & vegetasi
-    │   ├── LandmarkModels.js   # Geometri arsitektur 3D Monas, Bundaran HI, Wisma 46, GBK, dll.
+    │   ├── LandmarkModels.js   # Geometri arsitektur 3D seluruh landmark
     │   ├── TextureGenerator.js # Generator tekstur prosedural PBR (fasad kaca, aspal, trotoar)
     │   ├── Lighting.js         # Pengatur matahari, bayangan lembut, & siklus siang/malam
     │   ├── CameraController.js # Kontrol orbit & animasi terbang sinematik
