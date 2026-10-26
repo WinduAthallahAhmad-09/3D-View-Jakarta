@@ -2813,6 +2813,32 @@ export class CityScene {
     addRoad(-160, -660, -80, -660, 16, false); // Jl. Kemenangan / Petak Sembilan
     addRoad(-120, -640, -320, -640, 18, false); // Jl. Mangga Besar Raya Barat
 
+    // E. Jaringan Jalan Sekunder & Penghubung Void A (Jakarta Barat Tengah)
+    // 1. Jl. Greenville Raya & Jl. Taman Ratu Indah (Tanjung Duren -> Sentra Kuliner -> IPEKA -> Jl. Panjang)
+    addRoad(-580, -180, -680, -170, 16, false); // Tanjung Duren Barat ke Sentra Kuliner Greenville
+    addRoad(-680, -170, -775, -180, 16, false); // Sentra Kuliner ke Jl. Panjang
+    addRoad(-680, -170, -710, -210, 14, false); // Cabang ke Kampus IPEKA Greenville
+    addRoad(-680, -170, -680, -280, 14, false); // Jl. Taman Ratu Indah ke utara (arah Daan Mogot)
+
+    // 2. Jl. Kedoya Raya & Sunrise Garden (RS Graha Kedoya -> Kedoya Baru -> Puri Kencana)
+    addRoad(-775, -260, -860, -240, 16, true, 2.0); // Depan RS Graha Kedoya ke Kali Pesanggrahan
+    addRoad(-860, -240, -950, -220, 16, true, 2.0); // Sunrise Garden ke Puri Kencana
+
+    // 3. Jl. Pos Pengumben Raya (Poros Arteri 4-Lajur Palmerah/Kebayoran -> Kebon Jeruk -> Joglo)
+    addRoad(-580, 210, -775, 210, 20, true, 2.5); // Palmerah ke Sentra Pos Pengumben
+    addRoad(-775, 210, -1040, 210, 20, true, 2.5); // Sentra Pos Pengumben ke Joglo / Srengseng
+
+    // 4. Jl. Perjuangan & Akses Underpass Tol Kebon Jeruk
+    addRoad(-650, -45, -720, -45, 16, false); // Perpanjangan Jl. Perjuangan timur ke Kemanggisan
+    addRoad(-830, -45, -920, -45, 16, false); // Akses barat gerbang tol Kebon Jeruk ke Kedoya Selatan
+
+    // 5. Jl. Kebon Jeruk Raya / Kemanggisan Ilir (BINUS -> Sukabumi Utara -> Jl. Panjang)
+    addRoad(-480, 20, -650, 40, 15, false); // Dari BINUS Kemanggisan ke Sukabumi Utara
+    addRoad(-650, 40, -775, 50, 15, false); // Sukabumi Utara ke Jl. Panjang / MNC Studios
+
+    // 6. Akses Lingkar Taman Cattleya & Simpang Tomang Barat
+    addRoad(-480, -110, -580, -110, 18, true, 2.0); // S. Parman ke Tanjung Duren melintasi Taman Cattleya
+
     // =========================================================================
     // 5. TATA AIR & KANAL PENGENDALI BANJIR JAKARTA BARAT
     // =========================================================================
@@ -2832,6 +2858,23 @@ export class CityScene {
     addBridge(-890, 1.2, -435, 26, 1.4, 28, 0); // Jembatan Daan Mogot Pesing atas Kali Angke
     addBridge(-840, 1.2, 15, 24, 1.4, 22, 0); // Jembatan Arteri Jl. Panjang atas Kali Pesanggrahan
     addBridge(-840, 1.2, -45, 24, 1.4, 24, 0); // Jembatan Tol Tangerang atas Kali Pesanggrahan
+
+    // Kali Sekretaris (Sungai Pengendali Banjir Tanjung Duren -> Greenville -> Kedoya)
+    addRiverSegment(-670, 220, -680, 50, 14, 1.0);  // Sukabumi Selatan ke Pos Pengumben
+    addRiverSegment(-680, 50, -690, -100, 14, 1.0);  // Kebon Jeruk ke Greenville
+    addRiverSegment(-690, -100, -710, -280, 14, 1.0); // Greenville ke Kedoya Utara
+
+    // Danau Retensi Taman Cattleya Tomang Barat (Kolam Retensi Banjir Alami 55m x 45m)
+    const cattleyaLakeGeo = new THREE.PlaneGeometry(55, 45);
+    cattleyaLakeGeo.rotateX(-Math.PI / 2);
+    cattleyaLakeGeo.translate(-530, 0.04, -110);
+    waterGeos.push(cattleyaLakeGeo);
+    canalWallGeos.push(makeBox(57, 0.5, 47, -530, 0.25, -110));
+
+    // Jembatan Penyeberangan Void A:
+    addBridge(-690, 1.2, -175, 20, 1.4, 18, 0); // Jembatan Jl. Greenville Raya atas Kali Sekretaris
+    addBridge(-675, 1.2, 210, 22, 1.4, 18, 0);  // Jembatan Jl. Pos Pengumben atas Kali Sekretaris
+    addBridge(-860, 1.2, -240, 22, 1.4, 20, 0); // Jembatan Jl. Kedoya Raya atas Kali Pesanggrahan
 
     // =========================================================================
     // 6. MERGE GEOMETRIES & ADD TO SCENE (Hanya 9 Draw Calls!)

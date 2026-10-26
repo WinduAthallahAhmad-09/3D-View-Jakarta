@@ -905,5 +905,52 @@ assert.ok(citySceneContent.includes('"sentra-kuliner-greenville": () => Landmark
 assert.ok(citySceneContent.includes('"sentra-pos-pengumben": () => LandmarkModels.createSentraPosPengumben()'), 'CityScene.js missing sentra-pos-pengumben builder');
 assert.ok(citySceneContent.includes('"taman-cattleya-tomang": () => LandmarkModels.createTamanCattleyaTomang()'), 'CityScene.js missing taman-cattleya-tomang builder');
 
-console.log('✅ All 75 landmarks, Quick Wins, Jakarta Timur & Tahap 1 Void A verified successfully!');
+// Check 30: Tahap 2 Jaringan Jalan Sekunder & Tata Air Void A (Jakarta Barat Tengah)
+assert.ok(
+  citySceneContent.includes('Jl. Greenville Raya & Jl. Taman Ratu Indah'),
+  'CityScene.js missing Jl. Greenville Raya & Jl. Taman Ratu Indah'
+);
+assert.ok(
+  citySceneContent.includes('Jl. Kedoya Raya & Sunrise Garden'),
+  'CityScene.js missing Jl. Kedoya Raya & Sunrise Garden'
+);
+assert.ok(
+  citySceneContent.includes('Jl. Pos Pengumben Raya'),
+  'CityScene.js missing Jl. Pos Pengumben Raya'
+);
+assert.ok(
+  citySceneContent.includes('Jl. Perjuangan & Akses Underpass Tol Kebon Jeruk'),
+  'CityScene.js missing Jl. Perjuangan & Akses Underpass Tol Kebon Jeruk'
+);
+assert.ok(
+  citySceneContent.includes('Jl. Kebon Jeruk Raya / Kemanggisan Ilir'),
+  'CityScene.js missing Jl. Kebon Jeruk Raya / Kemanggisan Ilir'
+);
+assert.ok(
+  citySceneContent.includes('Akses Lingkar Taman Cattleya & Simpang Tomang Barat'),
+  'CityScene.js missing Akses Lingkar Taman Cattleya & Simpang Tomang Barat'
+);
+assert.ok(
+  citySceneContent.includes('Kali Sekretaris (Sungai Pengendali Banjir Tanjung Duren -> Greenville -> Kedoya)'),
+  'CityScene.js missing Kali Sekretaris'
+);
+assert.ok(
+  citySceneContent.includes('Danau Retensi Taman Cattleya Tomang Barat'),
+  'CityScene.js missing Danau Retensi Taman Cattleya Tomang Barat'
+);
+assert.ok(
+  citySceneContent.includes('Jembatan Jl. Greenville Raya atas Kali Sekretaris'),
+  'CityScene.js missing Jembatan Jl. Greenville Raya atas Kali Sekretaris'
+);
+assert.ok(
+  citySceneContent.includes('Jembatan Jl. Pos Pengumben atas Kali Sekretaris'),
+  'CityScene.js missing Jembatan Jl. Pos Pengumben atas Kali Sekretaris'
+);
+assert.ok(
+  citySceneContent.includes('Jembatan Jl. Kedoya Raya atas Kali Pesanggrahan'),
+  'CityScene.js missing Jembatan Jl. Kedoya Raya atas Kali Pesanggrahan'
+);
+
+console.log('✅ All 75 landmarks, Quick Wins, Jakarta Timur & Tahap 1 + 2 Void A verified successfully!');
+
 
