@@ -54,7 +54,7 @@ python -m http.server 8000
 npm test
 ```
 
-Perintah ini menjalankan satu skrip verifikasi statis (2.136 assertion) untuk 81 landmark: jumlah dan ID unik, kelengkapan metadata, ketersediaan builder, kelengkapan tombol tour, batas penyimpangan posisi terhadap proyeksi GPS, serta integritas dataset OSM Void B. Ini bukan pengganti pengujian render atau performa di browser.
+Perintah ini menjalankan satu skrip verifikasi statis (2.181 assertion) untuk 81 landmark: jumlah dan ID unik, kelengkapan metadata, ketersediaan builder, kelengkapan tombol tour, batas penyimpangan posisi terhadap proyeksi GPS, serta integritas dataset OSM dan infill Void B. Ini bukan pengganti pengujian render atau performa di browser.
 
 ---
 

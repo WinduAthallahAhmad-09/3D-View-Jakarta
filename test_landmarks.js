@@ -1161,7 +1161,63 @@ assert.ok(voidBMainJsContent.includes('updateShadowFocus(this.cameraController.c
 const tangerangRouteContent = citySceneContent.includes('x2: -1320.0, z2: -450.0');
 assert.ok(tangerangRouteContent, 'TransJakarta Koridor 3 route does not reach Terminal Kalideres');
 
-console.log(`✅ All 81 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-2 Void B COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 35: Void B Tahap 3 — infill permukiman & kawasan industri
+assert.ok(citySceneContent.includes('buildVoidBInfillAndIndustry()'), 'CityScene.js missing buildVoidBInfillAndIndustry');
+assert.ok(citySceneContent.includes('this.buildVoidBInfillAndIndustry();'), 'CityScene.js does not call buildVoidBInfillAndIndustry');
+
+const infillMethodStart = citySceneContent.indexOf('buildVoidBInfillAndIndustry() {');
+const infillMethodEnd = citySceneContent.indexOf('Tahap 3 Jakarta Timur', infillMethodStart);
+assert.ok(infillMethodStart > 0 && infillMethodEnd > infillMethodStart, 'Cannot isolate buildVoidBInfillAndIndustry');
+const infillMethod = citySceneContent.slice(infillMethodStart, infillMethodEnd);
+
+assert.ok(!infillMethod.includes('new THREE.PointLight'), 'Void B infill must not add PointLights');
+assert.ok(infillMethod.includes('VOID_B_OSM.roads'), 'Void B infill does not consume OSM roads');
+assert.ok(infillMethod.includes('new THREE.InstancedMesh'), 'Void B infill does not use InstancedMesh');
+assert.ok(infillMethod.includes('voidBInfillStats'), 'Void B infill does not record placement stats');
+assert.ok(infillMethod.includes('drawCalls: 9'), 'Void B infill draw-call budget changed unexpectedly');
+assert.ok(infillMethod.includes('isBlocked'), 'Void B infill is missing corridor collision masking');
+assert.ok(infillMethod.includes('createSidewalkTexture'), 'Void B industrial access shoulders must reuse the sidewalk texture');
+assert.ok(infillMethod.includes('buildRoadChains'), 'Void B infill must stitch fragmented OSM shophouse corridors');
+assert.ok(infillMethod.includes('placeShophouseRow'), 'Void B infill must share the shophouse row builder between OSM and access roads');
+
+[
+  'voidb-houses',
+  'voidb-shophouses',
+  'voidb-house-roofs',
+  'voidb-warehouses',
+  'voidb-warehouse-roofs'
+].forEach(name => {
+  assert.ok(infillMethod.includes(`'${name}'`), `Void B infill missing named instanced mesh ${name}`);
+});
+
+voidBLandmarkIds.forEach(id => {
+  assert.ok(infillMethod.includes(`id: '${id}'`), `Void B infill missing exclusion for ${id}`);
+});
+
+[
+  'Akses Kawasan Industri Kalideres',
+  'Akses Logistik Cengkareng'
+].forEach(name => {
+  assert.ok(infillMethod.includes(name), `Void B infill missing access road ${name}`);
+});
+
+[
+  'Jalan Kalideres Permai',
+  'Jalan Duri Kosambi Raya',
+  'Jalan Kembangan Raya',
+  'Jalan Kembangan Utama',
+  'Jalan Kembangan Utara',
+  'Jalan Kembangan Baru',
+  'Jalan Bumi Cengkareng Indah',
+  'Jalan Terminal Rawa Buaya',
+  'Jalan Daan Mogot Estate',
+  'Jalan Rusunawa Pesakih'
+].forEach(name => {
+  assert.ok(voidBRoadNames.has(name), `Void B shophouse corridor ${name} is absent from the OSM dataset`);
+  assert.ok(infillMethod.includes(`'${name}'`), `Void B infill missing shophouse corridor ${name}`);
+});
+
+console.log(`✅ All 81 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-3 Void B COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
