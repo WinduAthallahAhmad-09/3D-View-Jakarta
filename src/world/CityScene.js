@@ -4342,7 +4342,13 @@ export class CityScene {
       "ipeka-puri-greenville": () => LandmarkModels.createIPEKAGreenville(),
       "sentra-kuliner-greenville": () => LandmarkModels.createSentraKulinerGreenville(),
       "sentra-pos-pengumben": () => LandmarkModels.createSentraPosPengumben(),
-      "taman-cattleya-tomang": () => LandmarkModels.createTamanCattleyaTomang()
+      "taman-cattleya-tomang": () => LandmarkModels.createTamanCattleyaTomang(),
+      "terminal-bus-kalideres": () => LandmarkModels.createTerminalBusKalideres(),
+      "rsud-cengkareng": () => LandmarkModels.createRSUDCengkareng(),
+      "daan-mogot-mall": () => LandmarkModels.createDaanMogotMall(),
+      "stasiun-rawa-buaya-hub": () => LandmarkModels.createStasiunRawaBuayaHub(),
+      "danau-rawa-buaya": () => LandmarkModels.createDanauRawaBuaya(),
+      "cengkareng-business-city": () => LandmarkModels.createCengkarengBusinessCity()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {

@@ -6691,6 +6691,642 @@ export class LandmarkModels {
 
     return group;
   }
+  /**
+   * 76. Terminal Bus Terpadu Kalideres
+   * Terminal AKAP Tipe A gerbang barat Jakarta menuju Sumatera & halte awal TransJakarta Koridor 3.
+   */
+  static createTerminalBusKalideres() {
+    const group = new THREE.Group();
+
+    const apronMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.85 });
+    const concourseMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.6 });
+    const canopyMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4, side: THREE.DoubleSide });
+    const towerMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4 });
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, metalness: 0.8, transparent: true, opacity: 0.85 });
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.5, metalness: 0.7 });
+    const busBodyMat1 = new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.4 });
+    const busBodyMat2 = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.4 });
+    const busBodyMat3 = new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.4 });
+    const tjBusMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4 });
+    const tjStripeMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.4 });
+    const curbMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.7 });
+
+    // 1. Terminal Bus Apron Base
+    const apron = new THREE.Mesh(new THREE.BoxGeometry(84, 0.5, 68), apronMat);
+    apron.position.set(0, 0.25, 0);
+    apron.receiveShadow = true;
+    group.add(apron);
+
+    // 2. Main Concourse & Ticket Hall Building
+    const concourse = new THREE.Mesh(new THREE.BoxGeometry(48, 7.5, 18), concourseMat);
+    concourse.position.set(0, 4.0, -18);
+    concourse.castShadow = true;
+    concourse.receiveShadow = true;
+    group.add(concourse);
+
+    // Glass Facade on Concourse
+    const concourseGlass = new THREE.Mesh(new THREE.BoxGeometry(46, 5.0, 1.2), glassMat);
+    concourseGlass.position.set(0, 4.0, -9.0);
+    group.add(concourseGlass);
+
+    // Concourse Overhang Eaves
+    const eave = new THREE.Mesh(new THREE.BoxGeometry(52, 0.8, 22), steelMat);
+    eave.position.set(0, 8.0, -18);
+    eave.castShadow = true;
+    group.add(eave);
+
+    // 3. Dishub Air Traffic / Bus Dispatch Control Tower
+    const tower = new THREE.Mesh(new THREE.BoxGeometry(8, 18, 8), concourseMat);
+    tower.position.set(-20, 9.0, -18);
+    tower.castShadow = true;
+    group.add(tower);
+
+    // Observation Cab
+    const cab = new THREE.Mesh(new THREE.CylinderGeometry(5.2, 4.2, 4, 12), towerMat);
+    cab.position.set(-20, 19.5, -18);
+    cab.castShadow = true;
+    group.add(cab);
+
+    const cabGlass = new THREE.Mesh(new THREE.CylinderGeometry(5.0, 4.8, 2.2, 12), glassMat);
+    cabGlass.position.set(-20, 19.5, -18);
+    group.add(cabGlass);
+
+    // Antenna Mast
+    const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.3, 7, 6), steelMat);
+    mast.position.set(-20, 24.5, -18);
+    group.add(mast);
+
+    // 4. Tensile Membrane / Arched Canopy over Bus Departure Platforms
+    const platformCurb = new THREE.Mesh(new THREE.BoxGeometry(60, 0.6, 6), curbMat);
+    platformCurb.position.set(2, 0.6, 2);
+    group.add(platformCurb);
+
+    [-18, -6, 6, 18, 30].forEach((px) => {
+      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, 6.5, 8), steelMat);
+      pillar.position.set(px, 3.5, 2);
+      pillar.castShadow = true;
+      group.add(pillar);
+    });
+
+    const canopyRoof = new THREE.Mesh(new THREE.CylinderGeometry(20, 20, 62, 16, 1, false, 0, Math.PI), canopyMat);
+    canopyRoof.rotation.z = Math.PI / 2;
+    canopyRoof.scale.set(0.18, 1.0, 0.55);
+    canopyRoof.position.set(6, 6.8, 2);
+    canopyRoof.castShadow = true;
+    group.add(canopyRoof);
+
+    // Second Island Platform Canopy
+    const platformCurb2 = new THREE.Mesh(new THREE.BoxGeometry(60, 0.6, 6), curbMat);
+    platformCurb2.position.set(2, 0.6, 18);
+    group.add(platformCurb2);
+
+    [-18, -6, 6, 18, 30].forEach((px) => {
+      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, 6.5, 8), steelMat);
+      pillar.position.set(px, 3.5, 18);
+      pillar.castShadow = true;
+      group.add(pillar);
+    });
+
+    const canopyRoof2 = new THREE.Mesh(new THREE.CylinderGeometry(20, 20, 62, 16, 1, false, 0, Math.PI), canopyMat);
+    canopyRoof2.rotation.z = Math.PI / 2;
+    canopyRoof2.scale.set(0.18, 1.0, 0.55);
+    canopyRoof2.position.set(6, 6.8, 18);
+    canopyRoof2.castShadow = true;
+    group.add(canopyRoof2);
+
+    // 5. Representative Buses
+    const busConfigs = [
+      { x: -14, z: -5, mat: busBodyMat1 },
+      { x: 4, z: -5, mat: busBodyMat2 },
+      { x: 22, z: -5, mat: busBodyMat3 },
+      { x: -8, z: 10, mat: tjBusMat, isTJ: true },
+      { x: 16, z: 10, mat: busBodyMat1 },
+      { x: 0, z: 25, mat: busBodyMat2 }
+    ];
+
+    busConfigs.forEach((b) => {
+      const bus = new THREE.Mesh(new THREE.BoxGeometry(11, 3.2, 3.2), b.mat);
+      bus.position.set(b.x, 2.1, b.z);
+      bus.castShadow = true;
+      group.add(bus);
+
+      const busGlass = new THREE.Mesh(new THREE.BoxGeometry(11.2, 1.3, 3.25), glassMat);
+      busGlass.position.set(b.x, 2.6, b.z);
+      group.add(busGlass);
+
+      if (b.isTJ) {
+        const stripe = new THREE.Mesh(new THREE.BoxGeometry(11.3, 0.5, 3.3), tjStripeMat);
+        stripe.position.set(b.x, 1.5, b.z);
+        group.add(stripe);
+      }
+    });
+
+    return group;
+  }
+
+  /**
+   * 77. RSUD Cengkareng
+   * Pusat Rujukan Medis Paripurna Jakarta Barat, Fasilitas 8 Lantai, IGD Modern & Helipad Medis.
+   */
+  static createRSUDCengkareng() {
+    const group = new THREE.Group();
+
+    const siteMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 });
+    const wallWhiteMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.45 });
+    const podiumMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.5 });
+    const emeraldGlassMat = new THREE.MeshStandardMaterial({ color: 0x059669, roughness: 0.25, metalness: 0.8, transparent: true, opacity: 0.88 });
+    const redCrossMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.3 });
+    const helipadMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 });
+    const helipadMarkMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.4 });
+    const canopyMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4 });
+    const greenLawnMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 });
+
+    // 1. Site Base & Landscaping
+    const site = new THREE.Mesh(new THREE.BoxGeometry(78, 0.5, 68), siteMat);
+    site.position.set(0, 0.25, 0);
+    site.receiveShadow = true;
+    group.add(site);
+
+    const lawn = new THREE.Mesh(new THREE.BoxGeometry(74, 0.55, 20), greenLawnMat);
+    lawn.position.set(0, 0.28, 22);
+    group.add(lawn);
+
+    // 2. 3-Storey Podium (IGD Emergency Department & Poliklinik)
+    const podium = new THREE.Mesh(new THREE.BoxGeometry(64, 12, 42), podiumMat);
+    podium.position.set(0, 6.0, -4);
+    podium.castShadow = true;
+    podium.receiveShadow = true;
+    group.add(podium);
+
+    const podiumGlass = new THREE.Mesh(new THREE.BoxGeometry(64.6, 2.5, 42.6), emeraldGlassMat);
+    podiumGlass.position.set(0, 7.5, -4);
+    group.add(podiumGlass);
+
+    // 3. 8-Storey Main Inpatient Tower
+    const tower = new THREE.Mesh(new THREE.BoxGeometry(44, 26, 26), wallWhiteMat);
+    tower.position.set(0, 24.0, -6);
+    tower.castShadow = true;
+    tower.receiveShadow = true;
+    group.add(tower);
+
+    // Tower Glass Bands
+    for (let fl = 0; fl < 5; fl++) {
+      const band = new THREE.Mesh(new THREE.BoxGeometry(44.6, 2.4, 26.6), emeraldGlassMat);
+      band.position.set(0, 15 + fl * 4.5, -6);
+      group.add(band);
+    }
+
+    // 4. Rooftop Plant Room & Helipad
+    const roofBase = new THREE.Mesh(new THREE.BoxGeometry(22, 2.5, 22), helipadMat);
+    roofBase.position.set(0, 38.25, -6);
+    roofBase.castShadow = true;
+    group.add(roofBase);
+
+    // Helipad Landing Circle & Cross 'H'
+    const heliRing = new THREE.Mesh(new THREE.RingGeometry(6.5, 7.5, 24), helipadMarkMat);
+    heliRing.rotateX(-Math.PI / 2);
+    heliRing.position.set(0, 39.52, -6);
+    group.add(heliRing);
+
+    const hBar1 = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.1, 8), helipadMarkMat);
+    hBar1.position.set(-2.5, 39.53, -6);
+    group.add(hBar1);
+    const hBar2 = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.1, 8), helipadMarkMat);
+    hBar2.position.set(2.5, 39.53, -6);
+    group.add(hBar2);
+    const hBar3 = new THREE.Mesh(new THREE.BoxGeometry(5.0, 0.1, 1.2), helipadMarkMat);
+    hBar3.position.set(0, 39.53, -6);
+    group.add(hBar3);
+
+    // 5. Medical Red Cross Signage
+    [1, -1].forEach((dir) => {
+      const crossV = new THREE.Mesh(new THREE.BoxGeometry(1.8, 5.5, 0.6), redCrossMat);
+      crossV.position.set(16 * dir, 32.5, -6 + 13.5 * dir);
+      group.add(crossV);
+
+      const crossH = new THREE.Mesh(new THREE.BoxGeometry(5.5, 1.8, 0.6), redCrossMat);
+      crossH.position.set(16 * dir, 32.5, -6 + 13.5 * dir);
+      group.add(crossH);
+    });
+
+    // 6. IGD Emergency Drop-Off Portico
+    const igdCanopy = new THREE.Mesh(new THREE.BoxGeometry(22, 1.2, 12), canopyMat);
+    igdCanopy.position.set(-16, 5.0, 20);
+    igdCanopy.castShadow = true;
+    group.add(igdCanopy);
+
+    const igdColumn1 = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 5, 8), wallWhiteMat);
+    igdColumn1.position.set(-25, 2.5, 24);
+    group.add(igdColumn1);
+    const igdColumn2 = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 5, 8), wallWhiteMat);
+    igdColumn2.position.set(-7, 2.5, 24);
+    group.add(igdColumn2);
+
+    // Ambulances parked
+    [-18, -12].forEach((ax) => {
+      const amb = new THREE.Mesh(new THREE.BoxGeometry(3.2, 2.4, 6.5), wallWhiteMat);
+      amb.position.set(ax, 1.2, 21);
+      amb.castShadow = true;
+      group.add(amb);
+
+      const ambLight = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.4, 0.6), redCrossMat);
+      ambLight.position.set(ax, 2.6, 21);
+      group.add(ambLight);
+    });
+
+    return group;
+  }
+
+  /**
+   * 78. Daan Mogot Mall & Superblok
+   * Pusat Belanja & Hiburan Legendaris Kalideres-Cengkareng, Atrium Kaca, Bioskop & Ramp Spiral.
+   */
+  static createDaanMogotMall() {
+    const group = new THREE.Group();
+
+    const siteMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 });
+    const terracottaMat = new THREE.MeshStandardMaterial({ color: 0xca8a04, roughness: 0.55 });
+    const sandStoneMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.5 });
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, metalness: 0.85, transparent: true, opacity: 0.88 });
+    const skylightFrameMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4 });
+    const cinemaCubeMat = new THREE.MeshStandardMaterial({ color: 0x1e1b4b, roughness: 0.6 });
+    const cinemaSignMat = new THREE.MeshStandardMaterial({ color: 0xe11d48, roughness: 0.3 });
+    const concreteMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.7 });
+
+    // 1. Site Base
+    const site = new THREE.Mesh(new THREE.BoxGeometry(82, 0.5, 72), siteMat);
+    site.position.set(0, 0.25, 0);
+    site.receiveShadow = true;
+    group.add(site);
+
+    // 2. 5-Storey Main Mall Complex
+    const mallBody = new THREE.Mesh(new THREE.BoxGeometry(66, 18, 52), sandStoneMat);
+    mallBody.position.set(0, 9.0, -2);
+    mallBody.castShadow = true;
+    mallBody.receiveShadow = true;
+    group.add(mallBody);
+
+    // Terracotta Architectural Bands
+    for (let i = 0; i < 3; i++) {
+      const band = new THREE.Mesh(new THREE.BoxGeometry(67, 1.4, 53), terracottaMat);
+      band.position.set(0, 5 + i * 5, -2);
+      group.add(band);
+    }
+
+    // 3. Central Grand Glass Atrium Skylight
+    const skylightBase = new THREE.Mesh(new THREE.BoxGeometry(26, 2.5, 26), skylightFrameMat);
+    skylightBase.position.set(0, 19.25, -2);
+    group.add(skylightBase);
+
+    const skylightPyramid = new THREE.Mesh(new THREE.ConeGeometry(16, 8, 4), glassMat);
+    skylightPyramid.rotation.y = Math.PI / 4;
+    skylightPyramid.position.set(0, 24.5, -2);
+    skylightPyramid.castShadow = true;
+    group.add(skylightPyramid);
+
+    // 4. Rooftop Cineplex Cinema Volume
+    const cineplex = new THREE.Mesh(new THREE.BoxGeometry(28, 8, 20), cinemaCubeMat);
+    cineplex.position.set(-18, 22.0, -16);
+    cineplex.castShadow = true;
+    group.add(cineplex);
+
+    const cinemaSign = new THREE.Mesh(new THREE.BoxGeometry(16, 3, 0.6), cinemaSignMat);
+    cinemaSign.position.set(-18, 23.5, -5.7);
+    group.add(cinemaSign);
+
+    // 5. Signature Spiral Parking Ramp
+    const spiralRadius = 10;
+    const spiralTower = new THREE.Mesh(new THREE.CylinderGeometry(spiralRadius, spiralRadius, 18, 24), concreteMat);
+    spiralTower.position.set(33, 9.0, 16);
+    spiralTower.castShadow = true;
+    group.add(spiralTower);
+
+    for (let sr = 0; sr < 4; sr++) {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(spiralRadius + 0.8, 0.45, 6, 24), terracottaMat);
+      ring.rotateX(Math.PI / 2);
+      ring.position.set(33, 3 + sr * 4.5, 16);
+      group.add(ring);
+    }
+
+    // 6. Grand Main Entrance Canopy & Portico
+    const portico = new THREE.Mesh(new THREE.BoxGeometry(28, 2.0, 12), terracottaMat);
+    portico.position.set(0, 6.0, 26);
+    portico.castShadow = true;
+    group.add(portico);
+
+    [-11, 11].forEach((px) => {
+      const col = new THREE.Mesh(new THREE.BoxGeometry(2, 6, 2), sandStoneMat);
+      col.position.set(px, 3.0, 29);
+      col.castShadow = true;
+      group.add(col);
+    });
+
+    const entranceGlass = new THREE.Mesh(new THREE.BoxGeometry(24, 5.0, 1.2), glassMat);
+    entranceGlass.position.set(0, 3.0, 24.2);
+    group.add(entranceGlass);
+
+    return group;
+  }
+
+  /**
+   * 79. Stasiun Transit Rawa Buaya & KA Bandara
+   * Simpul Rel Ganda KRL Tangerang Line, Percabangan KA Bandara Soetta, Atap Lengkung & JPO Transit.
+   */
+  static createStasiunRawaBuayaHub() {
+    const group = new THREE.Group();
+
+    const gravelBallastMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.9 });
+    const steelBlueRoofMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4, side: THREE.DoubleSide });
+    const concreteMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.65 });
+    const steelGantryMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.5, metalness: 0.7 });
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, metalness: 0.8, transparent: true, opacity: 0.85 });
+    const railSteelMat = new THREE.MeshStandardMaterial({ color: 0xcfecff, metalness: 0.9, roughness: 0.2 });
+    const krlTrainMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.4 });
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
+
+    // 1. Ballast Trackbed Base
+    const trackbed = new THREE.Mesh(new THREE.BoxGeometry(92, 0.6, 56), gravelBallastMat);
+    trackbed.position.set(0, 0.3, 0);
+    trackbed.receiveShadow = true;
+    group.add(trackbed);
+
+    // 2. Elevated Concourse Level 2 Station Building
+    const concourse = new THREE.Mesh(new THREE.BoxGeometry(26, 7.5, 48), concreteMat);
+    concourse.position.set(0, 8.5, 0);
+    concourse.castShadow = true;
+    group.add(concourse);
+
+    const concourseGlass = new THREE.Mesh(new THREE.BoxGeometry(26.6, 4.0, 44), glassMat);
+    concourseGlass.position.set(0, 8.5, 0);
+    group.add(concourseGlass);
+
+    // 3. Dual Platform Canopies
+    [-15, 15].forEach((pz) => {
+      const plat = new THREE.Mesh(new THREE.BoxGeometry(84, 1.2, 7.5), concreteMat);
+      plat.position.set(0, 1.8, pz);
+      plat.castShadow = true;
+      group.add(plat);
+
+      [-32, -16, 0, 16, 32].forEach((cx) => {
+        const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.4, 5.5, 8), steelGantryMat);
+        pillar.position.set(cx, 4.8, pz);
+        pillar.castShadow = true;
+        group.add(pillar);
+      });
+
+      const roof = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 84, 16, 1, false, 0, Math.PI), steelBlueRoofMat);
+      roof.rotation.z = Math.PI / 2;
+      roof.scale.set(0.3, 1.0, 0.6);
+      roof.position.set(0, 8.0, pz);
+      roof.castShadow = true;
+      group.add(roof);
+    });
+
+    // 4. Double Tracks & KA Bandara Branch Rails
+    [-8, -2, 4, 8].forEach((tz) => {
+      [-0.7, 0.7].forEach((ro) => {
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(92, 0.25, 0.2), railSteelMat);
+        rail.position.set(0, 0.72, tz + ro);
+        group.add(rail);
+      });
+    });
+
+    // Overhead Electrification Catenary Gantries
+    [-30, -10, 10, 30].forEach((gx) => {
+      const gantryPole1 = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.3, 8.5, 8), steelGantryMat);
+      gantryPole1.position.set(gx, 4.5, -24);
+      group.add(gantryPole1);
+      const gantryPole2 = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.3, 8.5, 8), steelGantryMat);
+      gantryPole2.position.set(gx, 4.5, 24);
+      group.add(gantryPole2);
+
+      const gantryBeam = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 48), steelGantryMat);
+      gantryBeam.position.set(gx, 8.5, 0);
+      group.add(gantryBeam);
+    });
+
+    // 5. Stationary KRL Commuter Train Set
+    const trainBody = new THREE.Mesh(new THREE.BoxGeometry(42, 3.4, 3.2), whiteMat);
+    trainBody.position.set(-10, 3.8, -8);
+    trainBody.castShadow = true;
+    group.add(trainBody);
+
+    const trainStripe = new THREE.Mesh(new THREE.BoxGeometry(42.2, 0.7, 3.25), krlTrainMat);
+    trainStripe.position.set(-10, 3.4, -8);
+    group.add(trainStripe);
+
+    const trainGlass = new THREE.Mesh(new THREE.BoxGeometry(42.2, 1.1, 3.28), glassMat);
+    trainGlass.position.set(-10, 4.4, -8);
+    group.add(trainGlass);
+
+    // 6. Integrated Pedestrian Bridge (JPO Transit)
+    const jpo = new THREE.Mesh(new THREE.BoxGeometry(6, 3.2, 36), concreteMat);
+    jpo.position.set(0, 9.5, 24);
+    jpo.castShadow = true;
+    group.add(jpo);
+
+    const jpoGlass = new THREE.Mesh(new THREE.BoxGeometry(6.4, 1.8, 34), glassMat);
+    jpoGlass.position.set(0, 9.5, 24);
+    group.add(jpoGlass);
+
+    return group;
+  }
+
+  /**
+   * 80. Danau Retensi & Polder Rawa Buaya
+   * Waduk Retensi 4 Hektare, Stasiun Pompa Polder Hidrolik & Pengendali Banjir Cengkareng.
+   */
+  static createDanauRawaBuaya() {
+    const group = new THREE.Group();
+
+    const grassMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 });
+    const waterMat = new THREE.MeshStandardMaterial({ color: 0x0369a1, roughness: 0.15, metalness: 0.85, transparent: true, opacity: 0.88 });
+    const sheetpileMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.75, metalness: 0.2 });
+    const pumpBuildingMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.5 });
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 });
+    const dischargePipeMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8, roughness: 0.3 });
+    const sluiceGateMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.6, roughness: 0.4 });
+    const joggingTrackMat = new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.8 });
+    const treeLeavesMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.75 });
+    const treeTrunkMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.9 });
+
+    // 1. Surrounding Green Embankment Base
+    const base = new THREE.Mesh(new THREE.BoxGeometry(86, 0.6, 76), grassMat);
+    base.position.set(0, 0.3, 0);
+    base.receiveShadow = true;
+    group.add(base);
+
+    // 2. Retention Water Basin
+    const lake = new THREE.Mesh(new THREE.CylinderGeometry(28, 30, 0.35, 24), waterMat);
+    lake.scale.set(1.15, 1.0, 0.85);
+    lake.position.set(-8, 0.52, 0);
+    group.add(lake);
+
+    // Concrete Sheetpile Rim Wall
+    const rimWall = new THREE.Mesh(new THREE.TorusGeometry(29, 0.8, 6, 24), sheetpileMat);
+    rimWall.rotateX(Math.PI / 2);
+    rimWall.scale.set(1.15, 0.85, 1.0);
+    rimWall.position.set(-8, 0.7, 0);
+    group.add(rimWall);
+
+    // 3. Jogging Track Belt
+    const track = new THREE.Mesh(new THREE.TorusGeometry(32.5, 1.4, 4, 24), joggingTrackMat);
+    track.rotateX(Math.PI / 2);
+    track.scale.set(1.15, 0.85, 1.0);
+    track.position.set(-8, 0.62, 0);
+    group.add(track);
+
+    // 4. Stasiun Pompa Polder Hidrolik
+    const pumpHouse = new THREE.Mesh(new THREE.BoxGeometry(18, 9, 24), pumpBuildingMat);
+    pumpHouse.position.set(28, 4.8, 0);
+    pumpHouse.castShadow = true;
+    pumpHouse.receiveShadow = true;
+    group.add(pumpHouse);
+
+    const pumpRoof = new THREE.Mesh(new THREE.BoxGeometry(20, 1.5, 26), roofMat);
+    pumpRoof.position.set(28, 9.8, 0);
+    pumpRoof.castShadow = true;
+    group.add(pumpRoof);
+
+    // Discharge Pipes
+    [-5, 0, 5].forEach((pz) => {
+      const pipe = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 12, 12), dischargePipeMat);
+      pipe.rotateZ(Math.PI / 2);
+      pipe.position.set(18, 3.2, pz);
+      pipe.castShadow = true;
+      group.add(pipe);
+    });
+
+    // 5. Hydraulic Sluice Gates
+    const gateTower1 = new THREE.Mesh(new THREE.BoxGeometry(2.5, 12, 2.5), sheetpileMat);
+    gateTower1.position.set(16, 6.0, 14);
+    group.add(gateTower1);
+    const gateTower2 = new THREE.Mesh(new THREE.BoxGeometry(2.5, 12, 2.5), sheetpileMat);
+    gateTower2.position.set(16, 6.0, 20);
+    group.add(gateTower2);
+
+    const gateDoor = new THREE.Mesh(new THREE.BoxGeometry(1.2, 8, 4), sluiceGateMat);
+    gateDoor.position.set(16, 5.0, 17);
+    gateDoor.castShadow = true;
+    group.add(gateDoor);
+
+    const gateBridge = new THREE.Mesh(new THREE.BoxGeometry(3, 1.2, 8), sheetpileMat);
+    gateBridge.position.set(16, 11.5, 17);
+    group.add(gateBridge);
+
+    // 6. Perimeter Greenery & Shade Trees
+    const treePoints = [
+      [-36, -24], [-38, 0], [-36, 24], [-18, 30], [2, 30], [22, 26], [32, -22], [14, -28], [-8, -28]
+    ];
+    treePoints.forEach(([tx, tz]) => {
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.6, 4.5, 8), treeTrunkMat);
+      trunk.position.set(tx, 2.25, tz);
+      trunk.castShadow = true;
+      group.add(trunk);
+
+      const foliage = new THREE.Mesh(new THREE.SphereGeometry(3.2, 8, 8), treeLeavesMat);
+      foliage.scale.set(1.2, 0.8, 1.2);
+      foliage.position.set(tx, 5.5, tz);
+      foliage.castShadow = true;
+      group.add(foliage);
+    });
+
+    return group;
+  }
+
+  /**
+   * 81. Cengkareng Business City & Sentra Logistik
+   * Pusat Bisnis Kargo Bandara Soetta, Gedung Manajemen, Pergudangan Terpadu & Container Yard.
+   */
+  static createCengkarengBusinessCity() {
+    const group = new THREE.Group();
+
+    const siteMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 });
+    const blueGlassMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.2, metalness: 0.85, transparent: true, opacity: 0.85 });
+    const officeFacadeMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.4 });
+    const warehouseWallMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.7, metalness: 0.3 });
+    const warehouseRoofMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.5 });
+    const containerRedMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.5 });
+    const containerBlueMat = new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.5 });
+    const containerOrangeMat = new THREE.MeshStandardMaterial({ color: 0xea580c, roughness: 0.5 });
+    const loadingBayMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
+    const truckCabinMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.4 });
+
+    // 1. Staging Site & Concrete Paving Base
+    const site = new THREE.Mesh(new THREE.BoxGeometry(86, 0.5, 72), siteMat);
+    site.position.set(0, 0.25, 0);
+    site.receiveShadow = true;
+    group.add(site);
+
+    // 2. Corporate Management Office Tower
+    const office = new THREE.Mesh(new THREE.BoxGeometry(26, 22, 22), officeFacadeMat);
+    office.position.set(-24, 11.0, -18);
+    office.castShadow = true;
+    office.receiveShadow = true;
+    group.add(office);
+
+    for (let fl = 0; fl < 5; fl++) {
+      const band = new THREE.Mesh(new THREE.BoxGeometry(26.6, 2.5, 22.6), blueGlassMat);
+      band.position.set(-24, 6.0 + fl * 3.6, -18);
+      group.add(band);
+    }
+
+    // 3. Modular Modern Logistics Cargo Warehouses
+    [-8, 18].forEach((wx) => {
+      const wh = new THREE.Mesh(new THREE.BoxGeometry(20, 9, 44), warehouseWallMat);
+      wh.position.set(wx, 4.5, 0);
+      wh.castShadow = true;
+      wh.receiveShadow = true;
+      group.add(wh);
+
+      const roof = new THREE.Mesh(new THREE.CylinderGeometry(11, 11, 44, 16, 1, false, 0, Math.PI), warehouseRoofMat);
+      roof.rotation.x = Math.PI / 2;
+      roof.scale.set(0.9, 0.35, 1.0);
+      roof.position.set(wx, 9.0, 0);
+      roof.castShadow = true;
+      group.add(roof);
+
+      [-14, -6, 2, 10].forEach((dz) => {
+        const door = new THREE.Mesh(new THREE.BoxGeometry(0.6, 5.0, 4.2), loadingBayMat);
+        door.position.set(wx - 10.1, 2.7, dz);
+        group.add(door);
+      });
+    });
+
+    // 4. Stacks of ISO Cargo Containers
+    const containerConfigs = [
+      { x: -26, y: 1.5, z: 8, l: 12, mat: containerRedMat },
+      { x: -26, y: 4.1, z: 8, l: 12, mat: containerBlueMat },
+      { x: -26, y: 1.5, z: 18, l: 12, mat: containerOrangeMat },
+      { x: -26, y: 4.1, z: 18, l: 12, mat: containerRedMat },
+      { x: 34, y: 1.5, z: -16, l: 12, mat: containerBlueMat },
+      { x: 34, y: 4.1, z: -16, l: 12, mat: containerOrangeMat },
+      { x: 34, y: 1.5, z: -4, l: 12, mat: containerRedMat }
+    ];
+
+    containerConfigs.forEach((c) => {
+      const box = new THREE.Mesh(new THREE.BoxGeometry(4.2, 2.6, c.l), c.mat);
+      box.position.set(c.x, c.y, c.z);
+      box.castShadow = true;
+      group.add(box);
+    });
+
+    // 5. Container Hauler Trucks
+    const truckZ = [6, -10];
+    truckZ.forEach((tz) => {
+      const cab = new THREE.Mesh(new THREE.BoxGeometry(3.5, 3.2, 4), truckCabinMat);
+      cab.position.set(34, 1.7, tz);
+      cab.castShadow = true;
+      group.add(cab);
+
+      const tr = new THREE.Mesh(new THREE.BoxGeometry(3.2, 2.8, 12), containerRedMat);
+      tr.position.set(34, 2.0, tz + 9);
+      tr.castShadow = true;
+      group.add(tr);
+    });
+
+    return group;
+  }
 }
 
 

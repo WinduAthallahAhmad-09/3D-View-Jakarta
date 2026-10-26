@@ -5,7 +5,7 @@ import { JAKARTA_LANDMARKS } from './src/config/landmarks.js';
 console.log('Running test_landmarks.js verification...');
 
 // Check 1: Exactly 69 landmarks
-assert.strictEqual(JAKARTA_LANDMARKS.length, 75, `Expected 75 landmarks, got ${JAKARTA_LANDMARKS.length}`);
+assert.strictEqual(JAKARTA_LANDMARKS.length, 81, `Expected 81 landmarks, got ${JAKARTA_LANDMARKS.length}`);
 
 // Check 2: Unique IDs and valid properties
 const seenIds = new Set();
@@ -1023,7 +1023,44 @@ assert.ok(
   'CityScene.js missing Halte Pos Pengumben'
 );
 
-console.log('✅ All 75 landmarks, Quick Wins, Jakarta Timur & ALL 4 TAHAP VOID A COMPLETED SUCCESSFULLY!');
+
+// Check 33: Tahap 1 Void B Anchor Landmarks (Jakarta Barat Laut: Kalideres, Cengkareng, Rawa Buaya)
+const voidBLandmarkIds = [
+  'terminal-bus-kalideres',
+  'rsud-cengkareng',
+  'daan-mogot-mall',
+  'stasiun-rawa-buaya-hub',
+  'danau-rawa-buaya',
+  'cengkareng-business-city'
+];
+
+voidBLandmarkIds.forEach(id => {
+  const lm = JAKARTA_LANDMARKS.find(l => l.id === id);
+  assert.ok(lm, `Void B landmark ${id} not found in JAKARTA_LANDMARKS`);
+  assert.ok(lm.position[0] <= -1000 && lm.position[0] >= -1350, `Landmark ${id} X position ${lm.position[0]} outside Void B range [-1350, -1000]`);
+  assert.ok(lm.position[2] <= -350 && lm.position[2] >= -600, `Landmark ${id} Z position ${lm.position[2]} outside Void B range [-600, -350]`);
+  assert.ok(lm.facts && lm.facts.length >= 3, `Landmark ${id} must have at least 3 educational facts`);
+});
+
+const landmarkModelsFresh = fs.readFileSync('src/world/LandmarkModels.js', 'utf8');
+assert.ok(landmarkModelsFresh.includes('static createTerminalBusKalideres()'), 'LandmarkModels missing createTerminalBusKalideres');
+assert.ok(landmarkModelsFresh.includes('static createRSUDCengkareng()'), 'LandmarkModels missing createRSUDCengkareng');
+assert.ok(landmarkModelsFresh.includes('static createDaanMogotMall()'), 'LandmarkModels missing createDaanMogotMall');
+assert.ok(landmarkModelsFresh.includes('static createStasiunRawaBuayaHub()'), 'LandmarkModels missing createStasiunRawaBuayaHub');
+assert.ok(landmarkModelsFresh.includes('static createDanauRawaBuaya()'), 'LandmarkModels missing createDanauRawaBuaya');
+assert.ok(landmarkModelsFresh.includes('static createCengkarengBusinessCity()'), 'LandmarkModels missing createCengkarengBusinessCity');
+
+voidBLandmarkIds.forEach(id => {
+  assert.ok(citySceneContent.includes(`"${id}":`), `CityScene.js missing builder mapping for ${id}`);
+});
+
+const indexHtmlFresh = fs.readFileSync('index.html', 'utf8');
+voidBLandmarkIds.forEach(id => {
+  assert.ok(indexHtmlFresh.includes(`data-tour-id="${id}"`), `index.html missing tour button for ${id}`);
+});
+
+console.log('✅ All 81 landmarks, Quick Wins, Jakarta Timur, Void A & Tahap 1 Void B COMPLETED SUCCESSFULLY!');
+
 
 
 

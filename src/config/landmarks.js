@@ -1686,6 +1686,138 @@ export const JAKARTA_LANDMARKS = [
       "Danau buatan di tengah taman berfungsi ganda sebagai pengendali banjir lokal yang menampung limpasan air hujan dari kawasan Tomang.",
       "Merupakan salah satu taman kota paling populer untuk olahraga lari pagi, rekreasi keluarga, dan pemotretan bertema alam di Jakarta Barat."
     ]
+  },
+  {
+    id: "terminal-bus-kalideres",
+    name: "Terminal Bus Terpadu Kalideres",
+    shortName: "Terminal Kalideres",
+    category: "Transportasi Publik & Terminal Bus AKAP",
+    tagline: "Gerbang Antarmoda Barat Ibu Kota, Jalur Lintas Sumatera & Stasiun BRT Terpadu",
+    height: "18 meter (Kanopi Membran & Menara Kontrol Dishub)",
+    year: "1985 / Revitalisasi 2020",
+    architect: "Dinas Perhubungan DKI Jakarta",
+    location: "Jl. Daan Mogot KM 16, Kalideres, Jakarta Barat",
+    coordinates: { lat: -6.1554, lng: 106.7028 },
+    position: [-1320.0, 0, -450.0],
+    labelHeight: 38,
+    cameraPosition: [-1320.0, 55, -390.0],
+    cameraTarget: [-1320.0, 10, -450.0],
+    description: "Terminal bus antarkota antarprovinsi (AKAP) tipe A utama di ujung barat DKI Jakarta yang menjadi gerbang sentral mobilitas bus menuju Pulau Sumatera dan Banten. Menampilkan deretan peron jalur keberangkatan bus AKAP, kanopi membran lengkung pelindung cuaca, menara pengawas Dishub, ruang tunggu berpendingin udara, dan simpul awal TransJakarta Koridor 3.",
+    facts: [
+      "Merupakan salah satu dari empat terminal bus tipe A utama di DKI Jakarta bersama Pulo Gebang, Kampung Rambutan, dan Tanjung Priok.",
+      "Melayani ratusan rute bus antarkota menuju Lampung, Palembang, Padang, Medan, hingga kota-kota di Pulau Jawa.",
+      "Terhubung langsung dengan halte awal TransJakarta Koridor 3 rute Kalideres - Monas."
+    ]
+  },
+  {
+    id: "rsud-cengkareng",
+    name: "RSUD Cengkareng",
+    shortName: "RSUD Cengkareng",
+    category: "Kesehatan & Rumah Sakit Umum Daerah",
+    tagline: "Pusat Rujukan Medis Paripurna Jakarta Barat, Fasilitas 8 Lantai & IGD Modern",
+    height: "38 meter (Gedung Perawatan 8 Lantai & Helipad Medis)",
+    year: "2001 / Modernisasi 2018",
+    architect: "Dinas Kesehatan DKI Jakarta",
+    location: "Jl. Bumi Cengkareng Indah No. 1, Cengkareng Timur, Jakarta Barat",
+    coordinates: { lat: -6.1432, lng: 106.7325 },
+    position: [-1140.0, 0, -520.0],
+    labelHeight: 46,
+    cameraPosition: [-1140.0, 65, -455.0],
+    cameraTarget: [-1140.0, 16, -520.0],
+    description: "Rumah sakit umum daerah tipe B rujukan utama bagi warga Jakarta Barat bagian utara dan koridor Cengkareng-Bandara. Menampilkan arsitektur gedung 8 lantai berfasad panel putih dan kaca hijau zamrud, instalasi gawat darurat (IGD) berkanopi ambulans luas, poliklinik spesialis terpadu, serta helipad evakuasi medis darurat di atap menara.",
+    facts: [
+      "Merupakan salah satu RSUD dengan kapasitas tempat tidur terbesar di wilayah barat Jakarta.",
+      "Dilengkapi fasilitas penanganan trauma center dan pusat perawatan intensif modern bersertifikasi KARS Paripurna.",
+      "Lokasinya sangat strategis di dekat interchange jalan tol lingkar luar barat (JORR W1) menuju Bandara Soetta."
+    ]
+  },
+  {
+    id: "daan-mogot-mall",
+    name: "Daan Mogot Mall & Superblok",
+    shortName: "Mall Daan Mogot",
+    category: "Pusat Perbelanjaan & Komersial",
+    tagline: "Pusat Belanja & Hiburan Legendaris Cengkareng, Atrium Kaca & Spiral Parking",
+    height: "26 meter (Superblok Perbelanjaan 5 Lantai)",
+    year: "1997 / Revitalisasi 2019",
+    architect: "PT Duta Wisata Loka",
+    location: "Jl. Daan Mogot KM 16, Kalideres, Cengkareng, Jakarta Barat",
+    coordinates: { lat: -6.1528, lng: 106.7118 },
+    position: [-1260.0, 0, -460.0],
+    labelHeight: 40,
+    cameraPosition: [-1260.0, 55, -400.0],
+    cameraTarget: [-1260.0, 12, -460.0],
+    description: "Pusat perbelanjaan dan hiburan keluarga pertama dan paling ikonik di kawasan Kalideres-Cengkareng. Menampilkan arsitektur mall 5 lantai dengan fasad terakota oranye khas era modern, kubus skylight kaca penerangan alami, atrium utama bertingkat luas, gedung bioskop, hypermarket terpadu, dan ramp parkir spiral melengkung.",
+    facts: [
+      "Pusat perbelanjaan modern pertama yang dibangun di koridor barat Jl. Daan Mogot yang melayani kawasan perumahan Daan Mogot Baru dan Kalideres.",
+      "Memiliki bioskop cinema tertua dan pusat perbelanjaan retail terlengkap di kawasan barat laut Jakarta.",
+      "Terletak berdampingan dengan halte busway TransJakarta Pesakih di koridor arteri nasional."
+    ]
+  },
+  {
+    id: "stasiun-rawa-buaya-hub",
+    name: "Stasiun Transit Rawa Buaya & KA Bandara",
+    shortName: "Stasiun Rawa Buaya",
+    category: "Transit Kereta Api & Integrasi Multimoda",
+    tagline: "Simpul Rel Ganda KRL Tangerang Line, Percabangan KA Bandara Soetta & JPO Transit",
+    height: "16 meter (Stasiun Transit Layang 2 Lantai)",
+    year: "1899 / Modernisasi 2017",
+    architect: "PT Kereta Api Indonesia (Persero)",
+    location: "Jl. Duri Kosambi, Cengkareng, Jakarta Barat",
+    coordinates: { lat: -6.1612, lng: 106.7450 },
+    position: [-1050.0, 0, -446.0],
+    labelHeight: 36,
+    cameraPosition: [-1050.0, 50, -385.0],
+    cameraTarget: [-1050.0, 10, -446.0],
+    description: "Stasiun transit kereta api tersibuk di Jakarta Barat yang memadukan layanan KRL Commuter Line Lintas Tangerang dan Kereta Bandara Soekarno-Hatta (Railink). Menampilkan stasiun 2 lantai beratap baja lengkung biru, peron ganda berlantai granit dengan kanopi peneduh penuh, jembatan penyeberangan orang (JPO) terintegrasi halte busway, dan wesel rel percabangan jalur ganda.",
+    facts: [
+      "Merupakan titik percabangan penting tempat jalur rel Kereta Bandara memisahkan diri dari rel KRL utama menuju Bandara Soekarno-Hatta.",
+      "Memiliki volume penumpang harian tertinggi di lintas Duri-Tangerang berkat integrasi permukiman Bojong Indah dan Cengkareng.",
+      "Dilengkapi fasilitas park and ride terpadu bagi komuter yang menggunakan transportasi rel harian."
+    ]
+  },
+  {
+    id: "danau-rawa-buaya",
+    name: "Danau Retensi & Polder Rawa Buaya",
+    shortName: "Danau Rawa Buaya",
+    category: "Tata Air & Pengendali Banjir Alami",
+    tagline: "Waduk Retensi 4 Hektare, Stasiun Pompa Polder Hidrolik & Perlindungan Cengkareng",
+    height: "10 meter (Rumah Pompa Polder & Pintu Air Hidrolik)",
+    year: "2015 / Revitalisasi 2021",
+    architect: "Dinas Sumber Daya Air DKI Jakarta",
+    location: "Kawasan Rawa Buaya, Cengkareng, Jakarta Barat",
+    coordinates: { lat: -6.1650, lng: 106.7380 },
+    position: [-1080.0, 0, -400.0],
+    labelHeight: 32,
+    cameraPosition: [-1080.0, 45, -340.0],
+    cameraTarget: [-1080.0, 6, -400.0],
+    description: "Danau retensi air dan sistem polder pengendali banjir seluas 4 hektare yang menjadi benteng pertahanan utama Jakarta Barat dari luapan Kali Mookervaart dan Kali Angke. Menampilkan waduk penampung air alami luas dengan dinding tanggul beton sheetpile, gedung stasiun pompa polder berteknologi pompa submersible kapasitas tinggi, dan pintu air gerbang hidrolik masif.",
+    facts: [
+      "Menjadi infrastruktur pengendali banjir vital yang berhasil menuntaskan masalah genangan air musiman di pemukiman Rawa Buaya dan Duri Kosambi.",
+      "Stasiun pompa polder memiliki kapasitas sedot hingga belasan meter kubik per detik yang langsung dialirkan ke Cengkareng Drain menuju laut.",
+      "Dikelilingi jalur jogging track pejalan kaki dan sabuk hijau pepohonan peneduh untuk rekreasi warga sekitar."
+    ]
+  },
+  {
+    id: "cengkareng-business-city",
+    name: "Cengkareng Business City & Sentra Logistik",
+    shortName: "Cengkareng Business City",
+    category: "Sentra Bisnis, Pergudangan & Logistik Kargo",
+    tagline: "Pusat Logistik Modern Gerbang Bandara Soetta, Pergudangan Terpadu & Perkantoran Kargo",
+    height: "24 meter (Kompleks Gedung Manajemen & Pergudangan Logistik)",
+    year: "2014",
+    architect: "PT Cengkareng Inovasi Niaga & Arsitek Swasta",
+    location: "Jl. Atang Sanjaya, Benda / Cengkareng, Jakarta Barat",
+    coordinates: { lat: -6.1380, lng: 106.7210 },
+    position: [-1200.0, 0, -560.0],
+    labelHeight: 42,
+    cameraPosition: [-1200.0, 55, -495.0],
+    cameraTarget: [-1200.0, 12, -560.0],
+    description: "Kawasan perkantoran bisnis dan pergudangan modern terpadu seluas belasan hektare yang beroperasi sebagai pusat rantai pasok dan logistik kargo kargo udara di koridor gerbang Bandara Internasional Soekarno-Hatta. Menampilkan gedung perkantoran manajemen berfasad kaca arsitektural biru, kompleks gudang modular berdinding baja bergelombang, area parkir manuver truk kontainer, dan dermaga bongkar muat logistik.",
+    facts: [
+      "Menjadi basis operasional ratusan perusahaan ekspedisi, forwarding internasional, dan agen logistik kargo udara nasional.",
+      "Memiliki akses super cepat langsung menuju Tol Bandara Soekarno-Hatta (Prof. Sedyatmo) dan Tol JORR W1.",
+      "Dilengkapi sistem keamanan terpadu 24 jam dan fasilitas pergudangan berpendingin (cold storage) untuk komoditas sensitif suhu."
+    ]
   }
 ];
 
