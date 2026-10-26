@@ -17,8 +17,13 @@ export class LightingManager {
 
     // 2. Main Directional Sun Light
     this.sunLight = new THREE.DirectionalLight(0xfffbeb, 1.6);
-    this.sunLight.position.set(120, 180, 90);
+    this.sunOffset = new THREE.Vector3(120, 180, 90);
+    this.shadowFocusX = 0;
+    this.shadowFocusZ = 0;
+    this.sunLight.position.copy(this.sunOffset);
     this.sunLight.castShadow = true;
+    this.sunLight.target.position.set(0, 0, 0);
+    this.scene.add(this.sunLight.target);
 
     // High performance shadow configuration (optimized for 60 FPS)
     this.sunLight.shadow.mapSize.width = 1024;
@@ -40,6 +45,29 @@ export class LightingManager {
   }
 
   /**
+   * Keep the sun offset fixed while moving the shadow frustum to the camera target.
+   * The 40-unit snap avoids shadow shimmer when the camera drifts slowly.
+   */
+  updateShadowFocus(target) {
+    const sx = Math.round(target.x / 40) * 40;
+    const sz = Math.round(target.z / 40) * 40;
+    if (sx === this.shadowFocusX && sz === this.shadowFocusZ) return;
+    this.shadowFocusX = sx;
+    this.shadowFocusZ = sz;
+    this.applySunPosition();
+  }
+
+  applySunPosition() {
+    this.sunLight.position.set(
+      this.shadowFocusX + this.sunOffset.x,
+      this.sunOffset.y,
+      this.shadowFocusZ + this.sunOffset.z
+    );
+    this.sunLight.target.position.set(this.shadowFocusX, 0, this.shadowFocusZ);
+    this.sunLight.target.updateMatrixWorld();
+  }
+
+  /**
    * Smoothly apply time-of-day presets: 'day', 'golden', 'night'
    */
   setTimeOfDay(timePreset) {
@@ -47,7 +75,7 @@ export class LightingManager {
       // Natural Daylight with Muted Slate Horizon Harmony
       this.sunLight.color.setHex(0xfffdf9);
       this.sunLight.intensity = 1.75;
-      this.sunLight.position.set(220, 320, 150);
+      this.sunOffset.set(220, 320, 150);
 
       this.ambientLight.color.setHex(0xffffff);
       this.ambientLight.intensity = 0.65;
@@ -63,7 +91,7 @@ export class LightingManager {
       // Golden Hour / Senja Jakarta (Warm sunset glow, soft atmospheric twilight)
       this.sunLight.color.setHex(0xf59e0b);
       this.sunLight.intensity = 1.9;
-      this.sunLight.position.set(280, 95, 180);
+      this.sunOffset.set(280, 95, 180);
 
       this.ambientLight.color.setHex(0xfde047);
       this.ambientLight.intensity = 0.45;
@@ -79,7 +107,7 @@ export class LightingManager {
       // Malam Hari (Luminous city lights under clear indigo moonlight)
       this.sunLight.color.setHex(0x93c5fd);
       this.sunLight.intensity = 0.45;
-      this.sunLight.position.set(-120, 240, -100);
+      this.sunOffset.set(-120, 240, -100);
 
       this.ambientLight.color.setHex(0x1e293b);
       this.ambientLight.intensity = 0.42;
@@ -92,5 +120,6 @@ export class LightingManager {
       this.scene.fog.color.setHex(0x0b1120);
       this.scene.fog.density = 0.00065;
     }
+    this.applySunPosition();
   }
 }

@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import fs from 'node:fs';
 import { JAKARTA_LANDMARKS, projectGpsToScene } from './src/config/landmarks.js';
+import { VOID_B_OSM } from './src/data/void_b_osm.js';
 
 let assertionCount = 0;
 ['ok', 'equal', 'strictEqual', 'deepStrictEqual', 'notDeepStrictEqual', 'throws'].forEach((method) => {
@@ -1086,7 +1087,81 @@ voidBLandmarkIds.forEach(id => {
   assert.ok(indexHtmlFresh.includes(`data-tour-id="${id}"`), `index.html missing tour button for ${id}`);
 });
 
-console.log(`✅ All 81 landmarks, Quick Wins, Jakarta Timur, Void A & Tahap 1 Void B COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 34: Void B Tahap 2 — OSM Daan Mogot, Mookervaart, and anchor access
+assert.ok(VOID_B_OSM.meta.source.includes('OpenStreetMap'), 'Void B OSM dataset missing OSM attribution');
+assert.strictEqual(VOID_B_OSM.meta.voidBWarp.xScale, 0.4575, 'Void B warp xScale changed unexpectedly');
+assert.strictEqual(VOID_B_OSM.meta.voidBWarp.zScale, 0.3829, 'Void B warp zScale changed unexpectedly');
+
+const voidBRoadNames = new Set(VOID_B_OSM.roads.map((road) => road.name));
+[
+  'Jalan Daan Mogot',
+  'Jalan Bumi Cengkareng Indah',
+  'Jalan Kembangan Utama',
+  'Jalan Kembangan Baru',
+  'Jalan Duri Kosambi Raya',
+  'Jalan Kalideres Permai',
+  'Jalan Rusunawa Pesakih'
+].forEach((name) => {
+  assert.ok(voidBRoadNames.has(name), `Void B OSM dataset missing ${name}`);
+});
+
+const allVoidBPoints = [
+  ...VOID_B_OSM.roads.flatMap((road) => road.points),
+  ...VOID_B_OSM.waterways.flatMap((waterway) => waterway.points)
+];
+allVoidBPoints.forEach(([x, z]) => {
+  assert.ok(Number.isFinite(x) && Number.isFinite(z), 'Void B OSM contains a non-finite coordinate');
+  assert.ok(x <= -850 && x >= -1550, `Void B OSM x=${x} outside expected west corridor`);
+  assert.ok(z <= -250 && z >= -620, `Void B OSM z=${z} outside expected west corridor`);
+});
+
+const distanceToSegment = (p, a, b) => {
+  const dx = b[0] - a[0];
+  const dz = b[1] - a[1];
+  const len2 = dx * dx + dz * dz;
+  if (len2 === 0) return Math.hypot(p[0] - a[0], p[1] - a[1]);
+  let t = ((p[0] - a[0]) * dx + (p[1] - a[1]) * dz) / len2;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dz));
+};
+const distanceToRoad = (point, name) => {
+  let best = Infinity;
+  VOID_B_OSM.roads.filter((road) => road.name === name).forEach((road) => {
+    for (let i = 0; i < road.points.length - 1; i++) {
+      best = Math.min(best, distanceToSegment(point, road.points[i], road.points[i + 1]));
+    }
+  });
+  return best;
+};
+
+assert.ok(distanceToRoad([-1320, -450], 'Jalan Daan Mogot') < 40, 'Terminal Kalideres is detached from the OSM Daan Mogot extension');
+assert.ok(distanceToRoad([-1260, -460], 'Jalan Daan Mogot') < 40, 'Mall Daan Mogot is detached from the OSM Daan Mogot extension');
+assert.ok(distanceToRoad([-1140, -520], 'Jalan Bumi Cengkareng Indah') < 30, 'RSUD Cengkareng is detached from Jalan Bumi Cengkareng Indah');
+assert.ok(distanceToRoad([-1080, -400], 'Jalan Kembangan Utama') < 30, 'Danau Rawa Buaya is detached from Jalan Kembangan Utama');
+
+const waterwayNames = VOID_B_OSM.waterways.map((waterway) => waterway.name);
+assert.ok(waterwayNames.includes('Kali Mookervaart'), 'Void B OSM dataset missing Kali Mookervaart');
+assert.ok(citySceneContent.includes('buildVoidBDaanMogot()'), 'CityScene.js missing buildVoidBDaanMogot');
+assert.ok(citySceneContent.includes('this.buildVoidBDaanMogot();'), 'CityScene.js does not call buildVoidBDaanMogot');
+assert.ok(citySceneContent.includes('Akses Cengkareng Business City'), 'CityScene.js missing CBC access road');
+assert.ok(citySceneContent.includes('new THREE.GridHelper(3000, 150'), 'Ground grid does not cover Void B');
+
+const voidBMethodStart = citySceneContent.indexOf('buildVoidBDaanMogot() {');
+const voidBMethodEnd = citySceneContent.indexOf('Tahap 3 Jakarta Timur', voidBMethodStart);
+const voidBMethod = citySceneContent.slice(voidBMethodStart, voidBMethodEnd);
+assert.ok(voidBMethodStart > 0 && voidBMethodEnd > voidBMethodStart, 'Cannot isolate buildVoidBDaanMogot');
+assert.ok(!voidBMethod.includes('new THREE.PointLight'), 'Void B lamps must not add PointLights');
+assert.ok(voidBMethod.includes('VOID_B_OSM'), 'Void B builder does not consume the OSM dataset');
+
+const voidBLightingContent = fs.readFileSync('src/world/Lighting.js', 'utf8');
+assert.ok(voidBLightingContent.includes('updateShadowFocus(target)'), 'Lighting.js missing updateShadowFocus');
+const voidBMainJsContent = fs.readFileSync('src/main.js', 'utf8');
+assert.ok(voidBMainJsContent.includes('updateShadowFocus(this.cameraController.controls.target)'), 'main.js does not follow the camera with the shadow frustum');
+
+const tangerangRouteContent = citySceneContent.includes('x2: -1320.0, z2: -450.0');
+assert.ok(tangerangRouteContent, 'TransJakarta Koridor 3 route does not reach Terminal Kalideres');
+
+console.log(`✅ All 81 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-2 Void B COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

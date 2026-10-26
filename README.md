@@ -54,7 +54,7 @@ python -m http.server 8000
 npm test
 ```
 
-Perintah ini menjalankan satu skrip verifikasi statis untuk 81 landmark: jumlah dan ID unik, kelengkapan metadata, ketersediaan builder, kelengkapan tombol tour, serta batas penyimpangan posisi terhadap proyeksi GPS. Ini bukan pengganti pengujian render atau performa di browser.
+Perintah ini menjalankan satu skrip verifikasi statis (2.136 assertion) untuk 81 landmark: jumlah dan ID unik, kelengkapan metadata, ketersediaan builder, kelengkapan tombol tour, batas penyimpangan posisi terhadap proyeksi GPS, serta integritas dataset OSM Void B. Ini bukan pengganti pengujian render atau performa di browser.
 
 ---
 
@@ -95,7 +95,8 @@ JAKARTA 3D VIEW/
     ├── config/
     │   └── landmarks.js        # Konfigurasi koordinat spasial & metadata 81 landmark
     ├── data/
-    │   └── jakarta_osm.json    # Geometri OSM Jakarta (jalan, bangunan, air, taman, rel)
+    │   ├── jakarta_osm.json    # Geometri OSM Jakarta (jalan, bangunan, air, taman, rel)
+    │   └── void_b_osm.js       # Jalan & Kanal Mookervaart OSM untuk Void B (ter-warp)
     ├── world/
     │   ├── CityScene.js        # Perakitan lanskap koridor jalan, gedung, lalu lintas, & vegetasi
     │   ├── LandmarkModels.js   # Geometri arsitektur 3D seluruh landmark

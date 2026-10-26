@@ -3,6 +3,7 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 import { TextureGenerator } from './TextureGenerator.js';
 import { LandmarkModels } from './LandmarkModels.js';
 import { JAKARTA_LANDMARKS, CITY_CORRIDOR_CONFIG } from '../config/landmarks.js';
+import { VOID_B_OSM } from '../data/void_b_osm.js';
 
 export class CityScene {
   constructor(scene) {
@@ -37,6 +38,7 @@ export class CityScene {
     this.buildNorthJakartaInfillAndLogistics();
     this.buildWestJakartaInfrastructure();
     this.buildWestJakartaInfillAndDistricts();
+    this.buildVoidBDaanMogot();
     this.buildEastJakartaInfrastructure();
     this.buildEastJakartaInfillAndDistricts();
     this.buildLandmarks();
@@ -62,7 +64,7 @@ export class CityScene {
     ground.position.y = -0.15;
     this.proceduralGroup.add(ground);
 
-    this.gridHelper = new THREE.GridHelper(2400, 120, 0x3e4c63, 0x334155);
+    this.gridHelper = new THREE.GridHelper(3000, 150, 0x3e4c63, 0x334155);
     this.gridHelper.material.transparent = true;
     this.gridHelper.material.opacity = 0.4;
     this.gridHelper.position.y = -0.08;
@@ -3894,6 +3896,349 @@ export class CityScene {
   }
 
   /**
+   * Void B Tahap 2: Kali Mookervaart, perpanjangan Jl. Daan Mogot hingga Terminal Kalideres,
+   * akses RSUD Cengkareng, Cengkareng Business City, dan Danau Rawa Buaya.
+   *
+   * Jalan dan kanal berasal dari OpenStreetMap, diproyeksikan dengan projectGpsToScene lalu
+   * di-warp memakai transformasi affine yang mempertahankan enam anchor Void B. Seluruh
+   * geometri digabung per material (10 draw call) dan PJU di sini hanya visual, tanpa
+   * PointLight baru.
+   */
+  buildVoidBDaanMogot() {
+    const roadMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      roughness: 0.8,
+      metalness: 0.1
+    });
+    const sidewalkMat = new THREE.MeshStandardMaterial({
+      map: TextureGenerator.createSidewalkTexture(),
+      roughness: 0.8
+    });
+    const medianGrassMat = new THREE.MeshStandardMaterial({
+      color: 0x15803d,
+      roughness: 0.85
+    });
+    const waterMat = new THREE.MeshStandardMaterial({
+      color: 0x075985,
+      roughness: 0.15,
+      metalness: 0.8,
+      side: THREE.DoubleSide
+    });
+    const canalWallMat = new THREE.MeshStandardMaterial({
+      color: 0x64748b,
+      roughness: 0.75
+    });
+    const bridgeMat = new THREE.MeshStandardMaterial({
+      color: 0x475569,
+      roughness: 0.7
+    });
+    const lampPoleMat = new THREE.MeshStandardMaterial({
+      color: 0x334155,
+      metalness: 0.7,
+      roughness: 0.4
+    });
+
+    const roadGeos = [];
+    const sidewalkGeos = [];
+    const medianGeos = [];
+    const waterGeos = [];
+    const wallGeos = [];
+    const bridgeGeos = [];
+    const lampPoleGeos = [];
+    const lampBulbGeos = [];
+
+    const makeBox = (w, h, d, x, y, z, rotY = 0) => {
+      const g = new THREE.BoxGeometry(w, h, d);
+      if (rotY !== 0) g.rotateY(rotY);
+      g.translate(x, y, z);
+      return g;
+    };
+
+    const addRoadPolyline = (points, width, hasMedian = false, hasSidewalk = true) => {
+      for (let i = 0; i < points.length - 1; i++) {
+        const [x1, z1] = points[i];
+        const [x2, z2] = points[i + 1];
+        const dx = x2 - x1;
+        const dz = z2 - z1;
+        const len = Math.hypot(dx, dz);
+        if (len < 0.5) continue;
+        const angle = Math.atan2(dx, dz);
+        const mx = (x1 + x2) * 0.5;
+        const mz = (z1 + z2) * 0.5;
+
+        roadGeos.push(makeBox(width, 0.25, len + 0.8, mx, 0.125, mz, angle));
+        if (hasMedian) {
+          medianGeos.push(makeBox(3.4, 0.45, len + 0.6, mx, 0.225, mz, angle));
+        }
+        if (hasSidewalk) {
+          const sw = width >= 14 ? 2.8 : 2.2;
+          [-1, 1].forEach((dir) => {
+            const px = Math.cos(angle) * (width * 0.5 + sw * 0.5) * dir;
+            const pz = -Math.sin(angle) * (width * 0.5 + sw * 0.5) * dir;
+            sidewalkGeos.push(makeBox(sw, 0.4, len + 0.8, mx + px, 0.2, mz + pz, angle));
+          });
+        }
+      }
+    };
+
+    const addPathPolyline = (points, width) => {
+      for (let i = 0; i < points.length - 1; i++) {
+        const [x1, z1] = points[i];
+        const [x2, z2] = points[i + 1];
+        const len = Math.hypot(x2 - x1, z2 - z1);
+        if (len < 0.5) continue;
+        const angle = Math.atan2(x2 - x1, z2 - z1);
+        sidewalkGeos.push(
+          makeBox(width, 0.3, len + 0.5, (x1 + x2) * 0.5, 0.15, (z1 + z2) * 0.5, angle)
+        );
+      }
+    };
+
+    const offsetPolyline = (points, offset) => points.map((p, i) => {
+      const prev = points[Math.max(0, i - 1)];
+      const next = points[Math.min(points.length - 1, i + 1)];
+      const dx = next[0] - prev[0];
+      const dz = next[1] - prev[1];
+      const len = Math.hypot(dx, dz) || 1;
+      return [p[0] + (-dz / len) * offset, p[1] + (dx / len) * offset];
+    });
+
+    const samplePolyline = (points, step, offset = 0) => {
+      const samples = [];
+      let next = step * 0.5;
+      let travelled = 0;
+      for (let i = 0; i < points.length - 1; i++) {
+        const [x1, z1] = points[i];
+        const [x2, z2] = points[i + 1];
+        const dx = x2 - x1;
+        const dz = z2 - z1;
+        const len = Math.hypot(dx, dz);
+        if (len < 0.5) continue;
+        const angle = Math.atan2(dx, dz);
+        const px = Math.cos(angle) * offset;
+        const pz = -Math.sin(angle) * offset;
+        while (next <= travelled + len) {
+          const t = (next - travelled) / len;
+          samples.push({ x: x1 + dx * t + px, z: z1 + dz * t + pz, angle });
+          next += step;
+        }
+        travelled += len;
+      }
+      return samples;
+    };
+
+    const addWaterPolyline = (points, width) => {
+      for (let i = 0; i < points.length - 1; i++) {
+        const [x1, z1] = points[i];
+        const [x2, z2] = points[i + 1];
+        const len = Math.hypot(x2 - x1, z2 - z1);
+        if (len < 0.5) continue;
+        const angle = Math.atan2(x2 - x1, z2 - z1);
+        const mx = (x1 + x2) * 0.5;
+        const mz = (z1 + z2) * 0.5;
+
+        const water = new THREE.PlaneGeometry(width, len + 0.8);
+        water.rotateX(-Math.PI / 2);
+        water.rotateY(angle);
+        water.translate(mx, 0.04, mz);
+        waterGeos.push(water);
+
+        [-1, 1].forEach((dir) => {
+          const px = Math.cos(angle) * (width * 0.5 + 0.6) * dir;
+          const pz = -Math.sin(angle) * (width * 0.5 + 0.6) * dir;
+          wallGeos.push(makeBox(1.2, 0.7, len + 0.8, mx + px, 0.3, mz + pz, angle));
+        });
+      }
+    };
+
+    const addLampPost = (x, z, angle, side) => {
+      const px = Math.cos(angle);
+      const pz = -Math.sin(angle);
+      const pole = new THREE.CylinderGeometry(0.16, 0.24, 8.5, 6);
+      pole.translate(x, 4.25, z);
+      lampPoleGeos.push(pole);
+
+      const arm = new THREE.BoxGeometry(3.2, 0.14, 0.14);
+      arm.rotateY(angle);
+      arm.translate(x - px * 1.6 * side, 8.4, z - pz * 1.6 * side);
+      lampPoleGeos.push(arm);
+
+      const bulb = new THREE.SphereGeometry(0.34, 8, 8);
+      bulb.translate(x - px * 3.2 * side, 8.15, z - pz * 3.2 * side);
+      lampBulbGeos.push(bulb);
+    };
+
+    const segmentIntersection = (a, b, c, d) => {
+      const rx = b[0] - a[0];
+      const rz = b[1] - a[1];
+      const sx = d[0] - c[0];
+      const sz = d[1] - c[1];
+      const den = rx * sz - rz * sx;
+      if (Math.abs(den) < 1e-9) return null;
+      const t = ((c[0] - a[0]) * sz - (c[1] - a[1]) * sx) / den;
+      const u = ((c[0] - a[0]) * rz - (c[1] - a[1]) * rx) / den;
+      if (t <= 0 || t >= 1 || u <= 0 || u >= 1) return null;
+      return [a[0] + t * rx, a[1] + t * rz];
+    };
+
+    const waterway = VOID_B_OSM.waterways[0];
+    addWaterPolyline(waterway.points, waterway.width);
+    addPathPolyline(offsetPolyline(waterway.points, waterway.width * 0.5 + 5), 3.4);
+    addPathPolyline(offsetPolyline(waterway.points, -(waterway.width * 0.5 + 5)), 3.4);
+
+    const roads = VOID_B_OSM.roads.map((road) => ({
+      name: road.name,
+      width: road.width,
+      median: road.median === true,
+      points: road.points
+    }));
+    // Konektor prosedural yang tidak tersedia sebagai jalan OSM.
+    roads.push(
+      {
+        name: 'Akses RSUD Cengkareng',
+        width: 10,
+        points: [[-1145, -446], [-1142, -486], [-1144.9, -526.5]]
+      },
+      {
+        name: 'Akses Cengkareng Business City',
+        width: 10,
+        points: [[-1200, -448], [-1204, -505], [-1200, -560]]
+      },
+      {
+        name: 'Akses Danau Rawa Buaya',
+        width: 8,
+        points: [[-1066.7, -389.2], [-1072, -393], [-1080, -400]]
+      }
+    );
+
+    roads.forEach((road) => {
+      addRoadPolyline(road.points, road.width, road.median, road.width >= 10);
+    });
+
+    // Jembatan otomatis pada setiap perpotongan jalan dengan Kanal Mookervaart.
+    const crossings = [];
+    roads.forEach((road) => {
+      for (let i = 0; i < road.points.length - 1; i++) {
+        for (let j = 0; j < waterway.points.length - 1; j++) {
+          const hit = segmentIntersection(
+            road.points[i], road.points[i + 1],
+            waterway.points[j], waterway.points[j + 1]
+          );
+          if (!hit) continue;
+          if (crossings.some((c) => Math.hypot(c.x - hit[0], c.z - hit[1]) < 12)) continue;
+          const angle = Math.atan2(
+            road.points[i + 1][0] - road.points[i][0],
+            road.points[i + 1][1] - road.points[i][1]
+          );
+          crossings.push({ x: hit[0], z: hit[1], angle, width: road.width });
+        }
+      }
+    });
+
+    crossings.forEach((bridge) => {
+      const deckWidth = bridge.width + 12;
+      bridgeGeos.push(makeBox(deckWidth, 0.7, 24, bridge.x, 0.35, bridge.z, bridge.angle));
+      [-1, 1].forEach((dir) => {
+        const px = Math.cos(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
+        const pz = -Math.sin(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
+        bridgeGeos.push(makeBox(0.6, 0.8, 24, bridge.x + px, 0.85, bridge.z + pz, bridge.angle));
+      });
+    });
+
+    if (!this.pjuBulbMat) {
+      this.pjuBulbMat = new THREE.MeshStandardMaterial({
+        color: 0xfef08a,
+        emissive: 0xfef08a,
+        emissiveIntensity: 0.0,
+        roughness: 0.2
+      });
+      this.pjuBulbMat.name = 'pju-bulb';
+      this.glowMaterials.push(this.pjuBulbMat);
+    }
+
+    const daanRoad = VOID_B_OSM.roads.find((road) => road.name === 'Jalan Daan Mogot');
+    if (daanRoad) {
+      [1, -1].forEach((side) => {
+        samplePolyline(daanRoad.points, 95, 14.6 * side).forEach((p) => {
+          addLampPost(p.x, p.z, p.angle, side);
+        });
+      });
+    }
+    samplePolyline(offsetPolyline(waterway.points, waterway.width * 0.5 + 8), 130).forEach((p) => {
+      addLampPost(p.x, p.z, p.angle, 1);
+    });
+
+    // Vegetasi tepian kanal dan koridor Daan Mogot, dirender sebagai instanced mesh.
+    const treePositions = [];
+    const addTree = (x, z, scale) => {
+      if (treePositions.some((t) => Math.hypot(t.x - x, t.z - z) < 7)) return;
+      treePositions.push({ x, z, scale });
+    };
+    if (daanRoad) {
+      samplePolyline(daanRoad.points, 68, 21).forEach((p, i) => {
+        addTree(p.x, p.z, 0.85 + (i % 3) * 0.08);
+      });
+      samplePolyline(daanRoad.points, 68, -21).forEach((p, i) => {
+        addTree(p.x, p.z, 0.82 + (i % 4) * 0.06);
+      });
+    }
+    [1, -1].forEach((side) => {
+      samplePolyline(offsetPolyline(waterway.points, (waterway.width * 0.5 + 12) * side), 52).forEach((p, i) => {
+        addTree(p.x, p.z, 0.9 + (i % 5) * 0.05);
+      });
+    });
+
+    if (treePositions.length > 0) {
+      const dummy = new THREE.Object3D();
+      const trunkGeo = new THREE.CylinderGeometry(0.26, 0.38, 4.2, 5);
+      const foliageGeo = new THREE.ConeGeometry(2.6, 6.2, 6);
+      const trunkMat = new THREE.MeshStandardMaterial({ color: 0x3e2723, roughness: 0.9 });
+      const foliageMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.85 });
+      const trunkMesh = new THREE.InstancedMesh(trunkGeo, trunkMat, treePositions.length);
+      const foliageMesh = new THREE.InstancedMesh(foliageGeo, foliageMat, treePositions.length);
+
+      treePositions.forEach((tree, idx) => {
+        dummy.position.set(tree.x, 2.1 * tree.scale, tree.z);
+        dummy.scale.set(tree.scale, tree.scale, tree.scale);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        trunkMesh.setMatrixAt(idx, dummy.matrix);
+
+        dummy.position.set(tree.x, (4.2 + 3.0) * tree.scale, tree.z);
+        dummy.updateMatrix();
+        foliageMesh.setMatrixAt(idx, dummy.matrix);
+      });
+
+      trunkMesh.castShadow = true;
+      trunkMesh.receiveShadow = true;
+      foliageMesh.castShadow = true;
+      foliageMesh.receiveShadow = true;
+      this.proceduralGroup.add(trunkMesh);
+      this.proceduralGroup.add(foliageMesh);
+    }
+
+    const mergeAndAdd = (geos, mat, receiveShadow = true, castShadow = false) => {
+      if (!geos || geos.length === 0) return;
+      const merged = BufferGeometryUtils.mergeGeometries(geos, false);
+      if (merged) {
+        const mesh = new THREE.Mesh(merged, mat);
+        mesh.receiveShadow = receiveShadow;
+        mesh.castShadow = castShadow;
+        this.proceduralGroup.add(mesh);
+      }
+    };
+
+    mergeAndAdd(roadGeos, roadMat, true, false);
+    mergeAndAdd(sidewalkGeos, sidewalkMat, true, false);
+    mergeAndAdd(medianGeos, medianGrassMat, true, false);
+    mergeAndAdd(waterGeos, waterMat, false, false);
+    mergeAndAdd(wallGeos, canalWallMat, true, false);
+    mergeAndAdd(bridgeGeos, bridgeMat, true, true);
+    mergeAndAdd(lampPoleGeos, lampPoleMat, true, false);
+    mergeAndAdd(lampBulbGeos, this.pjuBulbMat, false, false);
+  }
+
+  /**
    * Tahap 3 Jakarta Timur: Infill Urban Fabric, Distrik Residensial & Sentra Budaya/Komersial
    *
    * 1. 160+ Ruko komersial & koridor bisnis Rawamangun (Balai Pustaka & Pemuda), Jatinegara, dan Otista Cawang.
@@ -5552,8 +5897,8 @@ export class CityScene {
       { x1: 1192.0, z1: -220.0, x2: 1192.0, z2: -820.0, count: 6 },
       { x1: 1204.0, z1: -820.0, x2: 1204.0, z2: -220.0, count: 6 },
       // 34. TransJakarta Koridor 3 (Kalideres <-> Grogol <-> Monas via Jl. Daan Mogot)
-      { x1: -484.0, z1: -403.0, x2: -1250.0, z2: -450.0, count: 5, isBus: true, busColor: 0x0284c7, speedBoost: 1.15 },
-      { x1: -1250.0, z1: -450.0, x2: -484.0, z2: -403.0, count: 5, isBus: true, busColor: 0x0284c7, speedBoost: 1.15 },
+      { x1: -484.0, z1: -403.0, x2: -1320.0, z2: -450.0, count: 5, isBus: true, busColor: 0x0284c7, speedBoost: 1.15 },
+      { x1: -1320.0, z1: -450.0, x2: -484.0, z2: -403.0, count: 5, isBus: true, busColor: 0x0284c7, speedBoost: 1.15 },
       // 35. TransJakarta Koridor 8 (Lebak Bulus <-> Kebon Jeruk <-> Harmoni via Jl. Panjang)
       { x1: -775.0, z1: 300.0, x2: -775.0, z2: -400.0, count: 5, isBus: true, busColor: 0x0284c7, speedBoost: 1.15 },
       { x1: -775.0, z1: -400.0, x2: -775.0, z2: 300.0, count: 5, isBus: true, busColor: 0x0284c7, speedBoost: 1.15 },

@@ -222,6 +222,11 @@ class JakartaApp {
       this.cameraController.update(delta);
     }
 
+    // Keep the shadow frustum centred on the area the user is exploring
+    if (this.lighting && this.cameraController) {
+      this.lighting.updateShadowFocus(this.cameraController.controls.target);
+    }
+
     // Update Google 3D Tiles stream
     if (this.googleTiles) {
       this.googleTiles.update();
