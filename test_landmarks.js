@@ -951,6 +951,37 @@ assert.ok(
   'CityScene.js missing Jembatan Jl. Kedoya Raya atas Kali Pesanggrahan'
 );
 
-console.log('✅ All 75 landmarks, Quick Wins, Jakarta Timur & Tahap 1 + 2 Void A verified successfully!');
+// Check 31: Tahap 3 Infill Macro Urban Fabric, Residensial & Sabuk Hijau Void A
+assert.ok(
+  citySceneContent.includes('Zona 5 (Void A): Greenville & Taman Ratu Indah'),
+  'CityScene.js missing Greenville & Taman Ratu residential zone'
+);
+assert.ok(
+  citySceneContent.includes('Zona 6 (Void A): Sunrise Garden & Kedoya Baru'),
+  'CityScene.js missing Sunrise Garden & Kedoya Baru residential zone'
+);
+assert.ok(
+  citySceneContent.includes('Zona 7 (Void A): Kedoya Selatan & Sukabumi Utara'),
+  'CityScene.js missing Kedoya Selatan & Sukabumi Utara residential zone'
+);
+assert.ok(
+  citySceneContent.includes('Zona 8 (Void A): Sukabumi Selatan & Pos Pengumben Timur/Barat'),
+  'CityScene.js missing Pos Pengumben residential zone'
+);
+assert.ok(
+  citySceneContent.includes('Koridor Ruko Modern Void A (Jl. Panjang & Sentra Pos Pengumben)'),
+  'CityScene.js missing Jl. Panjang modern shophouse corridor'
+);
+assert.ok(
+  citySceneContent.includes('Ruko Sepanjang Koridor Jl. Pos Pengumben Raya'),
+  'CityScene.js missing Pos Pengumben shophouse corridor'
+);
+assert.ok(
+  citySceneContent.includes('Pohon Peneduh Void A (Jl. Greenville Raya, Jl. Pos Pengumben & Kali Sekretaris)'),
+  'CityScene.js missing Void A street trees'
+);
+
+console.log('✅ All 75 landmarks, Quick Wins, Jakarta Timur & Tahap 1 + 2 + 3 Void A verified successfully!');
+
 
 

@@ -3615,7 +3615,15 @@ export class CityScene {
       // Zona 3: Kembangan Selatan / Perumahan Walikota
       { minX: -1120, maxX: -940, stepX: 18, minZ: -40, maxZ: 60, stepZ: 18, baseH: 7, maxH: 13 },
       // Zona 4: Meruya Utara / Kebon Jeruk Barat
-      { minX: -1100, maxX: -910, stepX: 20, minZ: 85, maxZ: 180, stepZ: 20, baseH: 7, maxH: 12 }
+      { minX: -1100, maxX: -910, stepX: 20, minZ: 85, maxZ: 180, stepZ: 20, baseH: 7, maxH: 12 },
+      // Zona 5 (Void A): Greenville & Taman Ratu Indah (Residensial Mapan)
+      { minX: -760, maxX: -600, stepX: 18, minZ: -250, maxZ: -130, stepZ: 18, baseH: 7.5, maxH: 12.5 },
+      // Zona 6 (Void A): Sunrise Garden & Kedoya Baru (Barat Kali Pesanggrahan)
+      { minX: -940, maxX: -795, stepX: 18, minZ: -280, maxZ: -150, stepZ: 18, baseH: 7.5, maxH: 13.0 },
+      // Zona 7 (Void A): Kedoya Selatan & Sukabumi Utara (Antara Tol dan Kemanggisan)
+      { minX: -760, maxX: -600, stepX: 18, minZ: -75, maxZ: 110, stepZ: 18, baseH: 7.0, maxH: 12.0 },
+      // Zona 8 (Void A): Sukabumi Selatan & Pos Pengumben Timur/Barat
+      { minX: -940, maxX: -600, stepX: 18, minZ: 130, maxZ: 280, stepZ: 18, baseH: 7.0, maxH: 12.5 }
     ];
 
     residentialZones.forEach((zone) => {
@@ -3628,6 +3636,22 @@ export class CityScene {
           // Lewati koridor Tol JORR W1 dan Tol Tangerang
           if (Math.abs(x - (-1040)) < 16) continue;
           if (Math.abs(z - (-85)) < 16) continue;
+          // Lewati landmark Void A (#70 s.d. #75) dan koridor Jl. Panjang
+          if (Math.abs(x - (-775)) < 28 && Math.abs(z - (-260)) < 28) continue; // RS Graha Kedoya
+          if (Math.abs(x - (-790)) < 26 && Math.abs(z - (-95)) < 26) continue;  // Wang Residence
+          if (Math.abs(x - (-710)) < 28 && Math.abs(z - (-210)) < 28) continue; // IPEKA Greenville
+          if (Math.abs(x - (-680)) < 26 && Math.abs(z - (-160)) < 26) continue; // Sentra Kuliner Greenville
+          if (Math.abs(x - (-775)) < 28 && Math.abs(z - 210) < 28) continue;    // Sentra Pos Pengumben
+          if (Math.abs(x - (-530)) < 36 && Math.abs(z - (-110)) < 36) continue; // Taman Cattleya
+          if (Math.abs(x - (-785)) < 28 && Math.abs(z - 30) < 28) continue;     // RCTI MNC Studios
+          if (Math.abs(x - (-775)) < 26 && Math.abs(z - 12) < 26) continue;     // Museum MACAN
+          // Lewati koridor jalan arteri dan kanal sungai Void A
+          if (Math.abs(x - (-775)) < 14) continue; // Jl. Panjang
+          if (Math.abs(z - 210) < 14) continue;   // Jl. Pos Pengumben Raya
+          if (Math.abs(z - (-180)) < 14 && x > -775 && x < -580) continue; // Jl. Greenville Raya
+          if (Math.abs(z - (-45)) < 16) continue; // Koridor Tol Jakarta-Tangerang
+          if (Math.abs(x - (-840)) < 12) continue; // Kali Pesanggrahan
+          if (Math.abs(x - (-680)) < 12 && z > -250 && z < 220) continue; // Kali Sekretaris
 
           const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233));
           const h = zone.baseH + hash * (zone.maxH - zone.baseH);
@@ -3732,6 +3756,53 @@ export class CityScene {
       });
     }
 
+    // Koridor Ruko Modern Void A (Jl. Panjang & Sentra Pos Pengumben)
+    for (let z = -280; z <= 280; z += 20) {
+      // Lewati underpass tol dan persimpangan arteri
+      if (Math.abs(z - (-45)) < 18) continue;
+      if (Math.abs(z - 210) < 16) continue;
+      if (Math.abs(z - (-260)) < 24) continue; // RS Graha Kedoya
+      if (Math.abs(z - (-95)) < 24) continue;  // Wang Residence
+      if (Math.abs(z - 30) < 24) continue;    // MNC Studios
+      if (Math.abs(z - 12) < 22) continue;    // Museum MACAN
+
+      [-795, -755].forEach((x) => {
+        const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233));
+        const h = 12 + hash * 10; // 12m - 22m (3-5 lantai ruko)
+        const colIdx = Math.floor(hash * commercialColors.length) % commercialColors.length;
+
+        commercialItems.push({
+          x,
+          y: h * 0.5,
+          z,
+          w: 15 + hash * 3,
+          h,
+          d: 16 + (1 - hash) * 3,
+          color: commercialColors[colIdx]
+        });
+      });
+    }
+
+    // Ruko Sepanjang Koridor Jl. Pos Pengumben Raya (Palmerah ke Joglo)
+    for (let x = -980; x <= -600; x += 24) {
+      if (Math.abs(x - (-775)) < 26) continue; // Simpang Jl. Panjang
+      [195, 225].forEach((z) => {
+        const hash = Math.abs(Math.sin(x * 14.123 + z * 53.421));
+        const h = 11 + hash * 9; // 11m - 20m
+        const colIdx = Math.floor(hash * commercialColors.length) % commercialColors.length;
+
+        commercialItems.push({
+          x,
+          y: h * 0.5,
+          z,
+          w: 18 + hash * 4,
+          h,
+          d: 14 + (1 - hash) * 3,
+          color: commercialColors[colIdx]
+        });
+      });
+    }
+
     if (commercialItems.length > 0) {
       const commMesh = new THREE.InstancedMesh(baseBoxGeo, commercialMat, commercialItems.length);
       commMesh.receiveShadow = true;
@@ -3775,6 +3846,20 @@ export class CityScene {
     // Pohon Peneduh sepanjang Jl. Daan Mogot Pesing
     for (let x = -1100; x <= -550; x += 26) {
       treeTransforms.push({ x, z: -418, scale: 1.05, isPalm: false });
+    }
+
+    // Pohon Peneduh Void A (Jl. Greenville Raya, Jl. Pos Pengumben & Kali Sekretaris)
+    for (let x = -760; x <= -590; x += 18) {
+      treeTransforms.push({ x, z: -172, scale: 1.0, isPalm: false });
+      treeTransforms.push({ x, z: -188, scale: 1.0, isPalm: false });
+    }
+    for (let x = -980; x <= -600; x += 22) {
+      treeTransforms.push({ x, z: 202, scale: 1.05, isPalm: false });
+      treeTransforms.push({ x, z: 218, scale: 1.05, isPalm: false });
+    }
+    for (let z = -260; z <= 240; z += 24) {
+      treeTransforms.push({ x: -688, z, scale: 1.15, isPalm: false }); // Bantaran Kali Sekretaris
+      treeTransforms.push({ x: -848, z, scale: 1.2, isPalm: false });  // Bantaran Kali Pesanggrahan
     }
 
     if (treeTransforms.length > 0) {
