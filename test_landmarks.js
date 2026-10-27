@@ -1357,7 +1357,101 @@ const shadowFocusMethod = lightingContent.slice(shadowFocusStart, shadowFocusEnd
 assert.ok(shadowFocusMethod.includes('return false;'), 'updateShadowFocus must report unchanged focus');
 assert.ok(shadowFocusMethod.includes('return true;'), 'updateShadowFocus must report a moved focus');
 
-console.log(`✅ All 81 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, F4 Tahap 1-2 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 39: F4 Tahap 3 — kendaraan instanced dan resolusi adaptif
+assert.ok(citySceneContent.includes('this.vehicleMeshes = null;'), 'CityScene.js missing vehicleMeshes registry');
+assert.ok(citySceneContent.includes('this.vehicleDummy = new THREE.Object3D();'), 'CityScene.js missing reusable vehicle transform');
+assert.ok(!citySceneContent.includes('createVehicleMesh'), 'CityScene.js still builds per-vehicle mesh groups');
+assert.ok(!citySceneContent.includes('this.proceduralGroup.add(vehicle);'), 'buildTraffic still adds vehicle groups instead of instances');
+assert.ok(citySceneContent.includes('this.buildVehicleInstances(vehicleSpecs);'), 'buildTraffic does not delegate vehicle rendering to instancing');
+assert.ok(!citySceneContent.includes('v.mesh'), 'Vehicle updates still drive per-vehicle mesh groups');
+
+const vehiclePartStart = citySceneContent.indexOf('createVehiclePartGeometry(');
+const vehiclePartEnd = citySceneContent.indexOf('\n  createVehicleInstancedMesh(', vehiclePartStart);
+assert.ok(vehiclePartStart > 0 && vehiclePartEnd > vehiclePartStart, 'Cannot isolate createVehiclePartGeometry');
+const vehiclePartMethod = citySceneContent.slice(vehiclePartStart, vehiclePartEnd);
+assert.ok(vehiclePartMethod.includes('geo.translate(x, y, z);'), 'Vehicle part geometry must bake its local offset');
+assert.ok(vehiclePartMethod.includes("geo.setAttribute('color'"), 'Vehicle light geometry must bake vertex colors');
+
+const vehicleNodeStart = citySceneContent.indexOf('createVehicleInstancedMesh(');
+const vehicleNodeEnd = citySceneContent.indexOf('\n  writeVehicleInstance(', vehicleNodeStart);
+assert.ok(vehicleNodeStart > 0 && vehicleNodeEnd > vehicleNodeStart, 'Cannot isolate createVehicleInstancedMesh');
+const vehicleNodeMethod = citySceneContent.slice(vehicleNodeStart, vehicleNodeEnd);
+assert.ok(vehicleNodeMethod.includes('new THREE.InstancedMesh(geometry, material, count)'), 'Vehicle parts are not instanced');
+assert.ok(vehicleNodeMethod.includes('mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)'), 'Vehicle instance matrices are not dynamic');
+assert.ok(vehicleNodeMethod.includes('mesh.frustumCulled = false'), 'Vehicle instances must skip frustum culling');
+assert.ok(vehicleNodeMethod.includes('mesh.name = name;'), 'Vehicle instanced mesh is not named');
+assert.ok(!vehicleNodeMethod.includes('.castShadow = true'), 'Vehicle instances must not cast dynamic shadows');
+
+const vehicleWriteStart = citySceneContent.indexOf('writeVehicleInstance(v) {');
+const vehicleWriteEnd = citySceneContent.indexOf('\n  buildVehicleInstances(', vehicleWriteStart);
+assert.ok(vehicleWriteStart > 0 && vehicleWriteEnd > vehicleWriteStart, 'Cannot isolate writeVehicleInstance');
+const vehicleWriteMethod = citySceneContent.slice(vehicleWriteStart, vehicleWriteEnd);
+assert.ok(vehicleWriteMethod.includes('this.vehicleDummy'), 'writeVehicleInstance must reuse the shared dummy transform');
+assert.ok(vehicleWriteMethod.includes('dummy.updateMatrix()'), 'writeVehicleInstance must recompose the instance matrix');
+assert.ok(vehicleWriteMethod.includes('.setMatrixAt(v.instanceIndex, dummy.matrix)'), 'writeVehicleInstance does not write instance matrices');
+
+const vehicleBuildStart = citySceneContent.indexOf('buildVehicleInstances(vehicleSpecs) {');
+const vehicleBuildEnd = citySceneContent.indexOf('\n  buildTraffic() {', vehicleBuildStart);
+assert.ok(vehicleBuildStart > 0 && vehicleBuildEnd > vehicleBuildStart, 'Cannot isolate buildVehicleInstances');
+const vehicleBuildMethod = citySceneContent.slice(vehicleBuildStart, vehicleBuildEnd);
+['vehicle-car-body', 'vehicle-bus-body', 'vehicle-truck-cab', 'vehicle-truck-chassis', 'vehicle-truck-container', 'vehicle-car-lights', 'vehicle-bus-lights', 'vehicle-truck-lights'].forEach((name) => {
+  assert.ok(vehicleBuildMethod.includes(`'${name}'`), `Missing instanced vehicle part: ${name}`);
+});
+assert.ok(vehicleBuildMethod.includes('setColorAt('), 'Vehicle bodies must carry per-instance colors');
+assert.ok(vehicleBuildMethod.includes('vertexColors: true'), 'Merged vehicle lights must use baked vertex colors');
+assert.ok(vehicleBuildMethod.includes('BufferGeometryUtils.mergeGeometries'), 'Vehicle lights must be merged per kind');
+assert.ok(vehicleBuildMethod.includes('this.writeVehicleInstance('), 'Vehicle instances are not seeded with matrices');
+assert.ok(!vehicleBuildMethod.includes('new THREE.PointLight'), 'Vehicle instances must not add lights');
+assert.ok(!vehicleBuildMethod.includes('.castShadow = true'), 'Vehicle instances must not cast dynamic shadows');
+
+const trafficUpdateStart = citySceneContent.indexOf('updateTraffic(delta) {');
+const trafficUpdateEnd = citySceneContent.indexOf('\n  collectGlowMaterials() {', trafficUpdateStart);
+assert.ok(trafficUpdateStart > 0 && trafficUpdateEnd > trafficUpdateStart, 'Cannot isolate updateTraffic');
+const trafficUpdateMethod = citySceneContent.slice(trafficUpdateStart, trafficUpdateEnd);
+assert.ok(trafficUpdateMethod.includes('this.writeVehicleInstance(v)'), 'updateTraffic does not refresh instance matrices');
+assert.ok(trafficUpdateMethod.includes('mesh.instanceMatrix.needsUpdate = true;'), 'updateTraffic does not flag instance matrices as dirty');
+assert.ok(!trafficUpdateMethod.includes('.mesh.position'), 'updateTraffic still positions per-vehicle groups');
+
+assert.ok(mainJsContent.includes('this.pixelRatioFloor = 0.6;'), 'Adaptive resolution floor is missing');
+assert.ok(mainJsContent.includes('this.fpsReduceThreshold = 48;'), 'Adaptive resolution reduce threshold is missing');
+assert.ok(mainJsContent.includes('this.fpsRaiseThreshold = 57;'), 'Adaptive resolution raise threshold is missing');
+assert.ok(mainJsContent.includes('this.basePixelRatio = this.computeBasePixelRatio();'), 'main.js does not compute a base pixel ratio');
+assert.ok(mainJsContent.includes('this.renderer.setPixelRatio(this.basePixelRatio);'), 'initRenderer does not apply the computed base ratio');
+assert.ok(mainJsContent.includes('this.updateAdaptiveResolution();'), 'animate loop does not sample the adaptive resolution');
+assert.strictEqual((mainJsContent.match(/const maxDPR/g) || []).length, 1, 'DPR cap must live in a single helper');
+
+const adaptiveStart = mainJsContent.indexOf('applyAdaptiveResolution(fps) {');
+const adaptiveEnd = mainJsContent.indexOf('\n  updateAdaptiveResolution() {', adaptiveStart);
+assert.ok(adaptiveStart > 0 && adaptiveEnd > adaptiveStart, 'Cannot isolate applyAdaptiveResolution');
+const adaptiveMethod = mainJsContent.slice(adaptiveStart, adaptiveEnd);
+assert.ok(adaptiveMethod.includes('fps < this.fpsReduceThreshold'), 'Adaptive resolution ignores low FPS');
+assert.ok(adaptiveMethod.includes('Math.max(this.pixelRatioFloor, this.pixelRatio - 0.1)'), 'Adaptive resolution must lower the pixel ratio gradually');
+assert.ok(adaptiveMethod.includes('fps > this.fpsRaiseThreshold'), 'Adaptive resolution ignores high FPS');
+assert.ok(adaptiveMethod.includes('Math.min(this.basePixelRatio, this.pixelRatio + 0.1)'), 'Adaptive resolution must raise the pixel ratio gradually');
+assert.ok(adaptiveMethod.includes('this.setPixelRatio(target)'), 'Adaptive resolution bypasses the shared pixel ratio setter');
+
+const ratioSetterStart = mainJsContent.indexOf('setPixelRatio(ratio) {');
+const ratioSetterEnd = mainJsContent.indexOf('\n  applyAdaptiveResolution(', ratioSetterStart);
+assert.ok(ratioSetterStart > 0 && ratioSetterEnd > ratioSetterStart, 'Cannot isolate setPixelRatio');
+const ratioSetterMethod = mainJsContent.slice(ratioSetterStart, ratioSetterEnd);
+assert.ok(ratioSetterMethod.includes('this.renderer.setPixelRatio(ratio);'), 'Pixel ratio changes do not reach the renderer');
+assert.ok(ratioSetterMethod.includes('this.composer.setPixelRatio(ratio);'), 'Pixel ratio changes do not reach the bloom composer');
+
+const ratioUpdateStart = mainJsContent.indexOf('updateAdaptiveResolution() {');
+const ratioUpdateEnd = mainJsContent.indexOf('\n  initCamera() {', ratioUpdateStart);
+assert.ok(ratioUpdateStart > 0 && ratioUpdateEnd > ratioUpdateStart, 'Cannot isolate updateAdaptiveResolution');
+const ratioUpdateMethod = mainJsContent.slice(ratioUpdateStart, ratioUpdateEnd);
+assert.ok(ratioUpdateMethod.includes('performance.now()'), 'Adaptive resolution must sample wall-clock time');
+assert.ok(ratioUpdateMethod.includes('this.applyAdaptiveResolution(fps)'), 'Adaptive resolution never applies its sample');
+
+const resizeStart = mainJsContent.indexOf("window.addEventListener('resize'");
+const resizeEnd = mainJsContent.indexOf('\n  animate() {', resizeStart);
+assert.ok(resizeStart > 0 && resizeEnd > resizeStart, 'Cannot isolate the resize handler');
+const resizeHandler = mainJsContent.slice(resizeStart, resizeEnd);
+assert.ok(resizeHandler.includes('this.basePixelRatio = this.computeBasePixelRatio();'), 'Resize does not refresh the base pixel ratio');
+assert.ok(resizeHandler.includes('this.setPixelRatio(this.pixelRatio);'), 'Resize bypasses the shared pixel ratio setter');
+
+console.log(`✅ All 81 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, F4 Tahap 1-3 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

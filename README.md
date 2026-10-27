@@ -54,7 +54,7 @@ python -m http.server 8000
 npm test
 ```
 
-Perintah ini menjalankan satu skrip verifikasi statis (2.282 assertion) untuk 81 landmark: jumlah dan ID unik, kelengkapan metadata, ketersediaan builder, kelengkapan tombol tour, batas penyimpangan posisi terhadap proyeksi GPS, serta integritas dataset OSM, infill, dan transit Void B (halte TransJakarta Koridor 3 dan viaduk KA Bandara). Sejak F4, verifikasi juga mengunci gerbong kereta dua mesh tanpa bayangan dinamis, 193 tiang/lampu PJU sebagai dua `InstancedMesh`, pool 12 `PointLight`, dan shadow map statis. Ini bukan pengganti pengujian render atau performa di browser.
+Perintah ini menjalankan satu skrip verifikasi statis (2.342 assertion) untuk 81 landmark: jumlah dan ID unik, kelengkapan metadata, ketersediaan builder, kelengkapan tombol tour, batas penyimpangan posisi terhadap proyeksi GPS, serta integritas dataset OSM, infill, dan transit Void B (halte TransJakarta Koridor 3 dan viaduk KA Bandara). Sejak F4, verifikasi juga mengunci gerbong kereta dua mesh tanpa bayangan dinamis, 193 tiang/lampu PJU sebagai dua `InstancedMesh`, pool 12 `PointLight`, shadow map statis, 647 kendaraan dalam delapan `InstancedMesh`, serta DPR adaptif yang menyinkronkan renderer dan composer. Ini bukan pengganti pengujian render atau performa di browser.
 
 ---
 

@@ -17,6 +17,11 @@ class JakartaApp {
     this.container = document.getElementById('canvas-container');
     this.clock = new THREE.Clock();
     this.initialRenderFrames = 2;
+    this.pixelRatioFloor = 0.6;
+    this.fpsReduceThreshold = 48;
+    this.fpsRaiseThreshold = 57;
+    this.adaptiveFpsWindowStart = null;
+    this.adaptiveFpsFrames = 0;
 
     this.initRenderer();
     this.initCamera();
@@ -34,8 +39,9 @@ class JakartaApp {
       powerPreference: 'high-performance'
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    const maxDPR = window.innerWidth > 1920 ? 1.25 : 1.5;
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxDPR));
+    this.basePixelRatio = this.computeBasePixelRatio();
+    this.pixelRatio = this.basePixelRatio;
+    this.renderer.setPixelRatio(this.basePixelRatio);
 
     // Realistic Tone Mapping & Shadows
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -46,6 +52,48 @@ class JakartaApp {
     this.renderer.shadowMap.needsUpdate = true;
 
     this.container.appendChild(this.renderer.domElement);
+  }
+
+  computeBasePixelRatio() {
+    const maxDPR = window.innerWidth > 1920 ? 1.25 : 1.5;
+    return Math.min(window.devicePixelRatio, maxDPR);
+  }
+
+  setPixelRatio(ratio) {
+    this.pixelRatio = ratio;
+    this.renderer.setPixelRatio(ratio);
+    if (this.composer) {
+      this.composer.setPixelRatio(ratio);
+    }
+  }
+
+  applyAdaptiveResolution(fps) {
+    let target = this.pixelRatio;
+    if (fps < this.fpsReduceThreshold) {
+      target = Math.max(this.pixelRatioFloor, this.pixelRatio - 0.1);
+    } else if (fps > this.fpsRaiseThreshold) {
+      target = Math.min(this.basePixelRatio, this.pixelRatio + 0.1);
+    }
+    target = Math.round(target * 100) / 100;
+    if (Math.abs(target - this.pixelRatio) > 0.001) {
+      this.setPixelRatio(target);
+    }
+  }
+
+  updateAdaptiveResolution() {
+    const now = performance.now();
+    if (this.adaptiveFpsWindowStart === null) {
+      this.adaptiveFpsWindowStart = now;
+      this.adaptiveFpsFrames = 0;
+      return;
+    }
+    this.adaptiveFpsFrames++;
+    const elapsed = now - this.adaptiveFpsWindowStart;
+    if (elapsed < 2000) return;
+    const fps = (this.adaptiveFpsFrames * 1000) / elapsed;
+    this.adaptiveFpsWindowStart = now;
+    this.adaptiveFpsFrames = 0;
+    this.applyAdaptiveResolution(fps);
   }
 
   initCamera() {
@@ -193,12 +241,12 @@ class JakartaApp {
       this.camera.aspect = window.innerWidth / window.innerHeight;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(window.innerWidth, window.innerHeight);
-      const maxDPR = window.innerWidth > 1920 ? 1.25 : 1.5;
-      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxDPR));
+      this.basePixelRatio = this.computeBasePixelRatio();
+      this.pixelRatio = Math.min(this.pixelRatio, this.basePixelRatio);
       if (this.composer) {
         this.composer.setSize(window.innerWidth, window.innerHeight);
-        this.composer.setPixelRatio(Math.min(window.devicePixelRatio, maxDPR));
       }
+      this.setPixelRatio(this.pixelRatio);
     });
   }
 
@@ -262,6 +310,9 @@ class JakartaApp {
     } else {
       this.renderer.render(this.scene, this.camera);
     }
+
+    // Adaptive Resolution: trade pixels for frame rate on slower GPUs
+    this.updateAdaptiveResolution();
   }
 }
 

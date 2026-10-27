@@ -14,6 +14,8 @@ export class CityScene {
 
     this.interactiveObjects = [];
     this.vehicles = [];
+    this.vehicleMeshes = null;
+    this.vehicleDummy = new THREE.Object3D();
     this.animatedTrains = [];
     this.pjuLampTransforms = [];
     this.pjuLightPool = [];
@@ -6612,71 +6614,113 @@ export class CityScene {
     this.proceduralGroup.add(group);
   }
 
-  createVehicleMesh(isBus, color, isTruck = false, truckContainerColor = 0xeb5310) {
-    const vehicle = new THREE.Group();
-
-    if (isTruck) {
-      // Tractor head (cab)
-      const cabGeo = new THREE.BoxGeometry(2.5, 2.6, 3.2);
-      const cabMat = new THREE.MeshStandardMaterial({ color, metalness: 0.6, roughness: 0.3 });
-      const cab = new THREE.Mesh(cabGeo, cabMat);
-      cab.position.set(0, 1.4, 4.4);
-      vehicle.add(cab);
-
-      // Chassis flatbed
-      const chassisGeo = new THREE.BoxGeometry(2.5, 0.6, 12.2);
-      const chassisMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
-      const chassis = new THREE.Mesh(chassisGeo, chassisMat);
-      chassis.position.set(0, 0.6, 0);
-      vehicle.add(chassis);
-
-      // Container on chassis
-      const contGeo = new THREE.BoxGeometry(2.44, 2.58, 11.6);
-      const contMat = new THREE.MeshStandardMaterial({ color: truckContainerColor, roughness: 0.5, metalness: 0.35 });
-      const cont = new THREE.Mesh(contGeo, contMat);
-      cont.position.set(0, 2.2, -0.4);
-      vehicle.add(cont);
-
-      // Headlight & Taillight
-      const hl = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.25, 0.1), new THREE.MeshBasicMaterial({ color: 0xffedd5 }));
-      hl.position.set(0, 0.9, 6.05);
-      vehicle.add(hl);
-
-      const tl = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.25, 0.1), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
-      tl.position.set(0, 0.9, -6.15);
-      vehicle.add(tl);
-
-      return vehicle;
+  createVehiclePartGeometry(width, height, depth, x, y, z, color) {
+    const geo = new THREE.BoxGeometry(width, height, depth);
+    geo.translate(x, y, z);
+    if (color !== undefined) {
+      const c = new THREE.Color(color);
+      const count = geo.attributes.position.count;
+      const colors = new Float32Array(count * 3);
+      for (let i = 0; i < count; i++) {
+        colors[i * 3] = c.r;
+        colors[i * 3 + 1] = c.g;
+        colors[i * 3 + 2] = c.b;
+      }
+      geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     }
+    return geo;
+  }
 
-    const bodyGeo = isBus
-      ? new THREE.BoxGeometry(2.6, 2.6, 9.2)
-      : new THREE.BoxGeometry(2.0, 1.4, 4.2);
-    const bodyMat = new THREE.MeshStandardMaterial({
-      color,
-      metalness: 0.6,
-      roughness: 0.3
+  createVehicleInstancedMesh(name, geometry, material, count) {
+    const mesh = new THREE.InstancedMesh(geometry, material, count);
+    mesh.name = name;
+    mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    mesh.frustumCulled = false;
+    this.proceduralGroup.add(mesh);
+    return mesh;
+  }
+
+  writeVehicleInstance(v) {
+    const dummy = this.vehicleDummy;
+    dummy.position.set(v.x, v.y || 0, v.z);
+    dummy.rotation.set(0, v.rotationY, 0);
+    dummy.updateMatrix();
+
+    const meshes = this.vehicleMeshes;
+    if (v.kind === 'truck') {
+      meshes.truckCab.setMatrixAt(v.instanceIndex, dummy.matrix);
+      meshes.truckChassis.setMatrixAt(v.instanceIndex, dummy.matrix);
+      meshes.truckContainer.setMatrixAt(v.instanceIndex, dummy.matrix);
+      meshes.truckLights.setMatrixAt(v.instanceIndex, dummy.matrix);
+    } else if (v.kind === 'bus') {
+      meshes.busBody.setMatrixAt(v.instanceIndex, dummy.matrix);
+      meshes.busLights.setMatrixAt(v.instanceIndex, dummy.matrix);
+    } else {
+      meshes.carBody.setMatrixAt(v.instanceIndex, dummy.matrix);
+      meshes.carLights.setMatrixAt(v.instanceIndex, dummy.matrix);
+    }
+  }
+
+  buildVehicleInstances(vehicleSpecs) {
+    const counts = { car: 0, bus: 0, truck: 0 };
+    vehicleSpecs.forEach((spec) => {
+      spec.instanceIndex = counts[spec.kind]++;
     });
 
-    const body = new THREE.Mesh(bodyGeo, bodyMat);
-    body.position.y = isBus ? 1.4 : 0.8;
-    vehicle.add(body);
+    const bodyMat = () => new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.6, roughness: 0.3 });
+    const lightsMat = new THREE.MeshBasicMaterial({ vertexColors: true });
 
-    const hl = new THREE.Mesh(
-      new THREE.BoxGeometry(1.6, 0.25, 0.1),
-      new THREE.MeshBasicMaterial({ color: 0xffedd5 })
-    );
-    hl.position.set(0, 0.8, isBus ? 4.65 : 2.15);
-    vehicle.add(hl);
+    const carBodyGeo = this.createVehiclePartGeometry(2.0, 1.4, 4.2, 0, 0.8, 0);
+    const busBodyGeo = this.createVehiclePartGeometry(2.6, 2.6, 9.2, 0, 1.4, 0);
+    const truckCabGeo = this.createVehiclePartGeometry(2.5, 2.6, 3.2, 0, 1.4, 4.4);
+    const truckChassisGeo = this.createVehiclePartGeometry(2.5, 0.6, 12.2, 0, 0.6, 0);
+    const truckContainerGeo = this.createVehiclePartGeometry(2.44, 2.58, 11.6, 0, 2.2, -0.4);
 
-    const tl = new THREE.Mesh(
-      new THREE.BoxGeometry(1.6, 0.25, 0.1),
-      new THREE.MeshBasicMaterial({ color: 0xef4444 })
-    );
-    tl.position.set(0, 0.8, -(isBus ? 4.65 : 2.15));
-    vehicle.add(tl);
+    const carLightsGeo = BufferGeometryUtils.mergeGeometries([
+      this.createVehiclePartGeometry(1.6, 0.25, 0.1, 0, 0.8, 2.15, 0xffedd5),
+      this.createVehiclePartGeometry(1.6, 0.25, 0.1, 0, 0.8, -2.15, 0xef4444)
+    ], false);
+    const busLightsGeo = BufferGeometryUtils.mergeGeometries([
+      this.createVehiclePartGeometry(1.6, 0.25, 0.1, 0, 0.8, 4.65, 0xffedd5),
+      this.createVehiclePartGeometry(1.6, 0.25, 0.1, 0, 0.8, -4.65, 0xef4444)
+    ], false);
+    const truckLightsGeo = BufferGeometryUtils.mergeGeometries([
+      this.createVehiclePartGeometry(1.8, 0.25, 0.1, 0, 0.9, 6.05, 0xffedd5),
+      this.createVehiclePartGeometry(1.8, 0.25, 0.1, 0, 0.9, -6.15, 0xef4444)
+    ], false);
 
-    return vehicle;
+    this.vehicleMeshes = {
+      carBody: this.createVehicleInstancedMesh('vehicle-car-body', carBodyGeo, bodyMat(), counts.car),
+      busBody: this.createVehicleInstancedMesh('vehicle-bus-body', busBodyGeo, bodyMat(), counts.bus),
+      truckCab: this.createVehicleInstancedMesh('vehicle-truck-cab', truckCabGeo, bodyMat(), counts.truck),
+      truckChassis: this.createVehicleInstancedMesh('vehicle-truck-chassis', truckChassisGeo,
+        new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 }), counts.truck),
+      truckContainer: this.createVehicleInstancedMesh('vehicle-truck-container', truckContainerGeo,
+        new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5, metalness: 0.35 }), counts.truck),
+      carLights: this.createVehicleInstancedMesh('vehicle-car-lights', carLightsGeo, lightsMat, counts.car),
+      busLights: this.createVehicleInstancedMesh('vehicle-bus-lights', busLightsGeo, lightsMat, counts.bus),
+      truckLights: this.createVehicleInstancedMesh('vehicle-truck-lights', truckLightsGeo, lightsMat, counts.truck)
+    };
+
+    const color = new THREE.Color();
+    vehicleSpecs.forEach((spec) => {
+      color.setHex(spec.color);
+      if (spec.kind === 'truck') {
+        this.vehicleMeshes.truckCab.setColorAt(spec.instanceIndex, color);
+        color.setHex(spec.containerColor);
+        this.vehicleMeshes.truckContainer.setColorAt(spec.instanceIndex, color);
+      } else if (spec.kind === 'bus') {
+        this.vehicleMeshes.busBody.setColorAt(spec.instanceIndex, color);
+      } else {
+        this.vehicleMeshes.carBody.setColorAt(spec.instanceIndex, color);
+      }
+      this.writeVehicleInstance(spec);
+    });
+
+    Object.values(this.vehicleMeshes).forEach((mesh) => {
+      mesh.instanceMatrix.needsUpdate = true;
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+    });
   }
 
   /**
@@ -6867,6 +6911,7 @@ export class CityScene {
       { x1: -580.0, z1: -110.0, x2: -480.0, z2: -110.0, count: 4, speedBoost: 1.1 }
     ];
 
+    const vehicleSpecs = [];
     let idx = 0;
     routes.forEach((route) => {
       const dx = route.x2 - route.x1;
@@ -6879,19 +6924,12 @@ export class CityScene {
         const isTruck = route.isTruck || false;
         const busColor = route.busColor || 0x0284c7;
         const truckContainerColor = [0x0080a5, 0x006633, 0xeb5310, 0xd91458, 0x1d4ed8, 0x8b0000][(idx + j) % 6];
-        const vehicle = this.createVehicleMesh(
-          isBus,
-          isBus ? busColor : colors[idx % colors.length],
-          isTruck,
-          truckContainerColor
-        );
-
         const t = j / route.count;
-        vehicle.position.set(route.x1 + dx * t, y, route.z1 + dz * t);
-        vehicle.rotation.y = angle;
 
-        this.vehicles.push({
-          mesh: vehicle,
+        vehicleSpecs.push({
+          kind: isTruck ? 'truck' : (isBus ? 'bus' : 'car'),
+          color: isBus ? busColor : colors[idx % colors.length],
+          containerColor: truckContainerColor,
           isCircular: false,
           x1: route.x1,
           y,
@@ -6899,10 +6937,11 @@ export class CityScene {
           dx,
           dz,
           progress: t,
-          speed: ((isTruck ? 0.055 : (isBus ? 0.065 : 0.095)) + (idx % 4) * 0.014) * (route.speedBoost || 1.0)
+          speed: ((isTruck ? 0.055 : (isBus ? 0.065 : 0.095)) + (idx % 4) * 0.014) * (route.speedBoost || 1.0),
+          x: route.x1 + dx * t,
+          z: route.z1 + dz * t,
+          rotationY: angle
         });
-
-        this.proceduralGroup.add(vehicle);
         idx++;
       }
     });
@@ -6950,27 +6989,26 @@ export class CityScene {
     roundabouts.forEach((rb, rIdx) => {
       for (let k = 0; k < rb.count; k++) {
         const isBus = k === 0 && rIdx === 0;
-        const vehicle = this.createVehicleMesh(
-          isBus,
-          isBus ? 0x0284c7 : colors[(k + rIdx) % colors.length]
-        );
         const angle = (k / rb.count) * Math.PI * 2;
-        vehicle.position.set(rb.cx + Math.cos(angle) * rb.radius, 0, rb.cz + Math.sin(angle) * rb.radius);
-        vehicle.rotation.y = Math.atan2(-Math.sin(angle), Math.cos(angle));
-
-        this.vehicles.push({
-          mesh: vehicle,
+        vehicleSpecs.push({
+          kind: isBus ? 'bus' : 'car',
+          color: isBus ? 0x0284c7 : colors[(k + rIdx) % colors.length],
           isCircular: true,
           cx: rb.cx,
           cz: rb.cz,
           radius: rb.radius,
           angle,
-          angularSpeed: rb.speed
+          angularSpeed: rb.speed,
+          y: 0,
+          x: rb.cx + Math.cos(angle) * rb.radius,
+          z: rb.cz + Math.sin(angle) * rb.radius,
+          rotationY: Math.atan2(-Math.sin(angle), Math.cos(angle))
         });
-
-        this.proceduralGroup.add(vehicle);
       }
     });
+
+    this.vehicles = vehicleSpecs;
+    this.buildVehicleInstances(vehicleSpecs);
 
     // Dynamic Kereta Rel Listrik (KRL) Commuter Line Consists running on dual mainline tracks
     const krlTrackPoints = [
@@ -7230,18 +7268,24 @@ export class CityScene {
     this.vehicles.forEach((v) => {
       if (v.isCircular) {
         v.angle += v.angularSpeed * delta;
-        v.mesh.position.x = v.cx + Math.cos(v.angle) * v.radius;
-        v.mesh.position.z = v.cz + Math.sin(v.angle) * v.radius;
+        v.x = v.cx + Math.cos(v.angle) * v.radius;
+        v.z = v.cz + Math.sin(v.angle) * v.radius;
         // Tangent direction for clockwise movement in XZ
-        v.mesh.rotation.y = Math.atan2(-Math.sin(v.angle), Math.cos(v.angle));
+        v.rotationY = Math.atan2(-Math.sin(v.angle), Math.cos(v.angle));
       } else {
         v.progress += v.speed * delta;
         if (v.progress > 1.0) v.progress -= 1.0;
-        v.mesh.position.x = v.x1 + v.dx * v.progress;
-        v.mesh.position.y = v.y || 0;
-        v.mesh.position.z = v.z1 + v.dz * v.progress;
+        v.x = v.x1 + v.dx * v.progress;
+        v.z = v.z1 + v.dz * v.progress;
       }
+      this.writeVehicleInstance(v);
     });
+
+    if (this.vehicleMeshes) {
+      Object.values(this.vehicleMeshes).forEach((mesh) => {
+        mesh.instanceMatrix.needsUpdate = true;
+      });
+    }
 
     if (this.animatedTrains && this.animatedTrains.length) {
       this.animatedTrains.forEach((train) => {
