@@ -1727,6 +1727,66 @@ export class LandmarkModels {
   }
 
   /**
+   * Bake every mesh in a rail car group into two vertex-colored meshes:
+   * one opaque body and one tinted glass shell. Builders keep constructing
+   * cars from primitives, then call this so each car costs two draw calls.
+   */
+  static bakeRailCarGroup(carGroup) {
+    const opaqueGeos = [];
+    const glassGeos = [];
+    const color = new THREE.Color();
+
+    carGroup.children.slice().forEach((mesh) => {
+      if (!mesh.isMesh) return;
+      const mat = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
+      if (!mat) return;
+
+      const geo = mesh.geometry.clone();
+      mesh.updateMatrix();
+      geo.applyMatrix4(mesh.matrix);
+
+      if (mat.name === 'rail-glass') {
+        glassGeos.push(geo);
+      } else {
+        color.copy(mat.color || new THREE.Color(0xffffff));
+        const count = geo.attributes.position.count;
+        const colors = new Float32Array(count * 3);
+        for (let i = 0; i < count; i++) {
+          colors[i * 3] = color.r;
+          colors[i * 3 + 1] = color.g;
+          colors[i * 3 + 2] = color.b;
+        }
+        geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        opaqueGeos.push(geo);
+      }
+
+      carGroup.remove(mesh);
+    });
+
+    if (opaqueGeos.length > 0) {
+      const body = new THREE.Mesh(
+        BufferGeometryUtils.mergeGeometries(opaqueGeos, false),
+        new THREE.MeshStandardMaterial({ vertexColors: true, metalness: 0.45, roughness: 0.38 })
+      );
+      body.name = 'rail-car-body';
+      body.receiveShadow = true;
+      carGroup.add(body);
+    }
+
+    if (glassGeos.length > 0) {
+      const glass = new THREE.Mesh(
+        BufferGeometryUtils.mergeGeometries(glassGeos, false),
+        new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.9, roughness: 0.12 })
+      );
+      glass.name = 'rail-car-glass';
+      glass.receiveShadow = true;
+      carGroup.add(glass);
+    }
+
+    return carGroup;
+  }
+
+  /**
    * Kereta Rel Listrik (KRL) Commuter Line Train Consist (Series JR 205 / Tokyo Metro)
    * 4-car commuter train with stainless-steel body, signature red & yellow stripes,
    * dark tinted passenger windows, pantographs, and driver cab headlights.
@@ -1752,6 +1812,7 @@ export class LandmarkModels {
       metalness: 0.9,
       roughness: 0.1
     });
+    windowGlassMat.name = 'rail-glass';
     const bogieMat = new THREE.MeshStandardMaterial({
       color: 0x1e293b,
       metalness: 0.7,
@@ -1769,7 +1830,6 @@ export class LandmarkModels {
     // Main Car Body
     const body = new THREE.Mesh(new THREE.BoxGeometry(3.1, 2.9, carLen), stainlessMat);
     body.position.set(0, 2.1, 0);
-    body.castShadow = true;
     body.receiveShadow = true;
     carGroup.add(body);
 
@@ -1838,7 +1898,7 @@ export class LandmarkModels {
       carGroup.add(gangway);
     }
 
-    return carGroup;
+    return this.bakeRailCarGroup(carGroup);
   }
 
   /**
@@ -1927,7 +1987,7 @@ export class LandmarkModels {
       BufferGeometryUtils.mergeGeometries(opaqueGeos, false),
       new THREE.MeshStandardMaterial({ vertexColors: true, metalness: 0.35, roughness: 0.42 })
     );
-    body.castShadow = true;
+    body.name = 'rail-car-body';
     body.receiveShadow = true;
     carGroup.add(body);
 
@@ -1935,6 +1995,8 @@ export class LandmarkModels {
       BufferGeometryUtils.mergeGeometries(glassGeos, false),
       new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.9, roughness: 0.12 })
     );
+    glass.name = 'rail-car-glass';
+    glass.receiveShadow = true;
     carGroup.add(glass);
 
     return carGroup;
@@ -1989,6 +2051,7 @@ export class LandmarkModels {
       roughness: 0.15,
       metalness: 0.85
     });
+    windowGlassMat.name = 'rail-glass';
     const bogieMat = new THREE.MeshStandardMaterial({
       color: 0x334155,
       metalness: 0.5,
@@ -2006,7 +2069,6 @@ export class LandmarkModels {
     // Main Car Body
     const body = new THREE.Mesh(new THREE.BoxGeometry(3.1, 2.8, carLen), stainlessMat);
     body.position.set(0, 2.05, 0);
-    body.castShadow = true;
     body.receiveShadow = true;
     carGroup.add(body);
 
@@ -2093,7 +2155,7 @@ export class LandmarkModels {
       carGroup.add(gangway);
     }
 
-    return carGroup;
+    return this.bakeRailCarGroup(carGroup);
   }
 
   static createMRTRatanggaTrain(cars = 4) {
@@ -2142,6 +2204,7 @@ export class LandmarkModels {
       roughness: 0.15,
       metalness: 0.85
     });
+    windowGlassMat.name = 'rail-glass';
     const bogieMat = new THREE.MeshStandardMaterial({
       color: 0x334155,
       metalness: 0.6,
@@ -2157,7 +2220,6 @@ export class LandmarkModels {
       // ==========================================
       const locoBody = new THREE.Mesh(new THREE.BoxGeometry(2.9, 2.7, locoLen - 2.8), whiteMat);
       locoBody.position.set(0, 2.15, -0.6);
-      locoBody.castShadow = true;
       carGroup.add(locoBody);
 
       // Aerodynamic Sloped Cab Noses (Front & Rear Double Cab)
@@ -2165,7 +2227,6 @@ export class LandmarkModels {
       const frontNose = new THREE.Mesh(new THREE.BoxGeometry(2.88, 2.3, 2.8), whiteMat);
       frontNose.position.set(0, 1.95, (locoLen - 2.8) * 0.5 + 0.8);
       frontNose.rotation.x = -0.15;
-      frontNose.castShadow = true;
       carGroup.add(frontNose);
 
       // Signature KAI Orange & Blue Livery Stripes
@@ -2201,7 +2262,6 @@ export class LandmarkModels {
       // ==========================================
       const coachBody = new THREE.Mesh(new THREE.BoxGeometry(3.0, 2.8, coachLen), stainlessMat);
       coachBody.position.set(0, 2.1, 0);
-      coachBody.castShadow = true;
       coachBody.receiveShadow = true;
       carGroup.add(coachBody);
 
@@ -2252,7 +2312,7 @@ export class LandmarkModels {
       carGroup.add(gangway);
     }
 
-    return carGroup;
+    return this.bakeRailCarGroup(carGroup);
   }
 
   static createKAIAntarkotaTrain(cars = 4) {
@@ -2286,6 +2346,7 @@ export class LandmarkModels {
       roughness: 0.15,
       metalness: 0.85
     });
+    windowGlassMat.name = 'rail-glass';
     const stainlessMat = new THREE.MeshStandardMaterial({
       color: 0xe2e8f0,
       metalness: 0.85,
@@ -2309,7 +2370,6 @@ export class LandmarkModels {
     // 1. Lower Body Shell (Merah Marun Khas LRT Jabodebek)
     const lowerBody = new THREE.Mesh(new THREE.BoxGeometry(2.85, 1.2, carLen), redMarunMat);
     lowerBody.position.set(0, 1.3, 0);
-    lowerBody.castShadow = true;
     carGroup.add(lowerBody);
 
     // 2. White Signature Livery Stripe
@@ -2325,7 +2385,6 @@ export class LandmarkModels {
     // 4. Upper Roof Cap & AC Units
     const roofCap = new THREE.Mesh(new THREE.BoxGeometry(2.82, 0.45, carLen), stainlessMat);
     roofCap.position.set(0, 3.15, 0);
-    roofCap.castShadow = true;
     carGroup.add(roofCap);
 
     const acUnit = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.35, 3.6), whiteMat);
@@ -2338,7 +2397,6 @@ export class LandmarkModels {
       const frontNose = new THREE.Mesh(new THREE.BoxGeometry(2.82, 2.2, 2.4), redMarunMat);
       frontNose.position.set(0, 2.0, carLen * 0.5 + 0.6);
       frontNose.rotation.x = -0.22;
-      frontNose.castShadow = true;
       carGroup.add(frontNose);
 
       const windshield = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.9, 0.2), windowGlassMat);
@@ -2358,7 +2416,6 @@ export class LandmarkModels {
       const rearNose = new THREE.Mesh(new THREE.BoxGeometry(2.82, 2.2, 2.4), redMarunMat);
       rearNose.position.set(0, 2.0, -carLen * 0.5 - 0.6);
       rearNose.rotation.x = 0.22;
-      rearNose.castShadow = true;
       carGroup.add(rearNose);
 
       [-0.8, 0.8].forEach((hx) => {
@@ -2406,7 +2463,7 @@ export class LandmarkModels {
       });
     });
 
-    return carGroup;
+    return this.bakeRailCarGroup(carGroup);
   }
 
   static createLRTJabodebekTrain(cars = 4) {
@@ -2439,6 +2496,7 @@ export class LandmarkModels {
       roughness: 0.15,
       metalness: 0.85
     });
+    darkGlassMat.name = 'rail-glass';
     const stainlessMat = new THREE.MeshStandardMaterial({
       color: 0xe2e8f0,
       metalness: 0.85,
@@ -2560,7 +2618,7 @@ export class LandmarkModels {
       });
     });
 
-    return carGroup;
+    return this.bakeRailCarGroup(carGroup);
   }
 
   static createLRTJakartaTrain(cars = 2) {

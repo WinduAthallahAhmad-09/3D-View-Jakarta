@@ -7,11 +7,12 @@ Repo: `WinduAthallahAhmad-09/3D-View-Jakarta` (branch `main`)
 
 - **81 landmark anchor** (#01 Monas s.d. #81 Cengkareng Business City) di `src/config/landmarks.js`.
 - **82 tombol tour** (81 landmark + tampilan aerial) di `index.html`; seluruh ID landmark memiliki tombol dan builder model.
-- **Satu skrip verifikasi statis** di `test_landmarks.js`, dijalankan dengan `npm test`. Saat ini menjalankan 2.203 assertion yang memeriksa data, metadata, builder, tombol tour, batas deviasi posisi, serta integrasi dataset OSM, infill, dan transit Void B. Ini **bukan 33 unit test suite** dan belum mencakup render, interaksi, atau performa.
+- **Satu skrip verifikasi statis** di `test_landmarks.js`, dijalankan dengan `npm test`. Saat ini menjalankan 2.240 assertion yang memeriksa data, metadata, builder, tombol tour, batas deviasi posisi, serta integrasi dataset OSM, infill, dan transit Void B. Sejak F4 Tahap 1, skrip juga memastikan lima builder gerbong KRL/MRT/KAI/LRT memakai `bakeRailCarGroup`: dua mesh per gerbong, material kaca bertanda, dan tanpa bayangan dinamis. Ini **bukan 33 unit test suite** dan belum mencakup render, interaksi, atau performa.
 - Kawasan inti Jakarta Pusat, Jakarta Selatan, dan Jakarta Utara selesai.
 - Jakarta Timur selesai 4 tahap.
 - Void A (Jakarta Barat Tengah) selesai 4 tahap.
 - Void B (Jakarta Barat Laut) selesai Tahap 1–4: 6 anchor #76–#81, Kanal Mookervaart, ekstensi Daan Mogot, infill permukiman dan kawasan industri, serta integrasi halte TransJakarta Koridor 3 dan viaduk KA Bandara.
+- F4 Tahap 1 (optimasi performa) selesai: geometri 76 gerbong kereta digabung menjadi dua mesh per gerbong (badan berwarna per-vertex + kaca), menurunkan draw call pandangan Bundaran HI dari **1.531 menjadi 603** (−60,6%) pada perangkat uji.
 
 ### Dataset OSM
 
@@ -64,6 +65,15 @@ Catatan regenerasi: ambil way jalan (`highway`) dan kanal (`waterway`, termasuk 
 - Jarak bebas viaduk terverifikasi programatik: minimum **2,34 unit** ke atap gudang kawasan industri (koridor x ≈ -1.040 s.d. -1.022) dan **10,41 unit** ke RSUD Cengkareng; halte berjarak lebih dari 8 unit dari Danau Rawa Buaya dan 25 unit dari Mall Daan Mogot.
 - Shadow frustum kini mengikuti target kamera dengan snapping 40 unit, sehingga cakupan bayangan konsisten di seluruh kota. Grid diperluas menjadi **3.000 unit / 150 divisi** (±1.500) untuk mencakup Void B.
 
+## Catatan F4 — Optimasi performa
+
+F4 dibagi menjadi tiga tahap yang diverifikasi dan di-commit terpisah. Keputusan yang disetujui: bayangan dibuat statis dan kereta tidak lagi menjadi shadow caster.
+
+- **Tahap 1 — konsolidasi gerbong kereta (selesai).** Lima builder gerbong (KRL, MRT Ratangga, KAI Antarkota, LRT Jabodebek, LRT Jakarta) kini memanggil `LandmarkModels.bakeRailCarGroup()`; geometri anak digabung menjadi **satu mesh badan berwarna per-vertex** dan **satu mesh kaca**, sehingga 76 gerbong pada 22 rangkaian hanya memakai **152 mesh**. Nama mesh `rail-car-body`/`rail-car-glass` dan penandaan material `rail-glass` ikut diverifikasi. Seluruh `castShadow = true` pada gerbong dihapus.
+- Verifikasi runtime 2026-10-27 (Chrome, viewport 531×553, Intel UHD Graphics via ANGLE/D3D11): **603 draw call** pada pandangan Bundaran HI (sebelumnya 1.531), tiga kali render berturut-turut identik; 76/76 gerbong tepat dua mesh, 0 mesh tanpa nama, 0 shadow caster kereta, 0 `PointLight` di dalam kereta, dan konsol tanpa error. Scene tetap memuat 6.143 mesh, 1.067 shadow caster, dan 194 `PointLight`.
+- **Tahap 2 — lampu dan bayangan (belum dikerjakan).** Rencana: instancing mesh PJU, pooling `PointLight` (0 pada siang hari, 8–16 lampu terdekat saat malam), dan shadow map statis yang diperbarui saat fokus kamera atau preset waktu berubah.
+- **Tahap 3 — kendaraan dan resolusi adaptif (belum dikerjakan).** Rencana: `InstancedMesh` untuk 647 kendaraan, DPR adaptif menuju target 60 FPS, lalu verifikasi mode malam dan bloom.
+
 ## Kebijakan akurasi posisi
 
 `projectGpsToScene()` adalah kerangka referensi, tetapi sebagian posisi landmark sengaja disesuaikan agar selaras dengan jalan dan geometri prosedural. Pada audit 2026-10-26:
@@ -76,7 +86,7 @@ Kebijakan ini didokumentasikan pula di header `src/config/landmarks.js`.
 
 ## Klaim yang belum terverifikasi
 
-- **"60 FPS" belum tercapai pada perangkat uji.** Baseline runtime 2026-10-26 di Chrome (viewport 831×785, Intel UHD Graphics via ANGLE/D3D11): pandangan Danau Rawa Buaya **13,9 FPS / 411 draw call per frame**, Bundaran HI **9,8 FPS / 1.206 draw call per frame**. Baseline ini diambil sebelum Tahap 3; Tahap 2 menambah 10 draw call, Tahap 3 menambah 9 draw call, dan Tahap 4 menambah 14 draw call (6 mesh transit + 8 mesh gerbong), sehingga bukan penyebab utama. Optimasi menyeluruh tetap menjadi gerbang performa F4. Beban statis mencakup 647 kendaraan (614 rute + 33 roundabout), sekitar 192 PointLight PJU, dan 81 label DOM.
+- **"60 FPS" belum tercapai pada perangkat uji.** Baseline runtime 2026-10-26 di Chrome (viewport 831×785, Intel UHD Graphics via ANGLE/D3D11): pandangan Danau Rawa Buaya **13,9 FPS / 411 draw call per frame**, Bundaran HI **9,8 FPS / 1.206 draw call per frame**. Baseline ini diambil sebelum Tahap 3; Tahap 2 menambah 10 draw call, Tahap 3 menambah 9 draw call, dan Tahap 4 menambah 14 draw call (6 mesh transit + 8 mesh gerbong), sehingga bukan penyebab utama. F4 Tahap 1 menurunkan draw call Bundaran HI menjadi **603** (viewport 531×553). FPS belum diklaim karena pengukuran pada Intel UHD sangat bervariasi antar-run; Tahap 2 dan 3 masih diperlukan. Beban statis mencakup 647 kendaraan (614 rute + 33 roundabout), 193 PointLight PJU (194 PointLight total), dan 81 label DOM.
 - **Verifikasi visual Tahap 3–4 belum dilakukan lewat screenshot browser.** Permukaan in-app browser berstatus `hidden` saat verifikasi, sehingga penempatan diperiksa secara programatik di dalam halaman. Tahap 3: jumlah instance, tidak ada tumpang-tindih AABB rumah/gudang, dan jarak bebas terhadap jalan OSM (rumah 5,4 unit, ruko 1,4 unit, gudang 32,7 unit). Tahap 4: enam mesh transit, dua kereta KA Bandara (2 gerbong masing-masing), panjang kurva 759 unit tanpa sampel NaN, jarak bebas viaduk ke gudang ≥2,34 unit dan ke RSUD 10,41 unit, serta papan portal bertekstur `KA BANDARA`. Pemeriksaan visual manual masih diperlukan.
 - **"33/33 unit test suites" tidak didukung repo.** Yang tersedia adalah satu skrip verifikasi statis.
 - Belum ada tes render, interaksi kamera, atau regresi visual.

@@ -1246,7 +1246,48 @@ assert.ok(citySceneContent.includes("type: 'ka-bandara'"), 'buildTraffic missing
 assert.ok(citySceneContent.includes("id: 'ka-bandara-outbound'"), 'buildTraffic missing ka-bandara outbound consist');
 assert.ok(citySceneContent.includes("id: 'ka-bandara-inbound'"), 'buildTraffic missing ka-bandara inbound consist');
 
-console.log(`✅ All 81 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 37: F4 Tahap 1 — gerbong kereta digabung menjadi badan + kaca (2 mesh/gerbong)
+assert.ok(landmarkModelsFresh.includes('static bakeRailCarGroup(carGroup)'), 'LandmarkModels missing bakeRailCarGroup');
+
+const railCarBuilders = [
+  'static createSingleKRLCar(c, cars = 4)',
+  'static createSingleMRTRatanggaCar(c, cars = 4)',
+  'static createSingleKAIAntarkotaCar(c, cars = 4)',
+  'static createSingleLRTJabodebekCar(c, cars = 4)',
+  'static createSingleLRTJakartaCar(c, cars = 2)'
+];
+
+railCarBuilders.forEach((signature) => {
+  const start = landmarkModelsFresh.indexOf(signature);
+  assert.ok(start > 0, `Missing rail car builder: ${signature}`);
+  const end = landmarkModelsFresh.indexOf('\n  static ', start + signature.length);
+  assert.ok(end > start, `Cannot isolate rail car builder: ${signature}`);
+  const builder = landmarkModelsFresh.slice(start, end);
+  assert.ok(builder.includes('return this.bakeRailCarGroup(carGroup);'), `${signature} does not merge its car geometry`);
+  assert.ok(builder.includes(".name = 'rail-glass';"), `${signature} does not tag its glass material`);
+  assert.ok(!builder.includes('.castShadow = true'), `${signature} still opts into dynamic shadows`);
+});
+
+const bakeStart = landmarkModelsFresh.indexOf('static bakeRailCarGroup(carGroup)');
+const bakeEnd = landmarkModelsFresh.indexOf('\n  static ', bakeStart + 1);
+assert.ok(bakeStart > 0 && bakeEnd > bakeStart, 'Cannot isolate bakeRailCarGroup');
+const bakeMethod = landmarkModelsFresh.slice(bakeStart, bakeEnd);
+assert.ok(bakeMethod.includes("mat.name === 'rail-glass'"), 'bakeRailCarGroup cannot identify glass materials');
+assert.ok(bakeMethod.includes('BufferGeometryUtils.mergeGeometries(opaqueGeos, false)'), 'bakeRailCarGroup must merge the opaque body');
+assert.ok(bakeMethod.includes('BufferGeometryUtils.mergeGeometries(glassGeos, false)'), 'bakeRailCarGroup must merge the glass');
+assert.ok(bakeMethod.includes("body.name = 'rail-car-body'"), 'Merged rail car body mesh is not named');
+assert.ok(bakeMethod.includes("glass.name = 'rail-car-glass'"), 'Merged rail car glass mesh is not named');
+assert.ok(!bakeMethod.includes('.castShadow = true'), 'Merged rail car meshes must not cast dynamic shadows');
+
+const bandaraStart = landmarkModelsFresh.indexOf('static createSingleKABandaraCar(c, cars = 2)');
+const bandaraEnd = landmarkModelsFresh.indexOf('\n  static ', bandaraStart + 1);
+assert.ok(bandaraStart > 0 && bandaraEnd > bandaraStart, 'Cannot isolate createSingleKABandaraCar');
+const bandaraBuilder = landmarkModelsFresh.slice(bandaraStart, bandaraEnd);
+assert.ok(!bandaraBuilder.includes('.castShadow = true'), 'KA Bandara car must not cast dynamic shadows');
+assert.ok(bandaraBuilder.includes("body.name = 'rail-car-body'"), 'KA Bandara body mesh is not named');
+assert.ok(bandaraBuilder.includes("glass.name = 'rail-car-glass'"), 'KA Bandara glass mesh is not named');
+
+console.log(`✅ All 81 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, F4 Tahap 1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
