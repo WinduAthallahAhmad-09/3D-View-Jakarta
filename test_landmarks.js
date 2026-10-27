@@ -1287,7 +1287,77 @@ assert.ok(!bandaraBuilder.includes('.castShadow = true'), 'KA Bandara car must n
 assert.ok(bandaraBuilder.includes("body.name = 'rail-car-body'"), 'KA Bandara body mesh is not named');
 assert.ok(bandaraBuilder.includes("glass.name = 'rail-car-glass'"), 'KA Bandara glass mesh is not named');
 
-console.log(`✅ All 81 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, F4 Tahap 1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 38: F4 Tahap 2 — PJU instanced, pool PointLight, dan shadow map statis
+assert.ok(citySceneContent.includes('this.pjuLampTransforms = [];'), 'CityScene.js missing pjuLampTransforms collector');
+assert.ok(citySceneContent.includes('this.pjuLightPool = [];'), 'CityScene.js missing pjuLightPool');
+assert.ok(citySceneContent.includes('this.pjuLightPoolSize = 12;'), 'PJU light pool must be capped at 12 lights');
+assert.ok(citySceneContent.includes('this.buildStreetLampInstances();'), 'CityScene.js does not build instanced PJU lamps');
+assert.ok(citySceneContent.includes('this.buildPjuLightPool();'), 'CityScene.js does not build the PJU light pool');
+assert.ok(!citySceneContent.includes('this.streetLights'), 'CityScene.js still creates per-lamp PointLights');
+
+const lampStart = citySceneContent.indexOf('createStreetLamp(x, z, facingEast) {');
+const lampEnd = citySceneContent.indexOf('\n  buildStreetLampInstances() {', lampStart);
+assert.ok(lampStart > 0 && lampEnd > lampStart, 'Cannot isolate createStreetLamp');
+const lampMethod = citySceneContent.slice(lampStart, lampEnd);
+assert.ok(lampMethod.includes('this.pjuLampTransforms.push'), 'createStreetLamp must record lamp transforms');
+assert.ok(!lampMethod.includes('new THREE.Mesh'), 'createStreetLamp must not create per-lamp meshes');
+assert.ok(!lampMethod.includes('new THREE.PointLight'), 'createStreetLamp must not create per-lamp PointLights');
+assert.ok(!lampMethod.includes('proceduralGroup.add'), 'createStreetLamp must not add per-lamp groups');
+
+const instancedLampStart = citySceneContent.indexOf('buildStreetLampInstances() {');
+const instancedLampEnd = citySceneContent.indexOf('\n  buildPjuLightPool() {', instancedLampStart);
+assert.ok(instancedLampStart > 0 && instancedLampEnd > instancedLampStart, 'Cannot isolate buildStreetLampInstances');
+const instancedLampMethod = citySceneContent.slice(instancedLampStart, instancedLampEnd);
+assert.ok(instancedLampMethod.includes('new THREE.InstancedMesh(poleGeo, poleMat, count)'), 'PJU poles are not instanced');
+assert.ok(instancedLampMethod.includes('new THREE.InstancedMesh(bulbGeo, this.pjuBulbMat, count)'), 'PJU bulbs are not instanced');
+assert.ok(instancedLampMethod.includes("poleMesh.name = 'pju-pole'"), 'Instanced PJU pole mesh is not named');
+assert.ok(instancedLampMethod.includes("bulbMesh.name = 'pju-bulb-instanced'"), 'Instanced PJU bulb mesh is not named');
+assert.ok(instancedLampMethod.includes('setMatrixAt'), 'Instanced PJU meshes do not write instance matrices');
+assert.ok(!instancedLampMethod.includes('new THREE.PointLight'), 'Instanced PJU builder must not add PointLights');
+
+const poolStart = citySceneContent.indexOf('buildPjuLightPool() {');
+const poolEnd = citySceneContent.indexOf('\n  updatePjuLights(cameraPosition) {', poolStart);
+assert.ok(poolStart > 0 && poolEnd > poolStart, 'Cannot isolate buildPjuLightPool');
+const poolMethod = citySceneContent.slice(poolStart, poolEnd);
+assert.ok(poolMethod.includes('new THREE.PointLight(0xfffbeb, 0, 22, 1.5)'), 'PJU pool light configuration changed');
+assert.ok(poolMethod.includes("light.name = 'pju-pool-light'"), 'PJU pool light is not named');
+assert.ok(poolMethod.includes('light.visible = false'), 'PJU pool must start hidden during the day');
+assert.ok(poolMethod.includes('this.pjuLightPool.push(light)'), 'PJU pool does not collect its lights');
+
+const pjuUpdateStart = citySceneContent.indexOf('updatePjuLights(cameraPosition) {');
+const pjuUpdateEnd = citySceneContent.indexOf('\n  buildNorthJakartaInfrastructure() {', pjuUpdateStart);
+assert.ok(pjuUpdateStart > 0 && pjuUpdateEnd > pjuUpdateStart, 'Cannot isolate updatePjuLights');
+const pjuUpdateMethod = citySceneContent.slice(pjuUpdateStart, pjuUpdateEnd);
+assert.ok(pjuUpdateMethod.includes('this.currentTimePreset'), 'updatePjuLights ignores the time preset');
+assert.ok(pjuUpdateMethod.includes('this.pjuLampTransforms'), 'updatePjuLights does not read the lamp transforms');
+assert.ok(pjuUpdateMethod.includes('sort((a, b) => a.d - b.d)'), 'updatePjuLights does not rank lamps by distance');
+assert.ok(pjuUpdateMethod.includes('this.pjuLightPool.forEach'), 'updatePjuLights does not drive the light pool');
+assert.ok(pjuUpdateMethod.includes("this.currentTimePreset === 'night' ? 1.8 : 0.6"), 'PJU pool intensity no longer matches the presets');
+assert.ok(pjuUpdateMethod.includes('dx * dx + dz * dz < 225'), 'updatePjuLights is missing its camera-move throttle');
+assert.ok(!pjuUpdateMethod.includes('new THREE.PointLight'), 'updatePjuLights must not allocate PointLights');
+
+const presetStart = citySceneContent.indexOf('setTimePreset(preset) {');
+const presetEnd = citySceneContent.indexOf('setNightMode(', presetStart);
+assert.ok(presetStart > 0 && presetEnd > presetStart, 'Cannot isolate setTimePreset');
+const presetMethod = citySceneContent.slice(presetStart, presetEnd);
+assert.ok(presetMethod.includes('this.currentTimePreset = preset;'), 'setTimePreset does not record the active preset');
+assert.ok(presetMethod.includes('this.lastPjuLightPosition.set(Infinity, Infinity, Infinity);'), 'setTimePreset does not force a PJU pool refresh');
+assert.ok(presetMethod.includes('this.pjuLightPool.forEach'), 'setTimePreset does not drive the PJU light pool');
+
+assert.ok(mainJsContent.includes('this.renderer.shadowMap.autoUpdate = false;'), 'main.js still rebuilds the shadow map every frame');
+const shadowRefreshCount = (mainJsContent.match(/this\.renderer\.shadowMap\.needsUpdate = true;/g) || []).length;
+assert.ok(shadowRefreshCount >= 3, 'main.js does not request shadow refreshes on init, time, and focus changes');
+assert.ok(mainJsContent.includes('if (this.lighting.updateShadowFocus(this.cameraController.controls.target))'), 'main.js does not refresh static shadows when the focus moves');
+assert.ok(mainJsContent.includes('this.city.updatePjuLights(this.camera.position);'), 'main.js does not update the PJU light pool with the camera');
+
+const shadowFocusStart = lightingContent.indexOf('updateShadowFocus(target) {');
+const shadowFocusEnd = lightingContent.indexOf('applySunPosition() {', shadowFocusStart);
+assert.ok(shadowFocusStart > 0 && shadowFocusEnd > shadowFocusStart, 'Cannot isolate updateShadowFocus');
+const shadowFocusMethod = lightingContent.slice(shadowFocusStart, shadowFocusEnd);
+assert.ok(shadowFocusMethod.includes('return false;'), 'updateShadowFocus must report unchanged focus');
+assert.ok(shadowFocusMethod.includes('return true;'), 'updateShadowFocus must report a moved focus');
+
+console.log(`✅ All 81 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, F4 Tahap 1-2 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

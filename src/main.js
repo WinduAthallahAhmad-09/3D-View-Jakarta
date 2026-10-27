@@ -42,6 +42,8 @@ class JakartaApp {
     this.renderer.toneMappingExposure = 1.05;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.autoUpdate = false;
+    this.renderer.shadowMap.needsUpdate = true;
 
     this.container.appendChild(this.renderer.domElement);
   }
@@ -105,6 +107,7 @@ class JakartaApp {
     // 2. City Environment & Landmarks
     this.city = new CityScene(this.scene);
     this.city.setTimePreset('day');
+    this.renderer.shadowMap.needsUpdate = true;
 
     // 3. Camera Controller with smooth flight
     this.cameraController = new CameraController(this.camera, this.renderer.domElement);
@@ -128,6 +131,7 @@ class JakartaApp {
         this.lighting.setTimeOfDay(preset);
         this.city.setTimePreset(preset);
         this.setTimePresetBloom(preset);
+        this.renderer.shadowMap.needsUpdate = true;
       },
       onResetNorth: () => {
         if (this.cameraController) {
@@ -168,14 +172,17 @@ class JakartaApp {
         try {
           await this.googleTiles.enable(apiKey);
           this.city.setProceduralVisible(false);
+          this.renderer.shadowMap.needsUpdate = true;
           this.ui.showToast('Google Photorealistic 3D Tiles Aktif!');
         } catch (err) {
           this.city.setProceduralVisible(true);
+          this.renderer.shadowMap.needsUpdate = true;
           this.ui.showToast('Gagal memuat Google Tiles: ' + (err.message || 'Error'));
         }
       } else {
         this.googleTiles.disable();
         this.city.setProceduralVisible(true);
+        this.renderer.shadowMap.needsUpdate = true;
         this.ui.showToast('Kembali ke mode model lokal Three.js.');
       }
     });
@@ -222,9 +229,16 @@ class JakartaApp {
       this.cameraController.update(delta);
     }
 
-    // Keep the shadow frustum centred on the area the user is exploring
+    // Keep only the nearest PJU lights active around the camera
+    if (this.city && this.camera) {
+      this.city.updatePjuLights(this.camera.position);
+    }
+
+    // Refresh the static shadow map only when the focus crosses a snap cell
     if (this.lighting && this.cameraController) {
-      this.lighting.updateShadowFocus(this.cameraController.controls.target);
+      if (this.lighting.updateShadowFocus(this.cameraController.controls.target)) {
+        this.renderer.shadowMap.needsUpdate = true;
+      }
     }
 
     // Update Google 3D Tiles stream

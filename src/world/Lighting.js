@@ -47,14 +47,16 @@ export class LightingManager {
   /**
    * Keep the sun offset fixed while moving the shadow frustum to the camera target.
    * The 40-unit snap avoids shadow shimmer when the camera drifts slowly.
+   * Returns true only when the focus moved, so the static shadow map can be rebuilt.
    */
   updateShadowFocus(target) {
     const sx = Math.round(target.x / 40) * 40;
     const sz = Math.round(target.z / 40) * 40;
-    if (sx === this.shadowFocusX && sz === this.shadowFocusZ) return;
+    if (sx === this.shadowFocusX && sz === this.shadowFocusZ) return false;
     this.shadowFocusX = sx;
     this.shadowFocusZ = sz;
     this.applySunPosition();
+    return true;
   }
 
   applySunPosition() {

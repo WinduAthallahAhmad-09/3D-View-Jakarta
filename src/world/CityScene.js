@@ -15,7 +15,12 @@ export class CityScene {
     this.interactiveObjects = [];
     this.vehicles = [];
     this.animatedTrains = [];
-    this.streetLights = [];
+    this.pjuLampTransforms = [];
+    this.pjuLightPool = [];
+    this.pjuLightPoolSize = 12;
+    this.pjuLightsActive = false;
+    this.currentTimePreset = 'day';
+    this.lastPjuLightPosition = new THREE.Vector3(Infinity, Infinity, Infinity);
     this.nightMaterials = [];
     this.glowMaterials = [];
     this.init();
@@ -46,6 +51,8 @@ export class CityScene {
     this.buildLandmarks();
     this.buildUrbanDistricts();
     this.buildStreetVegetation();
+    this.buildStreetLampInstances();
+    this.buildPjuLightPool();
     this.buildTraffic();
     this.collectGlowMaterials();
   }
@@ -2296,13 +2303,17 @@ export class CityScene {
   }
 
   createStreetLamp(x, z, facingEast) {
-    const poleGroup = new THREE.Group();
-    poleGroup.position.set(x, 0, z);
+    this.pjuLampTransforms.push({ x, z, facingEast });
+  }
+
+  buildStreetLampInstances() {
+    const count = this.pjuLampTransforms.length;
+    if (count === 0) return;
 
     const poleMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.7 });
-    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.28, 9, 6), poleMat);
-    pole.position.y = 4.5;
-    poleGroup.add(pole);
+    const poleGeo = new THREE.CylinderGeometry(0.18, 0.28, 9, 6);
+    const poleMesh = new THREE.InstancedMesh(poleGeo, poleMat, count);
+    poleMesh.name = 'pju-pole';
 
     if (!this.pjuBulbMat) {
       this.pjuBulbMat = new THREE.MeshStandardMaterial({
@@ -2315,19 +2326,80 @@ export class CityScene {
       this.glowMaterials.push(this.pjuBulbMat);
     }
 
-    const bulb = new THREE.Mesh(
-      new THREE.SphereGeometry(0.35, 8, 8),
-      this.pjuBulbMat
-    );
-    bulb.position.set(facingEast ? 2.0 : -2.0, 8.5, 0);
-    poleGroup.add(bulb);
+    const bulbGeo = new THREE.SphereGeometry(0.35, 8, 8);
+    const bulbMesh = new THREE.InstancedMesh(bulbGeo, this.pjuBulbMat, count);
+    bulbMesh.name = 'pju-bulb-instanced';
 
-    const lampLight = new THREE.PointLight(0xfffbeb, 0, 22, 1.5);
-    lampLight.position.set(facingEast ? 2.0 : -2.0, 8.0, 0);
-    poleGroup.add(lampLight);
-    this.streetLights.push(lampLight);
+    const dummy = new THREE.Object3D();
+    this.pjuLampTransforms.forEach((lamp, index) => {
+      dummy.position.set(lamp.x, 4.5, lamp.z);
+      dummy.updateMatrix();
+      poleMesh.setMatrixAt(index, dummy.matrix);
 
-    this.proceduralGroup.add(poleGroup);
+      dummy.position.set(lamp.x + (lamp.facingEast ? 2.0 : -2.0), 8.5, lamp.z);
+      dummy.updateMatrix();
+      bulbMesh.setMatrixAt(index, dummy.matrix);
+    });
+
+    poleMesh.instanceMatrix.needsUpdate = true;
+    bulbMesh.instanceMatrix.needsUpdate = true;
+    this.proceduralGroup.add(poleMesh);
+    this.proceduralGroup.add(bulbMesh);
+  }
+
+  buildPjuLightPool() {
+    for (let i = 0; i < this.pjuLightPoolSize; i++) {
+      const light = new THREE.PointLight(0xfffbeb, 0, 22, 1.5);
+      light.name = 'pju-pool-light';
+      light.visible = false;
+      light.position.set(0, 8, 0);
+      this.proceduralGroup.add(light);
+      this.pjuLightPool.push(light);
+    }
+  }
+
+  /**
+   * Keep only the nearest PJU lights active at night so the shader never
+   * evaluates all 193 lamps. Refreshes after the camera moves 15 units.
+   */
+  updatePjuLights(cameraPosition) {
+    if (this.currentTimePreset === 'day') {
+      if (this.pjuLightsActive) {
+        this.pjuLightPool.forEach((light) => {
+          light.visible = false;
+          light.intensity = 0;
+        });
+        this.pjuLightsActive = false;
+      }
+      return;
+    }
+
+    const dx = cameraPosition.x - this.lastPjuLightPosition.x;
+    const dz = cameraPosition.z - this.lastPjuLightPosition.z;
+    if (this.pjuLightsActive && dx * dx + dz * dz < 225) return;
+
+    this.lastPjuLightPosition.copy(cameraPosition);
+
+    const nearest = this.pjuLampTransforms
+      .map((lamp) => {
+        const x = lamp.x + (lamp.facingEast ? 2.0 : -2.0);
+        const z = lamp.z;
+        return { x, z, d: (x - cameraPosition.x) ** 2 + (z - cameraPosition.z) ** 2 };
+      })
+      .sort((a, b) => a.d - b.d);
+
+    const intensity = this.currentTimePreset === 'night' ? 1.8 : 0.6;
+    this.pjuLightPool.forEach((light, index) => {
+      const nearestLamp = nearest[index];
+      if (!nearestLamp) {
+        light.visible = false;
+        return;
+      }
+      light.position.set(nearestLamp.x, 8.0, nearestLamp.z);
+      light.intensity = intensity;
+      light.visible = true;
+    });
+    this.pjuLightsActive = true;
   }
 
   /**
@@ -7251,8 +7323,12 @@ export class CityScene {
       }
     }
 
-    this.streetLights.forEach((light) => {
+    this.currentTimePreset = preset;
+    this.lastPjuLightPosition.set(Infinity, Infinity, Infinity);
+    if (preset === 'day') this.pjuLightsActive = false;
+    this.pjuLightPool.forEach((light) => {
       light.intensity = isNight ? 1.8 : isGolden ? 0.6 : 0;
+      if (preset === 'day') light.visible = false;
     });
 
     const monasSpots = this.scene.getObjectsByProperty("name", "monas-spotlight");
