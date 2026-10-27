@@ -1451,7 +1451,60 @@ const resizeHandler = mainJsContent.slice(resizeStart, resizeEnd);
 assert.ok(resizeHandler.includes('this.basePixelRatio = this.computeBasePixelRatio();'), 'Resize does not refresh the base pixel ratio');
 assert.ok(resizeHandler.includes('this.setPixelRatio(this.pixelRatio);'), 'Resize bypasses the shared pixel ratio setter');
 
-console.log(`✅ All 81 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, F4 Tahap 1-3 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 40: Verifikasi visual 2026-10-27 — perbaikan P1
+const westJakartaStart = citySceneContent.indexOf('buildWestJakartaInfillAndDistricts() {');
+const westJakartaEnd = citySceneContent.indexOf('\n  buildVoidBDaanMogot(', westJakartaStart);
+assert.ok(westJakartaStart > 0 && westJakartaEnd > westJakartaStart, 'Cannot isolate buildWestJakartaInfillAndDistricts');
+const westJakartaMethod = citySceneContent.slice(westJakartaStart, westJakartaEnd);
+
+const daanMogotStart = westJakartaMethod.indexOf('// Koridor Gudang & Niaga Daan Mogot Pesing');
+const daanMogotEnd = westJakartaMethod.indexOf('// Koridor Ruko Modern Void A', daanMogotStart);
+assert.ok(daanMogotStart > 0 && daanMogotEnd > daanMogotStart, 'Cannot isolate the Daan Mogot commercial corridor');
+const daanMogotCorridor = westJakartaMethod.slice(daanMogotStart, daanMogotEnd);
+assert.ok(daanMogotCorridor.includes('Math.abs(x - (-1080)) < 52'), 'Daan Mogot corridor must exclude the Danau Rawa Buaya footprint (X)');
+assert.ok(daanMogotCorridor.includes('Math.abs(z - (-400)) < 46'), 'Daan Mogot corridor must exclude the Danau Rawa Buaya footprint (Z)');
+
+const landmarkById = (id) => JAKARTA_LANDMARKS.find((l) => l.id === id);
+assert.deepStrictEqual(landmarkById('monas').cameraPosition, [219, 115, -113], 'Monas preset must frame the full flame');
+assert.deepStrictEqual(landmarkById('daan-mogot-mall').cameraPosition, [-1260, 85, -310], 'Daan Mogot Mall preset must show the facade, not the roof');
+assert.deepStrictEqual(landmarkById('mall-kelapa-gading').cameraPosition, [1100, 70, -660], 'Mall Kelapa Gading preset must show the pyramid skylight and campanile');
+assert.deepStrictEqual(landmarkById('mall-kelapa-gading').cameraTarget, [1198, 18, -531], 'Mall Kelapa Gading preset must aim at the podium');
+assert.deepStrictEqual(landmarkById('bandara-halim-perdanakusuma').cameraPosition, [773, 120, 1163], 'Bandara Halim preset must clear the hangar foreground');
+assert.deepStrictEqual(landmarkById('bandara-halim-perdanakusuma').cameraTarget, [893, 8, 993], 'Bandara Halim preset must aim at the apron');
+assert.deepStrictEqual(landmarkById('danau-rawa-buaya').cameraPosition, [-1080, 90, -250], 'Danau Rawa Buaya preset must show the full retention basin');
+assert.deepStrictEqual(landmarkById('danau-rawa-buaya').cameraTarget, [-1080, 4, -400], 'Danau Rawa Buaya preset must aim at the water body');
+assert.deepStrictEqual(landmarkById('scbd-district').cameraPosition, [-420, 190, 620], 'SCBD preset must not sit behind a tower');
+assert.deepStrictEqual(landmarkById('scbd-district').cameraTarget, [-198, 110, 433], 'SCBD preset must keep the skyline and its label in frame');
+
+const modelSourceContent = fs.readFileSync('./src/world/LandmarkModels.js', 'utf-8');
+const halimModelStart = modelSourceContent.indexOf('static createBandaraHalim() {');
+const halimModelEnd = modelSourceContent.indexOf('\n  static create', halimModelStart + 1);
+assert.ok(halimModelStart > 0 && halimModelEnd > halimModelStart, 'Cannot isolate createBandaraHalim');
+const halimModel = modelSourceContent.slice(halimModelStart, halimModelEnd);
+assert.ok(halimModel.includes('color: 0x64748b, metalness: 0.25'), 'Halim hangar must read as slate instead of rendering black');
+
+const scbdClusterStart = citySceneContent.indexOf('createSCBDCluster() {');
+const scbdClusterEnd = citySceneContent.indexOf('\n  /**', scbdClusterStart);
+assert.ok(scbdClusterStart > 0 && scbdClusterEnd > scbdClusterStart, 'Cannot isolate createSCBDCluster');
+const scbdCluster = citySceneContent.slice(scbdClusterStart, scbdClusterEnd);
+assert.ok(
+  scbdCluster.includes('metalness: 0.5') && scbdCluster.includes('roughness: 0.25'),
+  'SCBD facade must stay below 0.8 metalness so it does not render black without an environment map'
+);
+
+assert.deepStrictEqual(landmarkById('tanjung-priok').cameraPosition, [940, 150, -1070], 'Tanjung Priok preset must clear the station vault roof');
+assert.deepStrictEqual(landmarkById('tanjung-priok').cameraTarget, [831, 25, -1233], 'Tanjung Priok preset must frame the cranes and station');
+
+const tanjungModelStart = modelSourceContent.indexOf('static createTanjungPriokPort() {');
+const tanjungModelEnd = modelSourceContent.indexOf('\n  /**', tanjungModelStart);
+assert.ok(tanjungModelStart > 0 && tanjungModelEnd > tanjungModelStart, 'Cannot isolate createTanjungPriokPort');
+const tanjungModel = modelSourceContent.slice(tanjungModelStart, tanjungModelEnd);
+assert.ok(
+  tanjungModel.includes('color: 0x334155, metalness: 0.35, roughness: 0.4'),
+  'Tanjung Priok vault roof must read as steel instead of rendering black'
+);
+
+console.log(`✅ All 81 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

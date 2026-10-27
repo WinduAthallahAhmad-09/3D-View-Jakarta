@@ -3817,6 +3817,8 @@ export class CityScene {
       [-465, -400].forEach((z) => {
         // Lewati simpang flyover pesing
         if (Math.abs(x - (-650)) < 30 && Math.abs(z - (-420)) < 25) return;
+        // Danau Rawa Buaya (landmark #80) — jangan menimbun badan air
+        if (Math.abs(x - (-1080)) < 52 && Math.abs(z - (-400)) < 46) return;
 
         const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233));
         const h = 9 + hash * 8; // 9m - 17m
@@ -5653,8 +5655,8 @@ export class CityScene {
         emissiveMap: emissiveTexture,
         emissive: 0x0284c7,
         emissiveIntensity: 0.28,
-        roughness: 0.2,
-        metalness: 0.8
+        roughness: 0.25,
+        metalness: 0.5
       });
       this.nightMaterials.push(mat);
 

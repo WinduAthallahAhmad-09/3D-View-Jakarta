@@ -2,7 +2,7 @@
 
 Website eksplorasi interaktif 3D Kota Jakarta dengan bangunan-bangunan yang mirip kondisi nyata saat ini. Dibangun menggunakan teknologi WebGL modern (**Three.js**), **100% gratis** tanpa memerlukan API key berbayar ataupun pendaftaran kartu kredit.
 
-**Status saat ini:** 81 landmark anchor dengan verifikasi statis, 9 Voids dalam roadmap. Lihat [docs/ROADMAP.md](docs/ROADMAP.md) untuk status per wilayah dan catatan batasan.
+**Status saat ini:** 81 landmark anchor dengan verifikasi statis, 9 Voids dalam roadmap. Audit visual 2026-10-27 menyimpan 14 baseline screenshot di [`docs/verification/screenshots/`](docs/verification/screenshots/). Lihat [docs/ROADMAP.md](docs/ROADMAP.md) untuk status per wilayah dan catatan batasan.
 
 ---
 
@@ -54,7 +54,9 @@ python -m http.server 8000
 npm test
 ```
 
-Perintah ini menjalankan satu skrip verifikasi statis (2.342 assertion) untuk 81 landmark: jumlah dan ID unik, kelengkapan metadata, ketersediaan builder, kelengkapan tombol tour, batas penyimpangan posisi terhadap proyeksi GPS, serta integritas dataset OSM, infill, dan transit Void B (halte TransJakarta Koridor 3 dan viaduk KA Bandara). Sejak F4, verifikasi juga mengunci gerbong kereta dua mesh tanpa bayangan dinamis, 193 tiang/lampu PJU sebagai dua `InstancedMesh`, pool 12 `PointLight`, shadow map statis, 647 kendaraan dalam delapan `InstancedMesh`, serta DPR adaptif yang menyinkronkan renderer dan composer. Ini bukan pengganti pengujian render atau performa di browser.
+Perintah ini menjalankan satu skrip verifikasi statis (2.364 assertion) untuk 81 landmark: jumlah dan ID unik, kelengkapan metadata, ketersediaan builder, kelengkapan tombol tour, batas penyimpangan posisi terhadap proyeksi GPS, serta integritas dataset OSM, infill, dan transit Void B (halte TransJakarta Koridor 3 dan viaduk KA Bandara). Sejak F4, verifikasi juga mengunci gerbong kereta dua mesh tanpa bayangan dinamis, 193 tiang/lampu PJU sebagai dua `InstancedMesh`, pool 12 `PointLight`, shadow map statis, 647 kendaraan dalam delapan `InstancedMesh`, serta DPR adaptif yang menyinkronkan renderer dan composer. Check 40 mengunci perbaikan audit visual 2026-10-27: exclusion Danau Rawa Buaya, framing enam preset, material hangar Halim, fasad SCBD, dan atap Stasiun Tanjung Priok. Ini bukan pengganti pengujian render atau performa di browser.
+
+Hasil audit visual, statistik draw call per sudut pandang, dan daftar temuan P2/P3 ada di [docs/verification/2026-10-27-visual-audit.md](docs/verification/2026-10-27-visual-audit.md).
 
 ---
 
@@ -87,7 +89,8 @@ JAKARTA 3D VIEW/
 ├── test_landmarks.js           # Verifikasi statis data & integrasi landmark
 ├── README.md                   # Dokumentasi lengkap
 ├── docs/
-│   └── ROADMAP.md              # Status terverifikasi & roadmap 9 Voids
+│   ├── ROADMAP.md              # Status terverifikasi & roadmap 9 Voids
+│   └── verification/           # Audit visual & 14 baseline screenshot
 ├── public/
 │   └── models/                 # Slot folder untuk menyimpan file 3D .glb kustom
 └── src/

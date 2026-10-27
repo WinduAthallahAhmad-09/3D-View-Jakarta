@@ -129,7 +129,7 @@ export const JAKARTA_LANDMARKS = [
     coordinates: { lat: -6.175397, lng: 106.827161 },
     position: [58, 0, -277],
     labelHeight: 142,
-    cameraPosition: [168, 95, -165],
+    cameraPosition: [219, 115, -113],
     cameraTarget: [58, 65, -277],
     description: "Monumen peringatan setinggi 132 meter di jantung Lapangan Medan Merdeka seluas 80 hektare yang membentang di sebelah timur poros Jl. M.H. Thamrin – Jl. Medan Merdeka Barat. Memiliki empat jalur diagonal X-Paths, Taman Rusa di tenggara, dan Kolam Air Mancur Menari di sisi barat.",
     facts: [
@@ -479,8 +479,8 @@ export const JAKARTA_LANDMARKS = [
     position: [-198, 0, 433],
     rotationY: -0.68,
     labelHeight: 175,
-    cameraPosition: [-290, 108, 500],
-    cameraTarget: [-198, 75, 433],
+    cameraPosition: [-420, 190, 620],
+    cameraTarget: [-198, 110, 433],
     description: "Distrik bisnis super-modern seluas 45 hektare di kuadran tenggara Simpang Semanggi (sisi timur Jl. Jenderal Sudirman). Merupakan pusat keuangan pasar modal Indonesia tempat berdirinya Gedung Bursa Efek Indonesia (IDX), Treasury Tower, District 8, dan Pacific Place.",
     facts: [
       "Treasury Tower di kompleks District 8 mencapai tinggi 279,5 meter."
@@ -1258,8 +1258,8 @@ export const JAKARTA_LANDMARKS = [
     coordinates: { lat: -6.1575, lng: 106.9080 },
     position: [1198.0, 0, -531.0],
     labelHeight: 55,
-    cameraPosition: [1198.0, 85, -445],
-    cameraTarget: [1198.0, 20, -531.0],
+    cameraPosition: [1100.0, 70, -660.0],
+    cameraTarget: [1198.0, 18, -531.0],
     description: "Superblok pusat gaya hidup dan komersial paling prestisius di Jakarta Utara dengan luas lebih dari 150.000 m². Menghubungkan MKG 1 hingga 5 dengan jembatan penghubung layang terpadu, kanopi kubah kaca atrium piramida, koridor kuliner terbuka Gading Walk, serta menara jam bergaya Italia klasik La Piazza Campanile.",
     facts: [
       "Salah satu superblok mall terluas di Indonesia yang terintegrasi langsung dengan stasiun LRT Jakarta Boulevard Utara.",
@@ -1280,7 +1280,7 @@ export const JAKARTA_LANDMARKS = [
     coordinates: { lat: -6.1080, lng: 106.8820 },
     position: [831.0, 0, -1233.0],
     labelHeight: 65,
-    cameraPosition: [831.0, 95, -1140],
+    cameraPosition: [940, 150, -1070],
     cameraTarget: [831.0, 25, -1233.0],
     description: "Gerbang logistik maritim tersibuk dan terbesar di Indonesia yang menangani lebih dari 50% arus kargo perdagangan nasional. Menampilkan deretan derek raksasa kontainer (Quay Cranes) oranye-putih di atas dermaga laut dalam, ribuan peti kemas warna-warni, serta monumen arsitektur monumental Stasiun Tanjung Priok bergaya Art Deco dengan atap kanopi busur baja melengkung megah.",
     facts: [
@@ -1462,8 +1462,8 @@ export const JAKARTA_LANDMARKS = [
     coordinates: { lat: -6.2650, lng: 106.8864 },
     position: [893.2, 0, 993.0],
     labelHeight: 55,
-    cameraPosition: [893.2, 85, 1075],
-    cameraTarget: [893.2, 20, 993.0],
+    cameraPosition: [773, 120, 1163],
+    cameraTarget: [893, 8, 993.0],
     description: "Pangkalan udara militer dan bandara penerbangan komersial/kenegaraan bersejarah di timur Jakarta. Menampilkan landasan pacu Runway 06/24 sepanjang 3.000 meter berorientasi 065.25°, apron pesawat kepresidenan Skadron Udara 17 VIP TNI-AU, menara pemandu lalu lintas udara (ATC Tower), serta terminal penumpang bernuansa kearifan lokal Nusantara.",
     facts: [
       "Dahulu dikenal sebagai Lapangan Terbang Tjililitan (didirikan tahun 1924) sebelum dinamai pahlawan nasional Marsekal Muda Agustinus Adisutjipto dan Abdul Halim Perdanakusuma.",
@@ -1748,8 +1748,8 @@ export const JAKARTA_LANDMARKS = [
     coordinates: { lat: -6.1528, lng: 106.7118 },
     position: [-1260.0, 0, -460.0],
     labelHeight: 40,
-    cameraPosition: [-1260.0, 55, -400.0],
-    cameraTarget: [-1260.0, 12, -460.0],
+    cameraPosition: [-1260.0, 85, -310.0],
+    cameraTarget: [-1260.0, 10, -460.0],
     description: "Pusat perbelanjaan dan hiburan keluarga pertama dan paling ikonik di kawasan Kalideres-Cengkareng. Menampilkan arsitektur mall 5 lantai dengan fasad terakota oranye khas era modern, kubus skylight kaca penerangan alami, atrium utama bertingkat luas, gedung bioskop, hypermarket terpadu, dan ramp parkir spiral melengkung.",
     facts: [
       "Pusat perbelanjaan modern pertama yang dibangun di koridor barat Jl. Daan Mogot yang melayani kawasan perumahan Daan Mogot Baru dan Kalideres.",
@@ -1792,8 +1792,8 @@ export const JAKARTA_LANDMARKS = [
     coordinates: { lat: -6.1650, lng: 106.7380 },
     position: [-1080.0, 0, -400.0],
     labelHeight: 32,
-    cameraPosition: [-1080.0, 45, -340.0],
-    cameraTarget: [-1080.0, 6, -400.0],
+    cameraPosition: [-1080.0, 90, -250.0],
+    cameraTarget: [-1080.0, 4, -400.0],
     description: "Danau retensi air dan sistem polder pengendali banjir seluas 4 hektare yang menjadi benteng pertahanan utama Jakarta Barat dari luapan Kali Mookervaart dan Kali Angke. Menampilkan waduk penampung air alami luas dengan dinding tanggul beton sheetpile, gedung stasiun pompa polder berteknologi pompa submersible kapasitas tinggi, dan pintu air gerbang hidrolik masif.",
     facts: [
       "Menjadi infrastruktur pengendali banjir vital yang berhasil menuntaskan masalah genangan air musiman di pemukiman Rawa Buaya dan Duri Kosambi.",

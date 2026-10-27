@@ -4644,7 +4644,7 @@ export class LandmarkModels {
 
     const quayConcreteMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.85 });
     const stationStuccoMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.65 });
-    const steelArchMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8, roughness: 0.3 });
+    const steelArchMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.35, roughness: 0.4 });
     const craneOrangeMat = new THREE.MeshStandardMaterial({ color: 0xea580c, metalness: 0.6, roughness: 0.4 });
     const craneWhiteMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.5, roughness: 0.4 });
     const oceanWaterMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.15, metalness: 0.85 });
@@ -5564,7 +5564,7 @@ export class LandmarkModels {
       emissiveIntensity: 0.25
     });
     const concreteMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.7 });
-    const hangarMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.7, roughness: 0.35 });
+    const hangarMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.25, roughness: 0.5 });
     const airplaneWhiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, metalness: 0.6, roughness: 0.2 });
     const flagRedMat = new THREE.MeshBasicMaterial({ color: 0xdc2626 });
     const runwayMarkingMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
