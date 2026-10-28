@@ -57,6 +57,7 @@ export class CityScene {
     this.buildVoidCInfill();
     this.buildVoidCTransit();
     this.buildVoidDPenjaringan();
+    this.buildVoidDInfill();
     this.buildVoidBInfillAndIndustry();
     this.buildVoidBTransit();
     this.buildEastJakartaInfrastructure();
@@ -5645,7 +5646,8 @@ export class CityScene {
             az: road.points[i][1],
             bx: road.points[i + 1][0],
             bz: road.points[i + 1][1],
-            halfWidth: road.width * 0.5
+            halfWidth: road.width * 0.5,
+            way: road
           });
         }
       });
@@ -5669,6 +5671,471 @@ export class CityScene {
       if (Math.hypot(x - (s.ax + t * dx), z - (s.az + t * dz)) < pad) return true;
     }
     return false;
+  }
+
+  /**
+   * Void D Tahap 3: Infill urban fabric Kamal Muara, PIK, Kapuk, Teluk Gong
+   * dan Muara Baru.
+   *
+   * 1. Rumah kampung 2-3 lantai pada lima zona permukiman.
+   * 2. Ruko dua sisi pada tujuh koridor jalan OSM.
+   * 3. Gudang logistik di klaster Kamal Cengkareng, Kapuk, dan Muara Baru.
+   * Total penambahan: lima InstancedMesh = 5 draw call.
+   */
+  buildVoidDInfill() {
+    const dummy = new THREE.Object3D();
+    const baseBoxGeo = new THREE.BoxGeometry(1, 1, 1);
+
+    const roofGeo = new THREE.BufferGeometry();
+    roofGeo.setAttribute(
+      'position',
+      new THREE.Float32BufferAttribute([
+        -0.5, 0, -0.5, 0.5, 0, -0.5, -0.5, 0, 0.5, 0.5, 0, 0.5,
+        0, 1, -0.5, 0, 1, 0.5
+      ], 3)
+    );
+    roofGeo.setIndex([
+      0, 2, 5, 0, 5, 4,
+      1, 4, 5, 1, 5, 3,
+      0, 4, 1,
+      2, 3, 5,
+      0, 1, 3, 0, 3, 2
+    ]);
+    roofGeo.computeVertexNormals();
+
+    const pointInWaterPolygon = (x, z, points) => {
+      let inside = false;
+      for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+        const xi = points[i][0];
+        const zi = points[i][1];
+        const xj = points[j][0];
+        const zj = points[j][1];
+        if ((zi > z) !== (zj > z) && x < ((xj - xi) * (z - zi)) / (zj - zi) + xi) {
+          inside = !inside;
+        }
+      }
+      return inside;
+    };
+
+    const waterSegments = [];
+    VOID_D_OSM.waterways.forEach((waterway) => {
+      for (let i = 0; i < waterway.points.length - 1; i++) {
+        waterSegments.push({
+          ax: waterway.points[i][0],
+          az: waterway.points[i][1],
+          bx: waterway.points[i + 1][0],
+          bz: waterway.points[i + 1][1],
+          half: waterway.width * 0.5 + 4
+        });
+      }
+    });
+
+    const isNearVoidDWater = (x, z) => {
+      for (const s of waterSegments) {
+        const dx = s.bx - s.ax;
+        const dz = s.bz - s.az;
+        const len2 = dx * dx + dz * dz;
+        let t = len2 ? ((x - s.ax) * dx + (z - s.az) * dz) / len2 : 0;
+        t = Math.max(0, Math.min(1, t));
+        if (Math.hypot(x - (s.ax + t * dx), z - (s.az + t * dz)) < s.half) return true;
+      }
+      for (const polygon of VOID_D_OSM.waterPolygons) {
+        if (pointInWaterPolygon(x, z, polygon.points)) return true;
+        for (let i = 0; i < polygon.points.length; i++) {
+          const a = polygon.points[i];
+          const b = polygon.points[(i + 1) % polygon.points.length];
+          const dx = b[0] - a[0];
+          const dz = b[1] - a[1];
+          const len2 = dx * dx + dz * dz;
+          let t = len2 ? ((x - a[0]) * dx + (z - a[1]) * dz) / len2 : 0;
+          t = Math.max(0, Math.min(1, t));
+          if (Math.hypot(x - (a[0] + t * dx), z - (a[1] + t * dz)) < 5) return true;
+        }
+      }
+      return false;
+    };
+
+    const anchorExclusions = [
+      [-1165, -1055, -1335, -1245], // PIK Avenue
+      [-1192, -1068, -1455, -1343], // Pantai Maju PIK
+      [-1037, -913, -1287, -1183],  // TWA Angke Kapuk
+      [-1277, -1183, -1252, -1178], // Kampung Nelayan Kamal Muara
+      [-630, -526, -852, -778],     // Teluk Gong
+      [-498, -362, -1303, -1207]    // PPS Nizam Zachman
+    ];
+    const insideAnchorExclusion = (x, z, margin) => anchorExclusions.some(
+      ([minX, maxX, minZ, maxZ]) => x > minX - margin && x < maxX + margin &&
+        z > minZ - margin && z < maxZ + margin
+    );
+    // Blok prosedural Pluit/Penjaringan: townhouse, mangrove, Waduk Pluit,
+    // seawall, dan viaduk tol sudah menempati area ini.
+    const pluitExclusion = { minX: -800, maxX: -350, minZ: -1120, maxZ: -880 };
+    const insidePluitExclusion = (x, z, margin) => x > pluitExclusion.minX - margin &&
+      x < pluitExclusion.maxX + margin &&
+      z > pluitExclusion.minZ - margin && z < pluitExclusion.maxZ + margin;
+
+    const distanceToSegment = (x, z, s) => {
+      const dx = s.bx - s.ax;
+      const dz = s.bz - s.az;
+      const len2 = dx * dx + dz * dz;
+      let t = len2 ? ((x - s.ax) * dx + (z - s.az) * dz) / len2 : 0;
+      t = Math.max(0, Math.min(1, t));
+      return Math.hypot(x - (s.ax + t * dx), z - (s.az + t * dz));
+    };
+
+    // Ruko berdiri di tepi koridornya sendiri; segmen milik deret memakai
+    // batas lebih rapat, pola yang sama dengan infill Void C.
+    const isBlocked = (x, z, radius, ignoreWays) => {
+      if (ignoreWays) {
+        for (const s of this.getVoidDRoadSegments()) {
+          const pad = ignoreWays.has(s.way) ? s.halfWidth + radius - 2 : s.halfWidth + radius + 2;
+          if (distanceToSegment(x, z, s) < pad) return true;
+        }
+      } else if (this.isNearVoidDRoad(x, z, radius + 2)) {
+        return true;
+      }
+      if (isNearVoidDWater(x, z)) return true;
+      if (insideAnchorExclusion(x, z, radius * 0.5)) return true;
+      if (insidePluitExclusion(x, z, radius)) return true;
+      return false;
+    };
+
+    const placed = [];
+    const isOccupied = (x, z, radius) => {
+      for (let i = 0; i < placed.length; i++) {
+        const p = placed[i];
+        if (Math.hypot(p.x - x, p.z - z) < p.radius + radius + 2) return true;
+      }
+      return false;
+    };
+
+    const residentialItems = [];
+    const shophouseItems = [];
+    const roofItems = [];
+    const warehouseItems = [];
+    const warehouseRoofItems = [];
+
+    const residentialColors = [
+      new THREE.Color(0xf8fafc),
+      new THREE.Color(0xe7e5e4),
+      new THREE.Color(0xfef3c7),
+      new THREE.Color(0xbae6fd),
+      new THREE.Color(0xfed7aa),
+      new THREE.Color(0xa7f3d0)
+    ];
+    const roofColors = [
+      new THREE.Color(0xb45309),
+      new THREE.Color(0x9a3412),
+      new THREE.Color(0x991b1b),
+      new THREE.Color(0x78350f)
+    ];
+    const shophouseColors = [
+      new THREE.Color(0xf1f5f9),
+      new THREE.Color(0xe2e8f0),
+      new THREE.Color(0xfed7aa),
+      new THREE.Color(0xbae6fd),
+      new THREE.Color(0x0f766e),
+      new THREE.Color(0x1e293b),
+      new THREE.Color(0xd97706)
+    ];
+    const warehouseColors = [
+      new THREE.Color(0x64748b),
+      new THREE.Color(0x94a3b8),
+      new THREE.Color(0x475569),
+      new THREE.Color(0x0e7490),
+      new THREE.Color(0xb45309)
+    ];
+    const warehouseRoofColors = [
+      new THREE.Color(0x334155),
+      new THREE.Color(0x475569),
+      new THREE.Color(0x64748b),
+      new THREE.Color(0x1e293b)
+    ];
+
+    const buildRoadChains = (ways) => {
+      const keyOf = (p) => `${Math.round(p[0])}:${Math.round(p[1])}`;
+      const pending = ways.map((road) => ({
+        points: road.points.map((p) => [p[0], p[1]]),
+        ways: new Set([road])
+      }));
+      const chains = [];
+      while (pending.length > 0) {
+        const chain = pending.pop();
+        let extended = true;
+        while (extended) {
+          extended = false;
+          const head = chain.points[0];
+          const tail = chain.points[chain.points.length - 1];
+          for (let i = 0; i < pending.length; i++) {
+            const way = pending[i].points;
+            if (keyOf(way[way.length - 1]) === keyOf(tail)) {
+              chain.points.push(...way.slice(0, -1).reverse());
+            } else if (keyOf(way[0]) === keyOf(tail)) {
+              chain.points.push(...way.slice(1));
+            } else if (keyOf(way[0]) === keyOf(head)) {
+              chain.points.unshift(...way.slice(1).reverse());
+            } else if (keyOf(way[way.length - 1]) === keyOf(head)) {
+              chain.points.unshift(...way.slice(0, -1));
+            } else {
+              continue;
+            }
+            pending[i].ways.forEach((road) => chain.ways.add(road));
+            pending.splice(i, 1);
+            extended = true;
+            break;
+          }
+        }
+        chains.push(chain);
+      }
+      return chains;
+    };
+
+    const visitChain = (chain, spacing, visit) => {
+      let offset = spacing * 0.5;
+      for (let i = 0; i < chain.length - 1; i++) {
+        const a = chain[i];
+        const b = chain[i + 1];
+        const dx = b[0] - a[0];
+        const dz = b[1] - a[1];
+        const len = Math.hypot(dx, dz);
+        if (len < 0.01) continue;
+        let cursor = offset;
+        while (cursor <= len) {
+          const t = cursor / len;
+          visit(a[0] + dx * t, a[1] + dz * t, Math.atan2(dx, dz));
+          cursor += spacing;
+        }
+        offset = cursor - len;
+      }
+    };
+
+    const shophouseRoads = new Set([
+      'Jalan Kapuk Raya',
+      'Jalan Teluk Gong Raya',
+      'Jalan Pantai Indah Selatan 1',
+      'Jalan Pantai Indah Utara 1',
+      'Jalan Kapuk Muara Raya',
+      'Jalan Pluit Utara Raya',
+      'Jalan Pantai Indah Kapuk'
+    ]);
+    const shophouseWaysByName = new Map();
+    VOID_D_OSM.roads.forEach((road) => {
+      if (!shophouseRoads.has(road.name)) return;
+      if (!shophouseWaysByName.has(road.name)) shophouseWaysByName.set(road.name, []);
+      shophouseWaysByName.get(road.name).push(road);
+    });
+
+    const placeShophouseRow = (roadWidth, chain, ignoreWays) => {
+      visitChain(chain, 13, (bx, bz, angle) => {
+        const nx = Math.cos(angle);
+        const nz = -Math.sin(angle);
+        [-1, 1].forEach((side) => {
+          const hash = Math.abs(Math.sin(bx * 8.13 + bz * 4.71 + side * 3.7));
+          const w = 11 + (1 - hash) * 4;
+          const d = 10.5 + hash * 2.5;
+          const h = 9 + hash * 7;
+          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
+          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
+          const radius = Math.max(w, d) * 0.5;
+          if (isBlocked(px, pz, radius, ignoreWays) || isOccupied(px, pz, d * 0.45)) return;
+          placed.push({ x: px, z: pz, radius: d * 0.45 });
+          shophouseItems.push({
+            x: px,
+            y: h * 0.5,
+            z: pz,
+            w,
+            h,
+            d,
+            rotY: angle,
+            color: shophouseColors[Math.floor(hash * shophouseColors.length) % shophouseColors.length]
+          });
+          const roofH = 1.8 + hash * 0.8;
+          roofItems.push({
+            x: px,
+            y: h,
+            z: pz,
+            w: w + 1.3,
+            h: roofH,
+            d: d + 1.3,
+            rotY: angle,
+            color: roofColors[Math.floor(hash * roofColors.length) % roofColors.length]
+          });
+        });
+      });
+    };
+
+    shophouseWaysByName.forEach((ways) => {
+      const roadWidth = Math.max(...ways.map((road) => road.width));
+      buildRoadChains(ways).forEach((chain) => placeShophouseRow(roadWidth, chain.points, chain.ways));
+    });
+
+    const warehouseZones = [
+      // Pergudangan Kamal Cengkareng di antara Jl. Kapuk Cengkareng dan lingkar barat.
+      { minX: -1340, maxX: -1150, minZ: -1000, maxZ: -780, stepX: 28, stepZ: 24 },
+      { minX: -1340, maxX: -1150, minZ: -800, maxZ: -740, stepX: 28, stepZ: 24 },
+      // Pergudangan Kapuk di timur Cengkareng Drain.
+      { minX: -960, maxX: -860, minZ: -1000, maxZ: -850, stepX: 28, stepZ: 24 },
+      { minX: -1040, maxX: -900, minZ: -1060, maxZ: -1010, stepX: 28, stepZ: 24 },
+      { minX: -900, maxX: -820, minZ: -1060, maxZ: -1010, stepX: 26, stepZ: 22 },
+      // Cold storage dan logistik Muara Baru di utara PPS Nizam Zachman.
+      { minX: -600, maxX: -400, minZ: -1195, maxZ: -1120, stepX: 28, stepZ: 24 }
+    ];
+    warehouseZones.forEach((zone, zoneIndex) => {
+      for (let x = zone.minX; x <= zone.maxX; x += zone.stepX) {
+        for (let z = zone.minZ; z <= zone.maxZ; z += zone.stepZ) {
+          const hash = Math.abs(Math.sin(x * 4.71 + z * 9.13 + zoneIndex));
+          const w = 19 + hash * 5;
+          const d = 21 + (1 - hash) * 6;
+          const h = 8 + hash * 4;
+          const radius = Math.max(w, d) * 0.5;
+          const px = x + (hash - 0.5) * 4;
+          const pz = z + (((hash * 5.7) % 1) - 0.5) * 4;
+          if (isBlocked(px, pz, radius) || isOccupied(px, pz, radius)) continue;
+          placed.push({ x: px, z: pz, radius });
+          warehouseItems.push({
+            x: px,
+            y: h * 0.5,
+            z: pz,
+            w,
+            h,
+            d,
+            color: warehouseColors[Math.floor(hash * warehouseColors.length) % warehouseColors.length]
+          });
+          const roofH = 1.6 + hash * 1.2;
+          warehouseRoofItems.push({
+            x: px,
+            y: h,
+            z: pz,
+            w: w + 1.4,
+            h: roofH,
+            d: d + 1.4,
+            color: warehouseRoofColors[Math.floor(hash * warehouseRoofColors.length) % warehouseRoofColors.length]
+          });
+        }
+      }
+    });
+
+    const residentialZones = [
+      // Kampung Kamal Muara dan Muara Angke.
+      { minX: -1340, maxX: -1200, minZ: -1180, maxZ: -1040, step: 16 },
+      // Townhouse Cordoba, Diamond Golf, dan Marina Indah PIK.
+      { minX: -1220, maxX: -1090, minZ: -1260, maxZ: -1130, step: 15 },
+      // Kapuk Muara di selatan TWA Angke Kapuk.
+      { minX: -1050, maxX: -900, minZ: -1300, maxZ: -1150, step: 16 },
+      // Kapuk Utara dan Pantai Indah Selatan.
+      { minX: -1030, maxX: -760, minZ: -1060, maxZ: -800, step: 16 },
+      // Kampung Teluk Gong dan Penjaringan utara.
+      { minX: -720, maxX: -430, minZ: -900, maxZ: -800, step: 15 },
+      // Kamal Muara utara sampai tepi Cengkareng Drain.
+      { minX: -1340, maxX: -1210, minZ: -1040, maxZ: -950, step: 16 },
+      // Strip Kapuk Utara di selatan Jalan Kapuk Raya.
+      { minX: -1040, maxX: -760, minZ: -800, maxZ: -740, step: 16 },
+      // Celah Penjaringan antara Pluit dan Teluk Gong.
+      { minX: -760, maxX: -620, minZ: -880, maxZ: -800, step: 15 },
+      // Konektor Kamal-PIK di barat PIK Avenue.
+      { minX: -1200, maxX: -1060, minZ: -1200, maxZ: -1140, step: 16 },
+      // Penjaringan timur di sisi Jalan Pluit Raya.
+      { minX: -600, maxX: -380, minZ: -960, maxZ: -800, step: 15 },
+      // Penjaringan utara mendekati batas clip.
+      { minX: -720, maxX: -600, minZ: -800, maxZ: -740, step: 15 },
+      // Kapuk Utara timur di atas Jalan Kapuk Muara Raya.
+      { minX: -920, maxX: -780, minZ: -800, maxZ: -740, step: 16 },
+      // Kamal Muara selatan, sisi barat Jalan Kapuk Muara Raya.
+      { minX: -1200, maxX: -1100, minZ: -1130, maxZ: -1060, step: 15 }
+    ];
+    residentialZones.forEach((zone, zoneIndex) => {
+      for (let x = zone.minX; x <= zone.maxX; x += zone.step) {
+        for (let z = zone.minZ; z <= zone.maxZ; z += zone.step) {
+          const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233 + zoneIndex));
+          const w = 9 + hash * 3;
+          const d = 10 + (1 - hash) * 3;
+          const h = 6.5 + hash * 3.5;
+          const radius = Math.max(w, d) * 0.5;
+          const px = x + (hash - 0.5) * 2.4;
+          const pz = z + (((hash * 7.31) % 1) - 0.5) * 2.4;
+          if (isBlocked(px, pz, radius) || isOccupied(px, pz, radius)) continue;
+          placed.push({ x: px, z: pz, radius });
+          residentialItems.push({
+            x: px,
+            y: h * 0.5,
+            z: pz,
+            w,
+            h,
+            d,
+            color: residentialColors[Math.floor(hash * residentialColors.length) % residentialColors.length]
+          });
+          const roofH = 1.5 + hash * 0.9;
+          roofItems.push({
+            x: px,
+            y: h,
+            z: pz,
+            w: w + 1.2,
+            h: roofH,
+            d: d + 1.2,
+            color: roofColors[Math.floor(hash * roofColors.length) % roofColors.length]
+          });
+        }
+      }
+    });
+
+    const addInstanced = (geo, mat, items, name) => {
+      if (items.length === 0) return;
+      const mesh = new THREE.InstancedMesh(geo, mat, items.length);
+      mesh.name = name;
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      items.forEach((item, idx) => {
+        dummy.position.set(item.x, item.y, item.z);
+        dummy.scale.set(item.w, item.h, item.d);
+        dummy.rotation.set(0, item.rotY || 0, 0);
+        dummy.updateMatrix();
+        mesh.setMatrixAt(idx, dummy.matrix);
+        mesh.setColorAt(idx, item.color);
+      });
+      mesh.instanceMatrix.needsUpdate = true;
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+      this.proceduralGroup.add(mesh);
+    };
+
+    addInstanced(
+      baseBoxGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.78 }),
+      residentialItems,
+      'voidd-houses'
+    );
+    addInstanced(
+      baseBoxGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6, metalness: 0.15 }),
+      shophouseItems,
+      'voidd-shophouses'
+    );
+    addInstanced(
+      roofGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }),
+      roofItems,
+      'voidd-house-roofs'
+    );
+    addInstanced(
+      baseBoxGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.65, metalness: 0.25 }),
+      warehouseItems,
+      'voidd-warehouses'
+    );
+    addInstanced(
+      roofGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.55, metalness: 0.35 }),
+      warehouseRoofItems,
+      'voidd-warehouse-roofs'
+    );
+
+    this.voidDInfillStats = {
+      houses: residentialItems.length,
+      shophouses: shophouseItems.length,
+      warehouses: warehouseItems.length,
+      zones: residentialZones.length,
+      corridors: shophouseRoads.size,
+      drawCalls: 5
+    };
   }
 
   /**
