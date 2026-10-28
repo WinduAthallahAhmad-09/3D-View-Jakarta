@@ -1957,6 +1957,141 @@ export const JAKARTA_LANDMARKS = [
       "Menjadi titik kumpul warga Joglo dan Kreo untuk acara keluarga, pertemuan komunitas, dan wisata kuliner malam.",
       "Berlokasi di Jl. Joglo Raya, koridor yang menghubungkan Meruya Ilir, Kreo, dan perbatasan Tangerang."
     ]
+  },
+  // =====================================================
+  // ZONA 10: VOID D — KAMAL MUARA, KAPUK, TELUK GONG & MUARA BARU
+  // =====================================================
+  {
+    id: "pik-avenue",
+    name: "PIK Avenue & Pusat Niaga Pantai Indah Kapuk",
+    shortName: "PIK Avenue",
+    category: "Pusat Perbelanjaan & Gaya Hidup Pesisir",
+    tagline: "Mal Pesisir Pantai Indah Kapuk, Fasad Lengkung & Gerbang Gaya Hidup Kamal Muara",
+    height: "32 meter (Podium Mal 3 Lantai & Atap Taman)",
+    year: "2015",
+    architect: "PT Agung Sedayu Group & PT Agung Podomoro Land",
+    location: "Jl. Pantai Indah Kapuk Boulevard, Kamal Muara, Penjaringan, Jakarta Utara",
+    coordinates: { lat: -6.1023, lng: 106.7435 },
+    position: [-1110.0, 0, -1290.0],
+    labelHeight: 38,
+    cameraPosition: [-1110.0, 78, -1190],
+    cameraTarget: [-1110.0, 14, -1290.0],
+    description: "Pusat perbelanjaan dan gaya hidup utama di jantung Pantai Indah Kapuk yang menjadi gerbang komersial kawasan pesisir Kamal Muara. Menampilkan podium mal tiga lantai berfasad kaca lengkung, kanopi putih menerus, plaza masuk dengan drop-off, atap taman, deretan tenant kuliner, serta area parkir tertata yang hidup hingga malam.",
+    facts: [
+      "Menjadi salah satu pusat belanja pertama di kawasan Pantai Indah Kapuk yang mengangkat konsep mal terbuka dan gaya hidup pesisir.",
+      "Lokasinya di Jl. Pantai Indah Kapuk Boulevard menghubungkan permukiman PIK, Kamal Muara, dan akses menuju Bandara Soekarno-Hatta.",
+      "Kawasan sekitarnya tumbuh menjadi klaster kuliner, kafe, dan hunian modern yang menjadi rujukan wisata urban Jakarta Utara."
+    ]
+  },
+  {
+    id: "pantai-maju-pik",
+    name: "Pantai Maju PIK & Promenade Pesisir",
+    shortName: "Pantai Maju PIK",
+    category: "Ruang Publik & Wisata Pantai",
+    tagline: "Pantai Reklamasi Pantai Indah Kapuk, Promenade & Gerbang Wisata Bahari",
+    height: "12 meter (Menara Lifeguard & Kanopi Promenade)",
+    year: "2022",
+    architect: "PT Agung Sedayu Group",
+    location: "Pantai Maju, Pantai Indah Kapuk, Kamal Muara, Penjaringan, Jakarta Utara",
+    coordinates: { lat: -6.0955, lng: 106.7425 },
+    position: [-1130.0, 0, -1385.0],
+    labelHeight: 24,
+    cameraPosition: [-1130.0, 58, -1290],
+    cameraTarget: [-1130.0, 6, -1385.0],
+    description: "Pantai reklamasi di ujung utara Pantai Indah Kapuk yang dibuka sebagai ruang publik tepi laut Jakarta. Menampilkan hamparan pasir, promenade berpaguan, menara penjaga pantai, payung dan kursi pantai, deretan kafe pinggir laut, serta papan informasi yang menghadap Laut Jawa.",
+    facts: [
+      "Pantai Maju merupakan wajah baru wisata bahari Jakarta Utara yang memanfaatkan garis pantai hasil reklamasi PIK.",
+      "Promenade-nya menjadi lokasi favorit warga untuk menikmati matahari terbenam dan aktivitas olahraga tepi laut.",
+      "Kawasan ini terhubung dengan klaster kuliner PIK dan Taman Wisata Alam Angke Kapuk melalui koridor pesisir."
+    ]
+  },
+  {
+    id: "twa-angke-kapuk",
+    name: "Taman Wisata Alam Angke Kapuk",
+    shortName: "TWA Angke Kapuk",
+    category: "Konservasi Mangrove & Ekowisata",
+    tagline: "Hutan Mangrove Angke Kapuk, Boardwalk & Menara Observasi Burung",
+    height: "18 meter (Menara Observasi & Pusat Informasi)",
+    year: "1998 / Revitalisasi 2011",
+    architect: "BKSDA DKI Jakarta & Jakarta Mangrove Resort",
+    location: "Jl. Mualim Teko, Kapuk Muara, Penjaringan, Jakarta Utara",
+    coordinates: { lat: -6.1080, lng: 106.7540 },
+    position: [-975.0, 0, -1235.0],
+    labelHeight: 30,
+    cameraPosition: [-975.0, 62, -1135],
+    cameraTarget: [-975.0, 8, -1235.0],
+    description: "Taman wisata alam seluas puluhan hektare yang melindungi hutan mangrove pesisir Kapuk Muara. Menampilkan boardwalk kayu melintasi rawa bakau, menara observasi burung, pusat informasi pengunjung beratap sirap, dermaga perahu, kolam pasang-surut, serta papan edukasi ekosistem mangrove.",
+    facts: [
+      "TWA Angke Kapuk menjadi salah satu sabuk hijau terakhir yang melindungi pesisir Jakarta Utara dari abrasi dan intrusi air laut.",
+      "Boardwalk dan menara observasinya menjadi lokasi pengamatan burung air dan edukasi mangrove bagi sekolah dan komunitas.",
+      "Kawasan ini berbatasan langsung dengan permukiman Kapuk Muara, Pantai Indah Kapuk, dan muara Kali Angke."
+    ]
+  },
+  {
+    id: "kampung-nelayan-kamal-muara",
+    name: "Kampung Nelayan Kamal Muara",
+    shortName: "Kampung Nelayan Kamal Muara",
+    category: "Permukiman Pesisir & Ekonomi Perikanan",
+    tagline: "Rumah Panggung, Dermaga Kayu & Perahu Nelayan di Muara Kamal",
+    height: "8 meter (Rumah Panggung & Musala Berkubah)",
+    year: "Awal Abad ke-20 / Penataan Berkala",
+    architect: "Masyarakat Nelayan Kamal Muara",
+    location: "Kampung Nelayan Kamal Muara, Penjaringan, Jakarta Utara",
+    coordinates: { lat: -6.1085, lng: 106.7350 },
+    position: [-1230.0, 0, -1215.0],
+    labelHeight: 22,
+    cameraPosition: [-1230.0, 52, -1120],
+    cameraTarget: [-1230.0, 6, -1215.0],
+    description: "Permukiman nelayan tradisional di tepi muara yang menjadi salah satu kampung pesisir tertua di Jakarta Utara. Menampilkan rumah panggung kayu berwarna cerah, dermaga sempit, perahu nelayan bermotor tempel, jaring dan keramba ikan, musala berkubah kecil, serta gang beton yang membelah permukiman padat.",
+    facts: [
+      "Warga Kamal Muara menggantungkan hidup pada penangkapan ikan, kerang, dan udang di perairan Teluk Jakarta.",
+      "Kampung ini menjadi saksi perubahan garis pantai dan perkembangan kawasan Pantai Indah Kapuk di sekitarnya.",
+      "Perahu nelayan Kamal Muara dikenal melaut hingga perairan Kepulauan Seribu pada musim tangkap tertentu."
+    ]
+  },
+  {
+    id: "teluk-gong",
+    name: "Pecinan Teluk Gong & Waduk Teluk Gong",
+    shortName: "Teluk Gong",
+    category: "Wisata Kuliner & Kawasan Pecinan Pesisir",
+    tagline: "Gerbang Paifang, Ruko Merah & Waduk Retensi Teluk Gong",
+    height: "14 meter (Gerbang Paifang & Ruko Dua Lantai)",
+    year: "1970-an / Penataan Kawasan",
+    architect: "Pemerintah Kota Jakarta Utara & Paguyuban Warga Tionghoa",
+    location: "Jl. Teluk Gong Raya, Pejagalan, Penjaringan, Jakarta Utara",
+    coordinates: { lat: -6.13821, lng: 106.78209 },
+    position: [-578.0, 0, -815.0],
+    labelHeight: 28,
+    cameraPosition: [-578.0, 55, -715],
+    cameraTarget: [-578.0, 8, -815.0],
+    description: "Kawasan kuliner dan permukiman Tionghoa di pesisir Penjaringan yang dikenal dengan deretan ruko merah dan gerbang paifang. Menampilkan gerbang masuk berarsitektur Tionghoa, ruko dua lantai dengan lampion merah, lapak seafood dan bakmi, waduk retensi kecil, serta gang padat yang ramai pada malam hari.",
+    facts: [
+      "Teluk Gong dikenal sebagai sentra kuliner seafood Tionghoa di Jakarta Utara, terutama pada malam hari dan akhir pekan.",
+      "Waduk Teluk Gong berfungsi menampung air hujan dan mengurangi genangan di kawasan Pejagalan dan Penjaringan.",
+      "Kawasan ini tumbuh dari permukiman pedagang dan nelayan Tionghoa yang menetap di pesisir utara Batavia."
+    ]
+  },
+  {
+    id: "pps-nizam-zachman",
+    name: "Pelabuhan Perikanan Samudera Nizam Zachman",
+    shortName: "PPS Nizam Zachman",
+    category: "Pelabuhan Perikanan & Logistik Hasil Laut",
+    tagline: "Pelabuhan Ikan Terbesar Jakarta, Dermaga Kapal & Lelang Ikan Muara Baru",
+    height: "22 meter (Kran Dermaga & Gedung Cold Storage)",
+    year: "2002",
+    architect: "Kementerian Kelautan dan Perikanan RI",
+    location: "Jl. Tuna Raya No. 1, Muara Baru Ujung, Penjaringan, Jakarta Utara",
+    coordinates: { lat: -6.1042, lng: 106.7930 },
+    position: [-430.0, 0, -1255.0],
+    labelHeight: 36,
+    cameraPosition: [-430.0, 70, -1150],
+    cameraTarget: [-430.0, 10, -1255.0],
+    description: "Pelabuhan perikanan samudera terbesar di Jakarta yang menjadi pusat pendaratan, lelang, dan distribusi hasil laut dari seluruh Nusantara. Menampilkan dermaga beton panjang, breakwater pemecah gelombang, kapal ikan berukuran besar, gedung lelang ikan, cold storage, pabrik es, kran dermaga, dan area bongkar muat kontainer berpendingin.",
+    facts: [
+      "PPS Nizam Zachman adalah salah satu pelabuhan perikanan samudera terbesar di Indonesia dengan kapal dari berbagai daerah.",
+      "Lelang ikan di Muara Baru menjadi acuan harga hasil laut untuk pasar Jakarta dan sekitarnya.",
+      "Pelabuhan ini terhubung dengan kawasan pengolahan ikan, cold storage, dan industri kemasan di sepanjang Muara Baru."
+    ]
   }
 ];
 

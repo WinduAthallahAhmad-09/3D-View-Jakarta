@@ -6599,7 +6599,13 @@ export class CityScene {
       "pasar-meruya": () => LandmarkModels.createPasarMeruya(),
       "stasiun-kembangan": () => LandmarkModels.createStasiunKembangan(),
       "bendungan-polor": () => LandmarkModels.createBendunganPolor(),
-      "kampung-makan-joglo": () => LandmarkModels.createKampungMakanJoglo()
+      "kampung-makan-joglo": () => LandmarkModels.createKampungMakanJoglo(),
+      "pik-avenue": () => LandmarkModels.createPIKAvenue(),
+      "pantai-maju-pik": () => LandmarkModels.createPantaiMajuPIK(),
+      "twa-angke-kapuk": () => LandmarkModels.createTWAAngkeKapuk(),
+      "kampung-nelayan-kamal-muara": () => LandmarkModels.createKampungNelayanKamalMuara(),
+      "teluk-gong": () => LandmarkModels.createTelukGong(),
+      "pps-nizam-zachman": () => LandmarkModels.createPPSNizamZachman()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {

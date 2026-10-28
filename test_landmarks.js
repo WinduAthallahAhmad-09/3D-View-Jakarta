@@ -15,8 +15,8 @@ let assertionCount = 0;
 
 console.log('Running test_landmarks.js verification...');
 
-// Check 1: Exactly 87 landmarks
-assert.strictEqual(JAKARTA_LANDMARKS.length, 87, `Expected 87 landmarks, got ${JAKARTA_LANDMARKS.length}`);
+// Check 1: Exactly 93 landmarks
+assert.strictEqual(JAKARTA_LANDMARKS.length, 93, `Expected 93 landmarks, got ${JAKARTA_LANDMARKS.length}`);
 
 // Check 2: Unique IDs and valid properties
 const seenIds = new Set();
@@ -1516,7 +1516,7 @@ const voidCAnchors = [
 ];
 
 assert.deepStrictEqual(
-  JAKARTA_LANDMARKS.slice(81).map((l) => l.id),
+  JAKARTA_LANDMARKS.slice(81, 87).map((l) => l.id),
   voidCAnchors.map((a) => a.id),
   'Void C anchors must follow Cengkareng Business City as landmarks #82-#87'
 );
@@ -1688,7 +1688,59 @@ assert.ok(voidCTransitMethod.includes('voidCTransitStats'), 'Void C transit must
 assert.ok(voidCTransitMethod.includes('drawCalls: 5'), 'Void C transit should add five draw calls');
 assert.ok(!voidCTransitMethod.includes('nightMaterials.push'), 'Void C transit must not register new night materials');
 
-console.log(`✅ All 87 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 45: Void D Tahap 1 — 6 anchor pesisir Kamal Muara, Kapuk, Teluk Gong & Muara Baru
+const voidDAnchors = [
+  { id: 'pik-avenue', builder: 'createPIKAvenue', position: [-1110, 0, -1290], marker: 'pik-avenue-mall' },
+  { id: 'pantai-maju-pik', builder: 'createPantaiMajuPIK', position: [-1130, 0, -1385], marker: 'pantai-maju-promenade' },
+  { id: 'twa-angke-kapuk', builder: 'createTWAAngkeKapuk', position: [-975, 0, -1235], marker: 'twa-angke-boardwalk' },
+  { id: 'kampung-nelayan-kamal-muara', builder: 'createKampungNelayanKamalMuara', position: [-1230, 0, -1215], marker: 'kamal-muara-stilt-houses' },
+  { id: 'teluk-gong', builder: 'createTelukGong', position: [-578, 0, -815], marker: 'teluk-gong-paifang' },
+  { id: 'pps-nizam-zachman', builder: 'createPPSNizamZachman', position: [-430, 0, -1255], marker: 'pps-nizam-quay' }
+];
+
+assert.deepStrictEqual(
+  JAKARTA_LANDMARKS.slice(87).map((l) => l.id),
+  voidDAnchors.map((a) => a.id),
+  'Void D anchors must follow Kampung Makan Joglo as landmarks #88-#93'
+);
+
+const voidDModelSource = fs.readFileSync('src/world/LandmarkModels.js', 'utf8');
+voidDAnchors.forEach(({ id, builder, position, marker }) => {
+  const lm = JAKARTA_LANDMARKS.find((l) => l.id === id);
+  assert.ok(lm, `Void D landmark ${id} not found in JAKARTA_LANDMARKS`);
+  assert.deepStrictEqual(lm.position, position, `Void D landmark ${id} position changed without updating the layout`);
+  assert.ok(lm.position[0] <= -350 && lm.position[0] >= -1300, `Landmark ${id} X position ${lm.position[0]} outside Void D range [-1300, -350]`);
+  assert.ok(lm.position[2] >= -1450 && lm.position[2] <= -780, `Landmark ${id} Z position ${lm.position[2]} outside Void D range [-1450, -780]`);
+  assert.ok(lm.facts && lm.facts.length >= 3, `Landmark ${id} must have at least 3 educational facts`);
+  assert.ok(lm.labelHeight >= 20, `Landmark ${id} labelHeight ${lm.labelHeight} is too low for a Void D anchor`);
+  assert.ok(lm.cameraPosition[1] > 30, `Landmark ${id} camera must be elevated above street level`);
+  assert.ok(lm.cameraTarget[1] < lm.cameraPosition[1], `Landmark ${id} camera must look downward at the anchor`);
+
+  const [projectedX, projectedZ] = projectGpsToScene(lm.coordinates.lat, lm.coordinates.lng);
+  const gpsDeviation = Math.hypot(lm.position[0] - projectedX, lm.position[2] - projectedZ);
+  assert.ok(gpsDeviation <= 80, `Landmark ${id} deviates ${gpsDeviation.toFixed(1)} units from its GPS projection`);
+
+  const builderStart = voidDModelSource.indexOf(`static ${builder}()`);
+  const builderEnd = voidDModelSource.indexOf('static ', builderStart + 10);
+  assert.ok(builderStart > 0, `LandmarkModels missing ${builder}`);
+  const builderSource = voidDModelSource.slice(builderStart, builderEnd > builderStart ? builderEnd : undefined);
+  assert.ok(builderSource.includes(marker), `LandmarkModels ${builder} missing the ${marker} mesh`);
+  assert.ok(!builderSource.includes('new THREE.PointLight'), `${builder} must not add PointLights`);
+
+  assert.ok(citySceneContent.includes(`"${id}":`), `CityScene.js missing builder mapping for ${id}`);
+  assert.ok(indexHtmlContent.includes(`data-tour-id="${id}"`), `index.html missing tour button for ${id}`);
+});
+
+for (let i = 0; i < voidDAnchors.length; i++) {
+  for (let j = i + 1; j < voidDAnchors.length; j++) {
+    const a = voidDAnchors[i].position;
+    const b = voidDAnchors[j].position;
+    const gap = Math.hypot(a[0] - b[0], a[2] - b[2]);
+    assert.ok(gap >= 70, `Void D anchors ${voidDAnchors[i].id} and ${voidDAnchors[j].id} are only ${gap.toFixed(0)} units apart`);
+  }
+}
+
+console.log(`✅ All 93 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
