@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import { JAKARTA_LANDMARKS, projectGpsToScene } from './src/config/landmarks.js';
 import { VOID_B_OSM } from './src/data/void_b_osm.js';
 import { VOID_C_OSM } from './src/data/void_c_osm.js';
+import { VOID_D_OSM } from './src/data/void_d_osm.js';
 
 let assertionCount = 0;
 ['ok', 'equal', 'strictEqual', 'deepStrictEqual', 'notDeepStrictEqual', 'throws'].forEach((method) => {
@@ -1585,7 +1586,7 @@ const distanceToVoidCRoad = (point) => {
   'kampung-makan-joglo'
 ].forEach((id) => {
   const lm = JAKARTA_LANDMARKS.find((landmark) => landmark.id === id);
-  const distance = distanceToVoidCRoad(lm.position);
+  const distance = distanceToVoidCRoad([lm.position[0], lm.position[2]]);
   assert.ok(distance < 60, `Void C landmark ${id} is ${distance.toFixed(1)} units from the nearest OSM road`);
 });
 
@@ -1740,7 +1741,118 @@ for (let i = 0; i < voidDAnchors.length; i++) {
   }
 }
 
-console.log(`✅ All 93 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 46: Void D Tahap 2 — jaringan jalan OSM, tata air & infrastruktur pesisir
+assert.ok(VOID_D_OSM.meta.source.includes('OpenStreetMap'), 'Void D OSM dataset missing OSM attribution');
+assert.ok(VOID_D_OSM.meta.license.includes('ODbL'), 'Void D OSM dataset missing ODbL license');
+assert.strictEqual(VOID_D_OSM.meta.projection, 'projectGpsToScene', 'Void D dataset must use the unscaled GPS projection');
+assert.deepStrictEqual(
+  VOID_D_OSM.meta.clipBox,
+  { minX: -1340, maxX: -360, minZ: -1440, maxZ: -740 },
+  'Void D clip box changed without updating the layout'
+);
+assert.strictEqual(VOID_D_OSM.roads.length, 201, `Void D OSM dataset changed size: ${VOID_D_OSM.roads.length} roads`);
+assert.strictEqual(VOID_D_OSM.meta.roadCount, VOID_D_OSM.roads.length, 'Void D roadCount does not match roads array');
+
+const allVoidDPoints = VOID_D_OSM.roads.flatMap((road) => road.points);
+assert.strictEqual(VOID_D_OSM.meta.roadPointCount, allVoidDPoints.length, 'Void D roadPointCount does not match dataset');
+assert.strictEqual(allVoidDPoints.length, 590, `Void D road point count changed: ${allVoidDPoints.length}`);
+assert.strictEqual(new Set(VOID_D_OSM.roads.map((road) => road.name)).size, 94, 'Void D road name coverage changed');
+allVoidDPoints.forEach(([x, z]) => {
+  assert.ok(Number.isFinite(x) && Number.isFinite(z), 'Void D OSM contains a non-finite coordinate');
+  assert.ok(x <= -355 && x >= -1345, `Void D OSM x=${x} outside the Penjaringan corridor`);
+  assert.ok(z <= -725 && z >= -1445, `Void D OSM z=${z} outside the Penjaringan corridor`);
+});
+
+const voidDRoadNames = new Set(VOID_D_OSM.roads.map((road) => road.name));
+[
+  'Jalan Pantai Indah Kapuk',
+  'Jalan Pantai Indah Selatan 1',
+  'Jalan Kapuk Raya',
+  'Jalan Teluk Gong Raya',
+  'Jalan Marina Indah',
+  'Jalan Pantai Indah Utara 1',
+  'Jalan Muara Baru Pompa'
+].forEach((name) => {
+  assert.ok(voidDRoadNames.has(name), `Void D OSM dataset missing ${name}`);
+});
+
+const distanceToVoidDRoad = (point) => {
+  let best = Infinity;
+  VOID_D_OSM.roads.forEach((road) => {
+    for (let i = 0; i < road.points.length - 1; i++) {
+      best = Math.min(best, distanceToSegment(point, road.points[i], road.points[i + 1]));
+    }
+  });
+  return best;
+};
+voidDAnchors.forEach(({ id }) => {
+  const lm = JAKARTA_LANDMARKS.find((landmark) => landmark.id === id);
+  const distance = distanceToVoidDRoad([lm.position[0], lm.position[2]]);
+  assert.ok(distance < 60, `Void D landmark ${id} is ${distance.toFixed(1)} units from the nearest OSM road`);
+});
+
+assert.strictEqual(VOID_D_OSM.waterways.length, 31, `Void D waterway count changed: ${VOID_D_OSM.waterways.length}`);
+assert.strictEqual(VOID_D_OSM.meta.waterwayCount, VOID_D_OSM.waterways.length, 'Void D waterwayCount mismatch');
+const allVoidDWaterPoints = VOID_D_OSM.waterways.flatMap((waterway) => waterway.points);
+assert.strictEqual(allVoidDWaterPoints.length, 156, `Void D waterway point count changed: ${allVoidDWaterPoints.length}`);
+assert.strictEqual(VOID_D_OSM.meta.waterPointCount, allVoidDWaterPoints.length, 'Void D waterPointCount mismatch');
+VOID_D_OSM.waterways.forEach((waterway) => {
+  assert.ok(['river', 'canal', 'stream', 'drain'].includes(waterway.kind), `Unexpected Void D waterway kind ${waterway.kind}`);
+  assert.ok(waterway.name !== 'Kanal Banjir Barat', 'Kanal Banjir Barat is already rendered by renderOSMLayers');
+  assert.ok(waterway.width > 0, 'Void D waterway must have a positive width');
+});
+
+assert.strictEqual(VOID_D_OSM.waterPolygons.length, 19, `Void D water polygon count changed: ${VOID_D_OSM.waterPolygons.length}`);
+assert.strictEqual(VOID_D_OSM.meta.waterPolygonCount, VOID_D_OSM.waterPolygons.length, 'Void D waterPolygonCount mismatch');
+const allVoidDPolygonPoints = VOID_D_OSM.waterPolygons.flatMap((polygon) => polygon.points);
+assert.strictEqual(allVoidDPolygonPoints.length, 225, `Void D water polygon point count changed: ${allVoidDPolygonPoints.length}`);
+assert.strictEqual(VOID_D_OSM.meta.waterPolygonPointCount, allVoidDPolygonPoints.length, 'Void D waterPolygonPointCount mismatch');
+allVoidDPolygonPoints.forEach(([x, z]) => {
+  assert.ok(Number.isFinite(x) && Number.isFinite(z), 'Void D water polygon contains a non-finite coordinate');
+});
+assert.ok(
+  !VOID_D_OSM.waterPolygons.some((polygon) => polygon.name === 'Waduk Pluit'),
+  'Waduk Pluit is already built by buildNorthJakartaInfrastructure'
+);
+
+assert.ok(citySceneContent.includes("from '../data/void_d_osm.js'"), 'CityScene.js does not import the Void D OSM dataset');
+assert.ok(citySceneContent.includes('buildVoidDPenjaringan()'), 'CityScene.js missing buildVoidDPenjaringan');
+
+const voidDNetworkCall = citySceneContent.indexOf('this.buildVoidDPenjaringan();');
+const voidCTransitCallIndex = citySceneContent.indexOf('this.buildVoidCTransit();');
+assert.ok(voidDNetworkCall > 0, 'CityScene.js does not call buildVoidDPenjaringan');
+assert.ok(
+  voidDNetworkCall > voidCTransitCallIndex,
+  'buildVoidDPenjaringan must run after buildVoidCTransit'
+);
+
+const voidDNetworkStart = citySceneContent.indexOf('buildVoidDPenjaringan() {');
+const voidDNetworkEnd = citySceneContent.indexOf('buildVoidBInfillAndIndustry() {', voidDNetworkStart);
+assert.ok(voidDNetworkStart > 0 && voidDNetworkEnd > voidDNetworkStart, 'Cannot isolate buildVoidDPenjaringan');
+const voidDNetworkMethod = citySceneContent.slice(voidDNetworkStart, voidDNetworkEnd);
+assert.ok(voidDNetworkMethod.includes('VOID_D_OSM'), 'Void D builder does not consume the OSM dataset');
+assert.ok(voidDNetworkMethod.includes('segmentIntersection'), 'Void D builder missing automatic bridges');
+assert.ok(voidDNetworkMethod.includes('pjuBulbMat'), 'Void D builder must share the pju-bulb material');
+assert.ok(voidDNetworkMethod.includes('voidDOsmStats'), 'Void D builder must expose runtime stats');
+assert.ok(!voidDNetworkMethod.includes('new THREE.PointLight'), 'Void D network must not add PointLights');
+assert.ok(!voidDNetworkMethod.includes('nightMaterials.push'), 'Void D network must not register new night materials');
+
+[
+  'voidd-roads',
+  'voidd-sidewalks',
+  'voidd-water',
+  'voidd-bridges',
+  'voidd-pju-poles',
+  'voidd-pju-bulbs',
+  'voidd-tree-trunks',
+  'voidd-tree-foliage'
+].forEach((name) => {
+  assert.ok(voidDNetworkMethod.includes(name), `Void D builder missing the ${name} mesh`);
+});
+
+assert.ok(citySceneContent.includes('isNearVoidDRoad(x, z, clearance = 12)'), 'CityScene.js missing the Void D road corridor mask');
+
+console.log(`✅ All 93 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-2, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
