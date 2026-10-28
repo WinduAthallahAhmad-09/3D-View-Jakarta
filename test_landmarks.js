@@ -1644,7 +1644,51 @@ assert.ok(voidCInfillMethod.includes('voidCInfillStats'), 'Void C infill must ex
 assert.ok(voidCInfillMethod.includes('drawCalls: 5'), 'Void C infill should add five instanced draw calls');
 assert.ok(!voidCInfillMethod.includes('nightMaterials.push'), 'Void C infill must not register new night materials');
 
-console.log(`✅ All 87 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-3 Void C, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 44: Void C Tahap 4 — transit kawasan (park-and-ride + 4 feeder halte)
+assert.ok(citySceneContent.includes('buildVoidCTransit()'), 'CityScene.js missing buildVoidCTransit');
+
+const voidCTransitCall = citySceneContent.indexOf('this.buildVoidCTransit();');
+assert.ok(
+  voidCInfillCall > 0 && voidCTransitCall > voidCInfillCall,
+  'buildVoidCTransit must run after buildVoidCInfill'
+);
+
+const voidCTransitStart = citySceneContent.indexOf('buildVoidCTransit() {');
+const voidCTransitEnd = citySceneContent.indexOf('buildVoidBInfillAndIndustry() {', voidCTransitStart);
+assert.ok(voidCTransitStart > 0 && voidCTransitEnd > voidCTransitStart, 'Cannot isolate buildVoidCTransit');
+const voidCTransitMethod = citySceneContent.slice(voidCTransitStart, voidCTransitEnd);
+assert.ok(!voidCTransitMethod.includes('new THREE.PointLight'), 'Void C transit must not add PointLights');
+
+[
+  'Halte Meruya Ilir',
+  'Halte Joglo Raya',
+  'Halte Ciledug Raya',
+  'Halte Puri Kembangan',
+  'Park and Ride Kembangan'
+].forEach((name) => {
+  assert.ok(voidCTransitMethod.includes(name), `Void C transit missing ${name}`);
+});
+
+['Jalan Meruya Ilir', 'Jalan Joglo Raya', 'Jalan Ciledug Raya', 'Jalan Puri Kembangan'].forEach((name) => {
+  assert.ok(voidCTransitMethod.includes(name), `Void C transit feeder is not anchored to ${name}`);
+});
+
+[
+  'voidc-transit-concrete',
+  'voidc-transit-steel',
+  'voidc-transit-sign',
+  'voidc-transit-tree-trunks',
+  'voidc-transit-tree-foliage'
+].forEach((name) => {
+  assert.ok(voidCTransitMethod.includes(name), `Void C transit missing the ${name} mesh`);
+});
+
+assert.ok(voidCTransitMethod.includes('VOID_C_OSM'), 'Void C transit must consume the OSM road dataset');
+assert.ok(voidCTransitMethod.includes('voidCTransitStats'), 'Void C transit must expose runtime stats');
+assert.ok(voidCTransitMethod.includes('drawCalls: 5'), 'Void C transit should add five draw calls');
+assert.ok(!voidCTransitMethod.includes('nightMaterials.push'), 'Void C transit must not register new night materials');
+
+console.log(`✅ All 87 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

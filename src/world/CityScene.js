@@ -54,6 +54,7 @@ export class CityScene {
     this.buildVoidBDaanMogot();
     this.buildVoidCMeruya();
     this.buildVoidCInfill();
+    this.buildVoidCTransit();
     this.buildVoidBInfillAndIndustry();
     this.buildVoidBTransit();
     this.buildEastJakartaInfrastructure();
@@ -3831,6 +3832,8 @@ export class CityScene {
         if (Math.abs(x - (-1080)) < 52 && Math.abs(z - (-400)) < 46) return;
         // Stasiun Kembangan (#85) — jaga koridor peron, JPO & jalur ganda
         if (Math.abs(x - (-955)) < 52 && Math.abs(z - (-437)) < 34) return;
+        // Park and Ride Kembangan (#85) — forecourt transit di utara akses
+        if (Math.abs(x - (-960)) < 48 && Math.abs(z - (-398)) < 16) return;
         if (this.isNearVoidCRoad(x, z, 26)) return; // Koridor jalan OSM Void C
 
         const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233));
@@ -5079,6 +5082,228 @@ export class CityScene {
       shophouses: shophouseItems.length,
       warehouses: warehouseItems.length,
       trees: 0,
+      drawCalls: 5
+    };
+  }
+
+  /**
+   * Void C Tahap 4: transit kawasan Meruya-Kembangan.
+   *
+   * 1. Park and Ride Kembangan di forecourt utara Stasiun Kembangan:
+   *    plaza beton, 12 slot parkir, dua shelter, totem, dan enam pohon.
+   * 2. Empat feeder halte di koridor OSM: Meruya Ilir, Joglo Raya,
+   *    Ciledug Raya, dan Puri Kembangan. Posisi dan rotasi halte
+   *    diturunkan dari segmen jalan terdekat, bukan koordinat hardcode.
+   * 3. Tiga mesh gabungan (beton, baja, papan) plus dua InstancedMesh
+   *    pohon = 5 draw call, tanpa PointLight dan material malam baru.
+   */
+  buildVoidCTransit() {
+    const concreteGeos = [];
+    const steelGeos = [];
+    const signGeos = [];
+    const treePositions = [];
+
+    const makeBox = (w, h, d, x, y, z, rotY = 0, target = concreteGeos) => {
+      const geo = new THREE.BoxGeometry(w, h, d);
+      if (rotY !== 0) geo.rotateY(rotY);
+      geo.translate(x, y, z);
+      target.push(geo);
+    };
+
+    const addMerged = (geos, material, name, castShadow = false) => {
+      if (geos.length === 0) return;
+      const merged = BufferGeometryUtils.mergeGeometries(geos, false);
+      if (!merged) return;
+      const mesh = new THREE.Mesh(merged, material);
+      mesh.name = name;
+      mesh.castShadow = castShadow;
+      mesh.receiveShadow = true;
+      this.proceduralGroup.add(mesh);
+    };
+
+    // =========================================================================
+    // 1. PARK AND RIDE KEMBANGAN
+    // Plaza di utara akses stasiun (z -407..-387), tepat di seberang
+    // tangga JPO. Deret niaga Daan Mogot di sisi timur sudah dimasker
+    // oleh koridor akses sehingga lahan ini kosong.
+    // =========================================================================
+    const prCenterX = -960;
+    const prCenterZ = -397;
+    makeBox(84, 0.35, 20, prCenterX, 0.175, prCenterZ);
+
+    // 12 slot parkir di sisi utara plaza, dua garis tepi membujur.
+    const bayCount = 12;
+    const bayWidth = 2.5;
+    const bayStartX = -998;
+    const bayCenterZ = -402.8;
+    const bayDepth = 4.4;
+    for (let i = 0; i <= bayCount; i++) {
+      const bx = bayStartX + i * bayWidth;
+      makeBox(0.14, 0.05, bayDepth, bx, 0.37, bayCenterZ, 0, signGeos);
+    }
+    makeBox(bayCount * bayWidth, 0.05, 0.14, bayStartX + (bayCount * bayWidth) / 2, 0.37, bayCenterZ - bayDepth / 2, 0, signGeos);
+    makeBox(bayCount * bayWidth, 0.05, 0.14, bayStartX + (bayCount * bayWidth) / 2, 0.37, bayCenterZ + bayDepth / 2, 0, signGeos);
+
+    // Dua shelter penumpang di sisi selatan plaza.
+    [-953, -926].forEach((sx) => {
+      const sz = -392.8;
+      const halfW = 6;
+      const halfD = 1.6;
+      makeBox(2 * halfW, 0.3, 2.2, sx, 3.15, sz, 0, concreteGeos);
+      makeBox(2 * halfW, 0.55, 0.16, sx, 3.0, sz - 1.1, 0, signGeos);
+      [-1, 1].forEach((dirX) => {
+        [-1, 1].forEach((dirZ) => {
+          makeBox(
+            0.25, 2.85, 0.25,
+            sx + dirX * (halfW - 0.4), 1.775, sz + dirZ * (halfD - 0.5),
+            0, steelGeos
+          );
+        });
+        makeBox(0.18, 2.3, 1.1, sx + dirX * (halfW - 0.3), 1.6, sz - halfD + 0.55, 0, steelGeos);
+      });
+      makeBox(0.8, 0.45, 3.8, sx, 0.58, sz, 0, concreteGeos);
+      makeBox(0.14, 2.3, 0.14, sx + halfW - 0.9, 1.5, sz - halfD + 0.3, 0, steelGeos);
+      makeBox(0.12, 1.0, 2.4, sx + halfW - 0.9, 2.35, sz - halfD + 0.3, 0, signGeos);
+    });
+
+    // Totem park-and-ride di pintu masuk timur plaza.
+    const totemX = -919.4;
+    const totemZ = -403;
+    makeBox(0.3, 3.4, 0.3, totemX, 2.05, totemZ, 0, steelGeos);
+    makeBox(0.26, 1.7, 5.2, totemX, 3.6, totemZ, 0, signGeos);
+
+    // Enam pohon peneduh di tepi selatan plaza.
+    [-998, -982, -966, -950, -934, -918].forEach((tx, idx) => {
+      treePositions.push({ x: tx, z: -385.6, scale: 0.88 + (idx % 3) * 0.07 });
+    });
+
+    // =========================================================================
+    // 2. EMPAT FEEDER HALTE DI KORIDOR OSM
+    // =========================================================================
+    const halteSpecs = [
+      { name: 'Halte Meruya Ilir', road: 'Jalan Meruya Ilir', near: [-1124, 39], side: 1 },
+      { name: 'Halte Joglo Raya', road: 'Jalan Joglo Raya', near: [-1253, 354], side: -1 },
+      { name: 'Halte Ciledug Raya', road: 'Jalan Ciledug Raya', near: [-1257, 538], side: 1 },
+      { name: 'Halte Puri Kembangan', road: 'Jalan Puri Kembangan', near: [-1046, -220], side: -1 }
+    ];
+
+    const findRoadPoint = (roadName, near) => {
+      let best = null;
+      VOID_C_OSM.roads.forEach((road) => {
+        if (road.name !== roadName) return;
+        for (let i = 0; i < road.points.length - 1; i++) {
+          const a = road.points[i];
+          const b = road.points[i + 1];
+          const dx = b[0] - a[0];
+          const dz = b[1] - a[1];
+          const len2 = dx * dx + dz * dz;
+          let t = len2 ? ((near[0] - a[0]) * dx + (near[1] - a[1]) * dz) / len2 : 0;
+          t = Math.max(0, Math.min(1, t));
+          const x = a[0] + dx * t;
+          const z = a[1] + dz * t;
+          const d = Math.hypot(near[0] - x, near[1] - z);
+          if (!best || d < best.d) {
+            best = { x, z, d, angle: Math.atan2(dx, dz), width: road.width };
+          }
+        }
+      });
+      return best;
+    };
+
+    halteSpecs.forEach((spec) => {
+      const road = findRoadPoint(spec.road, spec.near);
+      if (!road) return;
+      const nx = Math.cos(road.angle);
+      const nz = -Math.sin(road.angle);
+      // Peron masuk bahu jalan; fasad ruko mulai pada half + 2,2 sehingga
+      // kanopi tetap 1 m di depan bangunan tanpa menembus dinding.
+      const offset = road.width * 0.5 - 0.2;
+      const hx = road.x + nx * offset * spec.side;
+      const hz = road.z + nz * offset * spec.side;
+
+      // Peron 12 m x 2,6 m sejajar jalan, kanopi baja di empat kolom.
+      makeBox(2.6, 0.5, 12, hx, 0.25, hz, road.angle);
+      [-5.2, 5.2].forEach((lz) => {
+        [-1.0, 1.0].forEach((lx) => {
+          const px = hx + lx * Math.cos(road.angle) + lz * Math.sin(road.angle);
+          const pz = hz - lx * Math.sin(road.angle) + lz * Math.cos(road.angle);
+          makeBox(0.16, 2.7, 0.16, px, 1.85, pz, 0, steelGeos);
+        });
+      });
+      makeBox(2.8, 0.22, 12.6, hx, 3.2, hz, road.angle);
+
+      // Bangku beton dan papan rute di ujung peron.
+      makeBox(0.7, 0.45, 3.6, hx - nx * 0.35, 0.725, hz - nz * 0.35, road.angle);
+      const postX = hx + 4.8 * Math.sin(road.angle);
+      const postZ = hz + 4.8 * Math.cos(road.angle);
+      makeBox(0.14, 2.5, 0.14, postX, 1.6, postZ, 0, steelGeos);
+      makeBox(0.12, 1.0, 2.4, postX, 2.35, postZ, road.angle, signGeos);
+    });
+
+    // =========================================================================
+    // 3. MATERIAL GABUNGAN DAN INSTANCED POHON
+    // =========================================================================
+    addMerged(
+      concreteGeos,
+      new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.72 }),
+      'voidc-transit-concrete',
+      true
+    );
+    addMerged(
+      steelGeos,
+      new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.42, metalness: 0.55 }),
+      'voidc-transit-steel',
+      true
+    );
+    addMerged(
+      signGeos,
+      new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.45 }),
+      'voidc-transit-sign',
+      false
+    );
+
+    if (treePositions.length > 0) {
+      const dummy = new THREE.Object3D();
+      const trunkGeo = new THREE.CylinderGeometry(0.28, 0.4, 3.6, 5);
+      const foliageGeo = new THREE.ConeGeometry(2.4, 5.6, 6);
+      const trunkMesh = new THREE.InstancedMesh(
+        trunkGeo,
+        new THREE.MeshStandardMaterial({ color: 0x3e2723, roughness: 0.9 }),
+        treePositions.length
+      );
+      const foliageMesh = new THREE.InstancedMesh(
+        foliageGeo,
+        new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.85 }),
+        treePositions.length
+      );
+      trunkMesh.name = 'voidc-transit-tree-trunks';
+      foliageMesh.name = 'voidc-transit-tree-foliage';
+
+      treePositions.forEach((tree, idx) => {
+        dummy.position.set(tree.x, 1.8 * tree.scale, tree.z);
+        dummy.scale.set(tree.scale, tree.scale, tree.scale);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        trunkMesh.setMatrixAt(idx, dummy.matrix);
+
+        dummy.position.set(tree.x, 6.0 * tree.scale, tree.z);
+        dummy.updateMatrix();
+        foliageMesh.setMatrixAt(idx, dummy.matrix);
+      });
+
+      trunkMesh.castShadow = true;
+      trunkMesh.receiveShadow = true;
+      foliageMesh.castShadow = true;
+      foliageMesh.receiveShadow = true;
+      this.proceduralGroup.add(trunkMesh);
+      this.proceduralGroup.add(foliageMesh);
+    }
+
+    this.voidCTransitStats = {
+      parkAndRide: 'Park and Ride Kembangan',
+      parkingBays: bayCount,
+      halte: halteSpecs.map((spec) => spec.name),
+      trees: treePositions.length,
       drawCalls: 5
     };
   }
