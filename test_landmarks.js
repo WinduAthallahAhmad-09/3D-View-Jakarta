@@ -1911,7 +1911,56 @@ assert.ok(
   assert.ok(voidDInfillMethod.includes(zone), `Void D infill missing the ${zone} warehouse cluster`);
 });
 
-console.log(`✅ All 93 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-3, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 48: Void D Tahap 4 — hub transit TWA Angke Kapuk & enam feeder halte
+assert.ok(citySceneContent.includes('buildVoidDTransit()'), 'CityScene.js missing buildVoidDTransit');
+
+const voidDTransitCall = citySceneContent.indexOf('this.buildVoidDTransit();');
+assert.ok(
+  voidDTransitCall > voidDInfillCall,
+  'buildVoidDTransit must run after buildVoidDInfill'
+);
+
+const voidDTransitStart = citySceneContent.indexOf('buildVoidDTransit() {');
+const voidDTransitEnd = citySceneContent.indexOf('buildVoidBInfillAndIndustry() {', voidDTransitStart);
+assert.ok(voidDTransitStart > 0 && voidDTransitEnd > voidDTransitStart, 'Cannot isolate buildVoidDTransit');
+const voidDTransitMethod = citySceneContent.slice(voidDTransitStart, voidDTransitEnd);
+assert.ok(!voidDTransitMethod.includes('new THREE.PointLight'), 'Void D transit must not add PointLights');
+assert.ok(!voidDTransitMethod.includes('nightMaterials.push'), 'Void D transit must not register new night materials');
+assert.ok(voidDTransitMethod.includes('VOID_D_OSM'), 'Void D transit must anchor halte to the OSM road dataset');
+assert.ok(voidDTransitMethod.includes('findRoadPoint'), 'Void D transit missing the nearest-road helper');
+assert.ok(
+  voidDTransitMethod.includes('Park and Ride TWA Angke Kapuk'),
+  'Void D transit missing the TWA Angke Kapuk park-and-ride'
+);
+assert.ok(
+  voidDTransitMethod.includes('Jalan Pantai Indah Utara 2'),
+  'Void D transit park-and-ride must use Jalan Pantai Indah Utara 2 access'
+);
+assert.ok(voidDTransitMethod.includes('voidDTransitStats'), 'Void D transit must expose runtime stats');
+assert.ok(voidDTransitMethod.includes('drawCalls: 5'), 'Void D transit should add five draw calls');
+
+[
+  'voidd-transit-concrete',
+  'voidd-transit-steel',
+  'voidd-transit-sign',
+  'voidd-transit-tree-trunks',
+  'voidd-transit-tree-foliage'
+].forEach((name) => {
+  assert.ok(voidDTransitMethod.includes(name), `Void D transit missing the ${name} mesh`);
+});
+
+[
+  'Halte PIK Avenue',
+  'Halte TWA Angke Kapuk',
+  'Halte Kapuk Raya',
+  'Halte Kapuk Muara',
+  'Halte Teluk Gong',
+  'Halte Muara Baru'
+].forEach((name) => {
+  assert.ok(voidDTransitMethod.includes(name), `Void D transit missing the ${name} feeder`);
+});
+
+console.log(`✅ All 93 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
