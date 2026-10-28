@@ -14,8 +14,8 @@ let assertionCount = 0;
 
 console.log('Running test_landmarks.js verification...');
 
-// Check 1: Exactly 81 landmarks
-assert.strictEqual(JAKARTA_LANDMARKS.length, 81, `Expected 81 landmarks, got ${JAKARTA_LANDMARKS.length}`);
+// Check 1: Exactly 87 landmarks
+assert.strictEqual(JAKARTA_LANDMARKS.length, 87, `Expected 87 landmarks, got ${JAKARTA_LANDMARKS.length}`);
 
 // Check 2: Unique IDs and valid properties
 const seenIds = new Set();
@@ -1504,7 +1504,43 @@ assert.ok(
   'Tanjung Priok vault roof must read as steel instead of rendering black'
 );
 
-console.log(`✅ All 81 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 41: Void C Tahap 1 — 6 anchor Meruya, Kembangan Selatan, Joglo & Kreo
+const voidCAnchors = [
+  { id: 'universitas-mercu-buana', builder: 'createUniversitasMercuBuana' },
+  { id: 'rsud-kembangan', builder: 'createRSUDKembangan' },
+  { id: 'pasar-meruya', builder: 'createPasarMeruya' },
+  { id: 'stasiun-kembangan', builder: 'createStasiunKembangan' },
+  { id: 'bendungan-polor', builder: 'createBendunganPolor' },
+  { id: 'kampung-makan-joglo', builder: 'createKampungMakanJoglo' }
+];
+
+assert.deepStrictEqual(
+  JAKARTA_LANDMARKS.slice(81).map((l) => l.id),
+  voidCAnchors.map((a) => a.id),
+  'Void C anchors must follow Cengkareng Business City as landmarks #82-#87'
+);
+
+const voidCModelSource = fs.readFileSync('src/world/LandmarkModels.js', 'utf8');
+voidCAnchors.forEach(({ id, builder }) => {
+  const lm = JAKARTA_LANDMARKS.find((l) => l.id === id);
+  assert.ok(lm, `Void C landmark ${id} not found in JAKARTA_LANDMARKS`);
+  assert.ok(lm.position[0] <= -900 && lm.position[0] >= -1450, `Landmark ${id} X position ${lm.position[0]} outside Void C range [-1450, -900]`);
+  assert.ok(lm.position[2] >= -500 && lm.position[2] <= 400, `Landmark ${id} Z position ${lm.position[2]} outside Void C range [-500, 400]`);
+  assert.ok(lm.facts && lm.facts.length >= 3, `Landmark ${id} must have at least 3 educational facts`);
+  assert.ok(lm.labelHeight >= 20, `Landmark ${id} labelHeight ${lm.labelHeight} is too low for a Void C anchor`);
+  assert.ok(lm.cameraPosition[1] > 30, `Landmark ${id} camera must be elevated above street level`);
+  assert.ok(lm.cameraTarget[1] < lm.cameraPosition[1], `Landmark ${id} camera must look downward at the anchor`);
+
+  const [projectedX, projectedZ] = projectGpsToScene(lm.coordinates.lat, lm.coordinates.lng);
+  const gpsDeviation = Math.hypot(lm.position[0] - projectedX, lm.position[2] - projectedZ);
+  assert.ok(gpsDeviation <= 80, `Landmark ${id} deviates ${gpsDeviation.toFixed(1)} units from its GPS projection`);
+
+  assert.ok(voidCModelSource.includes(`static ${builder}()`), `LandmarkModels missing ${builder}`);
+  assert.ok(citySceneContent.includes(`"${id}":`), `CityScene.js missing builder mapping for ${id}`);
+  assert.ok(indexHtmlContent.includes(`data-tour-id="${id}"`), `index.html missing tour button for ${id}`);
+});
+
+console.log(`✅ All 87 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1 Void C, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

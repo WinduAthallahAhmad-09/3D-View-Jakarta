@@ -2,7 +2,7 @@
 
 Website eksplorasi interaktif 3D Kota Jakarta dengan bangunan-bangunan yang mirip kondisi nyata saat ini. Dibangun menggunakan teknologi WebGL modern (**Three.js**), **100% gratis** tanpa memerlukan API key berbayar ataupun pendaftaran kartu kredit.
 
-**Status saat ini:** 81 landmark anchor dengan verifikasi statis, 9 Voids dalam roadmap. Audit visual 2026-10-27 menyimpan 14 baseline screenshot di [`docs/verification/screenshots/`](docs/verification/screenshots/). Lihat [docs/ROADMAP.md](docs/ROADMAP.md) untuk status per wilayah dan catatan batasan.
+**Status saat ini:** 87 landmark anchor dengan verifikasi statis, 9 Voids dalam roadmap. Void C Tahap 1 menambahkan enam anchor Meruya–Kembangan–Joglo (#82–#87) beserta 12 screenshot verifikasi baru di [`docs/verification/screenshots/`](docs/verification/screenshots/). Lihat [docs/ROADMAP.md](docs/ROADMAP.md) untuk status per wilayah dan catatan batasan.
 
 ---
 
@@ -54,7 +54,7 @@ python -m http.server 8000
 npm test
 ```
 
-Perintah ini menjalankan satu skrip verifikasi statis (2.364 assertion) untuk 81 landmark: jumlah dan ID unik, kelengkapan metadata, ketersediaan builder, kelengkapan tombol tour, batas penyimpangan posisi terhadap proyeksi GPS, serta integritas dataset OSM, infill, dan transit Void B (halte TransJakarta Koridor 3 dan viaduk KA Bandara). Sejak F4, verifikasi juga mengunci gerbong kereta dua mesh tanpa bayangan dinamis, 193 tiang/lampu PJU sebagai dua `InstancedMesh`, pool 12 `PointLight`, shadow map statis, 647 kendaraan dalam delapan `InstancedMesh`, serta DPR adaptif yang menyinkronkan renderer dan composer. Check 40 mengunci perbaikan audit visual 2026-10-27: exclusion Danau Rawa Buaya, framing enam preset, material hangar Halim, fasad SCBD, dan atap Stasiun Tanjung Priok. Ini bukan pengganti pengujian render atau performa di browser.
+Perintah ini menjalankan satu skrip verifikasi statis (2.491 assertion) untuk 87 landmark: jumlah dan ID unik, kelengkapan metadata, ketersediaan builder, kelengkapan tombol tour, batas penyimpangan posisi terhadap proyeksi GPS, serta integritas dataset OSM, infill, dan transit Void B (halte TransJakarta Koridor 3 dan viaduk KA Bandara). Sejak F4, verifikasi juga mengunci gerbong kereta dua mesh tanpa bayangan dinamis, 193 tiang/lampu PJU sebagai dua `InstancedMesh`, pool 12 `PointLight`, shadow map statis, 647 kendaraan dalam delapan `InstancedMesh`, serta DPR adaptif yang menyinkronkan renderer dan composer. Check 40 mengunci perbaikan audit visual 2026-10-27: exclusion Danau Rawa Buaya, framing enam preset, material hangar Halim, fasad SCBD, dan atap Stasiun Tanjung Priok. Check 41 mengunci enam anchor Void C Tahap 1: rentang posisi, deviasi GPS ≤80 unit, builder, mapping `CityScene`, tombol tour, dan metadata edukatif. Ini bukan pengganti pengujian render atau performa di browser.
 
 Hasil audit visual, statistik draw call per sudut pandang, dan daftar temuan P2/P3 ada di [docs/verification/2026-10-27-visual-audit.md](docs/verification/2026-10-27-visual-audit.md).
 
@@ -90,13 +90,13 @@ JAKARTA 3D VIEW/
 ├── README.md                   # Dokumentasi lengkap
 ├── docs/
 │   ├── ROADMAP.md              # Status terverifikasi & roadmap 9 Voids
-│   └── verification/           # Audit visual & 14 baseline screenshot
+│   └── verification/           # Audit visual 2026-10-27 & 12 screenshot Void C
 ├── public/
 │   └── models/                 # Slot folder untuk menyimpan file 3D .glb kustom
 └── src/
     ├── main.js                 # Entry point & inisialisasi aplikasi
     ├── config/
-    │   └── landmarks.js        # Konfigurasi koordinat spasial & metadata 81 landmark
+    │   └── landmarks.js        # Konfigurasi koordinat spasial & metadata 87 landmark
     ├── data/
     │   ├── jakarta_osm.json    # Geometri OSM Jakarta (jalan, bangunan, air, taman, rel)
     │   └── void_b_osm.js       # Jalan & Kanal Mookervaart OSM untuk Void B (ter-warp)

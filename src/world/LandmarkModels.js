@@ -7485,6 +7485,869 @@ export class LandmarkModels {
 
     return group;
   }
+
+  /**
+   * 82. Universitas Mercu Buana Kampus Meruya
+   * Menara rektorat, fakultas, auditorium, plaza upacara & kantin mahasiswa.
+   */
+  static createUniversitasMercuBuana() {
+    const group = new THREE.Group();
+
+    const siteMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.85 });
+    const plazaMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.8 });
+    const lawnMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.9 });
+    const towerMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.45 });
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0x0369a1, roughness: 0.25, metalness: 0.3, transparent: true, opacity: 0.88 });
+    const accentMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.5 });
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.6, metalness: 0.2 });
+    const canopyMat = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, roughness: 0.4 });
+    const signMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.45 });
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
+    const foliageMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.9 });
+
+    // 1. Kampus Site, Plaza & Lawn
+    const site = new THREE.Mesh(new THREE.BoxGeometry(118, 0.6, 96), siteMat);
+    site.position.y = 0.3;
+    site.receiveShadow = true;
+    group.add(site);
+
+    const plaza = new THREE.Mesh(new THREE.BoxGeometry(84, 0.62, 18), plazaMat);
+    plaza.position.set(0, 0.35, 32);
+    plaza.receiveShadow = true;
+    group.add(plaza);
+
+    [-34, 34].forEach((lx) => {
+      const lawn = new THREE.Mesh(new THREE.BoxGeometry(22, 0.64, 16), lawnMat);
+      lawn.position.set(lx, 0.34, 32);
+      group.add(lawn);
+    });
+
+    // 2. Menara Rektorat 12 Lantai
+    const tower = new THREE.Mesh(new THREE.BoxGeometry(34, 46, 24), towerMat);
+    tower.position.set(0, 23.6, -18);
+    tower.castShadow = true;
+    tower.receiveShadow = true;
+    group.add(tower);
+
+    for (let fl = 0; fl < 5; fl++) {
+      const band = new THREE.Mesh(new THREE.BoxGeometry(34.6, 2.6, 24.6), glassMat);
+      band.position.set(0, 8 + fl * 7.2, -18);
+      group.add(band);
+    }
+
+    const roofPlant = new THREE.Mesh(new THREE.BoxGeometry(16, 3.4, 12), roofMat);
+    roofPlant.position.set(0, 48.3, -18);
+    roofPlant.castShadow = true;
+    group.add(roofPlant);
+
+    const towerFin = new THREE.Mesh(new THREE.BoxGeometry(2.6, 46.4, 24.4), accentMat);
+    towerFin.position.set(17.6, 23.6, -18);
+    group.add(towerFin);
+
+    // 3. Dua Sayap Fakultas
+    [-42, 42].forEach((wx) => {
+      const wing = new THREE.Mesh(new THREE.BoxGeometry(30, 26, 20), towerMat);
+      wing.position.set(wx, 13.6, -10);
+      wing.castShadow = true;
+      group.add(wing);
+
+      [0, 1].forEach((fl) => {
+        const band = new THREE.Mesh(new THREE.BoxGeometry(30.6, 2.4, 20.6), glassMat);
+        band.position.set(wx, 8 + fl * 8, -10);
+        group.add(band);
+      });
+
+      const wingRoof = new THREE.Mesh(new THREE.BoxGeometry(31, 1.2, 21), roofMat);
+      wingRoof.position.set(wx, 27.1, -10);
+      group.add(wingRoof);
+    });
+
+    // 4. Auditorium berkubah kaca
+    const auditorium = new THREE.Mesh(new THREE.BoxGeometry(42, 13, 22), towerMat);
+    auditorium.position.set(0, 7.1, 12);
+    auditorium.castShadow = true;
+    group.add(auditorium);
+
+    const audGlass = new THREE.Mesh(new THREE.BoxGeometry(42.6, 3.6, 22.6), glassMat);
+    audGlass.position.set(0, 6.4, 12);
+    group.add(audGlass);
+
+    const audRoofGeo = new THREE.CylinderGeometry(11, 11, 42, 16, 1, false, 0, Math.PI);
+    audRoofGeo.rotateZ(Math.PI / 2);
+    const audRoof = new THREE.Mesh(audRoofGeo, roofMat);
+    audRoof.scale.set(0.32, 1.0, 0.9);
+    audRoof.position.set(0, 13.8, 12);
+    audRoof.castShadow = true;
+    group.add(audRoof);
+
+    // 5. Kanopi Gerbang & Signage Kampus
+    const canopy = new THREE.Mesh(new THREE.BoxGeometry(28, 1.1, 10), canopyMat);
+    canopy.position.set(0, 6.6, 40);
+    canopy.castShadow = true;
+    group.add(canopy);
+
+    [-10, 10].forEach((cx) => {
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.5, 6.6, 8), whiteMat);
+      col.position.set(cx, 3.3, 43);
+      group.add(col);
+    });
+
+    const signBoard = new THREE.Mesh(new THREE.BoxGeometry(18, 4.4, 1.2), signMat);
+    signBoard.position.set(-34, 6.4, 44);
+    signBoard.castShadow = true;
+    group.add(signBoard);
+
+    [-7, -2.5, 2, 6.5].forEach((sx) => {
+      const letter = new THREE.Mesh(new THREE.BoxGeometry(3.2, 2.2, 0.3), whiteMat);
+      letter.position.set(-34 + sx, 6.4, 44.7);
+      group.add(letter);
+    });
+
+    // 6. Tiang Bendera & Parkir
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.3, 24, 8), whiteMat);
+    pole.position.set(-14, 12.6, 30);
+    group.add(pole);
+
+    const flagRed = new THREE.Mesh(new THREE.BoxGeometry(4.2, 1.4, 0.12), new THREE.MeshBasicMaterial({ color: 0xdc2626 }));
+    flagRed.position.set(-11.9, 23.2, 30);
+    group.add(flagRed);
+    const flagWhite = new THREE.Mesh(new THREE.BoxGeometry(4.2, 1.4, 0.12), new THREE.MeshBasicMaterial({ color: 0xf8fafc }));
+    flagWhite.position.set(-11.9, 21.8, 30);
+    group.add(flagWhite);
+
+    const parking = new THREE.Mesh(new THREE.BoxGeometry(56, 0.1, 18), new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 }));
+    parking.position.set(28, 0.67, 30);
+    group.add(parking);
+
+    for (let px = 4; px <= 52; px += 8) {
+      const line = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.04, 14), whiteMat);
+      line.position.set(px, 0.74, 30);
+      group.add(line);
+    }
+
+    // 7. Pohon Peneduh
+    [-52, -40, 40, 52].forEach((tx) => {
+      [38, 22].forEach((tz) => {
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.7, 4.5, 6), trunkMat);
+        trunk.position.set(tx, 2.9, tz);
+        trunk.castShadow = true;
+        group.add(trunk);
+        const foliage = new THREE.Mesh(new THREE.ConeGeometry(3.6, 8, 7), foliageMat);
+        foliage.position.set(tx, 8, tz);
+        foliage.castShadow = true;
+        group.add(foliage);
+      });
+    });
+
+    return group;
+  }
+
+  /**
+   * 83. RSUD Kembangan
+   * Menara rawat inap, podium poliklinik, IGD berkanopi & helipad evakuasi.
+   */
+  static createRSUDKembangan() {
+    const group = new THREE.Group();
+
+    const siteMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 });
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.45 });
+    const podiumMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.5 });
+    const greenGlassMat = new THREE.MeshStandardMaterial({ color: 0x059669, roughness: 0.25, metalness: 0.3, transparent: true, opacity: 0.88 });
+    const redMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.35 });
+    const canopyMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4 });
+    const helipadMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.65 });
+    const helipadMarkMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.4 });
+    const lawnMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.9 });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
+    const foliageMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.9 });
+
+    // 1. Site, Taman & Parkir
+    const site = new THREE.Mesh(new THREE.BoxGeometry(100, 0.6, 84), siteMat);
+    site.position.y = 0.3;
+    site.receiveShadow = true;
+    group.add(site);
+
+    [-38, 38].forEach((lx) => {
+      const lawn = new THREE.Mesh(new THREE.BoxGeometry(18, 0.64, 20), lawnMat);
+      lawn.position.set(lx, 0.34, 24);
+      group.add(lawn);
+    });
+
+    const parking = new THREE.Mesh(new THREE.BoxGeometry(46, 0.1, 18), new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 }));
+    parking.position.set(22, 0.67, 26);
+    group.add(parking);
+
+    // 2. Menara Rawat Inap Utama
+    const tower = new THREE.Mesh(new THREE.BoxGeometry(34, 32, 26), whiteMat);
+    tower.position.set(-4, 16.6, -12);
+    tower.castShadow = true;
+    tower.receiveShadow = true;
+    group.add(tower);
+
+    for (let fl = 0; fl < 4; fl++) {
+      const band = new THREE.Mesh(new THREE.BoxGeometry(34.6, 2.2, 26.6), greenGlassMat);
+      band.position.set(-4, 9 + fl * 6.4, -12);
+      group.add(band);
+    }
+
+    // 3. Sayap Rawat Inap Kedua
+    const wing = new THREE.Mesh(new THREE.BoxGeometry(24, 24, 20), whiteMat);
+    wing.position.set(28, 12.6, -8);
+    wing.castShadow = true;
+    group.add(wing);
+
+    [0, 1, 2].forEach((fl) => {
+      const band = new THREE.Mesh(new THREE.BoxGeometry(24.6, 2.0, 20.6), greenGlassMat);
+      band.position.set(28, 8 + fl * 6.4, -8);
+      group.add(band);
+    });
+
+    // 4. Podium Poliklinik & Vestibule
+    const podium = new THREE.Mesh(new THREE.BoxGeometry(62, 10, 32), podiumMat);
+    podium.position.set(0, 5.3, 12);
+    podium.castShadow = true;
+    podium.receiveShadow = true;
+    group.add(podium);
+
+    const podiumGlass = new THREE.Mesh(new THREE.BoxGeometry(62.6, 2.6, 32.6), greenGlassMat);
+    podiumGlass.position.set(0, 6.4, 12);
+    group.add(podiumGlass);
+
+    const entrance = new THREE.Mesh(new THREE.BoxGeometry(18, 8, 6), podiumMat);
+    entrance.position.set(-14, 4.3, 30);
+    group.add(entrance);
+
+    // 5. IGD & Kanopi Ambulans
+    const igdCanopy = new THREE.Mesh(new THREE.BoxGeometry(22, 1.2, 11), canopyMat);
+    igdCanopy.position.set(22, 5.2, 30);
+    igdCanopy.castShadow = true;
+    group.add(igdCanopy);
+
+    [13, 31].forEach((cx) => {
+      [26, 34].forEach((cz) => {
+        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.4, 5, 8), whiteMat);
+        col.position.set(cx, 2.6, cz);
+        group.add(col);
+      });
+    });
+
+    [18, 26].forEach((ax) => {
+      const amb = new THREE.Mesh(new THREE.BoxGeometry(3.0, 2.2, 6.2), whiteMat);
+      amb.position.set(ax, 1.2, 31);
+      amb.castShadow = true;
+      group.add(amb);
+      const ambStripe = new THREE.Mesh(new THREE.BoxGeometry(3.06, 0.4, 6.26), redMat);
+      ambStripe.position.set(ax, 1.7, 31);
+      group.add(ambStripe);
+    });
+
+    // 6. Helipad atap
+    const roofBase = new THREE.Mesh(new THREE.BoxGeometry(16, 2.4, 16), helipadMat);
+    roofBase.position.set(-4, 33.8, -12);
+    roofBase.castShadow = true;
+    group.add(roofBase);
+
+    const heliRing = new THREE.Mesh(new THREE.RingGeometry(5.2, 6.0, 24), helipadMarkMat);
+    heliRing.rotateX(-Math.PI / 2);
+    heliRing.position.set(-4, 35.06, -12);
+    group.add(heliRing);
+
+    [-6.5, -1.5].forEach((hx) => {
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.1, 6), helipadMarkMat);
+      bar.position.set(-4 + hx, 35.07, -12);
+      group.add(bar);
+    });
+    const barH = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.1, 0.9), helipadMarkMat);
+    barH.position.set(-4, 35.07, -12);
+    group.add(barH);
+
+    // 7. Palang Merah & Signage
+    [[-4, 24, -25.4], [28, 20.5, -18.4]].forEach(([cx, cy, cz]) => {
+      const crossV = new THREE.Mesh(new THREE.BoxGeometry(1.4, 4.4, 0.5), redMat);
+      crossV.position.set(cx, cy, cz);
+      group.add(crossV);
+      const crossH = new THREE.Mesh(new THREE.BoxGeometry(4.4, 1.4, 0.5), redMat);
+      crossH.position.set(cx, cy, cz);
+      group.add(crossH);
+    });
+
+    // 8. Pohon Peneduh
+    [-44, 44].forEach((tx) => {
+      [8, 22].forEach((tz) => {
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.65, 4.2, 6), trunkMat);
+        trunk.position.set(tx, 2.8, tz);
+        trunk.castShadow = true;
+        group.add(trunk);
+        const foliage = new THREE.Mesh(new THREE.ConeGeometry(3.2, 7.4, 7), foliageMat);
+        foliage.position.set(tx, 7.6, tz);
+        foliage.castShadow = true;
+        group.add(foliage);
+      });
+    });
+
+    return group;
+  }
+
+  /**
+   * 84. Pasar Meruya & Sentra Niaga Meruya Ilir
+   * Bangunan pasar beratap lengkung, los basah-kering, kios & area bongkar muat.
+   */
+  static createPasarMeruya() {
+    const group = new THREE.Group();
+
+    const siteMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.85 });
+    const wallMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.55 });
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.5, metalness: 0.2 });
+    const awningMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.6 });
+    const awningAltMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.6 });
+    const wetMat = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, roughness: 0.35, metalness: 0.15 });
+    const stallMat = new THREE.MeshStandardMaterial({ color: 0xd6d3d1, roughness: 0.7 });
+    const signMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.5 });
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
+    const foliageMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.9 });
+
+    // 1. Site & Plaza Bongkar Muat
+    const site = new THREE.Mesh(new THREE.BoxGeometry(96, 0.6, 76), siteMat);
+    site.position.y = 0.3;
+    site.receiveShadow = true;
+    group.add(site);
+
+    const plaza = new THREE.Mesh(new THREE.BoxGeometry(80, 0.64, 16), new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.85 }));
+    plaza.position.set(0, 0.34, 26);
+    group.add(plaza);
+
+    // 2. Bangunan Pasar Utama
+    const hall = new THREE.Mesh(new THREE.BoxGeometry(66, 9.5, 34), wallMat);
+    hall.position.set(0, 5.4, -6);
+    hall.castShadow = true;
+    hall.receiveShadow = true;
+    group.add(hall);
+
+    const hallBase = new THREE.Mesh(new THREE.BoxGeometry(66.6, 2.2, 34.6), wetMat);
+    hallBase.position.set(0, 1.8, -6);
+    group.add(hallBase);
+
+    const roofGeo = new THREE.CylinderGeometry(19, 19, 66, 18, 1, false, 0, Math.PI);
+    const roof = new THREE.Mesh(roofGeo, roofMat);
+    roof.rotation.z = Math.PI / 2;
+    roof.scale.set(0.35, 1.0, 1.0);
+    roof.position.set(0, 10.2, -6);
+    roof.castShadow = true;
+    group.add(roof);
+
+    // 3. Skylight & Ventilasi Atap
+    [-20, 0, 20].forEach((sx) => {
+      const skylight = new THREE.Mesh(new THREE.BoxGeometry(10, 0.5, 26), whiteMat);
+      skylight.position.set(sx, 15.6, -6);
+      group.add(skylight);
+    });
+
+    [-26, 26].forEach((ex) => {
+      const vent = new THREE.Mesh(new THREE.BoxGeometry(0.5, 3.2, 20), whiteMat);
+      vent.position.set(ex, 10.6, -6);
+      group.add(vent);
+    });
+
+    // 4. Deretan Kios & Los
+    for (let kx = -28; kx <= 28; kx += 8) {
+      [-22, 10].forEach((kz, kIdx) => {
+        const kios = new THREE.Mesh(new THREE.BoxGeometry(6, 3.4, 4.2), stallMat);
+        kios.position.set(kx, 2.4, kz);
+        kios.castShadow = true;
+        group.add(kios);
+
+        const awning = new THREE.Mesh(new THREE.BoxGeometry(6.4, 0.4, 4.6), kIdx === 0 ? awningMat : awningAltMat);
+        awning.position.set(kx, 4.3, kz);
+        group.add(awning);
+      });
+    }
+
+    // 5. Los Basah di Sisi Barat
+    const wetStalls = new THREE.Mesh(new THREE.BoxGeometry(10, 1.0, 26), wetMat);
+    wetStalls.position.set(-28, 1.0, -6);
+    group.add(wetStalls);
+
+    // 6. Gerbang & Papan Nama Pasar
+    [-1, 1].forEach((dir) => {
+      const gateCol = new THREE.Mesh(new THREE.BoxGeometry(1.2, 7.5, 1.2), whiteMat);
+      gateCol.position.set(dir * 18, 4, 34);
+      gateCol.castShadow = true;
+      group.add(gateCol);
+    });
+
+    const gateBeam = new THREE.Mesh(new THREE.BoxGeometry(38, 1.2, 1.4), signMat);
+    gateBeam.position.set(0, 7.6, 34);
+    group.add(gateBeam);
+
+    const signText = new THREE.Mesh(new THREE.BoxGeometry(22, 3.2, 0.4), whiteMat);
+    signText.position.set(0, 7.6, 34.8);
+    group.add(signText);
+
+    // 7. Kendaraan Pengangkut
+    const truckBody = new THREE.Mesh(new THREE.BoxGeometry(3.0, 2.8, 7.2), stallMat);
+    truckBody.position.set(-34, 1.9, 26);
+    truckBody.castShadow = true;
+    group.add(truckBody);
+
+    const truckCab = new THREE.Mesh(new THREE.BoxGeometry(3.0, 2.4, 3.0), awningMat);
+    truckCab.position.set(-34, 1.7, 31.2);
+    truckCab.castShadow = true;
+    group.add(truckCab);
+
+    // 8. Pohon & Pohon Pot
+    [-42, 42].forEach((tx) => {
+      [-24, 34].forEach((tz) => {
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.7, 4.5, 6), trunkMat);
+        trunk.position.set(tx, 2.9, tz);
+        trunk.castShadow = true;
+        group.add(trunk);
+        const foliage = new THREE.Mesh(new THREE.ConeGeometry(3.4, 8, 7), foliageMat);
+        foliage.position.set(tx, 8.0, tz);
+        foliage.castShadow = true;
+        group.add(foliage);
+      });
+    });
+
+    return group;
+  }
+
+  /**
+   * 85. Stasiun Kembangan
+   * Peron ganda KRL Lintas Tangerang, kanopi baja toska & JPO penyeberangan.
+   */
+  static createStasiunKembangan() {
+    const group = new THREE.Group();
+
+    const ballastMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.9 });
+    const concreteMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.65 });
+    const tealRoofMat = new THREE.MeshStandardMaterial({ color: 0x0d9488, roughness: 0.4, side: THREE.DoubleSide });
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.5, metalness: 0.5 });
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, metalness: 0.3, transparent: true, opacity: 0.85 });
+    const railSteelMat = new THREE.MeshStandardMaterial({ color: 0xcfecff, metalness: 0.6, roughness: 0.25 });
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
+    const redMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.4 });
+    const signMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.5 });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
+    const foliageMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.9 });
+
+    // 1. Ballast & Rel Ganda
+    const trackbed = new THREE.Mesh(new THREE.BoxGeometry(64, 0.6, 44), ballastMat);
+    trackbed.position.y = 0.3;
+    trackbed.receiveShadow = true;
+    group.add(trackbed);
+
+    [-5.5, 5.5].forEach((tz) => {
+      [-0.75, 0.75].forEach((ro) => {
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(64, 0.22, 0.18), railSteelMat);
+        rail.position.set(0, 0.7, tz + ro);
+        group.add(rail);
+      });
+    });
+
+    // 2. Peron Ganda
+    [-12, 12].forEach((pz) => {
+      const plat = new THREE.Mesh(new THREE.BoxGeometry(58, 1.1, 7), concreteMat);
+      plat.position.set(0, 1.25, pz);
+      plat.receiveShadow = true;
+      group.add(plat);
+
+      [-20, 0, 20].forEach((cx) => {
+        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.36, 5.2, 8), steelMat);
+        col.position.set(cx, 4.4, pz);
+        col.castShadow = true;
+        group.add(col);
+      });
+
+      const roofGeo = new THREE.CylinderGeometry(6, 6, 58, 14, 1, false, 0, Math.PI);
+      const roof = new THREE.Mesh(roofGeo, tealRoofMat);
+      roof.rotation.z = Math.PI / 2;
+      roof.scale.set(0.32, 1.0, 0.8);
+      roof.position.set(0, 7.1, pz);
+      roof.castShadow = true;
+      group.add(roof);
+    });
+
+    // 3. Gedung Stasiun
+    const station = new THREE.Mesh(new THREE.BoxGeometry(24, 7.5, 10), concreteMat);
+    station.position.set(-16, 4.4, -17.5);
+    station.castShadow = true;
+    group.add(station);
+
+    const stationGlass = new THREE.Mesh(new THREE.BoxGeometry(24.6, 3.2, 10.6), glassMat);
+    stationGlass.position.set(-16, 4.8, -17.5);
+    group.add(stationGlass);
+
+    const stationRoof = new THREE.Mesh(new THREE.BoxGeometry(25.5, 0.8, 11.5), tealRoofMat);
+    stationRoof.position.set(-16, 8.5, -17.5);
+    group.add(stationRoof);
+
+    // 4. JPO Penyeberangan
+    const jpo = new THREE.Mesh(new THREE.BoxGeometry(5, 2.8, 34), concreteMat);
+    jpo.position.set(20, 8.0, 0);
+    jpo.castShadow = true;
+    group.add(jpo);
+
+    const jpoGlass = new THREE.Mesh(new THREE.BoxGeometry(5.4, 1.5, 30), glassMat);
+    jpoGlass.position.set(20, 8.0, 0);
+    group.add(jpoGlass);
+
+    const stair = new THREE.Mesh(new THREE.BoxGeometry(4, 6.5, 5), concreteMat);
+    stair.position.set(20, 3.6, 20);
+    stair.castShadow = true;
+    group.add(stair);
+
+    // 5. Kereta KRL di Jalur Ganda
+    const trainBody = new THREE.Mesh(new THREE.BoxGeometry(38, 3.0, 2.9), whiteMat);
+    trainBody.position.set(-4, 3.4, 5.5);
+    trainBody.castShadow = true;
+    group.add(trainBody);
+
+    const trainStripe = new THREE.Mesh(new THREE.BoxGeometry(38.2, 0.6, 2.95), redMat);
+    trainStripe.position.set(-4, 3.0, 5.5);
+    group.add(trainStripe);
+
+    const trainGlass = new THREE.Mesh(new THREE.BoxGeometry(38.2, 0.9, 2.98), glassMat);
+    trainGlass.position.set(-4, 4.0, 5.5);
+    group.add(trainGlass);
+
+    // 6. Katener & Papan Nama Stasiun
+    [-24, -8, 8, 24].forEach((gx) => {
+      const pole1 = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.26, 7.5, 8), steelMat);
+      pole1.position.set(gx, 4.0, -20);
+      group.add(pole1);
+      const pole2 = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.26, 7.5, 8), steelMat);
+      pole2.position.set(gx, 4.0, 20);
+      group.add(pole2);
+      const beam = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 40), steelMat);
+      beam.position.set(gx, 7.7, 0);
+      group.add(beam);
+    });
+
+    const nameBoard = new THREE.Mesh(new THREE.BoxGeometry(16, 2.8, 0.5), signMat);
+    nameBoard.position.set(-16, 10.2, -17.5);
+    group.add(nameBoard);
+
+    const nameText = new THREE.Mesh(new THREE.BoxGeometry(11, 1.2, 0.2), whiteMat);
+    nameText.position.set(-16, 10.2, -17.15);
+    group.add(nameText);
+
+    // 7. Vegetasi Tepi Rel
+    [-30, 30].forEach((tx) => {
+      [-22, 22].forEach((tz) => {
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.55, 3.8, 6), trunkMat);
+        trunk.position.set(tx, 2.5, tz);
+        trunk.castShadow = true;
+        group.add(trunk);
+        const foliage = new THREE.Mesh(new THREE.ConeGeometry(2.8, 6.6, 7), foliageMat);
+        foliage.position.set(tx, 7.0, tz);
+        foliage.castShadow = true;
+        group.add(foliage);
+      });
+    });
+
+    return group;
+  }
+
+  /**
+   * 86. Bendungan Polor Kali Angke
+   * Pintu air hidrolik, pilar beton, rumah operator & jembatan inspeksi.
+   */
+  static createBendunganPolor() {
+    const group = new THREE.Group();
+
+    const waterMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2, metalness: 0.1 });
+    const bankMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.85 });
+    const concreteMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.7 });
+    const gateMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.45, metalness: 0.4 });
+    const hoistMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.5 });
+    const houseMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.5 });
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.5 });
+    const railingMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.4, metalness: 0.3 });
+    const signMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.5 });
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
+    const foliageMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.9 });
+
+    // 1. Badan Air Kali Angke
+    const water = new THREE.Mesh(new THREE.PlaneGeometry(24, 64), waterMat);
+    water.rotateX(-Math.PI / 2);
+    // Sedikit di atas muka air Kali Angke (y = 1,2) agar tidak z-fighting.
+    water.position.set(0, 1.3, 0);
+    group.add(water);
+
+    // 2. Tanggul & Dinding Penahan Beton
+    [-24, 24].forEach((bx) => {
+      const bank = new THREE.Mesh(new THREE.BoxGeometry(26, 1.4, 64), bankMat);
+      bank.position.set(bx, 0.7, 0);
+      bank.receiveShadow = true;
+      group.add(bank);
+    });
+
+    [-12.2, 12.2].forEach((wx) => {
+      const wall = new THREE.Mesh(new THREE.BoxGeometry(1.4, 3.4, 64), concreteMat);
+      wall.position.set(wx, 1.6, 0);
+      wall.castShadow = true;
+      group.add(wall);
+    });
+
+    // 3. Pilar & Gerbang Baja Hidrolik
+    [-12, -4, 4, 12].forEach((px) => {
+      const pier = new THREE.Mesh(new THREE.BoxGeometry(2.2, 6.2, 8), concreteMat);
+      pier.position.set(px, 3.1, 0);
+      pier.castShadow = true;
+      pier.receiveShadow = true;
+      group.add(pier);
+    });
+
+    [-8, 0, 8].forEach((gx) => {
+      const gate = new THREE.Mesh(new THREE.BoxGeometry(6.4, 4.8, 0.7), gateMat);
+      gate.position.set(gx, 2.9, 0.2);
+      gate.rotation.x = -0.12;
+      gate.castShadow = true;
+      group.add(gate);
+
+      [-1, 1].forEach((dir) => {
+        const hoistCol = new THREE.Mesh(new THREE.BoxGeometry(0.4, 3.0, 0.4), hoistMat);
+        hoistCol.position.set(gx + dir * 3.4, 7.4, 0);
+        group.add(hoistCol);
+      });
+
+      const hoistBeam = new THREE.Mesh(new THREE.BoxGeometry(7.2, 0.5, 0.5), hoistMat);
+      hoistBeam.position.set(gx, 8.9, 0);
+      group.add(hoistBeam);
+
+      const hoistBox = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.1, 1.0), hoistMat);
+      hoistBox.position.set(gx, 8.2, 0);
+      group.add(hoistBox);
+    });
+
+    // 4. Jembatan Inspeksi & Railing
+    const bridge = new THREE.Mesh(new THREE.BoxGeometry(50, 0.8, 5), concreteMat);
+    bridge.position.set(0, 6.6, -4.6);
+    bridge.castShadow = true;
+    group.add(bridge);
+
+    [-2, -1, 0, 1, 2].forEach((ri) => {
+      [-7, -2.2].forEach((rz) => {
+        const post = new THREE.Mesh(new THREE.BoxGeometry(0.15, 1.2, 0.15), railingMat);
+        post.position.set(ri * 8.4, 7.6, rz);
+        group.add(post);
+      });
+      const topRail = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 4.8), railingMat);
+      topRail.position.set(ri * 8.4, 8.2, -4.6);
+      group.add(topRail);
+    });
+
+    // 5. Rumah Operator di Tepi Timur
+    const house = new THREE.Mesh(new THREE.BoxGeometry(13, 6.4, 11), houseMat);
+    house.position.set(28, 3.6, -12);
+    house.castShadow = true;
+    group.add(house);
+
+    const houseGlass = new THREE.Mesh(new THREE.BoxGeometry(13.6, 1.8, 11.6), new THREE.MeshStandardMaterial({ color: 0x0ea5e9, roughness: 0.25, metalness: 0.2, transparent: true, opacity: 0.85 }));
+    houseGlass.position.set(28, 4.2, -12);
+    group.add(houseGlass);
+
+    const houseRoof = new THREE.Mesh(new THREE.BoxGeometry(14, 0.7, 12), roofMat);
+    houseRoof.position.set(28, 7.0, -12);
+    group.add(houseRoof);
+
+    // 6. Papan Peringatan & Pengukur Muka Air
+    const signBoard = new THREE.Mesh(new THREE.BoxGeometry(5.2, 3.0, 0.4), signMat);
+    signBoard.position.set(-28, 4.6, 18);
+    signBoard.rotation.y = 0.25;
+    group.add(signBoard);
+
+    const gaugePost = new THREE.Mesh(new THREE.BoxGeometry(0.4, 5.5, 0.4), whiteMat);
+    gaugePost.position.set(15, 2.9, 14);
+    group.add(gaugePost);
+
+    [-1.5, 0, 1.5].forEach((gy) => {
+      const mark = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.25, 0.45), new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.5 }));
+      mark.position.set(15, 4.2 + gy, 14);
+      group.add(mark);
+    });
+
+    // 7. Vegetasi Tepi Sungai
+    [-30, 30].forEach((tx) => {
+      [-26, 26].forEach((tz) => {
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.6, 4.0, 6), trunkMat);
+        trunk.position.set(tx, 2.6, tz);
+        trunk.castShadow = true;
+        group.add(trunk);
+        const foliage = new THREE.Mesh(new THREE.ConeGeometry(3.0, 7, 7), foliageMat);
+        foliage.position.set(tx, 7.3, tz);
+        foliage.castShadow = true;
+        group.add(foliage);
+      });
+    });
+
+    return group;
+  }
+
+  /**
+   * 87. Kampung Makan Joglo 21
+   * Pendopo joglo bertingkat, tenant kuliner, lesehan & panggung komunal.
+   */
+  static createKampungMakanJoglo() {
+    const group = new THREE.Group();
+
+    const siteMat = new THREE.MeshStandardMaterial({ color: 0x57534e, roughness: 0.85 });
+    const pavingMat = new THREE.MeshStandardMaterial({ color: 0xa8a29e, roughness: 0.8 });
+    const lawnMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.9 });
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0x7c2d12, roughness: 0.7 });
+    const pillarMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.75 });
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x92400e, roughness: 0.7 });
+    const roofAltMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.7 });
+    const stallMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.6 });
+    const awningMat = new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.6 });
+    const awningAltMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.6 });
+    const lampMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7, emissive: 0xf59e0b, emissiveIntensity: 0.8, roughness: 0.4 });
+    const signMat = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.5 });
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
+    const foliageMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.9 });
+
+    // 1. Site, Paving & Taman
+    const site = new THREE.Mesh(new THREE.BoxGeometry(92, 0.6, 74), siteMat);
+    site.position.y = 0.3;
+    site.receiveShadow = true;
+    group.add(site);
+
+    const paving = new THREE.Mesh(new THREE.BoxGeometry(62, 0.62, 50), pavingMat);
+    paving.position.set(0, 0.34, 4);
+    paving.receiveShadow = true;
+    group.add(paving);
+
+    [-34, 34].forEach((lx) => {
+      const lawn = new THREE.Mesh(new THREE.BoxGeometry(18, 0.64, 26), lawnMat);
+      lawn.position.set(lx, 0.34, 6);
+      group.add(lawn);
+    });
+
+    // 2. Pendopo Joglo Utama
+    const platform = new THREE.Mesh(new THREE.BoxGeometry(34, 1.2, 26), woodMat);
+    platform.position.set(0, 1.0, -4);
+    platform.castShadow = true;
+    group.add(platform);
+
+    [-13, 13].forEach((px) => {
+      [-9, 9].forEach((pz) => {
+        const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.85, 6.2, 8), pillarMat);
+        pillar.position.set(px, 4.6, -4 + pz);
+        pillar.castShadow = true;
+        group.add(pillar);
+      });
+    });
+
+    [-6.5, 6.5].forEach((px) => {
+      [-4, 4].forEach((pz) => {
+        const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 6.0, 8), pillarMat);
+        pillar.position.set(px, 4.5, -4 + pz);
+        group.add(pillar);
+      });
+    });
+
+    const roofLower = new THREE.Mesh(new THREE.ConeGeometry(25, 5.4, 4), roofMat);
+    roofLower.rotation.y = Math.PI / 4;
+    roofLower.scale.z = 0.82;
+    roofLower.position.set(0, 10.2, -4);
+    roofLower.castShadow = true;
+    group.add(roofLower);
+
+    const roofUpper = new THREE.Mesh(new THREE.ConeGeometry(16, 4.2, 4), roofAltMat);
+    roofUpper.rotation.y = Math.PI / 4;
+    roofUpper.scale.z = 0.82;
+    roofUpper.position.set(0, 14.4, -4);
+    roofUpper.castShadow = true;
+    group.add(roofUpper);
+
+    const finial = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.45, 3.0, 8), pillarMat);
+    finial.position.set(0, 17.4, -4);
+    group.add(finial);
+
+    // 3. Deretan Tenant Kuliner
+    for (let sx = -26; sx <= 26; sx += 13) {
+      [-26, 26].forEach((sz, sIdx) => {
+        const stall = new THREE.Mesh(new THREE.BoxGeometry(9, 3.2, 5), stallMat);
+        stall.position.set(sx, 2.2, sz);
+        stall.castShadow = true;
+        group.add(stall);
+
+        const awning = new THREE.Mesh(new THREE.BoxGeometry(9.6, 0.4, 5.6), sIdx === 0 ? awningMat : awningAltMat);
+        awning.position.set(sx, 4.0, sz);
+        group.add(awning);
+
+        const counter = new THREE.Mesh(new THREE.BoxGeometry(7, 0.9, 1.2), woodMat);
+        counter.position.set(sx, 1.2, sz + (sz > 0 ? -2.5 : 2.5));
+        group.add(counter);
+      });
+    }
+
+    // 4. Area Lesehan & Meja
+    [-18, -6, 6, 18].forEach((lx) => {
+      [-10, 10].forEach((lz) => {
+        const mat = new THREE.Mesh(new THREE.BoxGeometry(6, 0.25, 4), woodMat);
+        mat.position.set(lx, 0.75, lz + 4);
+        group.add(mat);
+
+        const table = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 0.2, 10), pillarMat);
+        table.position.set(lx, 1.35, lz + 4);
+        group.add(table);
+      });
+    });
+
+    // 5. Panggung Kecil & Langit-langit Lampu
+    const stage = new THREE.Mesh(new THREE.BoxGeometry(14, 1.0, 7), woodMat);
+    stage.position.set(0, 0.95, 28);
+    stage.castShadow = true;
+    group.add(stage);
+
+    for (let lx = -30; lx <= 30; lx += 10) {
+      [-16, 16].forEach((lz) => {
+        const lampPole = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 5.2, 6), pillarMat);
+        lampPole.position.set(lx, 3.1, lz);
+        group.add(lampPole);
+        const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.42, 8, 6), lampMat);
+        lamp.position.set(lx, 5.7, lz);
+        group.add(lamp);
+      });
+    }
+
+    // 6. Papan Nama & Gerbang Masuk
+    [-1, 1].forEach((dir) => {
+      const gateCol = new THREE.Mesh(new THREE.BoxGeometry(0.8, 6.0, 0.8), woodMat);
+      gateCol.position.set(dir * 14, 3.4, 36);
+      gateCol.castShadow = true;
+      group.add(gateCol);
+    });
+
+    const gateBeam = new THREE.Mesh(new THREE.BoxGeometry(30, 1.0, 1.0), signMat);
+    gateBeam.position.set(0, 6.4, 36);
+    group.add(gateBeam);
+
+    const gateSign = new THREE.Mesh(new THREE.BoxGeometry(20, 2.4, 0.3), whiteMat);
+    gateSign.position.set(0, 6.4, 36.55);
+    group.add(gateSign);
+
+    // 7. Pohon Tepi Kawasan
+    [-40, 40].forEach((tx) => {
+      [-20, 24].forEach((tz) => {
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.6, 4.2, 6), trunkMat);
+        trunk.position.set(tx, 2.7, tz);
+        trunk.castShadow = true;
+        group.add(trunk);
+        const foliage = new THREE.Mesh(new THREE.ConeGeometry(3.2, 7.2, 7), foliageMat);
+        foliage.position.set(tx, 7.6, tz);
+        foliage.castShadow = true;
+        group.add(foliage);
+      });
+    });
+
+    return group;
+  }
 }
 
 

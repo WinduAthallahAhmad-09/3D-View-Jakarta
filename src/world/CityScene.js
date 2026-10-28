@@ -3730,6 +3730,7 @@ export class CityScene {
           if (Math.abs(z - (-45)) < 16) continue; // Koridor Tol Jakarta-Tangerang
           if (Math.abs(x - (-840)) < 12) continue; // Kali Pesanggrahan
           if (Math.abs(x - (-680)) < 12 && z > -250 && z < 220) continue; // Kali Sekretaris
+          if (Math.abs(x - (-970)) < 16) continue; // Kali Angke
 
           const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233));
           const h = zone.baseH + hash * (zone.maxH - zone.baseH);
@@ -3819,6 +3820,8 @@ export class CityScene {
         if (Math.abs(x - (-650)) < 30 && Math.abs(z - (-420)) < 25) return;
         // Danau Rawa Buaya (landmark #80) — jangan menimbun badan air
         if (Math.abs(x - (-1080)) < 52 && Math.abs(z - (-400)) < 46) return;
+        // Stasiun Kembangan (#85) — jaga koridor peron, JPO & jalur ganda
+        if (Math.abs(x - (-955)) < 52 && Math.abs(z - (-437)) < 34) return;
 
         const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233));
         const h = 9 + hash * 8; // 9m - 17m
@@ -3867,6 +3870,9 @@ export class CityScene {
     for (let x = -980; x <= -600; x += 24) {
       if (Math.abs(x - (-775)) < 26) continue; // Simpang Jl. Panjang
       [195, 225].forEach((z) => {
+        // Bendungan Polor (#86) — jaga badan Kali Angke dan tanggul pintu air
+        if (Math.abs(x - (-970)) < 36 && Math.abs(z - 168) < 44) return;
+
         const hash = Math.abs(Math.sin(x * 14.123 + z * 53.421));
         const h = 11 + hash * 9; // 11m - 20m
         const colIdx = Math.floor(hash * commercialColors.length) % commercialColors.length;
@@ -5601,7 +5607,13 @@ export class CityScene {
       "daan-mogot-mall": () => LandmarkModels.createDaanMogotMall(),
       "stasiun-rawa-buaya-hub": () => LandmarkModels.createStasiunRawaBuayaHub(),
       "danau-rawa-buaya": () => LandmarkModels.createDanauRawaBuaya(),
-      "cengkareng-business-city": () => LandmarkModels.createCengkarengBusinessCity()
+      "cengkareng-business-city": () => LandmarkModels.createCengkarengBusinessCity(),
+      "universitas-mercu-buana": () => LandmarkModels.createUniversitasMercuBuana(),
+      "rsud-kembangan": () => LandmarkModels.createRSUDKembangan(),
+      "pasar-meruya": () => LandmarkModels.createPasarMeruya(),
+      "stasiun-kembangan": () => LandmarkModels.createStasiunKembangan(),
+      "bendungan-polor": () => LandmarkModels.createBendunganPolor(),
+      "kampung-makan-joglo": () => LandmarkModels.createKampungMakanJoglo()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {

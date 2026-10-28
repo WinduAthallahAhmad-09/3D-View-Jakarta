@@ -1,5 +1,5 @@
 /**
- * Geospatial configuration for 81 Jakarta landmarks across all city regions.
+ * Geospatial configuration for 87 Jakarta landmarks across all city regions.
  * Scene coordinates use a uniform metric projection centered at Bundaran Hotel Indonesia
  * (-6.194957°, 106.823048° -> [0, 0, 0]):
  *   X = (lng - 106.823048) * 14100.0   (~7.81 meters per scene unit)
@@ -1821,6 +1821,141 @@ export const JAKARTA_LANDMARKS = [
       "Menjadi basis operasional ratusan perusahaan ekspedisi, forwarding internasional, dan agen logistik kargo udara nasional.",
       "Memiliki akses super cepat langsung menuju Tol Bandara Soekarno-Hatta (Prof. Sedyatmo) dan Tol JORR W1.",
       "Dilengkapi sistem keamanan terpadu 24 jam dan fasilitas pergudangan berpendingin (cold storage) untuk komoditas sensitif suhu."
+    ]
+  },
+  // =====================================================
+  // ZONA 9: VOID C — MERUYA, KEMBANGAN SELATAN, JOGLO & KREO
+  // =====================================================
+  {
+    id: "universitas-mercu-buana",
+    name: "Universitas Mercu Buana Kampus Meruya",
+    shortName: "Universitas Mercu Buana",
+    category: "Pendidikan Tinggi & Kampus Swasta Nasional",
+    tagline: "Kampus Swasta Nasional di Meruya Selatan, Menara Rektorat & Pusat Inovasi Jakarta Barat",
+    height: "46 meter (Gedung Rektorat & Menara Kampus 12 Lantai)",
+    year: "1985",
+    architect: "Yayasan Menara Bhakti",
+    location: "Jl. Meruya Selatan No. 1, Joglo, Kecamatan Kembangan, Jakarta Barat",
+    coordinates: { lat: -6.2043, lng: 106.7291 },
+    position: [-1325.0, 0, 133.0],
+    labelHeight: 52,
+    cameraPosition: [-1255.0, 75, 215.0],
+    cameraTarget: [-1325.0, 18, 133.0],
+    description: "Kampus utama Universitas Mercu Buana di koridor Meruya Selatan yang menjadi salah satu pusat pendidikan tinggi swasta terbesar di Jakarta Barat. Menampilkan menara rektorat berfasad kaca biru, gedung fakultas bertingkat, plaza upacara, auditorium, perpustakaan terpadu, serta deretan kantin dan area parkir mahasiswa yang ramai setiap hari kuliah.",
+    facts: [
+      "Didirikan oleh Yayasan Menara Bhakti pada 1985 dan kini menyelenggarakan program sarjana hingga pascasarjana di bidang teknik, ekonomi, komunikasi, dan desain.",
+      "Kampus Meruya menjadi salah satu kampus swasta dengan populasi mahasiswa terbesar di Jakarta Barat.",
+      "Lokasinya di Jl. Meruya Selatan menghubungkan kawasan Kembangan, Joglo, dan Kebon Jeruk melalui angkutan kota serta bus kampus."
+    ]
+  },
+  {
+    id: "rsud-kembangan",
+    name: "RSUD Kembangan",
+    shortName: "RSUD Kembangan",
+    category: "Kesehatan & Rumah Sakit Umum Daerah",
+    tagline: "Rumah Sakit Daerah Tipe C, IGD 24 Jam & Layanan Publik Meruya Utara",
+    height: "34 meter (Gedung Rawat Inap 8 Lantai)",
+    year: "2019",
+    architect: "Dinas Kesehatan DKI Jakarta",
+    location: "Jl. Topas Raya Blok FII No. 3, Meruya Utara, Kecamatan Kembangan, Jakarta Barat",
+    coordinates: { lat: -6.1905, lng: 106.7275 },
+    position: [-1347.0, 0, -63.0],
+    labelHeight: 44,
+    cameraPosition: [-1268.0, 62, 5.0],
+    cameraTarget: [-1347.0, 14, -63.0],
+    description: "Rumah sakit umum daerah tipe C milik Pemerintah Provinsi DKI Jakarta yang melayani warga Kembangan, Meruya, dan Joglo. Menampilkan menara rawat inap berfasad putih dengan pita kaca hijau, podium poliklinik, instalasi gawat darurat berkanopi, ruang isolasi, serta area parkir ambulans dan pengunjung yang terpisah.",
+    facts: [
+      "Merupakan rumah sakit daerah rujukan di Kecamatan Kembangan dengan layanan gawat darurat 24 jam.",
+      "Berlokasi di kompleks Jl. Topas Raya, Meruya Utara, dekat kawasan perumahan Taman Aries dan Meruya Ilir.",
+      "Melayani peserta JKN-KIS serta pasien umum dari Jakarta Barat dan wilayah perbatasan Tangerang."
+    ]
+  },
+  {
+    id: "pasar-meruya",
+    name: "Pasar Meruya & Sentra Niaga Meruya Ilir",
+    shortName: "Pasar Meruya",
+    category: "Pasar Tradisional & Ekonomi Kerakyatan",
+    tagline: "Pasar Rakyat Meruya Ilir, Komoditas Segar & Denyut Ekonomi Kembangan",
+    height: "14 meter (Atap Pasar Berlapis & Kanopi Kios)",
+    year: "1970-an / Revitalisasi",
+    architect: "Pemerintah Kota Administrasi Jakarta Barat",
+    location: "Jl. Pasar Meruya Ilir, Meruya Utara, Kecamatan Kembangan, Jakarta Barat",
+    coordinates: { lat: -6.1975, lng: 106.7310 },
+    position: [-1298.0, 0, 36.0],
+    labelHeight: 30,
+    cameraPosition: [-1160.0, 74, 140.0],
+    cameraTarget: [-1298.0, 5, 34.0],
+    description: "Pasar tradisional yang menjadi pusat belanja harian warga Meruya Ilir dan sekitarnya. Menampilkan bangunan pasar beratap metal berlapis dengan deretan kios basah dan kering, los sayur dan daging, area bongkar muat, parkir motor pedagang, serta deretan ruko kuliner yang hidup sejak pagi hingga malam.",
+    facts: [
+      "Menjadi salah satu pasar rakyat utama di Kecamatan Kembangan yang melayani kebutuhan harian warga Meruya dan Joglo.",
+      "Aktivitas pasar dimulai dini hari saat komoditas segar tiba dari pasar induk dan petani sekitar Jabodetabek.",
+      "Berada di koridor Jl. Pasar Meruya Ilir yang terhubung ke Jl. Meruya Ilir Raya dan Jl. Meruya Selatan."
+    ]
+  },
+  {
+    id: "stasiun-kembangan",
+    name: "Stasiun Kembangan",
+    shortName: "Stasiun Kembangan",
+    category: "Transit Kereta Api & Integrasi Multimoda",
+    tagline: "Halte KRL Commuter Line Lintas Tangerang, Gerbang Komuter Kembangan",
+    height: "12 meter (Kanopi Peron & Gedung Stasiun)",
+    year: "1899 / Modernisasi",
+    architect: "PT Kereta Api Indonesia (Persero)",
+    location: "Jl. Kembangan Raya, Kembangan Utara, Kecamatan Kembangan, Jakarta Barat",
+    coordinates: { lat: -6.1619, lng: 106.7519 },
+    position: [-955.0, 0, -437.0],
+    labelHeight: 30,
+    cameraPosition: [-955.0, 76, -338.0],
+    cameraTarget: [-955.0, 9, -441.0],
+    description: "Stasiun KRL Commuter Line Lintas Tangerang yang melayani perjalanan harian warga Kembangan menuju Duri, Tanah Abang, dan Tangerang. Menampilkan dua peron sejajar dengan kanopi baja, bangunan stasiun berlantai dua, jembatan penyeberangan orang, tiket elektronik, serta jalur ganda yang membelah kawasan permukiman padat Kembangan Utara.",
+    facts: [
+      "Dilayani KRL Commuter Line Lintas Tangerang yang menghubungkan Duri dengan Tangerang melalui Grogol, Pesing, dan Rawa Buaya.",
+      "Berada di Kembangan Utara dan menjadi akses komuter bagi warga Puri Indah, Kembangan, serta perbatasan Tangerang.",
+      "Stasiun ini juga dilintasi Kereta Bandara Soekarno-Hatta pada segmen rel yang sama menuju Duri."
+    ]
+  },
+  {
+    id: "bendungan-polor",
+    name: "Bendungan Polor Kali Angke",
+    shortName: "Bendungan Polor",
+    category: "Tata Air & Pengendali Banjir",
+    tagline: "Pintu Air Kali Angke di Kembangan Selatan, Pengendali Debit Menuju Tangerang",
+    height: "9 meter (Pintu Air Hidrolik & Rumah Operator)",
+    year: "Awal Abad ke-20 / Rehabilitasi Berkala",
+    architect: "Dinas Sumber Daya Air DKI Jakarta",
+    location: "Kali Angke, Kembangan Selatan, Kecamatan Kembangan, Jakarta Barat",
+    coordinates: { lat: -6.2100, lng: 106.7540 },
+    position: [-970.0, 0, 168.0],
+    labelHeight: 28,
+    cameraPosition: [-970.0, 36, 96.0],
+    cameraTarget: [-970.0, 6, 168.0],
+    description: "Bendungan dan pintu air di aliran Kali Angke yang mengatur debit air dari hulu Tangerang menuju Jakarta. Menampilkan deretan pilar beton, gerbang baja hidrolik, rumah operator di tepi sungai, jembatan inspeksi, tanggul penahan banjir, serta papan ketinggian muka air yang dipantau saat musim hujan.",
+    facts: [
+      "Berada di Kelurahan Kembangan Selatan, dekat persimpangan Tol Kembangan, dan menjadi salah satu titik kendali banjir Kali Angke.",
+      "Mengatur aliran Kali Angke yang melintas dari Tangerang menuju Jakarta Barat sebelum bermuara ke laut.",
+      "Kondisi pintu air dan sedimentasi di sekitarnya rutin dipantau Pemerintah Kota Jakarta Barat saat curah hujan tinggi."
+    ]
+  },
+  {
+    id: "kampung-makan-joglo",
+    name: "Kampung Makan Joglo 21",
+    shortName: "Kampung Makan Joglo",
+    category: "Wisata Kuliner & Ruang Komunal",
+    tagline: "Pendopo Joglo, Kuliner Lesehan & Ruang Komunal Warga Kembangan",
+    height: "9 meter (Pendopo Joglo & Kanopi Lesehan)",
+    year: "2010-an",
+    architect: "Pengelola Kampung Makan Joglo",
+    location: "Jl. Joglo Raya No. 21, Joglo, Kecamatan Kembangan, Jakarta Barat",
+    coordinates: { lat: -6.2092, lng: 106.7380 },
+    position: [-1199.0, 0, 202.0],
+    labelHeight: 24,
+    cameraPosition: [-1199.0, 62, 302.0],
+    cameraTarget: [-1199.0, 6, 200.0],
+    description: "Kawasan kuliner dan ruang komunal di Jl. Joglo Raya yang mengangkat arsitektur pendopo joglo sebagai ciri khas. Menampilkan bangunan joglo beratap limasan bertumpuk dengan tiang kayu, deretan tenant makanan Indonesia, area lesehan terbuka, panggung kecil, taman hijau, serta area parkir yang ramai pada malam hari dan akhir pekan.",
+    facts: [
+      "Mengangkat bentuk pendopo joglo sebagai identitas ruang makan, memadukan kuliner tradisional dengan suasana kampung Kembangan.",
+      "Menjadi titik kumpul warga Joglo dan Kreo untuk acara keluarga, pertemuan komunitas, dan wisata kuliner malam.",
+      "Berlokasi di Jl. Joglo Raya, koridor yang menghubungkan Meruya Ilir, Kreo, dan perbatasan Tangerang."
     ]
   }
 ];
