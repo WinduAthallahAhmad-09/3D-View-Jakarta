@@ -7,15 +7,16 @@ Repo: `WinduAthallahAhmad-09/3D-View-Jakarta` (branch `main`)
 
 - **87 landmark anchor** (#01 Monas s.d. #87 Kampung Makan Joglo) di `src/config/landmarks.js`.
 - **88 tombol tour** (87 landmark + tampilan aerial) di `index.html`; seluruh ID landmark memiliki tombol dan builder model.
-- **Satu skrip verifikasi statis** di `test_landmarks.js`, dijalankan dengan `npm test`. Saat ini menjalankan 2.491 assertion yang memeriksa data, metadata, builder, tombol tour, batas deviasi posisi, serta integrasi dataset OSM, infill, dan transit Void B. Sejak F4, skrip juga memastikan lima builder gerbong KRL/MRT/KAI/LRT memakai `bakeRailCarGroup`, PJU memakai dua `InstancedMesh` dengan pool 12 `PointLight`, 647 kendaraan memakai delapan `InstancedMesh`, shadow map berjalan statis dengan refresh terarah, dan DPR adaptif menyinkronkan renderer serta composer. Check 40 mengunci audit visual 2026-10-27: exclusion Danau Rawa Buaya, framing enam preset, material hangar Halim, metalness fasad SCBD, serta atap Stasiun Tanjung Priok. Check 41 mengunci enam anchor Void C Tahap 1: rentang posisi, deviasi GPS ≤80 unit, builder, mapping `CityScene`, tombol tour, dan minimal tiga fakta edukatif. Ini **bukan 33 unit test suite** dan belum mencakup render, interaksi, atau performa.
+- **Satu skrip verifikasi statis** di `test_landmarks.js`, dijalankan dengan `npm test`. Saat ini menjalankan 3.954 assertion yang memeriksa data, metadata, builder, tombol tour, batas deviasi posisi, serta integrasi dataset OSM, infill, dan transit Void B. Sejak F4, skrip juga memastikan lima builder gerbong KRL/MRT/KAI/LRT memakai `bakeRailCarGroup`, PJU memakai dua `InstancedMesh` dengan pool 12 `PointLight`, 647 kendaraan memakai delapan `InstancedMesh`, shadow map berjalan statis dengan refresh terarah, dan DPR adaptif menyinkronkan renderer serta composer. Check 40 mengunci audit visual 2026-10-27: exclusion Danau Rawa Buaya, framing enam preset, material hangar Halim, metalness fasad SCBD, serta atap Stasiun Tanjung Priok. Check 41 mengunci enam anchor Void C Tahap 1: rentang posisi, deviasi GPS ≤80 unit, builder, mapping `CityScene`, tombol tour, dan minimal tiga fakta edukatif. Check 42 mengunci dataset OSM Void C Tahap 2: 185 ruas/478 titik dengan koordinat terbatas pada clip box, lisensi ODbL, proyeksi tanpa warp, tujuh nama jalan kunci, jarak maksimum 60 unit ke enam anchor, builder `buildVoidCMeruya()`, dua konektor akses, jembatan otomatis, dan minimal empat pemakaian mask `isNearVoidCRoad`. Ini **bukan 33 unit test suite** dan belum mencakup render, interaksi, atau performa.
 - Kawasan inti Jakarta Pusat, Jakarta Selatan, dan Jakarta Utara selesai.
 - Jakarta Timur selesai 4 tahap.
 - Void A (Jakarta Barat Tengah) selesai 4 tahap.
 - Void B (Jakarta Barat Laut) selesai Tahap 1–4: 6 anchor #76–#81, Kanal Mookervaart, ekstensi Daan Mogot, infill permukiman dan kawasan industri, serta integrasi halte TransJakarta Koridor 3 dan viaduk KA Bandara.
 - Void C Tahap 1 (Jakarta Barat) selesai: enam anchor #82–#87 (Universitas Mercu Buana, RSUD Kembangan, Pasar Meruya, Stasiun Kembangan, Bendungan Polor, Kampung Makan Joglo) dengan model arsitektur, tombol tour, exclusion zone, dan verifikasi visual siang/malam.
+- Void C Tahap 2 (Jakarta Barat) selesai 2026-10-28: dataset OSM **185 ruas jalan / 478 titik**, segmen Kali Angke, jembatan otomatis pada perpotongan jalan–air, dua konektor akses, PJU, jalur inspeksi, dan vegetasi InstancedMesh; 7 draw call tambahan tanpa `PointLight` baru.
 - F4 Tahap 1 (optimasi performa) selesai: geometri 76 gerbong kereta digabung menjadi dua mesh per gerbong (badan berwarna per-vertex + kaca), menurunkan draw call pandangan Bundaran HI dari **1.531 menjadi 603** (−60,6%) pada perangkat uji.
 - F4 Tahap 2 selesai: 193 tiang dan lampu PJU menjadi dua `InstancedMesh`, pool 12 `PointLight` mengikuti 12 lampu terdekat kamera, dan shadow map statis. Draw call siang di Bundaran HI turun **603 → 556**; FPS indikatif naik **10,7 → 20,6** pada viewport 531×553 (Intel UHD), dan hanya 1 `PointLight` aktif saat siang.
-- **Gerbang verifikasi visual 2026-10-27 lulus**: audit 11 siang + 3 malam, 0 P0, 9 P1 diperbaiki, 14 baseline screenshot tersimpan. Void C Tahap 1 kemudian dilaksanakan dan diverifikasi pada 2026-10-28.
+- **Gerbang verifikasi visual 2026-10-27 lulus**: audit 11 siang + 3 malam, 0 P0, 9 P1 diperbaiki, 14 baseline screenshot tersimpan. Void C Tahap 1 dan Tahap 2 kemudian dilaksanakan dan diverifikasi pada 2026-10-28.
 
 ### Dataset OSM
 
@@ -32,6 +33,10 @@ Warp mempertahankan enam anchor yang sudah ditempatkan manual (residu 8–20 uni
 
 Catatan regenerasi: ambil way jalan (`highway`) dan kanal (`waterway`, termasuk way **31951163** untuk Kali Mookervaart) dari Overpass API pada bbox selatan -6,28 / barat 106,62 / utara -6,08 / timur 106,82; proyeksikan setiap titik dengan origin Bundaran HI; terapkan warp di atas; lalu tulis ulang array `roads` dan `waterways` di `src/data/void_b_osm.js`.
 
+`src/data/void_c_osm.js` berisi **185 ruas jalan (478 titik)** untuk kawasan Meruya–Kembangan–Joglo, diekstrak dari OpenStreetMap pada 2026-10-28 (ODbL) melalui mirror Overpass `overpass.openstreetmap.fr`, bbox selatan -6,245 / barat 106,705 / utara -6,145 / timur 106,785. Berbeda dengan Void B, geometri **tidak diwarp**: titik diproyeksikan langsung dengan `projectGpsToScene()` lalu dipotong ke clip box x -1.440 s.d. -860, z -560 s.d. 580. Kelas jalan yang diambil: primary, secondary, tertiary, unclassified, dan residential dari daftar putih ruas yang relevan; koridor milik builder lain dikecualikan lewat daftar hitam nama. Dataset menyimpan metadata sumber, lisensi, tanggal ekstraksi, konstanta proyeksi, dan tingkat simplifikasi Douglas–Peucker 2,5 unit. Lebar jalan: primary 18, secondary 14, tertiary 11, unclassified 9, residential 8 unit.
+
+Catatan regenerasi Void C: unduh way `highway` pada bbox di atas, buang ruas di luar daftar putih/kelas yang tidak dipakai, potong ke clip box, sederhanakan dengan DP 2,5, buang segmen hasil potongan yang lebih pendek dari 10 unit (kandidat mentah minimal 14 unit), dan deduplikasi way dengan nama+kelas sama bila selisih panjang <10 dan endpoint berjarak <5 unit pada salah satu orientasi. Empat tapak landmark (UMB, RSUD, Pasar Meruya, Joglo) di-carve dari polylines agar jalan tidak melintasi pelat tapak; stub depan tapak dipertahankan. Jangan menyambung (stitch) way OSM — duplikasi/dual carriageway menghasilkan polylines melingkar sendiri.
+
 ## Master roadmap 9 Voids
 
 | Wilayah | Cakupan | Status |
@@ -44,7 +49,7 @@ Catatan regenerasi: ambil way jalan (`highway`) dan kanal (`waterway`, termasuk 
 | Void B | Tahap 3: infill permukiman & industri | Selesai |
 | Void B | Tahap 4: TransJakarta Koridor 3 & KA Bandara | Selesai |
 | Void C | Tahap 1: 6 anchor Meruya, Kembangan & Joglo | Selesai |
-| Void C | Tahap 2: jalan, air & infrastruktur kawasan | Direncanakan |
+| Void C | Tahap 2: jalan, air & infrastruktur kawasan | Selesai |
 | Void C | Tahap 3: infill urban fabric termasuk Kreo | Direncanakan |
 | Void C | Tahap 4: transit kawasan | Direncanakan |
 | Void D | Kamal Muara, Teluk Gong, Kapuk, Muara Baru | Direncanakan |
@@ -87,6 +92,21 @@ Void C mencakup Meruya, Kembangan Selatan, Joglo, dan Kreo. Tahap 1 (selesai 202
 - **P2 terbuka:** anchor baru belum terdaftar pada `nightMaterials`, sehingga pandangan malam hanya menampilkan siluet gelap dan lampu Joglo; setara dengan temuan malam audit 2026-10-27. Kandidat perbaikan bersama Tahap 4.
 - **Belum diverifikasi:** interaksi klik drawer per anchor baru dan FPS pada perangkat nyata; draw call di atas diukur pada SwiftShader.
 
+### Void C Tahap 2 — jalan, air & infrastruktur
+
+Tahap 2 (selesai 2026-10-28) membangun jaringan jalan kawasan dari `src/data/void_c_osm.js` di dalam `buildVoidCMeruya()`, setelah Tahap 1.
+
+- 185 ruas jalan OSM dirender sebagai slab aspal (material `0x3b4a5f`) dengan bahu beton bertekstur sidewalk (`0xb9c4d2`); lebar jalan mengikuti kelasnya. Dua konektor prosedural menambal akses yang tidak ada di OSM: **Akses Stasiun Kembangan** (lebar 10) menuju forecourt selatan tanpa melintasi rel, dan **Akses Bendungan Polor** (lebar 8).
+- **Kali Angke** dimodelkan ulang sebagai jalur air lebar 21 unit pada polyline (-970, 200) → (-970, -30) → (-950, -220) → (-890, -420), dengan jalur inspeksi selebar 3,4 unit di kedua tepian pada offset 13,5 unit.
+- Jembatan dibuat otomatis untuk setiap perpotongan segmen jalan dengan Kali Angke (dedupe radius 12): deck selebar jalan + 12 unit, kedalaman 24, tinggi 0,7, dan dua balok girder. Perpotongan di zona Bendungan Polor (|x + 970| < 16 dan |z - 168| < 18) dilewati karena sudah ditangani anchor #86.
+- PJU dipasang dua sisi pada lima koridor utama (Jl. Meruya Ilir, Jl. Meruya Selatan, Jl. Joglo Raya, Jl. Kembangan Barat, Jl. Raya Kembangan Selatan) setiap 95 unit pada offset setengah lebar + 1,4; jalur inspeksi Kali Angke setiap 130 unit. Lampu memakai material emissive bersama `pju-bulb` yang didorong ke `glowMaterials`, tanpa `PointLight` baru.
+- Vegetasi dirender sebagai dua `InstancedMesh` (trunk dan foliage): lima koridor utama dua sisi setiap 72 unit pada offset setengah lebar + 6, tepian Kali Angke setiap 54 unit pada offset setengah lebar + 12, dengan dedupe radius 7.
+- Seluruh geometri statis digabung menjadi **5 mesh** (jalan, bahu, jembatan, tiang lampu, bulb lampu) ditambah **2 `InstancedMesh`** pohon, sehingga penambahan Tahap 2 adalah **7 draw call** dan **nol `PointLight`**.
+- Mask koridor `isNearVoidCRoad(x, z, clearance)` menjaga bangunan prosedural lama tidak menimpa jalan baru: deret permukiman clearance 16, gudang 26, ruko Pos Pengumben 22.
+- **Verifikasi runtime** (Chrome headless 156 SwiftShader, viewport 1280×800, DPR 1): 0 error konsol, ketujuh label masuk frame. Draw call siang: aerial Void C **926** (234.829 triangle), UMB **257** (106.945), RSUD **114** (126.279), Pasar **261** (128.578), Stasiun **177** (134.355), Bendungan **590** (154.724), Joglo **560** (177.683). Statistik malam tidak valid karena pass bloom menimpa `renderer.info`. Sepuluh screenshot tersimpan di `docs/verification/screenshots/voidc2-*.png`.
+- **P1 yang diperbaiki saat verifikasi:** jalan awalnya terbaca seperti wireframe putih di atas tanah gelap — warna aspal dinaikkan dari `0x1e293b` ke `0x3b4a5f` dan bahu ditoning `0xb9c4d2`; jalan sempat memotong pelat tapak UMB, RSUD, Pasar Meruya, dan Joglo — diperbaiki dengan carve persegi pada dataset; penyambungan way sempat menghasilkan polylines melingkar — stitching dihapus; way duplikat menyisakan slab bertumpuk — dedupe endpoint 5 unit.
+- **Belum diverifikasi:** interaksi klik drawer pada jalan baru (mask bukan objek interaktif), FPS perangkat nyata, dan kepadatan lalu lintas di jalan kawasan.
+
 ## Catatan F4 — Optimasi performa
 
 F4 dibagi menjadi tiga tahap yang diverifikasi dan di-commit terpisah. Keputusan yang disetujui: bayangan dibuat statis dan kereta tidak lagi menjadi shadow caster.
@@ -121,7 +141,7 @@ Kebijakan ini didokumentasikan pula di header `src/config/landmarks.js`.
 ## Klaim yang belum terverifikasi
 
 - **"60 FPS" belum terbukti pada perangkat uji.** Baseline runtime 2026-10-26 di Chrome (viewport 831×785, Intel UHD Graphics via ANGLE/D3D11): pandangan Danau Rawa Buaya **13,9 FPS / 411 draw call per frame**, Bundaran HI **9,8 FPS / 1.206 draw call per frame**. Baseline ini diambil sebelum Tahap 3; Tahap 2 menambah 10 draw call, Tahap 3 menambah 9 draw call, dan Tahap 4 menambah 14 draw call (6 mesh transit + 8 mesh gerbong), sehingga bukan penyebab utama. F4 Tahap 1–3 menurunkan draw call siang Bundaran HI menjadi **329** (viewport 531×553); FPS indikatif Tahap 2 sempat **20,6**, tetapi angka FPS tidak diklaim karena pengukuran pada Intel UHD sangat bervariasi dan permukaan browser uji berstatus `hidden`. DPR adaptif kini menahan resolusi minimum 0,6 untuk menjaga frame rate. Beban statis mencakup 647 kendaraan (614 rute + 33 roundabout) dalam 8 `InstancedMesh`, 193 PJU sebagai 2 `InstancedMesh` + pool 12 `PointLight`, dan 87 label DOM.
-- **Verifikasi visual sudah memakai screenshot browser, tetapi belum otomatis.** Audit 2026-10-27 menangkap 14 sudut pandang dan Void C Tahap 1 menangkap 12 sudut pandang (7 siang, 5 malam) dari source final, memeriksa framing, label, serta material secara manual. Pemeriksaan programatik Tahap 3–4 tetap menjadi bukti tambahan: jumlah instance, tidak ada tumpang-tindih AABB rumah/gudang, jarak bebas terhadap jalan OSM (rumah 5,4 unit, ruko 1,4 unit, gudang 32,7 unit), enam mesh transit, dua kereta KA Bandara (2 gerbong masing-masing), panjang kurva 759 unit tanpa sampel NaN, jarak bebas viaduk ke gudang ≥2,34 unit dan ke RSUD 10,41 unit, serta papan portal bertekstur `KA BANDARA`. Belum ada diff screenshot otomatis; interaksi kamera, klik drawer, dan FPS belum diuji.
+- **Verifikasi visual sudah memakai screenshot browser, tetapi belum otomatis.** Audit 2026-10-27 menangkap 14 sudut pandang, Void C Tahap 1 menangkap 12 sudut pandang (7 siang, 5 malam), dan Void C Tahap 2 menangkap 10 sudut pandang (7 siang, 3 malam) dari source final, memeriksa framing, label, serta material secara manual. Pemeriksaan programatik Tahap 3–4 tetap menjadi bukti tambahan: jumlah instance, tidak ada tumpang-tindih AABB rumah/gudang, jarak bebas terhadap jalan OSM (rumah 5,4 unit, ruko 1,4 unit, gudang 32,7 unit), enam mesh transit, dua kereta KA Bandara (2 gerbong masing-masing), panjang kurva 759 unit tanpa sampel NaN, jarak bebas viaduk ke gudang ≥2,34 unit dan ke RSUD 10,41 unit, serta papan portal bertekstur `KA BANDARA`. Belum ada diff screenshot otomatis; interaksi kamera, klik drawer, dan FPS belum diuji.
 - **"33/33 unit test suites" tidak didukung repo.** Yang tersedia adalah satu skrip verifikasi statis.
 - Belum ada tes otomatis untuk render, interaksi kamera, atau regresi visual; baseline screenshot masih diperiksa manual.
 

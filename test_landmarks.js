@@ -2,6 +2,7 @@ import assert from 'node:assert';
 import fs from 'node:fs';
 import { JAKARTA_LANDMARKS, projectGpsToScene } from './src/config/landmarks.js';
 import { VOID_B_OSM } from './src/data/void_b_osm.js';
+import { VOID_C_OSM } from './src/data/void_c_osm.js';
 
 let assertionCount = 0;
 ['ok', 'equal', 'strictEqual', 'deepStrictEqual', 'notDeepStrictEqual', 'throws'].forEach((method) => {
@@ -1540,7 +1541,75 @@ voidCAnchors.forEach(({ id, builder }) => {
   assert.ok(indexHtmlContent.includes(`data-tour-id="${id}"`), `index.html missing tour button for ${id}`);
 });
 
-console.log(`✅ All 87 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1 Void C, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 42: Void C Tahap 2 — jaringan jalan OSM, Kali Angke & infrastruktur kawasan
+assert.ok(VOID_C_OSM.meta.source.includes('OpenStreetMap'), 'Void C OSM dataset missing OSM attribution');
+assert.ok(VOID_C_OSM.meta.license.includes('ODbL'), 'Void C OSM dataset missing ODbL license');
+assert.strictEqual(VOID_C_OSM.meta.projection, 'projectGpsToScene', 'Void C dataset must use the unscaled GPS projection');
+assert.ok(VOID_C_OSM.roads.length >= 60, `Void C OSM dataset too small: ${VOID_C_OSM.roads.length} roads`);
+assert.strictEqual(VOID_C_OSM.meta.roadCount, VOID_C_OSM.roads.length, 'Void C roadCount does not match roads array');
+
+const allVoidCPoints = VOID_C_OSM.roads.flatMap((road) => road.points);
+assert.strictEqual(VOID_C_OSM.meta.pointCount, allVoidCPoints.length, 'Void C pointCount does not match dataset');
+allVoidCPoints.forEach(([x, z]) => {
+  assert.ok(Number.isFinite(x) && Number.isFinite(z), 'Void C OSM contains a non-finite coordinate');
+  assert.ok(x <= -850 && x >= -1450, `Void C OSM x=${x} outside expected Meruya/Joglo/Kreo corridor`);
+  assert.ok(z <= 590 && z >= -570, `Void C OSM z=${z} outside expected Meruya/Joglo/Kreo corridor`);
+});
+
+const voidCRoadNames = new Set(VOID_C_OSM.roads.map((road) => road.name));
+[
+  'Jalan Meruya Ilir',
+  'Jalan Meruya Selatan',
+  'Jalan Meruya Utara',
+  'Jalan Joglo Raya',
+  'Jalan Raya Kembangan Selatan',
+  'Jalan Kembangan Barat',
+  'Jalan Topas Raya'
+].forEach((name) => {
+  assert.ok(voidCRoadNames.has(name), `Void C OSM dataset missing ${name}`);
+});
+
+const distanceToVoidCRoad = (point) => {
+  let best = Infinity;
+  VOID_C_OSM.roads.forEach((road) => {
+    for (let i = 0; i < road.points.length - 1; i++) {
+      best = Math.min(best, distanceToSegment(point, road.points[i], road.points[i + 1]));
+    }
+  });
+  return best;
+};
+[
+  'universitas-mercu-buana',
+  'rsud-kembangan',
+  'pasar-meruya',
+  'kampung-makan-joglo'
+].forEach((id) => {
+  const lm = JAKARTA_LANDMARKS.find((landmark) => landmark.id === id);
+  const distance = distanceToVoidCRoad(lm.position);
+  assert.ok(distance < 60, `Void C landmark ${id} is ${distance.toFixed(1)} units from the nearest OSM road`);
+});
+
+assert.ok(citySceneContent.includes('buildVoidCMeruya()'), 'CityScene.js missing buildVoidCMeruya');
+assert.ok(citySceneContent.includes('this.buildVoidCMeruya();'), 'CityScene.js does not call buildVoidCMeruya');
+
+const voidCMethodStart = citySceneContent.indexOf('buildVoidCMeruya() {');
+const voidCMethodEnd = citySceneContent.indexOf('buildVoidBInfillAndIndustry() {', voidCMethodStart);
+assert.ok(voidCMethodStart > 0 && voidCMethodEnd > voidCMethodStart, 'Cannot isolate buildVoidCMeruya');
+const voidCMethod = citySceneContent.slice(voidCMethodStart, voidCMethodEnd);
+assert.ok(!voidCMethod.includes('new THREE.PointLight'), 'Void C lamps must not add PointLights');
+assert.ok(voidCMethod.includes('VOID_C_OSM'), 'Void C builder does not consume the OSM dataset');
+assert.ok(voidCMethod.includes('Akses Stasiun Kembangan'), 'Void C builder missing the station access road');
+assert.ok(voidCMethod.includes('Akses Bendungan Polor'), 'Void C builder missing the Bendungan Polor access road');
+assert.ok(voidCMethod.includes('segmentIntersection'), 'Void C builder missing automatic bridges');
+assert.ok(voidCMethod.includes('Kali Angke'), 'Void C builder missing Kali Angke inspection path');
+assert.ok(voidCMethod.includes('pjuBulbMat'), 'Void C builder must share the pju-bulb material');
+assert.ok(citySceneContent.includes('isNearVoidCRoad'), 'CityScene.js missing the Void C road corridor mask');
+assert.ok(
+  (citySceneContent.match(/isNearVoidCRoad\(/g) || []).length >= 4,
+  'Void C road mask must be applied to the residential, warehouse, and ruko builders'
+);
+
+console.log(`✅ All 87 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-2 Void C, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
