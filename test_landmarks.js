@@ -1609,7 +1609,42 @@ assert.ok(
   'Void C road mask must be applied to the residential, warehouse, and ruko builders'
 );
 
-console.log(`✅ All 87 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-2 Void C, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 43: Void C Tahap 3 — infill urban fabric Meruya-Kembangan-Joglo-Kreo
+assert.ok(citySceneContent.includes('buildVoidCInfill()'), 'CityScene.js missing buildVoidCInfill');
+
+const voidCInfillCall = citySceneContent.indexOf('this.buildVoidCInfill();');
+const voidCMeruyaCall = citySceneContent.indexOf('this.buildVoidCMeruya();');
+assert.ok(
+  voidCMeruyaCall > 0 && voidCInfillCall > voidCMeruyaCall,
+  'buildVoidCInfill must run after buildVoidCMeruya'
+);
+
+const voidCInfillStart = citySceneContent.indexOf('buildVoidCInfill() {');
+const voidCInfillEnd = citySceneContent.indexOf('buildVoidBInfillAndIndustry() {', voidCInfillStart);
+assert.ok(voidCInfillStart > 0 && voidCInfillEnd > voidCInfillStart, 'Cannot isolate buildVoidCInfill');
+const voidCInfillMethod = citySceneContent.slice(voidCInfillStart, voidCInfillEnd);
+assert.ok(!voidCInfillMethod.includes('new THREE.PointLight'), 'Void C infill must not add PointLights');
+
+[
+  'voidc-houses',
+  'voidc-shophouses',
+  'voidc-house-roofs',
+  'voidc-warehouses',
+  'voidc-warehouse-roofs'
+].forEach((name) => {
+  assert.ok(voidCInfillMethod.includes(name), `Void C infill missing the ${name} instanced mesh`);
+});
+
+['Jalan Ciledug Raya', 'Jalan Joglo Raya', 'Jalan Bojong Raya'].forEach((name) => {
+  assert.ok(voidCInfillMethod.includes(name), `Void C infill missing the ${name} shophouse corridor`);
+});
+assert.ok(voidCInfillMethod.includes('Kreo'), 'Void C infill missing the Kreo/Ciledug residential zone');
+assert.ok(voidCInfillMethod.includes('VOID_C_OSM'), 'Void C infill must mask against the OSM road dataset');
+assert.ok(voidCInfillMethod.includes('voidCInfillStats'), 'Void C infill must expose runtime stats');
+assert.ok(voidCInfillMethod.includes('drawCalls: 5'), 'Void C infill should add five instanced draw calls');
+assert.ok(!voidCInfillMethod.includes('nightMaterials.push'), 'Void C infill must not register new night materials');
+
+console.log(`✅ All 87 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-3 Void C, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

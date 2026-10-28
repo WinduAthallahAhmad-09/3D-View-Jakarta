@@ -53,6 +53,7 @@ export class CityScene {
     this.buildWestJakartaInfillAndDistricts();
     this.buildVoidBDaanMogot();
     this.buildVoidCMeruya();
+    this.buildVoidCInfill();
     this.buildVoidBInfillAndIndustry();
     this.buildVoidBTransit();
     this.buildEastJakartaInfrastructure();
@@ -4659,6 +4660,427 @@ export class CityScene {
       if (Math.hypot(x - (s.ax + t * dx), z - (s.az + t * dz)) < pad) return true;
     }
     return false;
+  }
+
+  /**
+   * Void C Tahap 3: Infill urban fabric Meruya-Kembangan Selatan-Joglo-Kreo.
+   *
+   * 1. Rumah kampung/perumahan 2-3 lantai beratap pelana di lima zona.
+   * 2. Ruko mengikuti rantai jalan OSM (Meruya Ilir, Meruya Selatan, Joglo Raya,
+   *    Ciledug Raya, Puri Kembangan, Bojong Raya, Basmol Raya).
+   * 3. Gudang ringan di klaster Bojong/Kembangan Selatan.
+   * 4. Seluruh massa menjadi 5 InstancedMesh; penambahan 5 draw call tanpa PointLight.
+   */
+  buildVoidCInfill() {
+    const dummy = new THREE.Object3D();
+    const baseBoxGeo = new THREE.BoxGeometry(1, 1, 1);
+
+    // Prisma atap pelana: ridge sejajar sumbu Z lokal, alas di y=0.
+    const roofGeo = new THREE.BufferGeometry();
+    roofGeo.setAttribute(
+      'position',
+      new THREE.Float32BufferAttribute([
+        -0.5, 0, -0.5, 0.5, 0, -0.5, -0.5, 0, 0.5, 0.5, 0, 0.5,
+        0, 1, -0.5, 0, 1, 0.5
+      ], 3)
+    );
+    roofGeo.setIndex([
+      0, 2, 5, 0, 5, 4,
+      1, 4, 5, 1, 5, 3,
+      0, 4, 1,
+      2, 3, 5,
+      0, 1, 3, 0, 3, 2
+    ]);
+    roofGeo.computeVertexNormals();
+
+    const segments = [];
+    const addSegment = (a, b, half, way) => {
+      segments.push({ ax: a[0], az: a[1], bx: b[0], bz: b[1], half, way });
+    };
+    VOID_C_OSM.roads.forEach((road) => {
+      for (let i = 0; i < road.points.length - 1; i++) {
+        addSegment(road.points[i], road.points[i + 1], road.width * 0.5 + 3, road);
+      }
+    });
+    VOID_C_CONNECTOR_PATHS.forEach((points) => {
+      for (let i = 0; i < points.length - 1; i++) {
+        addSegment(points[i], points[i + 1], 8, null);
+      }
+    });
+    const kaliAngke = [[-970, 200], [-970, -30], [-950, -220], [-890, -420]];
+    for (let i = 0; i < kaliAngke.length - 1; i++) {
+      addSegment(kaliAngke[i], kaliAngke[i + 1], 10.5 + 8, null);
+    }
+
+    const landmarkExclusions = [
+      { x: -1325, z: 133, halfX: 63, halfZ: 52 },  // #82 UMB
+      { x: -1347, z: -63, halfX: 54, halfZ: 46 },  // #83 RSUD Kembangan
+      { x: -1298, z: 36, halfX: 52, halfZ: 42 },   // #84 Pasar Meruya
+      { x: -955, z: -437, halfX: 52, halfZ: 34 },  // #85 Stasiun Kembangan
+      { x: -970, z: 168, halfX: 36, halfZ: 44 },   // #86 Bendungan Polor
+      { x: -1199, z: 202, halfX: 50, halfZ: 41 }   // #87 Kampung Makan Joglo
+    ];
+    const existingExclusions = [
+      // Zona infill Jakarta Barat yang sudah ada (jangan dobel).
+      { x: -1195, z: -157.5, halfX: 85, halfZ: 42.5 },
+      { x: -1010, z: -155, halfX: 70, halfZ: 35 },
+      { x: -1030, z: 10, halfX: 90, halfZ: 50 },
+      { x: -1005, z: 132.5, halfX: 95, halfZ: 47.5 },
+      // Deret gudang Daan Mogot dan ruko Pos Pengumben.
+      { x: -915, z: -465, halfX: 235, halfZ: 18 },
+      { x: -915, z: -400, halfX: 235, halfZ: 18 },
+      { x: -790, z: 195, halfX: 190, halfZ: 16 },
+      { x: -790, z: 225, halfX: 190, halfZ: 16 },
+      // Koridor rel KRL Kembangan.
+      { x: -1155, z: -442, halfX: 295, halfZ: 9 }
+    ];
+
+    const distToSegmentSq = (px, pz, s) => {
+      const dx = s.bx - s.ax;
+      const dz = s.bz - s.az;
+      const lenSq = dx * dx + dz * dz;
+      let t = lenSq > 0 ? ((px - s.ax) * dx + (pz - s.az) * dz) / lenSq : 0;
+      t = Math.max(0, Math.min(1, t));
+      const cx = s.ax + dx * t;
+      const cz = s.az + dz * t;
+      return (px - cx) ** 2 + (pz - cz) ** 2;
+    };
+
+    const isBlocked = (x, z, radius, ignoreWays) => {
+      for (let i = 0; i < segments.length; i++) {
+        const s = segments[i];
+        const dSq = distToSegmentSq(x, z, s);
+        const own = ignoreWays && s.way && ignoreWays.has(s.way);
+        const limit = own ? s.half + radius - 2 : s.half + radius + 2;
+        if (dSq < limit * limit) return true;
+      }
+      for (let i = 0; i < landmarkExclusions.length; i++) {
+        const ex = landmarkExclusions[i];
+        if (Math.abs(x - ex.x) < ex.halfX + radius && Math.abs(z - ex.z) < ex.halfZ + radius) return true;
+      }
+      for (let i = 0; i < existingExclusions.length; i++) {
+        const ex = existingExclusions[i];
+        if (Math.abs(x - ex.x) < ex.halfX + radius && Math.abs(z - ex.z) < ex.halfZ + radius) return true;
+      }
+      return false;
+    };
+
+    const placed = [];
+    const isOccupied = (x, z, radius) => {
+      for (let i = 0; i < placed.length; i++) {
+        const p = placed[i];
+        if (Math.hypot(p.x - x, p.z - z) < p.radius + radius + 2) return true;
+      }
+      return false;
+    };
+
+    const residentialItems = [];
+    const shophouseItems = [];
+    const roofItems = [];
+    const warehouseItems = [];
+    const warehouseRoofItems = [];
+
+    const residentialColors = [
+      new THREE.Color(0xf8fafc),
+      new THREE.Color(0xe7e5e4),
+      new THREE.Color(0xfef3c7),
+      new THREE.Color(0xd6d3d1),
+      new THREE.Color(0xbae6fd),
+      new THREE.Color(0xfed7aa)
+    ];
+    const roofColors = [
+      new THREE.Color(0xb45309),
+      new THREE.Color(0x9a3412),
+      new THREE.Color(0x991b1b),
+      new THREE.Color(0x78350f)
+    ];
+    const shophouseColors = [
+      new THREE.Color(0xf1f5f9),
+      new THREE.Color(0xe2e8f0),
+      new THREE.Color(0xfed7aa),
+      new THREE.Color(0xbae6fd),
+      new THREE.Color(0x0f766e),
+      new THREE.Color(0x1e293b),
+      new THREE.Color(0xd97706)
+    ];
+    const warehouseColors = [
+      new THREE.Color(0x64748b),
+      new THREE.Color(0x94a3b8),
+      new THREE.Color(0x475569),
+      new THREE.Color(0x0e7490),
+      new THREE.Color(0xb45309)
+    ];
+    const warehouseRoofColors = [
+      new THREE.Color(0x334155),
+      new THREE.Color(0x475569),
+      new THREE.Color(0x64748b),
+      new THREE.Color(0x1e293b)
+    ];
+
+    // OSM memecah koridor menjadi way pendek; sambung agar deret ruko tidak putus.
+    const buildRoadChains = (ways) => {
+      const keyOf = (p) => `${Math.round(p[0])}:${Math.round(p[1])}`;
+      const pending = ways.map((road) => ({
+        points: road.points.map((p) => [p[0], p[1]]),
+        ways: new Set([road])
+      }));
+      const chains = [];
+      while (pending.length > 0) {
+        const chain = pending.pop();
+        let extended = true;
+        while (extended) {
+          extended = false;
+          const head = chain.points[0];
+          const tail = chain.points[chain.points.length - 1];
+          for (let i = 0; i < pending.length; i++) {
+            const way = pending[i].points;
+            if (keyOf(way[way.length - 1]) === keyOf(tail)) {
+              chain.points.push(...way.slice(0, -1).reverse());
+            } else if (keyOf(way[0]) === keyOf(tail)) {
+              chain.points.push(...way.slice(1));
+            } else if (keyOf(way[0]) === keyOf(head)) {
+              chain.points.unshift(...way.slice(1).reverse());
+            } else if (keyOf(way[way.length - 1]) === keyOf(head)) {
+              chain.points.unshift(...way.slice(0, -1));
+            } else {
+              continue;
+            }
+            pending[i].ways.forEach((road) => chain.ways.add(road));
+            pending.splice(i, 1);
+            extended = true;
+            break;
+          }
+        }
+        chains.push(chain);
+      }
+      return chains;
+    };
+
+    const visitChain = (chain, spacing, visit) => {
+      let offset = spacing * 0.5;
+      for (let i = 0; i < chain.length - 1; i++) {
+        const a = chain[i];
+        const b = chain[i + 1];
+        const dx = b[0] - a[0];
+        const dz = b[1] - a[1];
+        const len = Math.hypot(dx, dz);
+        if (len < 0.01) continue;
+        let cursor = offset;
+        while (cursor <= len) {
+          const t = cursor / len;
+          visit(a[0] + dx * t, a[1] + dz * t, Math.atan2(dx, dz));
+          cursor += spacing;
+        }
+        offset = cursor - len;
+      }
+    };
+
+    const shophouseRoads = new Set([
+      'Jalan Meruya Ilir',
+      'Jalan Meruya Selatan',
+      'Jalan Meruya Utara',
+      'Jalan Joglo Raya',
+      'Jalan Ciledug Raya',
+      'Jalan Puri Kembangan',
+      'Jalan Raya Kembangan Selatan',
+      'Jalan Bojong Raya',
+      'Jalan Basmol Raya'
+    ]);
+    const shophouseWaysByName = new Map();
+    VOID_C_OSM.roads.forEach((road) => {
+      if (!shophouseRoads.has(road.name)) return;
+      if (!shophouseWaysByName.has(road.name)) shophouseWaysByName.set(road.name, []);
+      shophouseWaysByName.get(road.name).push(road);
+    });
+
+    const placeShophouseRow = (roadWidth, chain, ignoreWays) => {
+      visitChain(chain, 13, (bx, bz, angle) => {
+        const nx = Math.cos(angle);
+        const nz = -Math.sin(angle);
+        [-1, 1].forEach((side) => {
+          const hash = Math.abs(Math.sin(bx * 8.13 + bz * 4.71 + side * 3.7));
+          const w = 11 + (1 - hash) * 4; // kedalaman dari jalan
+          const d = 10.5 + hash * 2.5; // lebar fasad sepanjang jalan
+          const h = 9 + hash * 7;
+          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
+          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
+          const radius = Math.max(w, d) * 0.5;
+          if (isBlocked(px, pz, radius, ignoreWays) || isOccupied(px, pz, d * 0.45)) return;
+          placed.push({ x: px, z: pz, radius: d * 0.45 });
+          shophouseItems.push({
+            x: px,
+            y: h * 0.5,
+            z: pz,
+            w,
+            h,
+            d,
+            rotY: angle,
+            color: shophouseColors[Math.floor(hash * shophouseColors.length) % shophouseColors.length]
+          });
+          const roofH = 1.8 + hash * 0.8;
+          roofItems.push({
+            x: px,
+            y: h,
+            z: pz,
+            w: w + 1.3,
+            h: roofH,
+            d: d + 1.3,
+            rotY: angle,
+            color: roofColors[Math.floor(hash * roofColors.length) % roofColors.length]
+          });
+        });
+      });
+    };
+
+    shophouseWaysByName.forEach((ways) => {
+      const roadWidth = Math.max(...ways.map((road) => road.width));
+      buildRoadChains(ways).forEach((chain) => placeShophouseRow(roadWidth, chain.points, chain.ways));
+    });
+
+    // Gudang ringan Bojong/Kembangan Selatan, dilayani Jl. Bojong Raya.
+    const warehouseZones = [
+      { minX: -1360, maxX: -1180, minZ: -370, maxZ: -270, stepX: 32, stepZ: 28 }
+    ];
+    warehouseZones.forEach((zone, zoneIndex) => {
+      for (let x = zone.minX; x <= zone.maxX; x += zone.stepX) {
+        for (let z = zone.minZ; z <= zone.maxZ; z += zone.stepZ) {
+          const hash = Math.abs(Math.sin(x * 4.71 + z * 9.13 + zoneIndex));
+          const w = 19 + hash * 5;
+          const d = 21 + (1 - hash) * 6;
+          const h = 8 + hash * 4;
+          const radius = Math.max(w, d) * 0.5;
+          const px = x + (hash - 0.5) * 4;
+          const pz = z + (((hash * 5.7) % 1) - 0.5) * 4;
+          if (isBlocked(px, pz, radius) || isOccupied(px, pz, radius)) continue;
+          placed.push({ x: px, z: pz, radius });
+          warehouseItems.push({
+            x: px,
+            y: h * 0.5,
+            z: pz,
+            w,
+            h,
+            d,
+            color: warehouseColors[Math.floor(hash * warehouseColors.length) % warehouseColors.length]
+          });
+          const roofH = 1.6 + hash * 1.2;
+          warehouseRoofItems.push({
+            x: px,
+            y: h,
+            z: pz,
+            w: w + 1.4,
+            h: roofH,
+            d: d + 1.4,
+            color: warehouseRoofColors[Math.floor(hash * warehouseRoofColors.length) % warehouseRoofColors.length]
+          });
+        }
+      }
+    });
+
+    const residentialZones = [
+      // Meruya Barat: Raden Saleh Raya s.d. KH Ahmad Dahlan.
+      { minX: -1440, maxX: -1315, minZ: -240, maxZ: 115, stepX: 16, stepZ: 16 },
+      // Kembangan Selatan / Bojong: utara koridor Daan Mogot.
+      { minX: -1350, maxX: -1000, minZ: -500, maxZ: -300, stepX: 17, stepZ: 17 },
+      // Meruya Selatan / Jeruk Joglo.
+      { minX: -1150, maxX: -1020, minZ: 90, maxZ: 330, stepX: 15, stepZ: 15 },
+      // Joglo Selatan: antara Joglo Raya dan Jl. H. Sa'aba.
+      { minX: -1300, maxX: -1020, minZ: 330, maxZ: 430, stepX: 16, stepZ: 16 },
+      // Kreo / Ciledug: blok selatan Joglo Raya.
+      { minX: -1420, maxX: -1100, minZ: 430, maxZ: 575, stepX: 16, stepZ: 16 }
+    ];
+
+    residentialZones.forEach((zone, zoneIndex) => {
+      for (let x = zone.minX; x <= zone.maxX; x += zone.stepX) {
+        for (let z = zone.minZ; z <= zone.maxZ; z += zone.stepZ) {
+          const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233 + zoneIndex));
+          const w = 9 + hash * 3;
+          const d = 10 + (1 - hash) * 3;
+          const h = 6.5 + hash * 3.5;
+          const radius = Math.max(w, d) * 0.5;
+          const px = x + (hash - 0.5) * 2.4;
+          const pz = z + (((hash * 7.31) % 1) - 0.5) * 2.4;
+          if (isBlocked(px, pz, radius) || isOccupied(px, pz, radius)) continue;
+          placed.push({ x: px, z: pz, radius });
+          residentialItems.push({
+            x: px,
+            y: h * 0.5,
+            z: pz,
+            w,
+            h,
+            d,
+            color: residentialColors[Math.floor(hash * residentialColors.length) % residentialColors.length]
+          });
+          const roofH = 1.5 + hash * 0.9;
+          roofItems.push({
+            x: px,
+            y: h,
+            z: pz,
+            w: w + 1.2,
+            h: roofH,
+            d: d + 1.2,
+            color: roofColors[Math.floor(hash * roofColors.length) % roofColors.length]
+          });
+        }
+      }
+    });
+
+    const addInstanced = (geo, mat, items, name) => {
+      if (items.length === 0) return;
+      const mesh = new THREE.InstancedMesh(geo, mat, items.length);
+      mesh.name = name;
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      items.forEach((item, idx) => {
+        dummy.position.set(item.x, item.y, item.z);
+        dummy.scale.set(item.w, item.h, item.d);
+        dummy.rotation.set(0, item.rotY || 0, 0);
+        dummy.updateMatrix();
+        mesh.setMatrixAt(idx, dummy.matrix);
+        mesh.setColorAt(idx, item.color);
+      });
+      mesh.instanceMatrix.needsUpdate = true;
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+      this.proceduralGroup.add(mesh);
+    };
+
+    addInstanced(
+      baseBoxGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.78 }),
+      residentialItems,
+      'voidc-houses'
+    );
+    addInstanced(
+      baseBoxGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6, metalness: 0.15 }),
+      shophouseItems,
+      'voidc-shophouses'
+    );
+    addInstanced(
+      roofGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }),
+      roofItems,
+      'voidc-house-roofs'
+    );
+    addInstanced(
+      baseBoxGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.65, metalness: 0.25 }),
+      warehouseItems,
+      'voidc-warehouses'
+    );
+    addInstanced(
+      roofGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.55, metalness: 0.35 }),
+      warehouseRoofItems,
+      'voidc-warehouse-roofs'
+    );
+
+    this.voidCInfillStats = {
+      houses: residentialItems.length,
+      shophouses: shophouseItems.length,
+      warehouses: warehouseItems.length,
+      trees: 0,
+      drawCalls: 5
+    };
   }
 
   /**
