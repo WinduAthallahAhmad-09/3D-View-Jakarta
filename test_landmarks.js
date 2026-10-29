@@ -4,6 +4,7 @@ import { JAKARTA_LANDMARKS, projectGpsToScene } from './src/config/landmarks.js'
 import { VOID_B_OSM } from './src/data/void_b_osm.js';
 import { VOID_C_OSM } from './src/data/void_c_osm.js';
 import { VOID_D_OSM } from './src/data/void_d_osm.js';
+import { VOID_E_OSM } from './src/data/void_e_osm.js';
 
 let assertionCount = 0;
 ['ok', 'equal', 'strictEqual', 'deepStrictEqual', 'notDeepStrictEqual', 'throws'].forEach((method) => {
@@ -2020,7 +2021,139 @@ voidEAnchors.forEach(({ id, position }) => {
   assert.ok(Math.abs(position[2]) + 80 <= 2200, `Void E landmark ${id} sits outside the 4400-unit grid`);
 });
 
-console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 50: Void E Tahap 2 — dataset OSM jalan & waterway Cilincing–Marunda
+assert.ok(VOID_E_OSM.meta.source.includes('OpenStreetMap'), 'Void E OSM dataset missing OSM attribution');
+assert.ok(VOID_E_OSM.meta.license.includes('ODbL'), 'Void E OSM dataset missing ODbL license');
+assert.strictEqual(VOID_E_OSM.meta.retrieved, '2026-10-29', 'Void E dataset retrieval date changed');
+assert.ok(VOID_E_OSM.meta.api.includes('overpass.openstreetmap.fr'), 'Void E dataset must record the Overpass mirror');
+assert.ok(VOID_E_OSM.meta.api.includes('2026-08-10'), 'Void E dataset must record the OSM base snapshot');
+assert.strictEqual(VOID_E_OSM.meta.projection, 'projectGpsToScene', 'Void E dataset must use the unscaled GPS projection');
+assert.deepStrictEqual(
+  VOID_E_OSM.meta.projectionConstants,
+  { originLng: 106.823048, originLat: -6.194957, scaleX: 14100, scaleZ: 14180 },
+  'Void E projection constants drifted from projectGpsToScene'
+);
+assert.deepStrictEqual(
+  VOID_E_OSM.meta.bbox,
+  { south: -6.163, west: 106.915, north: -6.079, east: 106.988 },
+  'Void E source bbox changed without re-downloading the extract'
+);
+assert.deepStrictEqual(
+  VOID_E_OSM.meta.clipBox,
+  { minX: 1330, maxX: 2300, minZ: -1620, maxZ: -470 },
+  'Void E clip box changed without updating the layout'
+);
+assert.strictEqual(VOID_E_OSM.meta.simplification, 2, 'Void E simplification must stay at Douglas–Peucker 2.0');
+assert.ok(VOID_E_OSM.meta.note.includes('konektor akses'), 'Void E dataset must note the Nagrak access connector plan');
+
+assert.strictEqual(VOID_E_OSM.roads.length, 148, `Void E OSM dataset changed size: ${VOID_E_OSM.roads.length} roads`);
+assert.strictEqual(VOID_E_OSM.meta.roadCount, VOID_E_OSM.roads.length, 'Void E roadCount does not match roads array');
+const allVoidEPoints = VOID_E_OSM.roads.flatMap((road) => road.points);
+assert.strictEqual(VOID_E_OSM.meta.roadPointCount, allVoidEPoints.length, 'Void E roadPointCount does not match dataset');
+assert.strictEqual(allVoidEPoints.length, 640, `Void E road point count changed: ${allVoidEPoints.length}`);
+assert.strictEqual(new Set(VOID_E_OSM.roads.map((road) => road.name)).size, 102, 'Void E road name coverage changed');
+
+const voidEWidths = {
+  trunk: 16,
+  primary: 18,
+  secondary: 14,
+  tertiary: 11,
+  unclassified: 9,
+  residential: 8,
+  living_street: 7,
+  service: 6
+};
+VOID_E_OSM.roads.forEach((road) => {
+  assert.ok(road.name && road.name.trim().length > 0, 'Void E road missing a name');
+  assert.ok(voidEWidths[road.type] === road.width, `Void E road ${road.name} has unexpected type/width ${road.type}/${road.width}`);
+  assert.ok(road.points.length >= 2, `Void E road ${road.name} has fewer than two points`);
+  road.points.forEach(([x, z]) => {
+    assert.ok(Number.isFinite(x) && Number.isFinite(z), `Void E road ${road.name} contains a non-finite coordinate`);
+    assert.ok(x >= 1330 && x <= 2300 && z >= -1620 && z <= -470, `Void E road ${road.name} point ${x}/${z} outside the clip box`);
+  });
+});
+
+const voidERoadNames = new Set(VOID_E_OSM.roads.map((road) => road.name));
+[
+  'Jalan Raya Cilincing',
+  'Jalan Cakung Cilincing Timur',
+  'Jalan Cakung Cilincing Barat',
+  'Jalan Raya Cilincing Koja',
+  'Jalan Rusun Marunda',
+  'Jalan Marunda Kongsi',
+  'Jalan Jayapura',
+  'Jalan Rorotan XI',
+  'Jalan Komplek Militer',
+  'Jalan Sungai Tiram'
+].forEach((name) => {
+  assert.ok(voidERoadNames.has(name), `Void E OSM dataset missing ${name}`);
+});
+['Jalan Inspeksi BKT', 'Jalan Inspeksi Marunda Kepu', 'Jalan Pinggir Dermaga'].forEach((name) => {
+  assert.ok(!voidERoadNames.has(name), `${name} rides the Kanal Banjir Timur centerline and must stay excluded`);
+});
+
+const distanceToVoidERoad = (point) => {
+  let best = Infinity;
+  VOID_E_OSM.roads.forEach((road) => {
+    for (let i = 0; i < road.points.length - 1; i++) {
+      best = Math.min(best, distanceToSegment(point, road.points[i], road.points[i + 1]));
+    }
+  });
+  return best;
+};
+voidEAnchors.forEach(({ id }) => {
+  const lm = JAKARTA_LANDMARKS.find((landmark) => landmark.id === id);
+  const distance = distanceToVoidERoad([lm.position[0], lm.position[2]]);
+  const limit = id === 'rusunawa-nagrak-cilincing' ? 85 : 60;
+  assert.ok(distance < limit, `Void E landmark ${id} is ${distance.toFixed(1)} units from the nearest OSM road`);
+});
+
+assert.strictEqual(VOID_E_OSM.waterways.length, 23, `Void E waterway count changed: ${VOID_E_OSM.waterways.length}`);
+assert.strictEqual(VOID_E_OSM.meta.waterwayCount, VOID_E_OSM.waterways.length, 'Void E waterwayCount mismatch');
+const allVoidEWaterPoints = VOID_E_OSM.waterways.flatMap((waterway) => waterway.points);
+assert.strictEqual(allVoidEWaterPoints.length, 252, `Void E waterway point count changed: ${allVoidEWaterPoints.length}`);
+assert.strictEqual(VOID_E_OSM.meta.waterPointCount, allVoidEWaterPoints.length, 'Void E waterPointCount mismatch');
+VOID_E_OSM.waterways.forEach((waterway) => {
+  assert.ok(['canal', 'river', 'stream'].includes(waterway.kind), `Unexpected Void E waterway kind ${waterway.kind}`);
+  assert.ok(waterway.width > 0, 'Void E waterway must have a positive width');
+  assert.ok(waterway.points.length >= 2, 'Void E waterway has fewer than two points');
+  waterway.points.forEach(([x, z]) => {
+    assert.ok(Number.isFinite(x) && Number.isFinite(z), 'Void E waterway contains a non-finite coordinate');
+    assert.ok(x >= 1330 && x <= 2300 && z >= -1620 && z <= -470, `Void E waterway point ${x}/${z} outside the clip box`);
+  });
+});
+
+const voidEWaterNames = new Set(VOID_E_OSM.waterways.map((waterway) => waterway.name));
+['Kanal Banjir Timur', 'Cakung', 'Blencong', 'Tiram', 'Rawa Malang'].forEach((name) => {
+  assert.ok(voidEWaterNames.has(name), `Void E OSM dataset missing ${name} waterway`);
+});
+const voidEKbt = VOID_E_OSM.waterways.filter((waterway) => waterway.name === 'Kanal Banjir Timur');
+assert.ok(voidEKbt.length > 0, 'Void E dataset missing the Kanal Banjir Timur segment');
+voidEKbt.forEach((waterway) => {
+  assert.ok(waterway.width === 24, `Kanal Banjir Timur width changed to ${waterway.width}`);
+  waterway.points.forEach(([, z]) => {
+    assert.ok(z <= -470, 'Kanal Banjir Timur in Void E must stay south of the procedural segment that ends at z -250');
+  });
+});
+
+const voidEKbtWidth = Math.max(...voidEKbt.map((waterway) => waterway.width));
+VOID_E_OSM.roads.forEach((road) => {
+  const clearance = voidEKbtWidth / 2 + road.width / 2 + 1;
+  const samples = road.points.filter(([x, z]) => {
+    return voidEKbt.some((waterway) => {
+      for (let i = 0; i < waterway.points.length - 1; i++) {
+        if (distanceToSegment([x, z], waterway.points[i], waterway.points[i + 1]) < clearance) return true;
+      }
+      return false;
+    });
+  });
+  assert.ok(
+    samples.length / road.points.length < 0.6,
+    `Void E road ${road.name} rides the Kanal Banjir Timur centerline`
+  );
+});
+
+console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1, Void E Tahap 2 dataset, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
