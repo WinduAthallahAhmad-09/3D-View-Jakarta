@@ -2153,7 +2153,69 @@ VOID_E_OSM.roads.forEach((road) => {
   );
 });
 
-console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1, Void E Tahap 2 dataset, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 51: Void E Tahap 2 — builder jaringan jalan, air & infrastruktur Cilincing–Marunda
+assert.ok(citySceneContent.includes("from '../data/void_e_osm.js'"), 'CityScene.js does not import the Void E OSM dataset');
+assert.ok(citySceneContent.includes('this.buildVoidECilincing();'), 'CityScene.js does not call buildVoidECilincing');
+
+const voidENetworkCallIndex = citySceneContent.indexOf('this.buildVoidECilincing();');
+const voidDTransitCallIndex = citySceneContent.indexOf('this.buildVoidDTransit();');
+assert.ok(voidENetworkCallIndex > 0, 'CityScene.js does not call buildVoidECilincing');
+assert.ok(
+  voidENetworkCallIndex > voidDTransitCallIndex,
+  'buildVoidECilincing must run after buildVoidDTransit'
+);
+
+const voidENetworkStart = citySceneContent.indexOf('buildVoidECilincing() {');
+const voidENetworkEnd = citySceneContent.indexOf('buildVoidDInfill() {', voidENetworkStart);
+assert.ok(voidENetworkStart > 0 && voidENetworkEnd > voidENetworkStart, 'Cannot isolate buildVoidECilincing');
+const voidENetworkMethod = citySceneContent.slice(voidENetworkStart, voidENetworkEnd);
+assert.ok(voidENetworkMethod.includes('VOID_E_OSM'), 'Void E builder does not consume the OSM dataset');
+assert.ok(voidENetworkMethod.includes('segmentIntersection'), 'Void E builder missing automatic bridges');
+assert.ok(voidENetworkMethod.includes('insideAnchorSite'), 'Void E builder must mask bridges and props inside anchor sites');
+assert.ok(voidENetworkMethod.includes('pjuBulbMat'), 'Void E builder must share the pju-bulb material');
+assert.ok(voidENetworkMethod.includes('Akses Rusunawa Nagrak'), 'Void E builder missing the Nagrak access connector');
+assert.ok(
+  voidENetworkMethod.includes('Jalan Komplek Militer'),
+  'Nagrak access connector must anchor on Jalan Komplek Militer'
+);
+assert.ok(voidENetworkMethod.includes('voidEOsmStats'), 'Void E builder must expose runtime stats');
+assert.ok(voidENetworkMethod.includes('drawCalls: 8'), 'Void E network should add eight draw calls');
+assert.ok(!voidENetworkMethod.includes('new THREE.PointLight'), 'Void E network must not add PointLights');
+assert.ok(!voidENetworkMethod.includes('nightMaterials.push'), 'Void E network must not register new night materials');
+
+[
+  'voide-roads',
+  'voide-sidewalks',
+  'voide-water',
+  'voide-bridges',
+  'voide-pju-poles',
+  'voide-pju-bulbs',
+  'voide-tree-trunks',
+  'voide-tree-foliage'
+].forEach((name) => {
+  assert.ok(voidENetworkMethod.includes(name), `Void E builder missing the ${name} mesh`);
+});
+
+[
+  'Jalan Raya Cilincing',
+  'Jalan Cakung Cilincing Timur',
+  'Jalan Cakung Cilincing Barat',
+  'Jalan Raya Cilincing Koja',
+  'Jalan Rusun Marunda',
+  'Jalan Rorotan XI',
+  'Jalan Komplek Militer'
+].forEach((name) => {
+  assert.ok(voidENetworkMethod.includes(name), `Void E PJU corridor list missing ${name}`);
+});
+
+['Kanal Banjir Timur', 'Cakung'].forEach((name) => {
+  assert.ok(voidENetworkMethod.includes(name), `Void E tree bank list missing ${name}`);
+});
+
+assert.ok(citySceneContent.includes('getVoidERoadSegments()'), 'CityScene.js missing the Void E road segment cache');
+assert.ok(citySceneContent.includes('isNearVoidERoad(x, z, clearance = 12)'), 'CityScene.js missing the Void E road corridor mask');
+
+console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-2, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

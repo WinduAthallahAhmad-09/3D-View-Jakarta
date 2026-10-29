@@ -6,6 +6,7 @@ import { JAKARTA_LANDMARKS, CITY_CORRIDOR_CONFIG } from '../config/landmarks.js'
 import { VOID_B_OSM } from '../data/void_b_osm.js';
 import { VOID_C_OSM } from '../data/void_c_osm.js';
 import { VOID_D_OSM } from '../data/void_d_osm.js';
+import { VOID_E_OSM } from '../data/void_e_osm.js';
 
 const VOID_C_CONNECTOR_PATHS = [
   [[-1043.2, -422.7], [-1030, -414.5], [-1000, -412.5], [-975, -412.5], [-955, -413.5]],
@@ -59,6 +60,7 @@ export class CityScene {
     this.buildVoidDPenjaringan();
     this.buildVoidDInfill();
     this.buildVoidDTransit();
+    this.buildVoidECilincing();
     this.buildVoidBInfillAndIndustry();
     this.buildVoidBTransit();
     this.buildEastJakartaInfrastructure();
@@ -5659,6 +5661,372 @@ export class CityScene {
 
   isNearVoidDRoad(x, z, clearance = 12) {
     for (const s of this.getVoidDRoadSegments()) {
+      const pad = clearance + s.halfWidth;
+      if (
+        x < Math.min(s.ax, s.bx) - pad || x > Math.max(s.ax, s.bx) + pad ||
+        z < Math.min(s.az, s.bz) - pad || z > Math.max(s.az, s.bz) + pad
+      ) continue;
+      const dx = s.bx - s.ax;
+      const dz = s.bz - s.az;
+      const len2 = dx * dx + dz * dz;
+      let t = len2 ? ((x - s.ax) * dx + (z - s.az) * dz) / len2 : 0;
+      t = Math.max(0, Math.min(1, t));
+      if (Math.hypot(x - (s.ax + t * dx), z - (s.az + t * dz)) < pad) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Void E Tahap 2: Jaringan jalan, tata air & infrastruktur Cilincing–Marunda.
+   *
+   * 1. 148 ruas jalan OSM, trotoar pada jalan selebar >= 10, dan waterway
+   *    Kanal Banjir Timur-Cakung-Blencong-Tiram-Rawa Malang.
+   * 2. Jembatan otomatis pada setiap perpotongan jalan-waterway, kecuali di
+   *    dalam tapak anchor.
+   * 3. Konektor "Akses Rusunawa Nagrak" ke Jalan Komplek Militer karena tapak
+   *    Nagrak berada 79,8 unit dari jalan OSM terdekat.
+   * 4. PJU memakai pjuBulbMat bersama dan pohon peneduh instanced.
+   * 5. Delapan mesh gabungan, tanpa PointLight dan material malam baru.
+   */
+  buildVoidECilincing() {
+    const roadMat = new THREE.MeshStandardMaterial({
+      color: 0x3b4a5f,
+      roughness: 0.78,
+      metalness: 0.12
+    });
+    const sidewalkMat = new THREE.MeshStandardMaterial({
+      map: TextureGenerator.createSidewalkTexture(),
+      color: 0xb9c4d2,
+      roughness: 0.82
+    });
+    const waterMat = new THREE.MeshStandardMaterial({
+      color: 0x075985,
+      roughness: 0.2,
+      metalness: 0.5,
+      transparent: true,
+      opacity: 0.95
+      // FrontSide, bukan DoubleSide: air berupa box tipis di atas tanah dan
+      // DoubleSide + transparent membuat three.js merender dua pass per mesh.
+    });
+    const bridgeMat = new THREE.MeshStandardMaterial({
+      color: 0x475569,
+      roughness: 0.7
+    });
+    const lampPoleMat = new THREE.MeshStandardMaterial({
+      color: 0x334155,
+      metalness: 0.7,
+      roughness: 0.4
+    });
+
+    const roadGeos = [];
+    const sidewalkGeos = [];
+    const waterGeos = [];
+    const bridgeGeos = [];
+    const lampPoleGeos = [];
+    const lampBulbGeos = [];
+
+    const makeBox = (w, h, d, x, y, z, rotY = 0) => {
+      const g = new THREE.BoxGeometry(w, h, d);
+      if (rotY !== 0) g.rotateY(rotY);
+      g.translate(x, y, z);
+      return g;
+    };
+
+    // Tapak enam anchor menutupi jalan di bawahnya, jadi geometri jalan tetap
+    // utuh; hanya lampu, pohon, dan jembatan yang dihindarkan agar tidak
+    // menembus slab tapak.
+    const anchorSites = [
+      [1912, 2058, -1474, -1356],
+      [1837, 1903, -1464, -1412],
+      [1652, 1788, -1177, -1073],
+      [1713, 1817, -1036, -954],
+      [1486, 1634, -774, -666],
+      [1818, 1952, -749, -651]
+    ];
+    const insideAnchorSite = (x, z) => anchorSites.some(
+      ([x1, x2, z1, z2]) => x >= x1 - 2 && x <= x2 + 2 && z >= z1 - 2 && z <= z2 + 2
+    );
+
+    const addRoadPolyline = (points, width, hasSidewalk = true) => {
+      for (let i = 0; i < points.length - 1; i++) {
+        const [x1, z1] = points[i];
+        const [x2, z2] = points[i + 1];
+        const len = Math.hypot(x2 - x1, z2 - z1);
+        if (len < 0.5) continue;
+        const angle = Math.atan2(x2 - x1, z2 - z1);
+        const mx = (x1 + x2) * 0.5;
+        const mz = (z1 + z2) * 0.5;
+
+        roadGeos.push(makeBox(width, 0.25, len + 0.8, mx, 0.125, mz, angle));
+        if (hasSidewalk) {
+          const sw = width >= 14 ? 2.8 : 2.2;
+          [-1, 1].forEach((dir) => {
+            const px = Math.cos(angle) * (width * 0.5 + sw * 0.5) * dir;
+            const pz = -Math.sin(angle) * (width * 0.5 + sw * 0.5) * dir;
+            sidewalkGeos.push(makeBox(sw, 0.4, len + 0.8, mx + px, 0.2, mz + pz, angle));
+          });
+        }
+      }
+    };
+
+    const samplePolyline = (points, step, offset = 0) => {
+      const samples = [];
+      let next = step * 0.5;
+      let travelled = 0;
+      for (let i = 0; i < points.length - 1; i++) {
+        const [x1, z1] = points[i];
+        const [x2, z2] = points[i + 1];
+        const dx = x2 - x1;
+        const dz = z2 - z1;
+        const len = Math.hypot(dx, dz);
+        if (len < 0.5) continue;
+        const angle = Math.atan2(dx, dz);
+        const px = Math.cos(angle) * offset;
+        const pz = -Math.sin(angle) * offset;
+        while (next <= travelled + len) {
+          const t = (next - travelled) / len;
+          samples.push({ x: x1 + dx * t + px, z: z1 + dz * t + pz, angle });
+          next += step;
+        }
+        travelled += len;
+      }
+      return samples;
+    };
+
+    const addLampPost = (x, z, angle, side) => {
+      const px = Math.cos(angle);
+      const pz = -Math.sin(angle);
+      const pole = new THREE.CylinderGeometry(0.16, 0.24, 8.5, 6);
+      pole.translate(x, 4.25, z);
+      lampPoleGeos.push(pole);
+
+      const arm = new THREE.BoxGeometry(3.2, 0.14, 0.14);
+      arm.rotateY(angle);
+      arm.translate(x - px * 1.6 * side, 8.4, z - pz * 1.6 * side);
+      lampPoleGeos.push(arm);
+
+      const bulb = new THREE.SphereGeometry(0.34, 8, 8);
+      bulb.translate(x - px * 3.2 * side, 8.15, z - pz * 3.2 * side);
+      lampBulbGeos.push(bulb);
+    };
+
+    const segmentIntersection = (a, b, c, d) => {
+      const rx = b[0] - a[0];
+      const rz = b[1] - a[1];
+      const sx = d[0] - c[0];
+      const sz = d[1] - c[1];
+      const den = rx * sz - rz * sx;
+      if (Math.abs(den) < 1e-9) return null;
+      const t = ((c[0] - a[0]) * sz - (c[1] - a[1]) * sx) / den;
+      const u = ((c[0] - a[0]) * rz - (c[1] - a[1]) * rx) / den;
+      if (t <= 0 || t >= 1 || u <= 0 || u >= 1) return null;
+      return [a[0] + t * rx, a[1] + t * rz];
+    };
+
+    VOID_E_OSM.roads.forEach((road) => {
+      addRoadPolyline(road.points, road.width, road.width >= 10);
+    });
+
+    // Akses Rusunawa Nagrak ke Jalan Komplek Militer: tapak berada 79,8 unit
+    // dari jalan OSM terdekat, jadi konektor ini memotong jarak ke ~58 unit.
+    const nagrakAccess = [[1813, -1028], [1827.7, -1044.4]];
+    addRoadPolyline(nagrakAccess, 7, true);
+
+    VOID_E_OSM.waterways.forEach((waterway) => {
+      const points = waterway.points;
+      for (let i = 0; i < points.length - 1; i++) {
+        const [x1, z1] = points[i];
+        const [x2, z2] = points[i + 1];
+        const len = Math.hypot(x2 - x1, z2 - z1);
+        if (len < 0.5) continue;
+        const angle = Math.atan2(x2 - x1, z2 - z1);
+        waterGeos.push(
+          makeBox(waterway.width, 0.08, len + 0.6, (x1 + x2) * 0.5, 0.04, (z1 + z2) * 0.5, angle)
+        );
+      }
+    });
+
+    const crossings = [];
+    VOID_E_OSM.roads.forEach((road) => {
+      for (let i = 0; i < road.points.length - 1; i++) {
+        for (const waterway of VOID_E_OSM.waterways) {
+          for (let j = 0; j < waterway.points.length - 1; j++) {
+            const hit = segmentIntersection(
+              road.points[i], road.points[i + 1],
+              waterway.points[j], waterway.points[j + 1]
+            );
+            if (!hit) continue;
+            if (insideAnchorSite(hit[0], hit[1])) continue;
+            if (crossings.some((c) => Math.hypot(c.x - hit[0], c.z - hit[1]) < 12)) continue;
+            crossings.push({
+              x: hit[0],
+              z: hit[1],
+              angle: Math.atan2(
+                road.points[i + 1][0] - road.points[i][0],
+                road.points[i + 1][1] - road.points[i][1]
+              ),
+              width: road.width,
+              waterWidth: waterway.width
+            });
+          }
+        }
+      }
+    });
+
+    crossings.forEach((bridge) => {
+      const deckWidth = bridge.width + 12;
+      const deckLength = Math.max(24, bridge.waterWidth + 12);
+      bridgeGeos.push(makeBox(deckWidth, 0.7, deckLength, bridge.x, 0.35, bridge.z, bridge.angle));
+      [-1, 1].forEach((dir) => {
+        const px = Math.cos(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
+        const pz = -Math.sin(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
+        bridgeGeos.push(makeBox(0.6, 0.8, deckLength, bridge.x + px, 0.85, bridge.z + pz, bridge.angle));
+      });
+    });
+
+    if (!this.pjuBulbMat) {
+      this.pjuBulbMat = new THREE.MeshStandardMaterial({
+        color: 0xfef08a,
+        emissive: 0xfef08a,
+        emissiveIntensity: 0.0,
+        roughness: 0.2
+      });
+      this.pjuBulbMat.name = 'pju-bulb';
+      this.glowMaterials.push(this.pjuBulbMat);
+    }
+
+    const lampRoads = [
+      'Jalan Raya Cilincing',
+      'Jalan Cakung Cilincing Timur',
+      'Jalan Cakung Cilincing Barat',
+      'Jalan Raya Cilincing Koja',
+      'Jalan Rusun Marunda',
+      'Jalan Rorotan XI',
+      'Jalan Komplek Militer'
+    ];
+    let lampCount = 0;
+    VOID_E_OSM.roads.filter((road) => lampRoads.includes(road.name)).forEach((road) => {
+      [1, -1].forEach((side) => {
+        samplePolyline(road.points, 95, (road.width * 0.5 + 1.4) * side).forEach((p) => {
+          if (insideAnchorSite(p.x, p.z)) return;
+          addLampPost(p.x, p.z, p.angle, side);
+          lampCount++;
+        });
+      });
+    });
+    samplePolyline(nagrakAccess, 12, 0).forEach((p) => {
+      if (insideAnchorSite(p.x, p.z)) return;
+      addLampPost(p.x, p.z, p.angle, 1);
+      lampCount++;
+    });
+
+    const treePositions = [];
+    const addTree = (x, z, scale) => {
+      if (insideAnchorSite(x, z)) return;
+      if (treePositions.some((t) => Math.hypot(t.x - x, t.z - z) < 7)) return;
+      treePositions.push({ x, z, scale });
+    };
+    VOID_E_OSM.roads.filter((road) => lampRoads.includes(road.name)).forEach((road) => {
+      [1, -1].forEach((side) => {
+        samplePolyline(road.points, 72, (road.width * 0.5 + 6) * side).forEach((p, i) => {
+          addTree(p.x, p.z, 0.85 + (i % 4) * 0.06);
+        });
+      });
+    });
+    VOID_E_OSM.waterways
+      .filter((waterway) => waterway.name === 'Kanal Banjir Timur' || waterway.name === 'Cakung')
+      .forEach((waterway) => {
+        [1, -1].forEach((side) => {
+          samplePolyline(waterway.points, 54, (waterway.width * 0.5 + 6) * side).forEach((p, i) => {
+            addTree(p.x, p.z, 0.9 + (i % 5) * 0.05);
+          });
+        });
+      });
+
+    if (treePositions.length > 0) {
+      const dummy = new THREE.Object3D();
+      const trunkGeo = new THREE.CylinderGeometry(0.26, 0.38, 4.2, 5);
+      const foliageGeo = new THREE.ConeGeometry(2.6, 6.2, 6);
+      const trunkMat = new THREE.MeshStandardMaterial({ color: 0x3e2723, roughness: 0.9 });
+      const foliageMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.85 });
+      const trunkMesh = new THREE.InstancedMesh(trunkGeo, trunkMat, treePositions.length);
+      const foliageMesh = new THREE.InstancedMesh(foliageGeo, foliageMat, treePositions.length);
+      trunkMesh.name = 'voide-tree-trunks';
+      foliageMesh.name = 'voide-tree-foliage';
+
+      treePositions.forEach((tree, idx) => {
+        dummy.position.set(tree.x, 2.1 * tree.scale, tree.z);
+        dummy.scale.set(tree.scale, tree.scale, tree.scale);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        trunkMesh.setMatrixAt(idx, dummy.matrix);
+
+        dummy.position.set(tree.x, (4.2 + 3.0) * tree.scale, tree.z);
+        dummy.updateMatrix();
+        foliageMesh.setMatrixAt(idx, dummy.matrix);
+      });
+
+      trunkMesh.castShadow = true;
+      trunkMesh.receiveShadow = true;
+      foliageMesh.castShadow = true;
+      foliageMesh.receiveShadow = true;
+      this.proceduralGroup.add(trunkMesh);
+      this.proceduralGroup.add(foliageMesh);
+    }
+
+    const mergeAndAdd = (geos, mat, name, receiveShadow = true, castShadow = false) => {
+      if (!geos || geos.length === 0) return;
+      const merged = BufferGeometryUtils.mergeGeometries(geos, false);
+      if (merged) {
+        const mesh = new THREE.Mesh(merged, mat);
+        mesh.name = name;
+        mesh.receiveShadow = receiveShadow;
+        mesh.castShadow = castShadow;
+        this.proceduralGroup.add(mesh);
+      }
+    };
+
+    mergeAndAdd(roadGeos, roadMat, 'voide-roads', true, false);
+    mergeAndAdd(sidewalkGeos, sidewalkMat, 'voide-sidewalks', true, false);
+    mergeAndAdd(waterGeos, waterMat, 'voide-water', false, false);
+    mergeAndAdd(bridgeGeos, bridgeMat, 'voide-bridges', true, true);
+    mergeAndAdd(lampPoleGeos, lampPoleMat, 'voide-pju-poles', true, false);
+    mergeAndAdd(lampBulbGeos, this.pjuBulbMat, 'voide-pju-bulbs', false, false);
+
+    this.voidEOsmStats = {
+      roads: VOID_E_OSM.roads.length,
+      roadPoints: VOID_E_OSM.roads.reduce((sum, road) => sum + road.points.length, 0),
+      waterways: VOID_E_OSM.waterways.length,
+      bridges: crossings.length,
+      lamps: lampCount,
+      trees: treePositions.length,
+      connectors: 1,
+      drawCalls: 8
+    };
+  }
+
+  getVoidERoadSegments() {
+    if (!this.voidERoadSegments) {
+      const segments = [];
+      VOID_E_OSM.roads.forEach((road) => {
+        for (let i = 0; i < road.points.length - 1; i++) {
+          segments.push({
+            ax: road.points[i][0],
+            az: road.points[i][1],
+            bx: road.points[i + 1][0],
+            bz: road.points[i + 1][1],
+            halfWidth: road.width * 0.5,
+            way: road
+          });
+        }
+      });
+      this.voidERoadSegments = segments;
+    }
+    return this.voidERoadSegments;
+  }
+
+  isNearVoidERoad(x, z, clearance = 12) {
+    for (const s of this.getVoidERoadSegments()) {
       const pad = clearance + s.halfWidth;
       if (
         x < Math.min(s.ax, s.bx) - pad || x > Math.max(s.ax, s.bx) + pad ||
