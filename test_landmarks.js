@@ -2327,10 +2327,15 @@ assert.ok(voidETransitMethod.includes('parkingBays'), 'Void E transit stats must
   'Medan',
   'Jalan Komplek Militer',
   'Jalan Cakung Cilincing Timur',
-  'Jalan Rorotan XI'
+  'Jalan Malaka IV HB'
 ].forEach((name) => {
   assert.ok(voidETransitMethod.includes(name), `Void E transit missing the ${name} halte corridor`);
 });
+
+assert.ok(
+  voidETransitMethod.includes('near: [1907.1, -639.8]'),
+  'Halte Kampung Rorotan must stand clear of the Kampung Rorotan site slab'
+);
 
 assert.ok(voidEInfillMethod.includes('transitReservations'), 'Void E infill must reserve the transit hub footprint');
 assert.ok(voidEInfillMethod.includes('insideTransitReservation'), 'Void E infill missing the transit reservation test');

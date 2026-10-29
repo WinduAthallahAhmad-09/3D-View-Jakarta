@@ -7293,7 +7293,10 @@ export class CityScene {
       { name: 'Halte Kawasan Logistik Marunda', road: 'Medan', near: [1690, -1063], side: -1 },
       { name: 'Halte Rusunawa Nagrak', road: 'Jalan Komplek Militer', near: [1828, -1046], side: 1 },
       { name: 'Halte KBN Cakung', road: 'Jalan Cakung Cilincing Timur', near: [1640, -700], side: -1 },
-      { name: 'Halte Kampung Rorotan', road: 'Jalan Rorotan XI', near: [1904, -649], side: -1 }
+      // Jalan Rorotan XI seluruhnya berjalan di bawah pelat tapak kampung dan
+      // hanya menyisakan 3,6 unit di luar pelat, jadi peron berlabuh di bahu
+      // barat Jalan Malaka IV HB sembilan unit dari simpang gerbang kampung.
+      { name: 'Halte Kampung Rorotan', road: 'Jalan Malaka IV HB', near: [1907.1, -639.8], side: 1 }
     ];
 
     const findRoadPoint = (roadName, near) => {
