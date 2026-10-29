@@ -2215,7 +2215,66 @@ assert.ok(!voidENetworkMethod.includes('nightMaterials.push'), 'Void E network m
 assert.ok(citySceneContent.includes('getVoidERoadSegments()'), 'CityScene.js missing the Void E road segment cache');
 assert.ok(citySceneContent.includes('isNearVoidERoad(x, z, clearance = 12)'), 'CityScene.js missing the Void E road corridor mask');
 
-console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-2, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 52: Void E Tahap 3 — infill urban fabric Cilincing–Marunda–Rorotan–KBN Cakung
+assert.ok(citySceneContent.includes('buildVoidEInfill()'), 'CityScene.js missing buildVoidEInfill');
+
+const voidEInfillCall = citySceneContent.indexOf('this.buildVoidEInfill();');
+assert.ok(
+  voidEInfillCall > voidENetworkCallIndex,
+  'buildVoidEInfill must run after buildVoidECilincing'
+);
+assert.ok(
+  voidEInfillCall < citySceneContent.indexOf('this.buildVoidBInfillAndIndustry();'),
+  'buildVoidEInfill must run before buildVoidBInfillAndIndustry'
+);
+
+const voidEInfillStart = citySceneContent.indexOf('buildVoidEInfill() {');
+const voidEInfillEnd = citySceneContent.indexOf('buildVoidDInfill() {', voidEInfillStart);
+assert.ok(voidEInfillStart > 0 && voidEInfillEnd > voidEInfillStart, 'Cannot isolate buildVoidEInfill');
+const voidEInfillMethod = citySceneContent.slice(voidEInfillStart, voidEInfillEnd);
+assert.ok(!voidEInfillMethod.includes('new THREE.PointLight'), 'Void E infill must not add PointLights');
+assert.ok(!voidEInfillMethod.includes('nightMaterials.push'), 'Void E infill must not register new night materials');
+assert.ok(voidEInfillMethod.includes('VOID_E_OSM'), 'Void E infill must mask against the OSM water dataset');
+assert.ok(voidEInfillMethod.includes('isNearVoidERoad'), 'Void E infill missing the road corridor mask');
+assert.ok(voidEInfillMethod.includes('isNearVoidEWater'), 'Void E infill missing the waterway mask');
+assert.ok(voidEInfillMethod.includes('anchorExclusions'), 'Void E infill must exclude the six anchor pads');
+assert.ok(voidEInfillMethod.includes('insideAnchorExclusion'), 'Void E infill missing the anchor exclusion test');
+assert.ok(voidEInfillMethod.includes('voidEInfillStats'), 'Void E infill must expose runtime stats');
+assert.ok(voidEInfillMethod.includes('drawCalls: 5'), 'Void E infill should add five instanced draw calls');
+assert.ok(
+  voidEInfillMethod.includes('ignoreWays') &&
+    voidEInfillMethod.includes('placeShophouseRow(roadWidth, chain.points, chain.ways)'),
+  'Void E shophouse rows must ignore their own road corridor'
+);
+
+[
+  'voide-houses',
+  'voide-shophouses',
+  'voide-house-roofs',
+  'voide-warehouses',
+  'voide-warehouse-roofs'
+].forEach((name) => {
+  assert.ok(voidEInfillMethod.includes(name), `Void E infill missing the ${name} instanced mesh`);
+});
+
+['Cilincing', 'Kebantenan', 'Marunda Pulo', 'Rorotan', 'Sungai Tiram'].forEach((zone) => {
+  assert.ok(voidEInfillMethod.includes(zone), `Void E infill missing the ${zone} residential zone`);
+});
+
+[
+  'Jalan Raya Cilincing',
+  'Jalan Cakung Cilincing Timur',
+  'Jalan Cakung Cilincing Barat',
+  'Jalan Marunda Makmur'
+].forEach((name) => {
+  assert.ok(voidEInfillMethod.includes(name), `Void E infill missing the ${name} shophouse corridor`);
+});
+
+['KBN Cakung', 'Marunda', 'Cilincing industri'].forEach((zone) => {
+  assert.ok(voidEInfillMethod.includes(zone), `Void E infill missing the ${zone} warehouse cluster`);
+});
+
+console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-3, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
