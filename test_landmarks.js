@@ -2340,6 +2340,52 @@ assert.ok(
 assert.ok(voidEInfillMethod.includes('transitReservations'), 'Void E infill must reserve the transit hub footprint');
 assert.ok(voidEInfillMethod.includes('insideTransitReservation'), 'Void E infill missing the transit reservation test');
 
+// Check 54: Void E — label DOM untuk halte dan park-and-ride
+assert.ok(
+  citySceneContent.includes('this.voidETransitLabels = [];'),
+  'CityScene constructor must initialise the Void E transit label list'
+);
+assert.ok(voidETransitMethod.includes('halteLabels.push'), 'Void E transit must collect a label anchor per halte');
+assert.ok(voidETransitMethod.includes('this.voidETransitLabels = ['), 'Void E transit must publish the label anchors');
+assert.ok(voidETransitMethod.includes("shortName: 'P&R Marunda'"), 'Park-and-ride label needs a short name');
+assert.ok(voidETransitMethod.includes("kind: 'park'"), 'Park-and-ride label must carry the park kind');
+assert.ok(voidETransitMethod.includes("kind: 'halte'"), 'Halte labels must carry the halte kind');
+assert.ok(voidETransitMethod.includes('position: [prCenterX, 7.6, prCenterZ]'), 'Park-and-ride label anchor missing');
+
+[
+  'Rusunawa Marunda',
+  'Rumah Si Pitung',
+  'Logistik Marunda',
+  'Rusunawa Nagrak',
+  'KBN Cakung',
+  'Kampung Rorotan'
+].forEach((name) => {
+  assert.ok(
+    voidETransitMethod.includes(`shortName: '${name}'`),
+    `Void E halte label missing the ${name} short name`
+  );
+});
+
+assert.ok(uiManagerContent.includes('transitLabels = []'), 'UIManager constructor must accept transit labels');
+assert.ok(uiManagerContent.includes('this.initTransitLabels();'), 'UIManager.init must build the transit labels');
+assert.ok(uiManagerContent.includes('this.transitLabelElements.length'), 'Label update must include transit pins');
+assert.ok(uiManagerContent.includes("label.kind === 'park' ? 'P' : 'H'"), 'Transit pins must distinguish P and H badges');
+assert.ok(uiManagerContent.includes('dist > 520 || dist < 12'), 'Transit pins need their own visibility range');
+assert.ok(uiManagerContent.includes('zIndex = Math.round(1400 - dist)'), 'Transit pins need depth sorting');
+
+const transitCssStart = indexHtmlContent.indexOf('/* Secondary transit pins');
+const transitCssEnd = indexHtmlContent.indexOf('</style>', transitCssStart);
+assert.ok(transitCssStart > 0 && transitCssEnd > transitCssStart, 'index.html missing the transit pin styles');
+const transitCss = indexHtmlContent.slice(transitCssStart, transitCssEnd);
+assert.ok(transitCss.includes('pointer-events: none;'), 'Transit pins must stay non-interactive');
+assert.ok(transitCss.includes('.transit-badge {'), 'Transit pin badge style missing');
+assert.ok(transitCss.includes('.transit-pin.is-park .transit-badge'), 'Park-and-ride badge style missing');
+assert.ok(transitCss.includes('.transit-pin.is-compact .transit-text'), 'Transit pin compact mode missing');
+assert.ok(
+  mainJsContent.includes('transitLabels: this.city.voidETransitLabels'),
+  'main.js must pass the transit label anchors to UIManager'
+);
+
 console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 

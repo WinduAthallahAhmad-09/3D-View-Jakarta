@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { JAKARTA_LANDMARKS } from '../config/landmarks.js';
 
 export class UIManager {
-  constructor({ onSelectPreset, onTimeChange, onResetNorth }) {
+  constructor({ onSelectPreset, onTimeChange, onResetNorth, transitLabels = [] }) {
     this.onSelectPreset = onSelectPreset;
     this.onTimeChange = onTimeChange;
     this.onResetNorth = onResetNorth;
@@ -33,6 +33,8 @@ export class UIManager {
     this.isHomeActive = true;
     this.labelsVisible = true;
     this.labelElements = [];
+    this.transitLabels = transitLabels;
+    this.transitLabelElements = [];
     this.tempVec = new THREE.Vector3();
     this.forwardVec = new THREE.Vector3();
     this.toLabelVec = new THREE.Vector3();
@@ -47,6 +49,7 @@ export class UIManager {
     this.initAccordions();
     this.bindHomescreenEvents();
     this.initMapLabels();
+    this.initTransitLabels();
     this.bindTourButtons();
     this.bindTourScrollEvents();
     this.bindCompassEvents();
@@ -316,12 +319,60 @@ export class UIManager {
   }
 
   /**
+   * Secondary DOM pins for Void E feeder halte and Park and Ride Marunda.
+   * Non-interactive so they never block 3D picking underneath them.
+   */
+  initTransitLabels() {
+    if (!this.labelsContainer || !this.transitLabels.length) return;
+
+    this.transitLabelElements = [];
+
+    this.transitLabels.forEach((label) => {
+      const el = document.createElement('div');
+      el.className = `transit-pin${label.kind === 'park' ? ' is-park' : ''}`;
+      el.setAttribute('aria-hidden', 'true');
+
+      const pill = document.createElement('div');
+      pill.className = 'transit-pill';
+
+      const badge = document.createElement('span');
+      badge.className = 'transit-badge';
+      badge.textContent = label.kind === 'park' ? 'P' : 'H';
+
+      const text = document.createElement('span');
+      text.className = 'transit-text';
+      text.textContent = label.shortName || label.name;
+
+      const stem = document.createElement('div');
+      stem.className = 'transit-stem';
+
+      pill.appendChild(badge);
+      pill.appendChild(text);
+      el.appendChild(pill);
+      el.appendChild(stem);
+      this.labelsContainer.appendChild(el);
+
+      this.transitLabelElements.push({
+        label,
+        element: el,
+        worldPos: new THREE.Vector3(label.position[0], label.position[1], label.position[2])
+      });
+    });
+  }
+
+  /**
    * Project 3D world coordinates of each Jakarta place to 2D screen coordinates
    * with occlusion checking, depth sorting, and Smart LOD (compact badges when zoomed out,
    * smooth expansion on hover or close range)
    */
   updateMapLabels(camera) {
-    if (this.isHomeActive || !this.labelsVisible || !this.labelElements.length) return;
+    if (
+      this.isHomeActive ||
+      !this.labelsVisible ||
+      (!this.labelElements.length && !this.transitLabelElements.length)
+    ) {
+      return;
+    }
 
     // Dirty checking: Skip expensive DOM reflow when camera is stationary
     if (!this.lastCamPos) {
@@ -392,6 +443,47 @@ export class UIManager {
 
         item.element.style.opacity = alpha.toFixed(2);
         item.element.style.pointerEvents = 'auto';
+        item.element.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -100%) scale(${scale.toFixed(2)})`;
+      }
+    }
+
+    // Secondary transit pins: closer range, no pointer events, collapse to badges.
+    for (let i = 0; i < this.transitLabelElements.length; i++) {
+      const item = this.transitLabelElements[i];
+
+      this.toLabelVec.subVectors(item.worldPos, camera.position);
+      if (this.forwardVec.dot(this.toLabelVec) <= 0) {
+        item.element.style.opacity = '0';
+        continue;
+      }
+
+      this.tempVec.copy(item.worldPos);
+      this.tempVec.project(camera);
+
+      if (this.tempVec.z > 1.0 || this.tempVec.z < -1.0) {
+        item.element.style.opacity = '0';
+        continue;
+      }
+
+      const dist = camera.position.distanceTo(item.worldPos);
+      if (dist > 520 || dist < 12) {
+        item.element.style.opacity = '0';
+      } else {
+        const x = this.tempVec.x * widthHalf + widthHalf;
+        const y = -(this.tempVec.y * heightHalf) + heightHalf;
+
+        const isCompact = dist > 260;
+        item.element.classList.toggle('is-compact', isCompact);
+        item.element.style.zIndex = Math.round(1400 - dist);
+
+        let alpha = 1.0;
+        if (dist > 380) {
+          alpha = Math.max(0, (520 - dist) / 140);
+        }
+
+        const scale = isCompact ? Math.max(0.78, 1.0 - (dist - 260) * 0.0007) : 1.0;
+
+        item.element.style.opacity = alpha.toFixed(2);
         item.element.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -100%) scale(${scale.toFixed(2)})`;
       }
     }

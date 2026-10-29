@@ -25,6 +25,7 @@ export class CityScene {
     this.vehicleMeshes = null;
     this.vehicleDummy = new THREE.Object3D();
     this.animatedTrains = [];
+    this.voidETransitLabels = [];
     this.pjuLampTransforms = [];
     this.pjuLightPool = [];
     this.pjuLightPoolSize = 12;
@@ -7204,6 +7205,7 @@ export class CityScene {
     const steelGeos = [];
     const signGeos = [];
     const treePositions = [];
+    const halteLabels = [];
 
     const makeBox = (w, h, d, x, y, z, rotY = 0, target = concreteGeos) => {
       const geo = new THREE.BoxGeometry(w, h, d);
@@ -7288,15 +7290,15 @@ export class CityScene {
     // model anchor (rusun, gudang, rumah panggung).
     // =========================================================================
     const halteSpecs = [
-      { name: 'Halte Rusunawa Marunda', road: 'Jalan Marunda Empang', near: [1970, -1345], side: 1 },
-      { name: 'Halte Rumah Si Pitung', road: 'Jalan Jayapura', near: [1859, -1400], side: -1 },
-      { name: 'Halte Kawasan Logistik Marunda', road: 'Medan', near: [1690, -1063], side: -1 },
-      { name: 'Halte Rusunawa Nagrak', road: 'Jalan Komplek Militer', near: [1828, -1046], side: 1 },
-      { name: 'Halte KBN Cakung', road: 'Jalan Cakung Cilincing Timur', near: [1640, -700], side: -1 },
+      { name: 'Halte Rusunawa Marunda', shortName: 'Rusunawa Marunda', road: 'Jalan Marunda Empang', near: [1970, -1345], side: 1 },
+      { name: 'Halte Rumah Si Pitung', shortName: 'Rumah Si Pitung', road: 'Jalan Jayapura', near: [1859, -1400], side: -1 },
+      { name: 'Halte Kawasan Logistik Marunda', shortName: 'Logistik Marunda', road: 'Medan', near: [1690, -1063], side: -1 },
+      { name: 'Halte Rusunawa Nagrak', shortName: 'Rusunawa Nagrak', road: 'Jalan Komplek Militer', near: [1828, -1046], side: 1 },
+      { name: 'Halte KBN Cakung', shortName: 'KBN Cakung', road: 'Jalan Cakung Cilincing Timur', near: [1640, -700], side: -1 },
       // Jalan Rorotan XI seluruhnya berjalan di bawah pelat tapak kampung dan
       // hanya menyisakan 3,6 unit di luar pelat, jadi peron berlabuh di bahu
       // barat Jalan Malaka IV HB sembilan unit dari simpang gerbang kampung.
-      { name: 'Halte Kampung Rorotan', road: 'Jalan Malaka IV HB', near: [1907.1, -639.8], side: 1 }
+      { name: 'Halte Kampung Rorotan', shortName: 'Kampung Rorotan', road: 'Jalan Malaka IV HB', near: [1907.1, -639.8], side: 1 }
     ];
 
     const findRoadPoint = (roadName, near) => {
@@ -7354,6 +7356,14 @@ export class CityScene {
       const postZ = hz + 4.8 * cosA;
       makeBox(0.14, 2.5, 0.14, postX, 1.6, postZ, 0, steelGeos);
       makeBox(0.12, 1.0, 2.4, postX, 2.35, postZ, road.angle, signGeos);
+
+      // Anchor label DOM mengambang 3,1 unit di atas kanopi (puncak y 3,31).
+      halteLabels.push({
+        name: spec.name,
+        shortName: spec.shortName,
+        kind: 'halte',
+        position: [hx, 6.4, hz]
+      });
     });
 
     // =========================================================================
@@ -7414,6 +7424,16 @@ export class CityScene {
       this.proceduralGroup.add(trunkMesh);
       this.proceduralGroup.add(foliageMesh);
     }
+
+    this.voidETransitLabels = [
+      {
+        name: 'Park and Ride Marunda',
+        shortName: 'P&R Marunda',
+        kind: 'park',
+        position: [prCenterX, 7.6, prCenterZ]
+      },
+      ...halteLabels
+    ];
 
     this.voidETransitStats = {
       parkAndRide: 'Park and Ride Marunda',
