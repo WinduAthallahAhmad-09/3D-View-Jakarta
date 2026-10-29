@@ -76,7 +76,7 @@ export class CityScene {
    * Expansive Jakarta ground plane with subtle urban coordinate grid
    */
   buildGroundAndGrid() {
-    const groundGeo = new THREE.PlaneGeometry(3600, 3600);
+    const groundGeo = new THREE.PlaneGeometry(4800, 4800);
     groundGeo.rotateX(-Math.PI / 2);
     this.groundMat = new THREE.MeshStandardMaterial({
       color: 0x283344,
@@ -88,7 +88,7 @@ export class CityScene {
     ground.position.y = -0.15;
     this.proceduralGroup.add(ground);
 
-    this.gridHelper = new THREE.GridHelper(3000, 150, 0x3e4c63, 0x334155);
+    this.gridHelper = new THREE.GridHelper(4400, 220, 0x3e4c63, 0x334155);
     this.gridHelper.material.transparent = true;
     this.gridHelper.material.opacity = 0.4;
     this.gridHelper.position.y = -0.08;
@@ -7667,7 +7667,13 @@ export class CityScene {
       "twa-angke-kapuk": () => LandmarkModels.createTWAAngkeKapuk(),
       "kampung-nelayan-kamal-muara": () => LandmarkModels.createKampungNelayanKamalMuara(),
       "teluk-gong": () => LandmarkModels.createTelukGong(),
-      "pps-nizam-zachman": () => LandmarkModels.createPPSNizamZachman()
+      "pps-nizam-zachman": () => LandmarkModels.createPPSNizamZachman(),
+      "rusunawa-marunda": () => LandmarkModels.createRusunawaMarunda(),
+      "rumah-si-pitung": () => LandmarkModels.createRumahSiPitung(),
+      "kawasan-logistik-marunda": () => LandmarkModels.createKawasanLogistikMarunda(),
+      "rusunawa-nagrak-cilincing": () => LandmarkModels.createRusunawaNagrak(),
+      "kbn-cakung": () => LandmarkModels.createKBNCakung(),
+      "kampung-rorotan": () => LandmarkModels.createKampungRorotan()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {

@@ -2092,6 +2092,141 @@ export const JAKARTA_LANDMARKS = [
       "Lelang ikan di Muara Baru menjadi acuan harga hasil laut untuk pasar Jakarta dan sekitarnya.",
       "Pelabuhan ini terhubung dengan kawasan pengolahan ikan, cold storage, dan industri kemasan di sepanjang Muara Baru."
     ]
+  },
+  // =====================================================
+  // ZONA 11: VOID E — CILINCING, MARUNDA, ROROTAN & KBN CAKUNG
+  // =====================================================
+  {
+    id: "rusunawa-marunda",
+    name: "Rusunawa Marunda & Kampung Pesisir Marunda",
+    shortName: "Rusunawa Marunda",
+    category: "Rumah Susun & Permukiman Pesisir",
+    tagline: "Lima Menara Rusunawa Marunda, Kampung Nelayan & Gerbang Pantai Marunda",
+    height: "40 meter (Lima Menara Rusun 16 Lantai)",
+    year: "2014 / Penataan Berkala",
+    architect: "Pemerintah Provinsi DKI Jakarta",
+    location: "Jl. Marunda Baru, Marunda, Cilincing, Jakarta Utara",
+    coordinates: { lat: -6.09523, lng: 106.96376 },
+    position: [1985.0, 0, -1415.0],
+    labelHeight: 46,
+    cameraPosition: [1985.0, 78, -1315],
+    cameraTarget: [1985.0, 14, -1415.0],
+    description: "Kompleks rumah susun sewa di pesisir Marunda yang menjadi salah satu permukiman vertikal pertama di Jakarta Utara. Menampilkan lima menara 16 lantai berwarna cerah, pelat tapak beton, plaza bersama, musala berkubah, taman bermain, deretan pedagang kampung, serta latar kampung nelayan Marunda dan garis pantai Laut Jawa.",
+    facts: [
+      "Rusunawa Marunda dibangun untuk merelokasi warga kampung nelayan yang tinggal di bantaran sungai dan sempadan pantai.",
+      "Lima menaranya menampung ribuan keluarga dan dilengkapi puskesmas, perpustakaan, serta ruang komunitas di lantai dasar.",
+      "Kawasan ini berdiri di atas lahan bekas tambak di tepi Laut Jawa, bersebelahan dengan Kampung Marunda dan Pantai Marunda."
+    ]
+  },
+  {
+    id: "rumah-si-pitung",
+    name: "Rumah Si Pitung & Kampung Betawi Marunda",
+    shortName: "Rumah Si Pitung",
+    category: "Situs Budaya & Rumah Adat Betawi",
+    tagline: "Rumah Panggung Betawi Marunda, Jejak Si Pitung & Kampung Pesisir",
+    height: "9 meter (Rumah Panggung & Anjungan Kayu)",
+    year: "Abad ke-19 / Restorasi 1970-an",
+    architect: "Arsitektur Tradisional Betawi Marunda",
+    location: "Jl. Marunda Pulo, Marunda, Cilincing, Jakarta Utara",
+    coordinates: { lat: -6.09693, lng: 106.95888 },
+    position: [1870.0, 0, -1438.0],
+    labelHeight: 22,
+    cameraPosition: [1870.0, 48, -1348],
+    cameraTarget: [1870.0, 4, -1438.0],
+    description: "Rumah panggung kayu berciri Betawi Marunda yang dikaitkan dengan legenda Si Pitung, jawara pembela rakyat pada masa kolonial. Menampilkan rumah panggung di atas tiang kayu, atap genteng pelana, anjungan depan, ukiran lisplang, sumur dan pekarangan, rumah museum di sampingnya, serta gang kampung yang menghubungkan ke Pantai Marunda.",
+    facts: [
+      "Rumah Si Pitung di Marunda dipercaya sebagai salah satu tempat tinggal jawara Betawi yang dikenal membela warga kecil.",
+      "Bentuk rumah panggungnya mencerminkan adaptasi arsitektur Betawi pesisir terhadap pasang-surut air dan tanah rawa.",
+      "Kampung Marunda kini menjadi salah satu kantung permukiman Betawi yang masih bertahan di Jakarta Utara."
+    ]
+  },
+  {
+    id: "kawasan-logistik-marunda",
+    name: "Kawasan Logistik Marunda",
+    shortName: "Logistik Marunda",
+    category: "Kawasan Logistik & Industri Pelabuhan",
+    tagline: "Gudang Logistik, Lapangan Kontainer & Gerbang Kargo Marunda",
+    height: "14 meter (Gudang & Derrick Kontainer)",
+    year: "2010-an",
+    architect: "PT Karya Citra Nusantara & Pengembang Kawasan",
+    location: "Jl. Marunda Baru, Cilincing, Jakarta Utara",
+    coordinates: { lat: -6.11564, lng: 106.94488 },
+    position: [1720.0, 0, -1125.0],
+    labelHeight: 26,
+    cameraPosition: [1720.0, 62, -1025],
+    cameraTarget: [1720.0, 8, -1125.0],
+    description: "Kawasan logistik dan pergudangan yang menopang aktivitas Pelabuhan Marunda dan koridor industri Cilincing. Menampilkan deretan gudang berjajar dengan atap pelana rendah, dermaga bongkar muat truk, lapangan kontainer bertumpuk, gerbang kawasan, pos timbang, derrick kontainer, serta deretan truk kontainer yang keluar-masuk kawasan.",
+    facts: [
+      "Kawasan Logistik Marunda menjadi simpul distribusi barang yang menghubungkan Pelabuhan Marunda dengan jalan tol dan kawasan industri Jakarta Utara.",
+      "Gudang-gudangnya menyimpan komoditas curah, bahan bangunan, dan barang konsumsi yang didistribusikan ke seluruh Jabodetabek.",
+      "Kawasan ini tumbuh seiring pengembangan Pelabuhan Marunda sebagai pelabuhan kargo penunjang Tanjung Priok."
+    ]
+  },
+  {
+    id: "rusunawa-nagrak-cilincing",
+    name: "Rusunawa Nagrak Cilincing",
+    shortName: "Rusunawa Nagrak",
+    category: "Rumah Susun & Permukiman",
+    tagline: "Dua Menara Rusunawa Nagrak, Hunian Pesisir Cilincing",
+    height: "36 meter (Dua Menara 12 Lantai)",
+    year: "2016",
+    architect: "Pemerintah Provinsi DKI Jakarta",
+    location: "Jl. Nagrak, Cilincing, Jakarta Utara",
+    coordinates: { lat: -6.12462, lng: 106.94823 },
+    position: [1765.0, 0, -995.0],
+    labelHeight: 42,
+    cameraPosition: [1765.0, 72, -905],
+    cameraTarget: [1765.0, 12, -995.0],
+    description: "Rumah susun sewa dua menara di Nagrak, Cilincing, yang menampung warga dari permukiman padat pesisir Jakarta Utara. Menampilkan dua menara 12 lantai berfasad warna cerah, podium penghubung, plaza dan taman bermain, musala, area parkir, serta deretan warung dan lahan basah di sekelilingnya.",
+    facts: [
+      "Rusunawa Nagrak dibangun untuk menata permukiman padat di kawasan Cilincing yang rawan banjir rob.",
+      "Fasad berwarna cerah dan podium penghubungnya menjadi ciri rusunawa yang dibangun pada dekade 2010-an di Jakarta Utara.",
+      "Kawasan Nagrak berada di antara koridor industri Marunda dan permukiman Cilincing yang padat."
+    ]
+  },
+  {
+    id: "kbn-cakung",
+    name: "Kawasan Berikat Nusantara Cakung",
+    shortName: "KBN Cakung",
+    category: "Kawasan Industri Berikat",
+    tagline: "Gerbang KBN Cakung, Pabrik & Pergudangan Berikat Jakarta Utara",
+    height: "16 meter (Gerbang & Menara Air)",
+    year: "1990",
+    architect: "PT Kawasan Berikat Nusantara (Persero)",
+    location: "Jl. Cakung Cilincing Raya, Cakung, Jakarta Utara",
+    coordinates: { lat: -6.14419, lng: 106.93370 },
+    position: [1560.0, 0, -720.0],
+    labelHeight: 24,
+    cameraPosition: [1560.0, 60, -620],
+    cameraTarget: [1560.0, 6, -720.0],
+    description: "Kawasan industri berikat milik negara di Cakung yang menjadi salah satu pusat manufaktur dan logistik tertua di Jakarta Utara. Menampilkan gerbang kawasan berkanopi lebar, jalan akses berpohon, pabrik dan gudang berjajar, kantor pengelola, menara air, lapangan kontainer, serta lalu lintas truk yang padat pada jam kerja.",
+    facts: [
+      "KBN Cakung berstatus kawasan berikat, sehingga barang impor dapat ditimbun dan diproses tanpa bea masuk sebelum diekspor kembali.",
+      "Kawasan ini menaungi ratusan pabrik dan pergudangan yang bergerak di bidang tekstil, elektronik, plastik, dan logistik.",
+      "KBN Cakung dikelola PT Kawasan Berikat Nusantara (Persero) dan terhubung langsung dengan Pelabuhan Tanjung Priok melalui Jl. Cakung Cilincing Raya."
+    ]
+  },
+  {
+    id: "kampung-rorotan",
+    name: "Kampung Rorotan & Rusunawa Rorotan",
+    shortName: "Kampung Rorotan",
+    category: "Permukiman Kampung & Hunian Baru",
+    tagline: "Kampung Tepi Cakung Drain, Rusunawa Rorotan & Lahan Basah Pesisir",
+    height: "28 meter (Rusunawa & Tanggul Cakung Drain)",
+    year: "2019 / Penataan Kampung",
+    architect: "Pemerintah Kota Jakarta Utara",
+    location: "Jl. Rorotan, Cilincing, Jakarta Utara",
+    coordinates: { lat: -6.14572, lng: 106.95670 },
+    position: [1885.0, 0, -700.0],
+    labelHeight: 30,
+    cameraPosition: [1885.0, 58, -610],
+    cameraTarget: [1885.0, 6, -700.0],
+    description: "Kampung padat di tepi Cakung Drain yang tumbuh berdampingan dengan rumah susun baru dan lahan basah pesisir. Menampilkan deretan rumah kampung beratap genteng, gang beton, musala dan menara masjid, rusunawa di sisi utara, tanggul dan jembatan Cakung Drain, sawah tersisa, serta deretan warung dan bengkel di sepanjang jalan kampung.",
+    facts: [
+      "Cakung Drain yang membelah Rorotan berfungsi mengalirkan air dari Jakarta Timur menuju Laut Jawa dan menjadi bagian sistem pengendali banjir utara Jakarta.",
+      "Rusunawa Rorotan dibangun untuk merelokasi warga yang tinggal di bantaran saluran dan lahan negara.",
+      "Kampung Rorotan masih mempertahankan lahan pertanian dan tambak sisa yang menyusut seiring perluasan permukiman."
+    ]
   }
 ];
 
