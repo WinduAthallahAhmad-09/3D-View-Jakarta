@@ -1643,8 +1643,9 @@ assert.ok(!voidCInfillMethod.includes('new THREE.PointLight'), 'Void C infill mu
 assert.ok(voidCInfillMethod.includes('Kreo'), 'Void C infill missing the Kreo/Ciledug residential zone');
 assert.ok(voidCInfillMethod.includes('VOID_C_OSM'), 'Void C infill must mask against the OSM road dataset');
 assert.ok(voidCInfillMethod.includes('voidCInfillStats'), 'Void C infill must expose runtime stats');
-assert.ok(voidCInfillMethod.includes('drawCalls: 5'), 'Void C infill should add five instanced draw calls');
-assert.ok(!voidCInfillMethod.includes('nightMaterials.push'), 'Void C infill must not register new night materials');
+assert.ok(voidCInfillMethod.includes('drawCalls: 6'), 'Void C infill should add six instanced draw calls');
+assert.ok(voidCInfillMethod.includes('voidc-night-windows'), 'Void C infill missing the night window mesh');
+assert.ok(voidCInfillMethod.includes('addInfillNightWindows'), 'Void C infill must reuse the shared night window helper');
 
 // Check 44: Void C Tahap 4 — transit kawasan (park-and-ride + 4 feeder halte)
 assert.ok(citySceneContent.includes('buildVoidCTransit()'), 'CityScene.js missing buildVoidCTransit');
@@ -1688,7 +1689,10 @@ assert.ok(!voidCTransitMethod.includes('new THREE.PointLight'), 'Void C transit 
 assert.ok(voidCTransitMethod.includes('VOID_C_OSM'), 'Void C transit must consume the OSM road dataset');
 assert.ok(voidCTransitMethod.includes('voidCTransitStats'), 'Void C transit must expose runtime stats');
 assert.ok(voidCTransitMethod.includes('drawCalls: 5'), 'Void C transit should add five draw calls');
-assert.ok(!voidCTransitMethod.includes('nightMaterials.push'), 'Void C transit must not register new night materials');
+assert.ok(
+  voidCTransitMethod.includes('registerNightMaterial') && voidCTransitMethod.includes('voidc-transit-sign'),
+  'Void C transit sign must glow at night without new draw calls'
+);
 
 // Check 45: Void D Tahap 1 — 6 anchor pesisir Kamal Muara, Kapuk, Teluk Gong & Muara Baru
 const voidDAnchors = [
@@ -1867,7 +1871,8 @@ const voidDInfillEnd = citySceneContent.indexOf('buildVoidBInfillAndIndustry() {
 assert.ok(voidDInfillStart > 0 && voidDInfillEnd > voidDInfillStart, 'Cannot isolate buildVoidDInfill');
 const voidDInfillMethod = citySceneContent.slice(voidDInfillStart, voidDInfillEnd);
 assert.ok(!voidDInfillMethod.includes('new THREE.PointLight'), 'Void D infill must not add PointLights');
-assert.ok(!voidDInfillMethod.includes('nightMaterials.push'), 'Void D infill must not register new night materials');
+assert.ok(voidDInfillMethod.includes('addInfillNightWindows'), 'Void D infill must reuse the shared night window helper');
+assert.ok(voidDInfillMethod.includes('voidd-night-windows'), 'Void D infill missing the night window mesh');
 assert.ok(voidDInfillMethod.includes('VOID_D_OSM'), 'Void D infill must mask against the OSM road dataset');
 assert.ok(voidDInfillMethod.includes('isNearVoidDRoad'), 'Void D infill missing the road corridor mask');
 assert.ok(voidDInfillMethod.includes('waterPolygons'), 'Void D infill must exclude water polygons');
@@ -1875,7 +1880,7 @@ assert.ok(voidDInfillMethod.includes('pointInWaterPolygon'), 'Void D infill miss
 assert.ok(voidDInfillMethod.includes('anchorExclusions'), 'Void D infill must exclude the six anchor pads');
 assert.ok(voidDInfillMethod.includes('pluitExclusion'), 'Void D infill must exclude the Pluit procedural block');
 assert.ok(voidDInfillMethod.includes('voidDInfillStats'), 'Void D infill must expose runtime stats');
-assert.ok(voidDInfillMethod.includes('drawCalls: 5'), 'Void D infill should add five instanced draw calls');
+assert.ok(voidDInfillMethod.includes('drawCalls: 6'), 'Void D infill should add six instanced draw calls');
 assert.ok(
   voidDInfillMethod.includes('ignoreWays') &&
     voidDInfillMethod.includes('placeShophouseRow(roadWidth, chain.points, chain.ways)'),
@@ -1926,7 +1931,10 @@ const voidDTransitEnd = citySceneContent.indexOf('buildVoidBInfillAndIndustry() 
 assert.ok(voidDTransitStart > 0 && voidDTransitEnd > voidDTransitStart, 'Cannot isolate buildVoidDTransit');
 const voidDTransitMethod = citySceneContent.slice(voidDTransitStart, voidDTransitEnd);
 assert.ok(!voidDTransitMethod.includes('new THREE.PointLight'), 'Void D transit must not add PointLights');
-assert.ok(!voidDTransitMethod.includes('nightMaterials.push'), 'Void D transit must not register new night materials');
+assert.ok(
+  voidDTransitMethod.includes('registerNightMaterial') && voidDTransitMethod.includes('voidd-transit-sign'),
+  'Void D transit sign must glow at night without new draw calls'
+);
 assert.ok(voidDTransitMethod.includes('VOID_D_OSM'), 'Void D transit must anchor halte to the OSM road dataset');
 assert.ok(voidDTransitMethod.includes('findRoadPoint'), 'Void D transit missing the nearest-road helper');
 assert.ok(
@@ -2233,14 +2241,15 @@ const voidEInfillEnd = citySceneContent.indexOf('buildVoidDInfill() {', voidEInf
 assert.ok(voidEInfillStart > 0 && voidEInfillEnd > voidEInfillStart, 'Cannot isolate buildVoidEInfill');
 const voidEInfillMethod = citySceneContent.slice(voidEInfillStart, voidEInfillEnd);
 assert.ok(!voidEInfillMethod.includes('new THREE.PointLight'), 'Void E infill must not add PointLights');
-assert.ok(!voidEInfillMethod.includes('nightMaterials.push'), 'Void E infill must not register new night materials');
+assert.ok(voidEInfillMethod.includes('addInfillNightWindows'), 'Void E infill must reuse the shared night window helper');
+assert.ok(voidEInfillMethod.includes('voide-night-windows'), 'Void E infill missing the night window mesh');
 assert.ok(voidEInfillMethod.includes('VOID_E_OSM'), 'Void E infill must mask against the OSM water dataset');
 assert.ok(voidEInfillMethod.includes('isNearVoidERoad'), 'Void E infill missing the road corridor mask');
 assert.ok(voidEInfillMethod.includes('isNearVoidEWater'), 'Void E infill missing the waterway mask');
 assert.ok(voidEInfillMethod.includes('anchorExclusions'), 'Void E infill must exclude the six anchor pads');
 assert.ok(voidEInfillMethod.includes('insideAnchorExclusion'), 'Void E infill missing the anchor exclusion test');
 assert.ok(voidEInfillMethod.includes('voidEInfillStats'), 'Void E infill must expose runtime stats');
-assert.ok(voidEInfillMethod.includes('drawCalls: 5'), 'Void E infill should add five instanced draw calls');
+assert.ok(voidEInfillMethod.includes('drawCalls: 6'), 'Void E infill should add six instanced draw calls');
 assert.ok(
   voidEInfillMethod.includes('ignoreWays') &&
     voidEInfillMethod.includes('placeShophouseRow(roadWidth, chain.points, chain.ways)'),
@@ -2292,7 +2301,10 @@ const voidETransitEnd = citySceneContent.indexOf('buildVoidBInfillAndIndustry() 
 assert.ok(voidETransitStart > 0 && voidETransitEnd > voidETransitStart, 'Cannot isolate buildVoidETransit');
 const voidETransitMethod = citySceneContent.slice(voidETransitStart, voidETransitEnd);
 assert.ok(!voidETransitMethod.includes('new THREE.PointLight'), 'Void E transit must not add PointLights');
-assert.ok(!voidETransitMethod.includes('nightMaterials.push'), 'Void E transit must not register new night materials');
+assert.ok(
+  voidETransitMethod.includes('registerNightMaterial') && voidETransitMethod.includes('voide-transit-sign'),
+  'Void E transit sign must glow at night without new draw calls'
+);
 assert.ok(voidETransitMethod.includes('VOID_E_OSM'), 'Void E transit must anchor halte on the OSM dataset');
 assert.ok(voidETransitMethod.includes('findRoadPoint'), 'Void E halte must derive from the nearest OSM segment');
 assert.ok(voidETransitMethod.includes('voidETransitStats'), 'Void E transit must expose runtime stats');
@@ -2386,7 +2398,97 @@ assert.ok(
   'main.js must pass the transit label anchors to UIManager'
 );
 
-console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 55: material malam Void C/D/E — helper, jendela infill, transit, anchor
+assert.ok(
+  citySceneContent.includes('registerNightMaterial(material, { emissive = 0xffc46b, nightIntensity = 0.88 } = {})'),
+  'CityScene missing the shared night material helper'
+);
+assert.ok(
+  citySceneContent.includes('material.userData.nightIntensity = nightIntensity;'),
+  'Night material helper must store the per-material intensity'
+);
+assert.ok(
+  citySceneContent.includes('this.nightMaterials.push(material);'),
+  'Night material helper must register into nightMaterials'
+);
+assert.ok(
+  citySceneContent.includes('const intensity = m.userData?.nightIntensity ?? 0.88;'),
+  'setTimePreset must honour the per-material night intensity'
+);
+assert.ok(
+  citySceneContent.includes('isGolden ? intensity * 0.4 : 0'),
+  'Golden preset must scale the per-material intensity'
+);
+
+const nightHelperStart = citySceneContent.indexOf('addInfillNightWindows(items, name) {');
+const nightHelperEnd = citySceneContent.indexOf('buildVoidCInfill() {', nightHelperStart);
+assert.ok(
+  nightHelperStart > 0 && nightHelperEnd > nightHelperStart,
+  'Cannot isolate addInfillNightWindows'
+);
+const nightHelperMethod = citySceneContent.slice(nightHelperStart, nightHelperEnd);
+assert.ok(nightHelperMethod.includes('new THREE.InstancedMesh'), 'Night windows must be instanced');
+assert.ok(nightHelperMethod.includes('this.registerNightMaterial('), 'Night window material must register for night');
+assert.ok(nightHelperMethod.includes('nightIntensity: 0.72'), 'Night window intensity drifted');
+assert.ok(nightHelperMethod.includes('hash < 0.22'), 'Night windows need the deterministic dark-house skip');
+assert.ok(nightHelperMethod.includes('mesh.instanceMatrix.needsUpdate = true'), 'Night window matrices must upload');
+assert.ok(nightHelperMethod.includes('mesh.computeBoundingSphere()'), 'Night window mesh needs a bounding sphere for culling');
+assert.ok(nightHelperMethod.includes('this.proceduralGroup.add(mesh)'), 'Night window mesh must join the procedural group');
+assert.ok(!nightHelperMethod.includes('new THREE.PointLight'), 'Night windows must not add PointLights');
+
+['voidc-night-windows', 'voidd-night-windows', 'voide-night-windows'].forEach((name) => {
+  assert.ok(citySceneContent.includes(`'${name}'`), `Missing ${name} instanced mesh`);
+});
+
+['voidCInfillStats', 'voidDInfillStats', 'voidEInfillStats'].forEach((name) => {
+  const idx = citySceneContent.indexOf(`${name} = {`);
+  assert.ok(idx > 0, `Missing ${name}`);
+  assert.ok(citySceneContent.slice(idx, idx + 320).includes('nightWindows,'), `${name} must report night window count`);
+});
+
+[
+  ['Void C', voidCTransitMethod, 'voidc-transit-sign'],
+  ['Void D', voidDTransitMethod, 'voidd-transit-sign'],
+  ['Void E', voidETransitMethod, 'voide-transit-sign']
+].forEach(([label, method, mesh]) => {
+  const idx = method.indexOf(`'${mesh}'`);
+  assert.ok(idx > 0, `${label} transit missing the ${mesh} mesh`);
+  const block = method.slice(Math.max(0, idx - 420), idx);
+  assert.ok(block.includes('registerNightMaterial'), `${label} transit sign must register for night`);
+  assert.ok(block.includes('emissive: 0xfff4d6'), `${label} transit sign missing the warm white emissive`);
+  assert.ok(block.includes('nightIntensity: 0.55'), `${label} transit sign night intensity drifted`);
+});
+
+assert.ok(
+  landmarkModelsContent.includes('static tagNightWindow(material, nightIntensity = 0.62)'),
+  'LandmarkModels missing the night window tagger'
+);
+assert.ok(
+  landmarkModelsContent.includes('material.userData.nightWindow = true;'),
+  'Night window tagger must flag the material'
+);
+assert.strictEqual(
+  (landmarkModelsContent.match(/LandmarkModels\.tagNightWindow\(/g) || []).length,
+  11,
+  'Expected 11 tagged window/glass materials across the Void C/D/E anchors'
+);
+assert.ok(
+  landmarkModelsContent.includes('createUniversitasMercuBuana') &&
+    landmarkModelsContent.includes('createRusunawaMarunda') &&
+    landmarkModelsContent.includes('createRusunawaNagrak') &&
+    landmarkModelsContent.includes('createKampungRorotan'),
+  'Night window tagging must cover the Void C and Void E towers'
+);
+assert.ok(
+  citySceneContent.includes('mat.userData?.nightWindow'),
+  'buildLandmarks must register tagged window materials'
+);
+assert.ok(
+  citySceneContent.includes('nightIntensity: mat.userData.nightIntensity ?? 0.62'),
+  'buildLandmarks must forward the tagged night intensity'
+);
+
+console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

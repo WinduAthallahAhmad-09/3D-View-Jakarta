@@ -4675,13 +4675,74 @@ export class CityScene {
   }
 
   /**
+   * Jendela malam infill Void C/D/E: satu InstancedMesh per kawasan.
+   *
+   * Dua jendela tipis menyala di fasad lokal +/-X tiap rumah dan ruko,
+   * dengan hash deterministik untuk mematikan sebagian massa agar sebaran
+   * cahaya tidak seragam. Material terdaftar di nightMaterials, sehingga
+   * siang/intensitas golden mengikuti preset waktu tanpa PointLight baru.
+   */
+  addInfillNightWindows(items, name) {
+    const dummy = new THREE.Object3D();
+    const windows = [];
+
+    items.forEach((item) => {
+      const hash = Math.abs(Math.sin(item.x * 7.31 + item.z * 3.97 + (item.rotY || 0)));
+      if (hash < 0.22) return;
+
+      const rotY = item.rotY || 0;
+      const cos = Math.cos(rotY);
+      const sin = Math.sin(rotY);
+      const winW = Math.min(1.9, item.d * 0.22);
+      const winH = Math.min(1.5, item.h * 0.18);
+      const winY = Math.min(4.4, item.h * 0.45);
+      const slots = hash > 0.55 ? [-0.22, 0.22] : [0];
+
+      [-1, 1].forEach((side) => {
+        slots.forEach((slotT) => {
+          const ox = side * (item.w * 0.5 + 0.09);
+          const oz = item.d * slotT;
+          windows.push({
+            x: item.x + ox * cos + oz * sin,
+            y: winY,
+            z: item.z - ox * sin + oz * cos,
+            w: winW,
+            h: winH,
+            rotY
+          });
+        });
+      });
+    });
+
+    if (windows.length === 0) return 0;
+
+    const material = this.registerNightMaterial(
+      new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.55 }),
+      { emissive: 0xffc46b, nightIntensity: 0.72 }
+    );
+    const mesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), material, windows.length);
+    mesh.name = name;
+    windows.forEach((win, idx) => {
+      dummy.position.set(win.x, win.y, win.z);
+      dummy.scale.set(0.18, win.h, win.w);
+      dummy.rotation.set(0, win.rotY, 0);
+      dummy.updateMatrix();
+      mesh.setMatrixAt(idx, dummy.matrix);
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+    mesh.computeBoundingSphere();
+    this.proceduralGroup.add(mesh);
+    return windows.length;
+  }
+
+  /**
    * Void C Tahap 3: Infill urban fabric Meruya-Kembangan Selatan-Joglo-Kreo.
    *
    * 1. Rumah kampung/perumahan 2-3 lantai beratap pelana di lima zona.
    * 2. Ruko mengikuti rantai jalan OSM (Meruya Ilir, Meruya Selatan, Joglo Raya,
    *    Ciledug Raya, Puri Kembangan, Bojong Raya, Basmol Raya).
    * 3. Gudang ringan di klaster Bojong/Kembangan Selatan.
-   * 4. Seluruh massa menjadi 5 InstancedMesh; penambahan 5 draw call tanpa PointLight.
+   * 4. Seluruh massa menjadi 5 InstancedMesh plus jendela malam; 6 draw call tanpa PointLight.
    */
   buildVoidCInfill() {
     const dummy = new THREE.Object3D();
@@ -5086,12 +5147,18 @@ export class CityScene {
       'voidc-warehouse-roofs'
     );
 
+    const nightWindows = this.addInfillNightWindows(
+      [...residentialItems, ...shophouseItems],
+      'voidc-night-windows'
+    );
+
     this.voidCInfillStats = {
       houses: residentialItems.length,
       shophouses: shophouseItems.length,
       warehouses: warehouseItems.length,
       trees: 0,
-      drawCalls: 5
+      nightWindows,
+      drawCalls: 6
     };
   }
 
@@ -5266,7 +5333,10 @@ export class CityScene {
     );
     addMerged(
       signGeos,
-      new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.45 }),
+      this.registerNightMaterial(
+        new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.45 }),
+        { emissive: 0xfff4d6, nightIntensity: 0.55 }
+      ),
       'voidc-transit-sign',
       false
     );
@@ -6051,7 +6121,7 @@ export class CityScene {
    * 1. Rumah kampung pada sepuluh zona permukiman tepi jalan OSM.
    * 2. Ruko dua sisi pada empat koridor jalan utama kawasan.
    * 3. Gudang industri di klaster KBN Cakung, Marunda, dan Cilincing industri.
-   * Total penambahan: lima InstancedMesh = 5 draw call.
+   * Total penambahan: lima InstancedMesh massa + jendela malam = 6 draw call.
    */
   buildVoidEInfill() {
     const dummy = new THREE.Object3D();
@@ -6482,13 +6552,19 @@ export class CityScene {
       'voide-warehouse-roofs'
     );
 
+    const nightWindows = this.addInfillNightWindows(
+      [...residentialItems, ...shophouseItems],
+      'voide-night-windows'
+    );
+
     this.voidEInfillStats = {
       houses: residentialItems.length,
       shophouses: shophouseItems.length,
       warehouses: warehouseItems.length,
       zones: residentialZones.length,
       corridors: shophouseRoads.size,
-      drawCalls: 5
+      nightWindows,
+      drawCalls: 6
     };
   }
 
@@ -6499,7 +6575,7 @@ export class CityScene {
    * 1. Rumah kampung 2-3 lantai pada lima zona permukiman.
    * 2. Ruko dua sisi pada tujuh koridor jalan OSM.
    * 3. Gudang logistik di klaster Kamal Cengkareng, Kapuk, dan Muara Baru.
-   * Total penambahan: lima InstancedMesh = 5 draw call.
+   * Total penambahan: lima InstancedMesh massa + jendela malam = 6 draw call.
    */
   buildVoidDInfill() {
     const dummy = new THREE.Object3D();
@@ -6947,13 +7023,19 @@ export class CityScene {
       'voidd-warehouse-roofs'
     );
 
+    const nightWindows = this.addInfillNightWindows(
+      [...residentialItems, ...shophouseItems],
+      'voidd-night-windows'
+    );
+
     this.voidDInfillStats = {
       houses: residentialItems.length,
       shophouses: shophouseItems.length,
       warehouses: warehouseItems.length,
       zones: residentialZones.length,
       corridors: shophouseRoads.size,
-      drawCalls: 5
+      nightWindows,
+      drawCalls: 6
     };
   }
 
@@ -7137,7 +7219,10 @@ export class CityScene {
     );
     addMerged(
       signGeos,
-      new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.45 }),
+      this.registerNightMaterial(
+        new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.45 }),
+        { emissive: 0xfff4d6, nightIntensity: 0.55 }
+      ),
       'voidd-transit-sign',
       false
     );
@@ -7383,7 +7468,10 @@ export class CityScene {
     );
     addMerged(
       signGeos,
-      new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.45 }),
+      this.registerNightMaterial(
+        new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.45 }),
+        { emissive: 0xfff4d6, nightIntensity: 0.55 }
+      ),
       'voide-transit-sign',
       false
     );
@@ -8769,6 +8857,15 @@ export class CityScene {
         if (child.isMesh) {
           child.userData = model.userData;
           this.interactiveObjects.push(child);
+
+          const mats = Array.isArray(child.material) ? child.material : [child.material];
+          mats.forEach((mat) => {
+            if (!mat || !mat.userData?.nightWindow) return;
+            this.registerNightMaterial(mat, {
+              emissive: 0xffc46b,
+              nightIntensity: mat.userData.nightIntensity ?? 0.62
+            });
+          });
         }
       });
 
@@ -10484,6 +10581,16 @@ export class CityScene {
     });
   }
 
+  registerNightMaterial(material, { emissive = 0xffc46b, nightIntensity = 0.88 } = {}) {
+    if (!material || this.nightMaterials.includes(material)) return material;
+    material.emissive = new THREE.Color(emissive);
+    material.emissiveIntensity = 0;
+    material.userData = material.userData || {};
+    material.userData.nightIntensity = nightIntensity;
+    this.nightMaterials.push(material);
+    return material;
+  }
+
   setTimePreset(preset) {
     const isNight = preset === 'night';
     const isGolden = preset === 'golden';
@@ -10529,7 +10636,8 @@ export class CityScene {
     });
 
     this.nightMaterials.forEach((m) => {
-      m.emissiveIntensity = isNight ? 0.88 : isGolden ? 0.35 : 0;
+      const intensity = m.userData?.nightIntensity ?? 0.88;
+      m.emissiveIntensity = isNight ? intensity : isGolden ? intensity * 0.4 : 0;
     });
 
     // Selective Night Bloom Targets: PJU, Taman Anggrek LED, Menara BCA Crown, and Monas Flame

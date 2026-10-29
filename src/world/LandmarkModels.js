@@ -8,6 +8,19 @@ import { TextureGenerator } from './TextureGenerator.js';
  */
 export class LandmarkModels {
   /**
+   * Menandai material kaca/jendela agar CityScene mendaftarkannya ke
+   * nightMaterials saat model dipasang; intensitas malam bisa dibedakan
+   * per material tanpa PointLight tambahan.
+   */
+  static tagNightWindow(material, nightIntensity = 0.62) {
+    if (!material) return material;
+    material.userData = material.userData || {};
+    material.userData.nightWindow = true;
+    material.userData.nightIntensity = nightIntensity;
+    return material;
+  }
+
+  /**
    * 1. Istana Merdeka & Istana Negara
    * Neo-Palladian white palace with Corinthian colonnade, grand stairs, and Merah Putih flagpole.
    */
@@ -7497,7 +7510,9 @@ export class LandmarkModels {
     const plazaMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.8 });
     const lawnMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.9 });
     const towerMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.45 });
-    const glassMat = new THREE.MeshStandardMaterial({ color: 0x0369a1, roughness: 0.25, metalness: 0.3, transparent: true, opacity: 0.88 });
+    const glassMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0x0369a1, roughness: 0.25, metalness: 0.3, transparent: true, opacity: 0.88 })
+    );
     const accentMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.5 });
     const roofMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.6, metalness: 0.2 });
     const canopyMat = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, roughness: 0.4 });
@@ -7653,7 +7668,9 @@ export class LandmarkModels {
     const siteMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 });
     const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.45 });
     const podiumMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.5 });
-    const greenGlassMat = new THREE.MeshStandardMaterial({ color: 0x059669, roughness: 0.25, metalness: 0.3, transparent: true, opacity: 0.88 });
+    const greenGlassMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0x059669, roughness: 0.25, metalness: 0.3, transparent: true, opacity: 0.88 })
+    );
     const redMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.35 });
     const canopyMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4 });
     const helipadMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.65 });
@@ -7924,7 +7941,9 @@ export class LandmarkModels {
     const concreteMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.65 });
     const tealRoofMat = new THREE.MeshStandardMaterial({ color: 0x0d9488, roughness: 0.4, side: THREE.DoubleSide });
     const steelMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.5, metalness: 0.5 });
-    const glassMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, metalness: 0.3, transparent: true, opacity: 0.85 });
+    const glassMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, metalness: 0.3, transparent: true, opacity: 0.85 })
+    );
     const railSteelMat = new THREE.MeshStandardMaterial({ color: 0xcfecff, metalness: 0.6, roughness: 0.25 });
     const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
     const redMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.4 });
@@ -8146,7 +8165,12 @@ export class LandmarkModels {
     house.castShadow = true;
     group.add(house);
 
-    const houseGlass = new THREE.Mesh(new THREE.BoxGeometry(13.6, 1.8, 11.6), new THREE.MeshStandardMaterial({ color: 0x0ea5e9, roughness: 0.25, metalness: 0.2, transparent: true, opacity: 0.85 }));
+    const houseGlass = new THREE.Mesh(
+      new THREE.BoxGeometry(13.6, 1.8, 11.6),
+      LandmarkModels.tagNightWindow(
+        new THREE.MeshStandardMaterial({ color: 0x0ea5e9, roughness: 0.25, metalness: 0.2, transparent: true, opacity: 0.85 })
+      )
+    );
     houseGlass.position.set(28, 4.2, -12);
     group.add(houseGlass);
 
@@ -8359,10 +8383,12 @@ export class LandmarkModels {
     const siteMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.85 });
     const plazaMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.75 });
     const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
-    const glassMat = new THREE.MeshStandardMaterial({
+    const glassMat = LandmarkModels.tagNightWindow(new THREE.MeshStandardMaterial({
       color: 0x7dd3fc, roughness: 0.15, metalness: 0.35, transparent: true, opacity: 0.82, side: THREE.DoubleSide
-    });
-    const darkGlassMat = new THREE.MeshStandardMaterial({ color: 0x155e75, roughness: 0.3, metalness: 0.15 });
+    }));
+    const darkGlassMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0x155e75, roughness: 0.3, metalness: 0.15 })
+    );
     const accentMat = new THREE.MeshStandardMaterial({ color: 0x0d9488, roughness: 0.45 });
     const goldMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.35, metalness: 0.5 });
     const lawnMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.9 });
@@ -9175,7 +9201,9 @@ export class LandmarkModels {
     const siteMat = new THREE.MeshStandardMaterial({ color: 0xd6d3d1, roughness: 0.92 });
     const plazaMat = new THREE.MeshStandardMaterial({ color: 0xe7e5e4, roughness: 0.8 });
     const roofMat = new THREE.MeshStandardMaterial({ color: 0x57534e, roughness: 0.75 });
-    const windowMat = new THREE.MeshStandardMaterial({ color: 0x1e3a5f, roughness: 0.35, metalness: 0.2 });
+    const windowMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0x1e3a5f, roughness: 0.35, metalness: 0.2 })
+    );
     const whiteMat = new THREE.MeshStandardMaterial({ color: 0xfafaf9, roughness: 0.5 });
     const domeMat = new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.45, metalness: 0.3 });
     const lawnMat = new THREE.MeshStandardMaterial({ color: 0x4d7c0f, roughness: 0.95 });
@@ -9529,7 +9557,10 @@ export class LandmarkModels {
     office.castShadow = true;
     group.add(office);
 
-    const officeGlass = new THREE.Mesh(new THREE.BoxGeometry(24.4, 1.6, 12.4), accentMat);
+    const officeGlassMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.35, metalness: 0.2 })
+    );
+    const officeGlass = new THREE.Mesh(new THREE.BoxGeometry(24.4, 1.6, 12.4), officeGlassMat);
     officeGlass.position.set(-50, 5.4, 36);
     group.add(officeGlass);
 
@@ -9579,7 +9610,9 @@ export class LandmarkModels {
     const siteMat = new THREE.MeshStandardMaterial({ color: 0xd6d3d1, roughness: 0.92 });
     const plazaMat = new THREE.MeshStandardMaterial({ color: 0xe7e5e4, roughness: 0.8 });
     const roofMat = new THREE.MeshStandardMaterial({ color: 0x57534e, roughness: 0.75 });
-    const windowMat = new THREE.MeshStandardMaterial({ color: 0x1e3a5f, roughness: 0.35, metalness: 0.2 });
+    const windowMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0x1e3a5f, roughness: 0.35, metalness: 0.2 })
+    );
     const whiteMat = new THREE.MeshStandardMaterial({ color: 0xfafaf9, roughness: 0.5 });
     const domeMat = new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.45, metalness: 0.3 });
     const lawnMat = new THREE.MeshStandardMaterial({ color: 0x4d7c0f, roughness: 0.95 });
@@ -9746,7 +9779,10 @@ export class LandmarkModels {
     office.castShadow = true;
     group.add(office);
 
-    const officeBand = new THREE.Mesh(new THREE.BoxGeometry(30.4, 1.5, 16.4), navyMat);
+    const officeGlassMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.35, metalness: 0.2 })
+    );
+    const officeBand = new THREE.Mesh(new THREE.BoxGeometry(30.4, 1.5, 16.4), officeGlassMat);
     officeBand.position.set(0, 9.6, -34);
     group.add(officeBand);
 
@@ -9814,7 +9850,9 @@ export class LandmarkModels {
     const roofAltMat = new THREE.MeshStandardMaterial({ color: 0x0369a1, roughness: 0.8 });
     const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
     const domeMat = new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.45, metalness: 0.3 });
-    const windowMat = new THREE.MeshStandardMaterial({ color: 0x1e3a5f, roughness: 0.35, metalness: 0.2 });
+    const windowMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0x1e3a5f, roughness: 0.35, metalness: 0.2 })
+    );
     const lawnMat = new THREE.MeshStandardMaterial({ color: 0x4d7c0f, roughness: 0.95 });
     const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
     const leafMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.9 });
