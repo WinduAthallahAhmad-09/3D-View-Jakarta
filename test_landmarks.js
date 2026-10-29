@@ -2274,7 +2274,68 @@ assert.ok(
   assert.ok(voidEInfillMethod.includes(zone), `Void E infill missing the ${zone} warehouse cluster`);
 });
 
-console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-3, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 53: Void E Tahap 4 — transit kawasan Cilincing–Marunda–Rorotan–KBN Cakung
+assert.ok(citySceneContent.includes('buildVoidETransit()'), 'CityScene.js missing buildVoidETransit');
+
+const voidETransitCall = citySceneContent.indexOf('this.buildVoidETransit();');
+assert.ok(
+  voidETransitCall > voidEInfillCall,
+  'buildVoidETransit must run after buildVoidEInfill'
+);
+assert.ok(
+  voidETransitCall < citySceneContent.indexOf('this.buildVoidBInfillAndIndustry();'),
+  'buildVoidETransit must run before buildVoidBInfillAndIndustry'
+);
+
+const voidETransitStart = citySceneContent.indexOf('buildVoidETransit() {');
+const voidETransitEnd = citySceneContent.indexOf('buildVoidBInfillAndIndustry() {', voidETransitStart);
+assert.ok(voidETransitStart > 0 && voidETransitEnd > voidETransitStart, 'Cannot isolate buildVoidETransit');
+const voidETransitMethod = citySceneContent.slice(voidETransitStart, voidETransitEnd);
+assert.ok(!voidETransitMethod.includes('new THREE.PointLight'), 'Void E transit must not add PointLights');
+assert.ok(!voidETransitMethod.includes('nightMaterials.push'), 'Void E transit must not register new night materials');
+assert.ok(voidETransitMethod.includes('VOID_E_OSM'), 'Void E transit must anchor halte on the OSM dataset');
+assert.ok(voidETransitMethod.includes('findRoadPoint'), 'Void E halte must derive from the nearest OSM segment');
+assert.ok(voidETransitMethod.includes('voidETransitStats'), 'Void E transit must expose runtime stats');
+assert.ok(voidETransitMethod.includes('drawCalls: 5'), 'Void E transit should add five draw calls');
+assert.ok(voidETransitMethod.includes('Park and Ride Marunda'), 'Void E transit missing the Marunda park-and-ride hub');
+assert.ok(voidETransitMethod.includes('parkingBays'), 'Void E transit stats must report parking bays');
+
+[
+  'voide-transit-concrete',
+  'voide-transit-steel',
+  'voide-transit-sign',
+  'voide-transit-tree-trunks',
+  'voide-transit-tree-foliage'
+].forEach((name) => {
+  assert.ok(voidETransitMethod.includes(name), `Void E transit missing the ${name} mesh`);
+});
+
+[
+  'Halte Rusunawa Marunda',
+  'Halte Rumah Si Pitung',
+  'Halte Kawasan Logistik Marunda',
+  'Halte Rusunawa Nagrak',
+  'Halte KBN Cakung',
+  'Halte Kampung Rorotan'
+].forEach((name) => {
+  assert.ok(voidETransitMethod.includes(name), `Void E transit missing the ${name} feeder`);
+});
+
+[
+  'Jalan Marunda Empang',
+  'Jalan Jayapura',
+  'Medan',
+  'Jalan Komplek Militer',
+  'Jalan Cakung Cilincing Timur',
+  'Jalan Rorotan XI'
+].forEach((name) => {
+  assert.ok(voidETransitMethod.includes(name), `Void E transit missing the ${name} halte corridor`);
+});
+
+assert.ok(voidEInfillMethod.includes('transitReservations'), 'Void E infill must reserve the transit hub footprint');
+assert.ok(voidEInfillMethod.includes('insideTransitReservation'), 'Void E infill missing the transit reservation test');
+
+console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
