@@ -68,6 +68,7 @@ export class CityScene {
     this.voidDTransitLabels = [];
     this.voidETransitLabels = [];
     this.pjuLampTransforms = [];
+    this.mergedPjuLampTransforms = [];
     this.pjuLightPool = [];
     this.pjuLightPoolSize = 12;
     this.pjuLightsActive = false;
@@ -2386,6 +2387,16 @@ export class CityScene {
     });
   }
 
+  /** Kepala lampu PJU gabungan Void B/C/D/E; hanya untuk pool cahaya, bukan instancing. */
+  recordMergedPjuLamp(x, z, angle, side) {
+    this.mergedPjuLampTransforms.push({
+      x: x - Math.cos(angle) * 3.2 * side,
+      z: z + Math.sin(angle) * 3.2 * side,
+      armX: 0,
+      armZ: 0
+    });
+  }
+
   /** PJU distrik Kelapa Gading & ring Danau Rawa Buaya, tanpa draw call/PointLight baru. */
   buildDistrictPju() {
     const addLamp = (x, z, armX, armZ) => {
@@ -2484,6 +2495,7 @@ export class CityScene {
     this.lastPjuLightPosition.copy(cameraPosition);
 
     const nearest = this.pjuLampTransforms
+      .concat(this.mergedPjuLampTransforms)
       .map((lamp) => {
         const x = lamp.x + lamp.armX;
         const z = lamp.z + lamp.armZ;
@@ -4272,6 +4284,7 @@ export class CityScene {
       const bulb = new THREE.SphereGeometry(0.34, 8, 8);
       bulb.translate(x - px * 3.2 * side, 8.15, z - pz * 3.2 * side);
       lampBulbGeos.push(bulb);
+      this.recordMergedPjuLamp(x, z, angle, side);
     };
 
     const segmentIntersection = (a, b, c, d) => {
@@ -4569,6 +4582,7 @@ export class CityScene {
       const bulb = new THREE.SphereGeometry(0.34, 8, 8);
       bulb.translate(x - px * 3.2 * side, 8.15, z - pz * 3.2 * side);
       lampBulbGeos.push(bulb);
+      this.recordMergedPjuLamp(x, z, angle, side);
     };
 
     const segmentIntersection = (a, b, c, d) => {
@@ -5648,6 +5662,7 @@ export class CityScene {
       const bulb = new THREE.SphereGeometry(0.34, 8, 8);
       bulb.translate(x - px * 3.2 * side, 8.15, z - pz * 3.2 * side);
       lampBulbGeos.push(bulb);
+      this.recordMergedPjuLamp(x, z, angle, side);
     };
 
     const segmentIntersection = (a, b, c, d) => {
@@ -6017,6 +6032,7 @@ export class CityScene {
       const bulb = new THREE.SphereGeometry(0.34, 8, 8);
       bulb.translate(x - px * 3.2 * side, 8.15, z - pz * 3.2 * side);
       lampBulbGeos.push(bulb);
+      this.recordMergedPjuLamp(x, z, angle, side);
     };
 
     const segmentIntersection = (a, b, c, d) => {

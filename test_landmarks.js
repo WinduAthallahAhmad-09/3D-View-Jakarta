@@ -2887,7 +2887,60 @@ assert.ok(
 );
 assert.ok(!rawaWaterMethod.includes('PointLight'), 'Danau Rawa Buaya water must not add PointLights');
 
-console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 62: PJU gabungan Void B/C/D/E memberi makan pool 12 PointLight
+assert.ok(
+  citySceneContent.includes('this.mergedPjuLampTransforms = [];'),
+  'CityScene.js must keep merged PJU lamp heads in a dedicated transform array'
+);
+assert.strictEqual(
+  (citySceneContent.match(/this\.recordMergedPjuLamp\(/g) || []).length,
+  4,
+  'Each merged PJU builder (Void B/C/D/E) must record its lamp heads exactly once'
+);
+const mergedLampHelperStart = citySceneContent.indexOf('recordMergedPjuLamp(x, z, angle, side) {');
+assert.ok(mergedLampHelperStart > 0, 'CityScene.js missing the recordMergedPjuLamp helper');
+const mergedLampHelper = citySceneContent.slice(mergedLampHelperStart, mergedLampHelperStart + 400);
+assert.ok(
+  mergedLampHelper.includes('x - Math.cos(angle) * 3.2 * side') &&
+    mergedLampHelper.includes('z + Math.sin(angle) * 3.2 * side') &&
+    mergedLampHelper.includes('armX: 0') &&
+    mergedLampHelper.includes('armZ: 0'),
+  'Merged PJU heads must sit at the bulb offset with zero arm so the pool can rank them'
+);
+const mergedPjuBuilders = [
+  ['buildVoidBDaanMogot() {', 'Void B Daan Mogot'],
+  ['buildVoidCMeruya() {', 'Void C Meruya'],
+  ['buildVoidDPenjaringan() {', 'Void D Penjaringan'],
+  ['buildVoidECilincing() {', 'Void E Cilincing']
+];
+for (const [token, label] of mergedPjuBuilders) {
+  const body = sliceCityBuilder(`  ${token}`);
+  assert.ok(
+    body.includes('this.recordMergedPjuLamp(x, z, angle, side);'),
+    `${label} must feed the PJU light pool`
+  );
+  assert.ok(!body.includes('new THREE.PointLight('), `${label} must not add PointLights`);
+}
+const poolUpdateBody = sliceCityBuilder('  updatePjuLights(cameraPosition) {');
+assert.ok(
+  poolUpdateBody.includes('this.pjuLampTransforms') &&
+    poolUpdateBody.includes('.concat(this.mergedPjuLampTransforms)'),
+  'PJU light pool must consider both core and merged district lamps'
+);
+assert.ok(
+  poolUpdateBody.includes("this.currentTimePreset === 'night' ? 1.8 : 0.6"),
+  'Pool intensities must stay unchanged'
+);
+assert.ok(
+  citySceneContent.includes('this.pjuLightPoolSize = 12;'),
+  'PJU pool size must remain 12 lights'
+);
+assert.ok(
+  !sliceCityBuilder('  buildStreetLampInstances() {').includes('mergedPjuLampTransforms'),
+  'Merged PJU lamps must not be instanced twice'
+);
+
+console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

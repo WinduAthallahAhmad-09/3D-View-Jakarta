@@ -83,6 +83,6 @@ Semua perbaikan dikunci oleh **Check 40** di `test_landmarks.js`: posisi kamera 
 
 1. **Void C boleh dimulai.** Tidak ada P0; seluruh P1 sudah diperbaiki dan diverifikasi lewat screenshot dari source final.
 2. Tambahkan **regresi visual otomatis** (diff screenshot terhadap baseline ini) saat ada GPU/lingkungan headless yang stabil; baseline saat ini adalah referensi manual.
-3. **Pass pencahayaan malam** Kelapa Gading dan Danau Rawa Buaya selesai 2026-10-30 (PJU distrik + aksen mall), disusul material malam **11 badan air** pada hari yang sama (`nightMaterials` 41). Berikutnya: masukkan PJU gabungan Void B/C/D/E ke pool lampu.
+3. **Pass pencahayaan malam** Kelapa Gading dan Danau Rawa Buaya selesai 2026-10-30 (PJU distrik + aksen mall), disusul material malam **11 badan air** pada hari yang sama (`nightMaterials` 41). **Ditutup 2026-10-30:** lampu PJU gabungan Void B/C/D/E kini masuk kandidat pool 12 `PointLight`; luma crop malam Kapuk Raya **+0,86** dan Cilincing **+0,69** (lihat *Catatan PJU Gabungan Void B/C/D/E* di ROADMAP).
 4. Perbaiki komposisi **TMII** (P2) pada kesempatan berikutnya; tidak menghalangi Void C.
 5. Gunakan statistik **per sudut pandang** dalam klaim performa; jangan menyebut satu angka draw call global.
