@@ -7346,7 +7346,11 @@ export class LandmarkModels {
     const group = new THREE.Group();
 
     const grassMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.85 });
-    const waterMat = new THREE.MeshStandardMaterial({ color: 0x0369a1, roughness: 0.15, metalness: 0.85, transparent: true, opacity: 0.88 });
+    const waterMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0x0369a1, roughness: 0.15, metalness: 0.85, transparent: true, opacity: 0.88 }),
+      0.38,
+      0x0e7490
+    );
     const sheetpileMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.75, metalness: 0.2 });
     const pumpBuildingMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.5 });
     const roofMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 });

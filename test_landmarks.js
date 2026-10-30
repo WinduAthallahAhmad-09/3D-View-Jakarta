@@ -2473,8 +2473,8 @@ assert.ok(
 );
 assert.strictEqual(
   (landmarkModelsContent.match(/LandmarkModels\.tagNightWindow\(/g) || []).length,
-  14,
-  'Expected 14 tagged window/glass materials across the Void C/D/E anchors and Mall Kelapa Gading'
+  15,
+  'Expected 15 tagged night materials across the Void C/D/E anchors, Mall Kelapa Gading and Danau Rawa Buaya'
 );
 assert.ok(
   landmarkModelsContent.includes('createUniversitasMercuBuana') &&
@@ -2789,7 +2789,105 @@ assert.ok(
   'District PJU must reuse the capped 12-light pool'
 );
 
-console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 61: material malam badan air — emissive teal tanpa mesh/PointLight baru
+assert.ok(
+  citySceneContent.includes('const WATER_NIGHT_EMISSIVE = 0x0e7490;'),
+  'CityScene.js must define the water night emissive colour'
+);
+assert.ok(
+  citySceneContent.includes('const WATER_NIGHT_INTENSITY = 0.34;'),
+  'CityScene.js must define the inland water night intensity'
+);
+assert.ok(
+  citySceneContent.includes('const SEA_NIGHT_INTENSITY = 0.22;'),
+  'CityScene.js must define the dimmer sea night intensity'
+);
+
+const sliceCityBuilder = (token) => {
+  const start = citySceneContent.indexOf(token);
+  assert.ok(start > 0, `CityScene.js missing ${token}`);
+  const rest = citySceneContent.slice(start + token.length);
+  const next = rest.match(/\n  [a-zA-Z_$][\w$]*\([^)\n]*\) \{/);
+  return citySceneContent.slice(start, next ? start + token.length + next.index : undefined);
+};
+
+const inlandWaterBuilders = [
+  ['buildCentralJakartaEastCorridor() {', 'Kali Ciliwung Kwitang'],
+  ['buildSouthJakartaInfillAndParks() {', 'Danau Ayodya dan kolam taman selatan'],
+  ['buildWestJakartaInfrastructure() {', 'Kali Angke dan koridor tata air barat'],
+  ['buildEastJakartaInfrastructure() {', 'Kanal Banjir Timur dan waduk timur'],
+  ['buildVoidBDaanMogot() {', 'Kali Mookervaart'],
+  ['buildVoidDPenjaringan() {', 'waterway dan polygon air Void D'],
+  ['buildVoidECilincing() {', 'waterway Void E'],
+  ['renderOSMLayers(osm, sharedMaterials, bldMats) {', 'badan air OSM inti']
+];
+for (const [token, label] of inlandWaterBuilders) {
+  const body = sliceCityBuilder(`  ${token}`);
+  assert.ok(
+    body.includes('this.registerNightMaterial(waterMat, {') &&
+      body.includes('emissive: WATER_NIGHT_EMISSIVE') &&
+      body.includes('nightIntensity: WATER_NIGHT_INTENSITY'),
+    `${label} must register the inland water night glow`
+  );
+  assert.ok(!body.includes('new THREE.PointLight('), `${label} must not add PointLights`);
+  assert.ok(
+    !/waterMat\.(color|metalness|roughness|opacity)/.test(body),
+    `${label} must keep its day water material parameters`
+  );
+}
+
+const northWaterBody = sliceCityBuilder('  buildNorthJakartaInfrastructure() {');
+assert.ok(
+  northWaterBody.includes('this.registerNightMaterial(waterMat, {') &&
+    northWaterBody.includes('emissive: WATER_NIGHT_EMISSIVE') &&
+    northWaterBody.includes('nightIntensity: SEA_NIGHT_INTENSITY'),
+  'Sea and harbour water must use the dimmer sea night intensity'
+);
+assert.ok(
+  !northWaterBody.includes('new THREE.PointLight('),
+  'Sea and harbour water must not add PointLights'
+);
+
+const golfPondBody = sliceCityBuilder('  buildCentralJakartaEastInfillAndDistricts() {');
+assert.ok(
+  golfPondBody.includes('const golfPondMat = this.registerNightMaterial(') &&
+    golfPondBody.includes('emissive: WATER_NIGHT_EMISSIVE') &&
+    golfPondBody.includes('nightIntensity: WATER_NIGHT_INTENSITY'),
+  'Danau Golf Kemayoran must register the inland water night glow'
+);
+assert.ok(
+  golfPondBody.includes(
+    'new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.15, metalness: 0.8 })'
+  ),
+  'Golf pond must keep its day water material parameters'
+);
+assert.ok(
+  !golfPondBody.includes('new THREE.PointLight('),
+  'Danau Golf Kemayoran must not add PointLights'
+);
+assert.strictEqual(
+  (citySceneContent.match(/new THREE\.PointLight\(/g) || []).length,
+  1,
+  'Water night materials must reuse the existing light pool instead of adding PointLights'
+);
+
+assert.ok(
+  !/const waterMat = new THREE\.MeshStandardMaterial\(\{[^}]*emissive:/.test(citySceneContent),
+  'Water materials must not bake emissive into the day material'
+);
+
+const rawaWaterStart = landmarkModelsContent.indexOf('static createDanauRawaBuaya() {');
+assert.ok(rawaWaterStart > 0, 'Cannot isolate createDanauRawaBuaya');
+const rawaWaterEnd = landmarkModelsContent.indexOf('static createCengkarengBusinessCity()', rawaWaterStart);
+assert.ok(rawaWaterEnd > rawaWaterStart, 'Cannot delimit createDanauRawaBuaya');
+const rawaWaterMethod = landmarkModelsContent.slice(rawaWaterStart, rawaWaterEnd);
+assert.ok(
+  /const waterMat = LandmarkModels\.tagNightWindow\(\s*new THREE\.MeshStandardMaterial\(\{ color: 0x0369a1, roughness: 0\.15, metalness: 0\.85, transparent: true, opacity: 0\.88 \}\),\s*0\.38,\s*0x0e7490\s*\)/.test(rawaWaterMethod),
+  'Danau Rawa Buaya water must register a teal night glow'
+);
+assert.ok(!rawaWaterMethod.includes('PointLight'), 'Danau Rawa Buaya water must not add PointLights');
+
+console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

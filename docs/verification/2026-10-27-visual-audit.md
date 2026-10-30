@@ -24,6 +24,8 @@ Gerbang verifikasi visual untuk kota yang sudah ada (Inti, Jakarta Timur, Void A
 
 `day-00-aerial`, `day-01-bundaran-hi`, `day-02-monas`, `day-03-semanggi`, `day-04-scbd`, `day-05-rawa-buaya`, `day-06-daan-mogot`, `day-07-tanjung-priok`, `day-08-kelapa-gading`, `day-09-halim`, `day-10-tmii`, `night-01-bundaran-hi`, `night-02-rawa-buaya`, `night-03-kelapa-gading`.
 
+*Pembaruan 2026-10-30:* pass material malam badan air menambah `night-04-daan-mogot` dan `night-05-tanjung-priok`, serta menyegarkan `day-05`, `day-06`, `day-07`, `night-02`, `night-03`, dan pasangan `nightmat-{voidd,voide}-{day,night}`. Baseline `day-06`/`day-07` lama masih dari 2026-10-27 (sebelum infill Void B/D/E) sehingga delta penuh-frame terhadapnya bukan regresi air; bukti regresi siang yang sah adalah `day-05-rawa-buaya` (selisih frame +0,01 luma).
+
 ## Statistik siang (final)
 
 | # | Sudut pandang | Kamera | Target | Draw call | Triangle |
@@ -69,7 +71,7 @@ Semua perbaikan dikunci oleh **Check 40** di `test_landmarks.js`: posisi kamera 
 - **Bundaran HI**: menara dan vegetasi di foreground menutupi sebagian kolam; monumen tetap terbaca, tetapi komposisi bisa lebih bersih.
 - **Simpang Semanggi**: kamera sangat dekat dengan ring flyover sehingga ring mendominasi frame dan sisi timurnya terpotong gedung. Label tetap terlihat.
 - **TMII**: preset masih berupa close-up dua kolam miniatur; label utama (setinggi 65 unit) berada di luar frame. Perbaikan yang disarankan: tarik kamera ke belakang ±150 unit dan naikkan target agar label masuk.
-- **Malam Danau Rawa Buaya & Kelapa Gading**: pemandangan sangat gelap; lampu taman/PJU dan aksen fasad minim. Perlu pass pencahayaan malam khusus, bukan sekadar perbaikan kamera. **Ditutup 2026-10-30:** aksen fasad dan pita jendela Mall Kelapa Gading menyala (lihat P3 di bawah), lalu **42 lampu PJU distrik** dipasang — 20 di Jl. Boulevard Raya Kelapa Gading, 14 di Jl. Boulevard Barat Raya, dan 8 di ring Danau Rawa Buaya — sehingga total 235 lampu, tetap dua `InstancedMesh` dan pool 12 `PointLight`. Rerata luma malam Kelapa Gading **37,2 → 39,4**, Danau Rawa Buaya **32,9 → 33,9**. Sisa: badan air danau masih gelap (material air belum punya emissive malam).
+- **Malam Danau Rawa Buaya & Kelapa Gading**: pemandangan sangat gelap; lampu taman/PJU dan aksen fasad minim. Perlu pass pencahayaan malam khusus, bukan sekadar perbaikan kamera. **Ditutup 2026-10-30:** aksen fasad dan pita jendela Mall Kelapa Gading menyala (lihat P3 di bawah), lalu **42 lampu PJU distrik** dipasang — 20 di Jl. Boulevard Raya Kelapa Gading, 14 di Jl. Boulevard Barat Raya, dan 8 di ring Danau Rawa Buaya — sehingga total 235 lampu, tetap dua `InstancedMesh` dan pool 12 `PointLight`. Rerata luma malam Kelapa Gading **37,2 → 39,4**, Danau Rawa Buaya **32,9 → 33,9**. **Ditutup total 2026-10-30:** material malam badan air menambahkan 11 material air (lihat *Catatan Material Malam Badan Air* di ROADMAP) sehingga luma badan air Danau Rawa Buaya naik **7,45 → 29,79** dan laut Tanjung Priok **28,13 → 50,21**.
 
 ### P3 — catatan kecil
 
@@ -81,6 +83,6 @@ Semua perbaikan dikunci oleh **Check 40** di `test_landmarks.js`: posisi kamera 
 
 1. **Void C boleh dimulai.** Tidak ada P0; seluruh P1 sudah diperbaiki dan diverifikasi lewat screenshot dari source final.
 2. Tambahkan **regresi visual otomatis** (diff screenshot terhadap baseline ini) saat ada GPU/lingkungan headless yang stabil; baseline saat ini adalah referensi manual.
-3. **Pass pencahayaan malam** kelapa Gading dan Danau Rawa Buaya selesai 2026-10-30 (PJU distrik + aksen mall). Berikutnya: masukkan PJU gabungan Void B/C/D/E ke pool lampu dan beri material malam pada badan air.
+3. **Pass pencahayaan malam** Kelapa Gading dan Danau Rawa Buaya selesai 2026-10-30 (PJU distrik + aksen mall), disusul material malam **11 badan air** pada hari yang sama (`nightMaterials` 41). Berikutnya: masukkan PJU gabungan Void B/C/D/E ke pool lampu.
 4. Perbaiki komposisi **TMII** (P2) pada kesempatan berikutnya; tidak menghalangi Void C.
 5. Gunakan statistik **per sudut pandang** dalam klaim performa; jangan menyebut satu angka draw call global.

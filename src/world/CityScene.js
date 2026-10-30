@@ -16,6 +16,12 @@ const VOID_C_CONNECTOR_PATHS = [
 const INFILL_ROOF_EAVE = 0.6;
 const INFILL_ROOF_TOLERANCE = 0.05;
 
+// Air malam: metalness tinggi tanpa environment map membuat badan air nyaris
+// hitam, jadi glow teal tipis ditambahkan lewat registerNightMaterial (siang 0).
+const WATER_NIGHT_EMISSIVE = 0x0e7490;
+const WATER_NIGHT_INTENSITY = 0.34;
+const SEA_NIGHT_INTENSITY = 0.22;
+
 // OBB overlap untuk footprint atap infill; penetrasi di bawah toleransi
 // dianggap bersentuhan agar deret ruko bertembok parti boleh menempel.
 const roofRectsOverlap = (a, b, tolerance) => {
@@ -488,6 +494,10 @@ export class CityScene {
       roughness: 0.1,
       metalness: 0.75
     });
+    this.registerNightMaterial(waterMat, {
+      emissive: WATER_NIGHT_EMISSIVE,
+      nightIntensity: WATER_NIGHT_INTENSITY
+    });
     const canalWallMat = new THREE.MeshStandardMaterial({
       color: 0x475569,
       roughness: 0.85
@@ -945,9 +955,13 @@ export class CityScene {
     this.proceduralGroup.add(golfPark);
 
     // Danau Golf Kemayoran
+    const golfPondMat = this.registerNightMaterial(
+      new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.15, metalness: 0.8 }),
+      { emissive: WATER_NIGHT_EMISSIVE, nightIntensity: WATER_NIGHT_INTENSITY }
+    );
     const golfPond = new THREE.Mesh(
       new THREE.CylinderGeometry(14, 14, 0.2, 24),
-      new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.15, metalness: 0.8 })
+      golfPondMat
     );
     golfPond.position.set(360, 0.12, -460);
     this.proceduralGroup.add(golfPond);
@@ -1792,6 +1806,10 @@ export class CityScene {
       transparent: true,
       opacity: 0.82
     });
+    this.registerNightMaterial(waterMat, {
+      emissive: WATER_NIGHT_EMISSIVE,
+      nightIntensity: WATER_NIGHT_INTENSITY
+    });
     const stonePathMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.7 });
     const timberMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.65 });
     const whiteWallMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
@@ -2528,6 +2546,10 @@ export class CityScene {
       metalness: 0.85,
       side: THREE.DoubleSide
     });
+    this.registerNightMaterial(waterMat, {
+      emissive: WATER_NIGHT_EMISSIVE,
+      nightIntensity: SEA_NIGHT_INTENSITY
+    });
     const parkMat = new THREE.MeshStandardMaterial({
       color: 0x166534,
       roughness: 0.9,
@@ -2776,6 +2798,10 @@ export class CityScene {
       roughness: 0.15,
       metalness: 0.85,
       side: THREE.DoubleSide
+    });
+    this.registerNightMaterial(waterMat, {
+      emissive: WATER_NIGHT_EMISSIVE,
+      nightIntensity: WATER_NIGHT_INTENSITY
     });
     const canalWallMat = new THREE.MeshStandardMaterial({
       color: 0x64748b,
@@ -3120,6 +3146,10 @@ export class CityScene {
       roughness: 0.15,
       metalness: 0.85,
       side: THREE.DoubleSide
+    });
+    this.registerNightMaterial(waterMat, {
+      emissive: WATER_NIGHT_EMISSIVE,
+      nightIntensity: WATER_NIGHT_INTENSITY
     });
     const canalWallMat = new THREE.MeshStandardMaterial({
       color: 0x64748b,
@@ -4095,6 +4125,10 @@ export class CityScene {
       roughness: 0.15,
       metalness: 0.8,
       side: THREE.DoubleSide
+    });
+    this.registerNightMaterial(waterMat, {
+      emissive: WATER_NIGHT_EMISSIVE,
+      nightIntensity: WATER_NIGHT_INTENSITY
     });
     const canalWallMat = new THREE.MeshStandardMaterial({
       color: 0x64748b,
@@ -5510,6 +5544,10 @@ export class CityScene {
       opacity: 0.95,
       side: THREE.DoubleSide
     });
+    this.registerNightMaterial(waterMat, {
+      emissive: WATER_NIGHT_EMISSIVE,
+      nightIntensity: WATER_NIGHT_INTENSITY
+    });
     const bridgeMat = new THREE.MeshStandardMaterial({
       color: 0x475569,
       roughness: 0.7
@@ -5874,6 +5912,10 @@ export class CityScene {
       opacity: 0.95
       // FrontSide, bukan DoubleSide: air berupa box tipis di atas tanah dan
       // DoubleSide + transparent membuat three.js merender dua pass per mesh.
+    });
+    this.registerNightMaterial(waterMat, {
+      emissive: WATER_NIGHT_EMISSIVE,
+      nightIntensity: WATER_NIGHT_INTENSITY
     });
     const bridgeMat = new THREE.MeshStandardMaterial({
       color: 0x475569,
@@ -9334,6 +9376,10 @@ export class CityScene {
       roughness: 0.15,
       metalness: 0.85,
       side: THREE.DoubleSide
+    });
+    this.registerNightMaterial(waterMat, {
+      emissive: WATER_NIGHT_EMISSIVE,
+      nightIntensity: WATER_NIGHT_INTENSITY
     });
     if (osm.waterPolygons && osm.waterPolygons.length) {
       const waterGeos = [];
