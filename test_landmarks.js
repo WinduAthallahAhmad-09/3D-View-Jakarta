@@ -3394,7 +3394,99 @@ assert.ok(
   'Duren Sawit houses must be cleared from the Cikarang rail ballast'
 );
 
-console.log(`✅ All 105 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 65: Void F Tahap 3 — infill urban fabric Cakung–Klender–Duren Sawit–Pulo Gebang
+assert.ok(citySceneContent.includes('buildVoidFInfill()'), 'CityScene.js missing buildVoidFInfill');
+
+const voidFInfillCall = citySceneContent.indexOf('this.buildVoidFInfill();');
+assert.ok(voidFInfillCall > 0, 'CityScene.js does not call buildVoidFInfill');
+assert.ok(
+  voidFInfillCall > citySceneContent.indexOf('this.buildVoidFCakung();'),
+  'buildVoidFInfill must run after buildVoidFCakung so the OSM network exists'
+);
+assert.ok(
+  voidFInfillCall < citySceneContent.indexOf('this.buildVoidBInfillAndIndustry();'),
+  'buildVoidFInfill must run before buildVoidBInfillAndIndustry'
+);
+assert.ok(
+  voidFInfillCall < citySceneContent.indexOf('this.buildEastJakartaInfillAndDistricts();'),
+  'buildVoidFInfill must run before the legacy east Jakarta infill'
+);
+
+const voidFInfillBody = sliceCityBuilder('  buildVoidFInfill() {');
+assert.ok(!voidFInfillBody.includes('new THREE.PointLight'), 'Void F infill must not add PointLights');
+assert.ok(!voidFInfillBody.includes('nightMaterials.push'), 'Void F infill must register night windows through the shared helper');
+assert.ok(voidFInfillBody.includes('addInfillNightWindows'), 'Void F infill must reuse the shared night window helper');
+assert.ok(voidFInfillBody.includes('voidf-night-windows'), 'Void F infill missing the night window mesh');
+assert.ok(voidFInfillBody.includes('VOID_F_OSM'), 'Void F infill must mask against the OSM roads and waterways');
+assert.ok(voidFInfillBody.includes('isNearVoidFRoad'), 'Void F infill missing the road corridor mask');
+assert.ok(voidFInfillBody.includes('isNearVoidFWater'), 'Void F infill missing the waterway mask');
+assert.ok(voidFInfillBody.includes('width * 0.5 + 4'), 'Void F water mask must add a four-unit bank buffer');
+assert.ok(voidFInfillBody.includes('VOID_F_ANCHOR_SITES'), 'Void F infill must exclude the six anchor pads');
+assert.ok(voidFInfillBody.includes('existingInfillExclusions'), 'Void F infill must clear the existing east Jakarta infill blocks');
+assert.ok(voidFInfillBody.includes('distanceToCikarangRail(x, z) < 16'), 'Void F infill must clear the Cikarang rail ballast');
+assert.ok(voidFInfillBody.includes('distanceToVoidFKbt(x, z) < 24'), 'Void F infill must clear the Kanal Banjir Timur');
+assert.ok(voidFInfillBody.includes('voidFInfillStats'), 'Void F infill must expose runtime stats');
+assert.ok(voidFInfillBody.includes('drawCalls: 6'), 'Void F infill should add six instanced draw calls');
+assert.ok(
+  voidFInfillBody.includes('INFILL_ROOF_EAVE') && voidFInfillBody.includes('INFILL_ROOF_TOLERANCE'),
+  'Void F infill must reuse the shared eave trim and roof occupancy constants'
+);
+assert.ok(
+  voidFInfillBody.includes('ignoreWays') &&
+    voidFInfillBody.includes('placeShophouseRow(roadWidth, chain.points, chain.ways)'),
+  'Void F shophouse rows must ignore their own road corridor'
+);
+
+[
+  'voidf-infill-houses',
+  'voidf-infill-shophouses',
+  'voidf-infill-house-roofs',
+  'voidf-infill-warehouses',
+  'voidf-infill-warehouse-roofs'
+].forEach((name) => {
+  assert.ok(voidFInfillBody.includes(name), `Void F infill missing the ${name} instanced mesh`);
+});
+
+[
+  'Jalan Bekasi Raya',
+  'Jalan Pangeran Komarudin',
+  'Jalan Dokter KRT Radjiman Widyodiningrat',
+  'Jalan Jenderal Polisi RS. Soekanto',
+  'Jalan Raya Penggilingan',
+  'Jalan Pulo Gebang',
+  'Jalan Bintara Raya',
+  'Jalan Raya Pondok Kopi'
+].forEach((name) => {
+  assert.ok(voidFInfillBody.includes(name), `Void F infill missing the ${name} shophouse corridor`);
+});
+
+[
+  'R1 Cakung barat',
+  'R2 Jatinegara Kaum',
+  'R3 Pulogadung selatan',
+  'R4 Cipinang Muara',
+  'R5 Malaka Sari selatan',
+  'R6 Pondok Kopi',
+  'R7 Bintara',
+  'R8 Pulo Gebang utara',
+  'R9 Cakung timur',
+  'R10 Buaran utara'
+].forEach((zone) => {
+  assert.ok(voidFInfillBody.includes(zone), `Void F infill missing the ${zone} residential zone`);
+});
+
+[
+  'W1 Cakung industri utara',
+  'W2 Pulo Gebang logistik utara',
+  'W3 Pulo Gebang hinterland'
+].forEach((zone) => {
+  assert.ok(voidFInfillBody.includes(zone), `Void F infill missing the ${zone} warehouse cluster`);
+});
+
+assert.ok(citySceneContent.includes('const VOID_F_KBT_CORRIDOR ='), 'Void F KBT corridor must live at module scope');
+assert.ok(citySceneContent.includes('const distanceToVoidFKbt = (x, z) =>'), 'CityScene.js missing the KBT distance helper');
+
+console.log(`✅ All 105 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
