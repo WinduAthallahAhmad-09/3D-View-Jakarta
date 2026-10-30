@@ -56,6 +56,19 @@ const VOID_F_KBT_CORRIDOR = [[850, 580], [1150, 350], [1320, 100], [1500, -250]]
 // dan plaza transit Tahap 4 agar keduanya tidak bergeser.
 const VOID_F_PR_PLOT = { x: 1000, z: 190, w: 38, d: 20 };
 
+// Satu sumber jalur LRT Cibubur: dek viaduk dan animasi kereta harus
+// memakai titik yang sama agar kereta tidak melayang tanpa jalur layang.
+const LRT_CIBUBUR_CORRIDOR = [
+  [712.3, 723.8], // Stasiun Hub Cawang
+  [640, 900],     // Cililitan / PGC
+  [660, 1150],    // Kramat Jati
+  [798, 1385],    // Stasiun TMII
+  [864, 1625],    // Stasiun Kampung Rambutan
+  [896, 1828],    // Stasiun Ciracas
+  [1003, 2477],   // Pendekatan Cibubur
+  [1022, 2539]    // Stasiun Harjamukti
+];
+
 const distanceToVoidFKbt = (x, z) => {
   let best = Infinity;
   for (let i = 0; i < VOID_F_KBT_CORRIDOR.length - 1; i++) {
@@ -146,6 +159,7 @@ export class CityScene {
     this.buildWaterways();
     this.buildRoadNetwork();
     this.buildElevatedRailway();
+    this.buildLrtCibuburViaduct();
     this.buildCentralJakartaEastCorridor();
     this.buildCentralJakartaEastInfillAndDistricts();
     this.buildSouthJakartaCorridor();
@@ -185,7 +199,7 @@ export class CityScene {
    * Expansive Jakarta ground plane with subtle urban coordinate grid
    */
   buildGroundAndGrid() {
-    const groundGeo = new THREE.PlaneGeometry(4800, 4800);
+    const groundGeo = new THREE.PlaneGeometry(5800, 5800);
     groundGeo.rotateX(-Math.PI / 2);
     this.groundMat = new THREE.MeshStandardMaterial({
       color: 0x283344,
@@ -197,7 +211,7 @@ export class CityScene {
     ground.position.y = -0.15;
     this.proceduralGroup.add(ground);
 
-    this.gridHelper = new THREE.GridHelper(4400, 220, 0x3e4c63, 0x334155);
+    this.gridHelper = new THREE.GridHelper(5600, 280, 0x3e4c63, 0x334155);
     this.gridHelper.material.transparent = true;
     this.gridHelper.material.opacity = 0.4;
     this.gridHelper.position.y = -0.08;
@@ -499,6 +513,117 @@ export class CityScene {
       stRoof.castShadow = true;
       this.proceduralGroup.add(stRoof);
     });
+  }
+
+  /**
+   * Viaduk layang LRT Jabodebek Lin Cibubur (Cawang - Ciracas - Harjamukti).
+   * Dek, flange merah, dan rel digabung per material, tiang menyusul terpisah.
+   */
+  buildLrtCibuburViaduct() {
+    const deckMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
+    const flangeMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.45 });
+    const trackMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.7 });
+    const pierMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.6 });
+
+    const deckGeos = [];
+    const flangeGeos = [];
+    const trackGeos = [];
+    const pierGeos = [];
+    const deckY = 15.0;
+
+    const pushBox = (geos, w, h, d, x, cy, z, angle) => {
+      const geo = new THREE.BoxGeometry(w, h, d);
+      geo.rotateY(angle);
+      geo.translate(x, cy, z);
+      geos.push(geo);
+    };
+
+    for (let i = 0; i < LRT_CIBUBUR_CORRIDOR.length - 1; i++) {
+      const [x1, z1] = LRT_CIBUBUR_CORRIDOR[i];
+      const [x2, z2] = LRT_CIBUBUR_CORRIDOR[i + 1];
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const angle = Math.atan2(dx, dz);
+      const mx = (x1 + x2) * 0.5;
+      const mz = (z1 + z2) * 0.5;
+
+      pushBox(deckGeos, 6.8, 1.4, len + 0.6, mx, deckY, mz, angle);
+
+      [-3.3, 3.3].forEach((rx) => {
+        const ox = Math.cos(angle) * rx;
+        const oz = -Math.sin(angle) * rx;
+        pushBox(flangeGeos, 0.3, 0.9, len + 0.6, mx + ox, deckY + 0.8, mz + oz, angle);
+      });
+
+      [-1.3, 1.3].forEach((tx) => {
+        const ox = Math.cos(angle) * tx;
+        const oz = -Math.sin(angle) * tx;
+        pushBox(trackGeos, 0.9, 0.2, len + 0.6, mx + ox, deckY + 0.8, mz + oz, angle);
+      });
+
+      const piers = Math.max(1, Math.round(len / 46));
+      for (let p = 1; p <= piers; p++) {
+        const t = p / (piers + 1);
+        const pier = new THREE.CylinderGeometry(1.1, 1.3, deckY, 10);
+        pier.translate(x1 + dx * t, deckY * 0.5, z1 + dz * t);
+        pierGeos.push(pier);
+      }
+    }
+
+    // Terminus Harjamukti: peron samping, kanopi, kolom, dan blok ujung rel
+    const [endX, endZ] = LRT_CIBUBUR_CORRIDOR[LRT_CIBUBUR_CORRIDOR.length - 1];
+    const [prevX, prevZ] = LRT_CIBUBUR_CORRIDOR[LRT_CIBUBUR_CORRIDOR.length - 2];
+    const tdx = endX - prevX;
+    const tdz = endZ - prevZ;
+    const tlen = Math.hypot(tdx, tdz);
+    const tangle = Math.atan2(tdx, tdz);
+    const ux = tdx / tlen;
+    const uz = tdz / tlen;
+    const nx = tdz / tlen;
+    const nz = -tdx / tlen;
+
+    const platformGeos = [];
+    const terminusCanopyGeos = [];
+    const terminusColumnGeos = [];
+    const terminusBufferGeos = [];
+
+    const platformX = endX - ux * 13 - nx * 6.5;
+    const platformZ = endZ - uz * 13 - nz * 6.5;
+    pushBox(platformGeos, 8, 1.2, 30, platformX, deckY + 0.1, platformZ, tangle);
+    pushBox(terminusCanopyGeos, 10, 0.4, 32, platformX, deckY + 5.2, platformZ, tangle);
+    [-11, 11].forEach((along) => {
+      [-3, 3].forEach((across) => {
+        const cx = platformX + ux * along + nx * across;
+        const cz = platformZ + uz * along + nz * across;
+        pushBox(terminusColumnGeos, 0.35, 4.6, 0.35, cx, deckY + 2.95, cz, tangle);
+      });
+    });
+    pushBox(terminusBufferGeos, 6.8, 2.4, 2, endX + ux * 1.4, deckY + 1.2, endZ + uz * 1.4, tangle);
+
+    const terminusMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.7 });
+    const terminusCanopyMat = new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.45 });
+    const terminusSteelMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.55, metalness: 0.4 });
+    const terminusBufferMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.5 });
+
+    const addMerged = (geos, material, name, castShadow = false) => {
+      const merged = BufferGeometryUtils.mergeGeometries(geos, false);
+      if (!merged) return;
+      const mesh = new THREE.Mesh(merged, material);
+      mesh.name = name;
+      mesh.castShadow = castShadow;
+      mesh.receiveShadow = true;
+      this.proceduralGroup.add(mesh);
+    };
+
+    addMerged(deckGeos, deckMat, 'lrtcibubur-deck', true);
+    addMerged(flangeGeos, flangeMat, 'lrtcibubur-flange');
+    addMerged(trackGeos, trackMat, 'lrtcibubur-track');
+    addMerged(pierGeos, pierMat, 'lrtcibubur-piers', true);
+    addMerged(platformGeos, terminusMat, 'lrtcibubur-terminus-platform', true);
+    addMerged(terminusCanopyGeos, terminusCanopyMat, 'lrtcibubur-terminus-canopy', true);
+    addMerged(terminusColumnGeos, terminusSteelMat, 'lrtcibubur-terminus-columns');
+    addMerged(terminusBufferGeos, terminusBufferMat, 'lrtcibubur-terminus-buffer', true);
   }
 
   /**
@@ -10218,7 +10343,13 @@ export class CityScene {
       "stasiun-klender-baru": () => LandmarkModels.createStasiunKlenderBaru(),
       "terminal-pulo-gebang": () => LandmarkModels.createTerminalPuloGebang(),
       "kawasan-industri-pulogadung": () => LandmarkModels.createKawasanIndustriPulogadung(),
-      "rusun-klender": () => LandmarkModels.createRusunKlender()
+      "rusun-klender": () => LandmarkModels.createRusunKlender(),
+      "terminal-kampung-rambutan": () => LandmarkModels.createTerminalKampungRambutan(),
+      "rsud-pasar-rebo": () => LandmarkModels.createRsudPasarRebo(),
+      "stasiun-lrt-ciracas": () => LandmarkModels.createStasiunLrtCiracas(),
+      "rusun-ciracas": () => LandmarkModels.createRusunCiracas(),
+      "mabes-tni-cilangkap": () => LandmarkModels.createMabesTniCilangkap(),
+      "cibubur-junction": () => LandmarkModels.createCibuburJunction()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {
@@ -11803,13 +11934,9 @@ export class CityScene {
     // Melintasi Stasiun Hub Cawang -> Cililitan -> Kramat Jati -> Stasiun TMII -> Ciracas/Harjamukti
     // Elevated Viaduct y=15.0m
     // =========================================================================
-    const lrtCibuburPoints = [
-      new THREE.Vector3(712.3, 15.0, 723.8),   // Stasiun Hub Cawang
-      new THREE.Vector3(780.0, 15.0, 950.0),   // Cililitan / PGC
-      new THREE.Vector3(890.0, 15.0, 1220.0),  // Kramat Jati / Hek
-      new THREE.Vector3(1040.0, 15.0, 1500.0), // Stasiun TMII
-      new THREE.Vector3(1120.0, 15.0, 1820.0)  // Menuju Ciracas & Harjamukti
-    ];
+    const lrtCibuburPoints = LRT_CIBUBUR_CORRIDOR.map(
+      ([x, z]) => new THREE.Vector3(x, 15.0, z)
+    );
     this.lrtCibuburCurve = new THREE.CatmullRomCurve3(lrtCibuburPoints, false, 'catmullrom', 0.15);
     this.lrtCibuburCurveLength = this.lrtCibuburCurve.getLength();
 

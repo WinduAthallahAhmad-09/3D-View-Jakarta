@@ -10845,6 +10845,820 @@ export class LandmarkModels {
 
     return group;
   }
+
+  /**
+   * 106. Terminal Kampung Rambutan
+   * Terminal tipe A Ciracas: hall tunggu, tiga dermaga bus berkanopi,
+   * bus AKAP, musala, dek parkir, dan gerbang di tepi Jl. Raya Bogor.
+   */
+  static createTerminalKampungRambutan() {
+    const group = new THREE.Group();
+
+    const siteMat = new THREE.MeshStandardMaterial({ color: 0xd6d3d1, roughness: 0.92 });
+    const hallMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.55 });
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.45, side: THREE.DoubleSide });
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.5, metalness: 0.5 });
+    const glassMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, metalness: 0.3, transparent: true, opacity: 0.85 })
+    );
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
+    const asphaltMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 });
+    const busBlueMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.5 });
+    const busYellowMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.5 });
+    const busGlassMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2, metalness: 0.6 });
+    const domeMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.45, metalness: 0.3 });
+    const signMat = new THREE.MeshStandardMaterial({ color: 0x1e40af, roughness: 0.5 });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
+    const leafMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.9 });
+
+    const site = new THREE.Mesh(new THREE.BoxGeometry(176, 0.3, 116), siteMat);
+    site.position.y = 0.15;
+    site.receiveShadow = true;
+    group.add(site);
+
+    const apron = new THREE.Mesh(new THREE.BoxGeometry(132, 0.1, 52), asphaltMat);
+    apron.position.set(0, 0.36, 34);
+    group.add(apron);
+
+    const hall = new THREE.Mesh(new THREE.BoxGeometry(64, 16, 40), hallMat);
+    hall.name = 'terminal-kampung-rambutan-hall';
+    hall.position.set(-44, 8.3, -20);
+    hall.castShadow = true;
+    hall.receiveShadow = true;
+    group.add(hall);
+
+    const hallGlass = new THREE.Mesh(new THREE.BoxGeometry(64.4, 3.6, 40.4), glassMat);
+    hallGlass.position.set(-44, 7, -20);
+    group.add(hallGlass);
+
+    const barrelRoof = new THREE.Mesh(
+      new THREE.CylinderGeometry(22, 22, 66, 22, 1, true, 0, Math.PI),
+      roofMat
+    );
+    barrelRoof.rotation.z = Math.PI / 2;
+    barrelRoof.scale.set(0.36, 1.0, 1.0);
+    barrelRoof.position.set(-44, 16.2, -20);
+    barrelRoof.castShadow = true;
+    group.add(barrelRoof);
+
+    const hallSign = new THREE.Mesh(new THREE.BoxGeometry(34, 3.2, 0.6), signMat);
+    hallSign.position.set(-44, 13, 0.4);
+    group.add(hallSign);
+
+    const hallSignText = new THREE.Mesh(new THREE.BoxGeometry(24, 1.3, 0.2), whiteMat);
+    hallSignText.position.set(-44, 13, 0.75);
+    group.add(hallSignText);
+
+    const entranceCanopy = new THREE.Mesh(new THREE.BoxGeometry(44, 0.5, 12), roofMat);
+    entranceCanopy.position.set(-44, 10, 10);
+    entranceCanopy.castShadow = true;
+    group.add(entranceCanopy);
+
+    [-60, -44, -28].forEach((px) => {
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.34, 9.4, 8), steelMat);
+      col.position.set(px, 5, 10);
+      group.add(col);
+    });
+
+    [24, 36, 48].forEach((laneZ) => {
+      const canopy = new THREE.Mesh(new THREE.BoxGeometry(72, 0.4, 9), roofMat);
+      canopy.position.set(-34, 6.4, laneZ);
+      canopy.castShadow = true;
+      group.add(canopy);
+
+      [-64, -34, -4].forEach((px) => {
+        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.28, 6, 8), steelMat);
+        col.position.set(px, 3.4, laneZ);
+        group.add(col);
+      });
+
+      [-60, -47, -34, -21, -8].forEach((px) => {
+        const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.05, 7.4), whiteMat);
+        stripe.position.set(px, 0.44, laneZ + 4.6);
+        group.add(stripe);
+      });
+    });
+
+    [[-26, 24, 0], [0, 24, 1], [26, 24, 0], [-26, 36, 2], [26, 36, 1], [-13, 48, 0], [13, 48, 2]].forEach(([bx, bz, idx]) => {
+      const body = new THREE.Mesh(new THREE.BoxGeometry(11, 3.2, 2.6), idx === 1 ? busYellowMat : busBlueMat);
+      body.position.set(bx, 2, bz);
+      body.castShadow = true;
+      group.add(body);
+
+      const windows = new THREE.Mesh(new THREE.BoxGeometry(11.1, 0.9, 2.7), busGlassMat);
+      windows.position.set(bx, 2.8, bz);
+      group.add(windows);
+    });
+
+    const mosque = new THREE.Mesh(new THREE.BoxGeometry(13, 5, 11), whiteMat);
+    mosque.position.set(-70, 2.9, 30);
+    mosque.castShadow = true;
+    group.add(mosque);
+
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(3.4, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), domeMat);
+    dome.position.set(-70, 5.4, 30);
+    group.add(dome);
+
+    const minaret = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.0, 12, 8), whiteMat);
+    minaret.position.set(-61, 6.4, 34);
+    minaret.castShadow = true;
+    group.add(minaret);
+
+    const parkingDeck = new THREE.Mesh(new THREE.BoxGeometry(34, 0.3, 18), asphaltMat);
+    parkingDeck.position.set(66, 0.6, -34);
+    parkingDeck.receiveShadow = true;
+    group.add(parkingDeck);
+
+    const boundarySign = new THREE.Mesh(new THREE.BoxGeometry(18, 4, 0.7), signMat);
+    boundarySign.position.set(0, 4.4, 58);
+    group.add(boundarySign);
+
+    const boundaryText = new THREE.Mesh(new THREE.BoxGeometry(12, 1.2, 0.2), whiteMat);
+    boundaryText.position.set(0, 4.4, 58.4);
+    group.add(boundaryText);
+
+    [[-80, -48], [80, -48], [-80, 50], [80, 50]].forEach(([tx, tz]) => {
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.38, 4.6, 6), trunkMat);
+      trunk.position.set(tx, 2.6, tz);
+      group.add(trunk);
+      const crown = new THREE.Mesh(new THREE.SphereGeometry(2.4, 8, 6), leafMat);
+      crown.position.set(tx, 6.2, tz);
+      crown.castShadow = true;
+      group.add(crown);
+    });
+
+    return group;
+  }
+
+  /**
+   * 107. RSUD Pasar Rebo
+   * RS rujukan Jakarta Timur: menara rawat inap, gedung gawat darurat,
+   * helipad, jalur ambulans, parkir, dan gerbang layanan.
+   */
+  static createRsudPasarRebo() {
+    const group = new THREE.Group();
+
+    const siteMat = new THREE.MeshStandardMaterial({ color: 0xe7e5e4, roughness: 0.92 });
+    const towerMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.6 });
+    const wingMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.65 });
+    const glassMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0x93c5fd, roughness: 0.2, metalness: 0.3, transparent: true, opacity: 0.85 })
+    );
+    const concreteMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.8 });
+    const redMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.5 });
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
+    const asphaltMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 });
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.5, metalness: 0.5 });
+    const ambulanceMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.45 });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
+    const leafMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.9 });
+
+    const site = new THREE.Mesh(new THREE.BoxGeometry(146, 0.3, 110), siteMat);
+    site.position.y = 0.15;
+    site.receiveShadow = true;
+    group.add(site);
+
+    const driveway = new THREE.Mesh(new THREE.BoxGeometry(96, 0.1, 30), asphaltMat);
+    driveway.position.set(0, 0.36, 38);
+    group.add(driveway);
+
+    const tower = new THREE.Mesh(new THREE.BoxGeometry(26, 34, 20), towerMat);
+    tower.name = 'rsud-pasar-rebo-tower';
+    tower.position.set(-8, 17.3, -14);
+    tower.castShadow = true;
+    tower.receiveShadow = true;
+    group.add(tower);
+
+    [11, 22.5].forEach((bandY) => {
+      const band = new THREE.Mesh(new THREE.BoxGeometry(26.4, 2.4, 20.4), glassMat);
+      band.position.set(-8, bandY, -14);
+      group.add(band);
+    });
+
+    const towerRoof = new THREE.Mesh(new THREE.BoxGeometry(27, 0.9, 21), concreteMat);
+    towerRoof.position.set(-8, 34.8, -14);
+    group.add(towerRoof);
+
+    const helipad = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, 0.4, 20), concreteMat);
+    helipad.position.set(-8, 35.4, -14);
+    group.add(helipad);
+
+    [1.6, -1.6].forEach((px) => {
+      const hMark = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.08, 4.4), redMat);
+      hMark.position.set(-8 + px, 35.65, -14);
+      group.add(hMark);
+    });
+    const hBar = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.08, 0.8), redMat);
+    hBar.position.set(-8, 35.65, -14);
+    group.add(hBar);
+
+    const ward = new THREE.Mesh(new THREE.BoxGeometry(46, 11, 24), wingMat);
+    ward.position.set(28, 5.8, -2);
+    ward.castShadow = true;
+    ward.receiveShadow = true;
+    group.add(ward);
+
+    const wardGlass = new THREE.Mesh(new THREE.BoxGeometry(46.4, 2.2, 24.4), glassMat);
+    wardGlass.position.set(28, 7.4, -2);
+    group.add(wardGlass);
+
+    const erSign = new THREE.Mesh(new THREE.BoxGeometry(14, 2.6, 0.5), redMat);
+    erSign.position.set(28, 9.6, 10.3);
+    group.add(erSign);
+
+    const erText = new THREE.Mesh(new THREE.BoxGeometry(9, 0.9, 0.2), whiteMat);
+    erText.position.set(28, 9.6, 10.6);
+    group.add(erText);
+
+    const entrance = new THREE.Mesh(new THREE.BoxGeometry(28, 0.5, 11), concreteMat);
+    entrance.position.set(-8, 6.6, 4);
+    entrance.castShadow = true;
+    group.add(entrance);
+
+    [-20, -8, 4].forEach((px) => {
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.34, 6.2, 8), steelMat);
+      col.position.set(px, 3.3, 4);
+      group.add(col);
+    });
+
+    const ambulanceBay = new THREE.Mesh(new THREE.BoxGeometry(40, 0.1, 18), asphaltMat);
+    ambulanceBay.position.set(36, 0.36, 26);
+    group.add(ambulanceBay);
+
+    [[28, 20], [44, 20]].forEach(([ax, az]) => {
+      const body = new THREE.Mesh(new THREE.BoxGeometry(8, 2.6, 2.8), ambulanceMat);
+      body.position.set(ax, 1.7, az);
+      body.castShadow = true;
+      group.add(body);
+
+      const stripe = new THREE.Mesh(new THREE.BoxGeometry(8.1, 0.6, 2.9), redMat);
+      stripe.position.set(ax, 2, az);
+      group.add(stripe);
+    });
+
+    const gateSign = new THREE.Mesh(new THREE.BoxGeometry(17, 3.4, 0.6), whiteMat);
+    gateSign.position.set(0, 3.6, 56);
+    gateSign.castShadow = true;
+    group.add(gateSign);
+
+    const gateStripe = new THREE.Mesh(new THREE.BoxGeometry(17.2, 0.7, 0.7), redMat);
+    gateStripe.position.set(0, 4.8, 56);
+    group.add(gateStripe);
+
+    const parking = new THREE.Mesh(new THREE.BoxGeometry(30, 0.12, 14), asphaltMat);
+    parking.position.set(-56, 0.36, 30);
+    group.add(parking);
+
+    [-9, 0, 9].forEach((px) => {
+      const mark = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.04, 11), whiteMat);
+      mark.position.set(-56 + px, 0.44, 30);
+      group.add(mark);
+    });
+
+    [[-62, -44], [62, -44], [-62, 46], [62, 46], [-30, 46], [30, 46]].forEach(([tx, tz]) => {
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.38, 4.6, 6), trunkMat);
+      trunk.position.set(tx, 2.6, tz);
+      group.add(trunk);
+      const crown = new THREE.Mesh(new THREE.SphereGeometry(2.4, 8, 6), leafMat);
+      crown.position.set(tx, 6.2, tz);
+      crown.castShadow = true;
+      group.add(crown);
+    });
+
+    return group;
+  }
+
+  /**
+   * 108. Stasiun LRT Ciracas
+   * Stasiun layang Lin Cibubur di atas Jl. Raya Bogor: peron pulau,
+   * kanopi tosca, hall tiket di bawah viaduk, tangga & lift akses.
+   */
+  static createStasiunLrtCiracas() {
+    const group = new THREE.Group();
+
+    const siteMat = new THREE.MeshStandardMaterial({ color: 0xd6d3d1, roughness: 0.92 });
+    const concreteMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.65 });
+    const deckMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.65 });
+    const platformMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.7 });
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.45, side: THREE.DoubleSide });
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.5, metalness: 0.5 });
+    const glassMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, metalness: 0.3, transparent: true, opacity: 0.85 })
+    );
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
+    const signMat = new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.5 });
+    const asphaltMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 });
+    const railMat = new THREE.MeshStandardMaterial({ color: 0xcfecff, metalness: 0.6, roughness: 0.25 });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
+    const leafMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.9 });
+
+    const site = new THREE.Mesh(new THREE.BoxGeometry(104, 0.3, 66), siteMat);
+    site.position.y = 0.15;
+    site.receiveShadow = true;
+    group.add(site);
+
+    const deck = new THREE.Mesh(new THREE.BoxGeometry(15, 1.2, 26), deckMat);
+    deck.position.set(0, 14.95, 0);
+    deck.castShadow = true;
+    group.add(deck);
+
+    [-3.9, 3.9].forEach((rx) => {
+      const flange = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.8, 26), new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.45 }));
+      flange.position.set(rx, 15.7, 0);
+      group.add(flange);
+
+      const rail = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.18, 26), railMat);
+      rail.position.set(rx * 0.33, 15.6, 0);
+      group.add(rail);
+    });
+
+    [-4.6, 4.6].forEach((px) => {
+      const platform = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.6, 24), platformMat);
+      if (px > 0) platform.name = 'stasiun-lrt-ciracas-platform';
+      platform.position.set(px, 15.85, 0);
+      platform.receiveShadow = true;
+      group.add(platform);
+
+      const canopy = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.4, 22), roofMat);
+      canopy.position.set(px, 20.4, 0);
+      canopy.castShadow = true;
+      group.add(canopy);
+
+      [-9, 0, 9].forEach((cz) => {
+        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.26, 4.2, 8), steelMat);
+        col.position.set(px, 18.1, cz);
+        group.add(col);
+      });
+    });
+
+    [-11.5, 11.5].forEach((pz) => {
+      const pier = new THREE.Mesh(new THREE.BoxGeometry(3, 14.2, 2.6), concreteMat);
+      pier.position.set(0, 7.3, pz);
+      pier.castShadow = true;
+      group.add(pier);
+    });
+
+    const hall = new THREE.Mesh(new THREE.BoxGeometry(24, 6, 14), whiteMat);
+    hall.position.set(0, 3.3, -16);
+    hall.castShadow = true;
+    hall.receiveShadow = true;
+    group.add(hall);
+
+    const hallGlass = new THREE.Mesh(new THREE.BoxGeometry(24.4, 3, 14.4), glassMat);
+    hallGlass.position.set(0, 3.6, -16);
+    group.add(hallGlass);
+
+    const hallRoof = new THREE.Mesh(new THREE.BoxGeometry(25, 0.5, 15), roofMat);
+    hallRoof.position.set(0, 6.6, -16);
+    group.add(hallRoof);
+
+    const nameBoard = new THREE.Mesh(new THREE.BoxGeometry(14, 2.6, 0.5), signMat);
+    nameBoard.position.set(0, 8.4, -16);
+    group.add(nameBoard);
+
+    const nameText = new THREE.Mesh(new THREE.BoxGeometry(9, 1, 0.2), whiteMat);
+    nameText.position.set(0, 8.4, -15.7);
+    group.add(nameText);
+
+    const liftTower = new THREE.Mesh(new THREE.BoxGeometry(4.4, 22, 4.4), concreteMat);
+    liftTower.position.set(-6.8, 11, -6);
+    liftTower.castShadow = true;
+    group.add(liftTower);
+
+    const liftGlass = new THREE.Mesh(new THREE.BoxGeometry(4.6, 18, 4.6), glassMat);
+    liftGlass.position.set(-6.8, 11, -6);
+    group.add(liftGlass);
+
+    const stair = new THREE.Mesh(new THREE.BoxGeometry(3.4, 14.4, 5), concreteMat);
+    stair.position.set(6.8, 7.4, -6);
+    stair.castShadow = true;
+    group.add(stair);
+
+    const kissRide = new THREE.Mesh(new THREE.BoxGeometry(38, 0.1, 12), asphaltMat);
+    kissRide.position.set(0, 0.36, 22);
+    group.add(kissRide);
+
+    [[-38, -22], [38, -22], [-38, 22], [38, 22]].forEach(([tx, tz]) => {
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.34, 4.2, 6), trunkMat);
+      trunk.position.set(tx, 2.4, tz);
+      group.add(trunk);
+      const crown = new THREE.Mesh(new THREE.SphereGeometry(2.1, 8, 6), leafMat);
+      crown.position.set(tx, 5.7, tz);
+      crown.castShadow = true;
+      group.add(crown);
+    });
+
+    return group;
+  }
+
+  /**
+   * 109. Rusun Ciracas
+   * Enam blok walk-up lima lantai, koridor bersama, musala,
+   * taman bermain, pos kesehatan, parkir, dan pepohonan peneduh.
+   */
+  static createRusunCiracas() {
+    const group = new THREE.Group();
+
+    const siteMat = new THREE.MeshStandardMaterial({ color: 0xd6d3d1, roughness: 0.92 });
+    const blockMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.75 });
+    const blockAltMat = new THREE.MeshStandardMaterial({ color: 0xfde68a, roughness: 0.75 });
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.6, side: THREE.DoubleSide });
+    const glassMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0x93c5fd, roughness: 0.25, metalness: 0.2, transparent: true, opacity: 0.85 })
+    );
+    const concreteMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.8 });
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
+    const asphaltMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 });
+    const greenMat = new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.85 });
+    const domeMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.5, metalness: 0.2 });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
+    const leafMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.9 });
+
+    const site = new THREE.Mesh(new THREE.BoxGeometry(150, 0.3, 112), siteMat);
+    site.position.y = 0.15;
+    site.receiveShadow = true;
+    group.add(site);
+
+    const blocks = new THREE.Group();
+    blocks.name = 'rusun-ciracas-blocks';
+    group.add(blocks);
+
+    [-46, 0, 46].forEach((bx, colIndex) => {
+      [-24, 26].forEach((bz, rowIndex) => {
+        const block = new THREE.Mesh(new THREE.BoxGeometry(30, 15, 10), (colIndex + rowIndex) % 2 === 0 ? blockMat : blockAltMat);
+        block.position.set(bx, 7.8, bz);
+        block.castShadow = true;
+        block.receiveShadow = true;
+        blocks.add(block);
+
+        [4.6, 9.2, 13.6].forEach((wy) => {
+          const band = new THREE.Mesh(new THREE.BoxGeometry(30.4, 0.8, 10.4), glassMat);
+          band.position.set(bx, wy, bz);
+          blocks.add(band);
+        });
+
+        const roof = new THREE.Mesh(new THREE.CylinderGeometry(6, 6, 31, 4, 1, true, 0, Math.PI), roofMat);
+        roof.rotation.z = Math.PI / 2;
+        roof.scale.set(0.28, 1.0, 1.55);
+        roof.position.set(bx, 15.3, bz);
+        roof.castShadow = true;
+        blocks.add(roof);
+      });
+    });
+
+    [-23, 23].forEach((cx) => {
+      const walkway = new THREE.Mesh(new THREE.BoxGeometry(3, 0.3, 60), concreteMat);
+      walkway.position.set(cx, 0.45, 1);
+      walkway.receiveShadow = true;
+      group.add(walkway);
+
+      [-20, 0, 20].forEach((cz) => {
+        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.24, 3.2, 6), concreteMat);
+        col.position.set(cx, 1.8, cz);
+        group.add(col);
+      });
+
+      const canopy = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.3, 60), roofMat);
+      canopy.position.set(cx, 3.4, 1);
+      canopy.castShadow = true;
+      group.add(canopy);
+    });
+
+    const playground = new THREE.Mesh(new THREE.BoxGeometry(26, 0.1, 18), greenMat);
+    playground.position.set(0, 0.36, 1);
+    group.add(playground);
+
+    [-7, 7].forEach((px) => {
+      const swing = new THREE.Mesh(new THREE.BoxGeometry(0.3, 2.6, 0.3), concreteMat);
+      swing.position.set(px, 1.5, 1);
+      group.add(swing);
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(6, 0.2, 0.3), concreteMat);
+      bar.position.set(px, 2.8, 1);
+      group.add(bar);
+    });
+
+    const musala = new THREE.Mesh(new THREE.BoxGeometry(12, 4.4, 9), whiteMat);
+    musala.position.set(-54, 2.6, 1);
+    musala.castShadow = true;
+    group.add(musala);
+
+    const musalaDome = new THREE.Mesh(new THREE.SphereGeometry(2.6, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), domeMat);
+    musalaDome.position.set(-54, 4.8, 1);
+    group.add(musalaDome);
+
+    const clinic = new THREE.Mesh(new THREE.BoxGeometry(10, 3.6, 8), whiteMat);
+    clinic.position.set(54, 2.2, 1);
+    clinic.castShadow = true;
+    group.add(clinic);
+
+    const clinicSign = new THREE.Mesh(new THREE.BoxGeometry(6, 0.9, 0.3), greenMat);
+    clinicSign.position.set(54, 3.6, 5.2);
+    group.add(clinicSign);
+
+    const parking = new THREE.Mesh(new THREE.BoxGeometry(44, 0.1, 14), asphaltMat);
+    parking.position.set(0, 0.36, -47);
+    group.add(parking);
+
+    [-14, 0, 14].forEach((px) => {
+      const mark = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.04, 11), whiteMat);
+      mark.position.set(px, 0.44, -47);
+      group.add(mark);
+    });
+
+    [[-66, -46], [66, -46], [-66, 48], [66, 48], [-30, 48], [30, 48]].forEach(([tx, tz]) => {
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.36, 4.2, 6), trunkMat);
+      trunk.position.set(tx, 2.4, tz);
+      group.add(trunk);
+      const crown = new THREE.Mesh(new THREE.SphereGeometry(2.3, 8, 6), leafMat);
+      crown.position.set(tx, 5.8, tz);
+      crown.castShadow = true;
+      group.add(crown);
+    });
+
+    return group;
+  }
+
+  /**
+   * 110. Mabes TNI Cilangkap
+   * Markas besar TNI: gedung markas beratap hijau, gerbang penjagaan,
+   * lapangan upacara, asrama, helipad, dan sabuk pohon kawasan.
+   */
+  static createMabesTniCilangkap() {
+    const group = new THREE.Group();
+
+    const siteMat = new THREE.MeshStandardMaterial({ color: 0xd6d3d1, roughness: 0.92 });
+    const hqMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.6 });
+    const hqRoofMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.55 });
+    const glassMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0x7dd3fc, roughness: 0.2, metalness: 0.3, transparent: true, opacity: 0.85 })
+    );
+    const concreteMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.8 });
+    const paradeMat = new THREE.MeshStandardMaterial({ color: 0xe7e5e4, roughness: 0.85 });
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
+    const redMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.5 });
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.5, metalness: 0.5 });
+    const asphaltMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.9 });
+    const leafMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.9 });
+
+    const site = new THREE.Mesh(new THREE.BoxGeometry(166, 0.3, 120), siteMat);
+    site.position.y = 0.15;
+    site.receiveShadow = true;
+    group.add(site);
+
+    const parade = new THREE.Mesh(new THREE.BoxGeometry(84, 0.1, 46), paradeMat);
+    parade.position.set(0, 0.36, 22);
+    group.add(parade);
+
+    const flag = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 18, 8), steelMat);
+    flag.position.set(0, 9.2, 22);
+    group.add(flag);
+
+    const flagCloth = new THREE.Mesh(new THREE.BoxGeometry(4.6, 2.8, 0.14), redMat);
+    flagCloth.position.set(2.5, 16.6, 22);
+    group.add(flagCloth);
+
+    const hq = new THREE.Mesh(new THREE.BoxGeometry(62, 18, 24), hqMat);
+    hq.position.set(0, 9.3, -14);
+    hq.castShadow = true;
+    hq.receiveShadow = true;
+    group.add(hq);
+
+    [6, 12.5].forEach((wy) => {
+      const band = new THREE.Mesh(new THREE.BoxGeometry(62.4, 2, 24.4), glassMat);
+      band.position.set(0, wy, -14);
+      group.add(band);
+    });
+
+    const hqRoof = new THREE.Mesh(new THREE.BoxGeometry(64, 1.1, 26), hqRoofMat);
+    hqRoof.position.set(0, 18.8, -14);
+    hqRoof.castShadow = true;
+    group.add(hqRoof);
+
+    const portico = new THREE.Mesh(new THREE.BoxGeometry(18, 7.2, 8), hqMat);
+    portico.position.set(0, 3.9, 1);
+    group.add(portico);
+
+    const porticoRoof = new THREE.Mesh(new THREE.BoxGeometry(19, 0.5, 9), hqRoofMat);
+    porticoRoof.position.set(0, 7.7, 1);
+    group.add(porticoRoof);
+
+    [-38, 38].forEach((px) => {
+      const wing = new THREE.Mesh(new THREE.BoxGeometry(22, 12, 18), hqMat);
+      wing.position.set(px, 6.3, -15);
+      wing.castShadow = true;
+      group.add(wing);
+
+      const wingBand = new THREE.Mesh(new THREE.BoxGeometry(22.4, 1.4, 18.4), glassMat);
+      wingBand.position.set(px, 6.8, -15);
+      group.add(wingBand);
+    });
+
+    const gate = new THREE.Mesh(new THREE.BoxGeometry(26, 7, 2.2), whiteMat);
+    gate.name = 'mabes-tni-cilangkap-gate';
+    gate.position.set(0, 3.8, 58);
+    gate.castShadow = true;
+    group.add(gate);
+
+    const gateRoof = new THREE.Mesh(new THREE.BoxGeometry(28, 0.8, 3.4), hqRoofMat);
+    gateRoof.position.set(0, 7.6, 58);
+    group.add(gateRoof);
+
+    const gateSign = new THREE.Mesh(new THREE.BoxGeometry(16, 2.4, 0.4), hqRoofMat);
+    gateSign.position.set(0, 5.4, 59.1);
+    group.add(gateSign);
+
+    const gateText = new THREE.Mesh(new THREE.BoxGeometry(11, 0.9, 0.2), whiteMat);
+    gateText.position.set(0, 5.4, 59.35);
+    group.add(gateText);
+
+    [-18, 18].forEach((px) => {
+      const post = new THREE.Mesh(new THREE.BoxGeometry(4.4, 4.2, 4.4), whiteMat);
+      post.position.set(px, 2.3, 56);
+      post.castShadow = true;
+      group.add(post);
+
+      const postRoof = new THREE.Mesh(new THREE.BoxGeometry(5, 0.4, 5), hqRoofMat);
+      postRoof.position.set(px, 4.6, 56);
+      group.add(postRoof);
+    });
+
+    const accessRoad = new THREE.Mesh(new THREE.BoxGeometry(16, 0.1, 34), asphaltMat);
+    accessRoad.position.set(0, 0.36, 40);
+    group.add(accessRoad);
+
+    [-52, -26, 26, 52].forEach((bx) => {
+      const barracks = new THREE.Mesh(new THREE.BoxGeometry(18, 9, 12), hqMat);
+      barracks.position.set(bx, 4.8, -48);
+      barracks.castShadow = true;
+      group.add(barracks);
+
+      const barracksRoof = new THREE.Mesh(new THREE.BoxGeometry(19, 0.5, 13), hqRoofMat);
+      barracksRoof.position.set(bx, 9.6, -48);
+      group.add(barracksRoof);
+
+      const barracksBand = new THREE.Mesh(new THREE.BoxGeometry(18.4, 0.9, 12.4), glassMat);
+      barracksBand.position.set(bx, 4.4, -48);
+      group.add(barracksBand);
+    });
+
+    const helipad = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, 0.3, 20), concreteMat);
+    helipad.position.set(58, 0.6, 12);
+    group.add(helipad);
+
+    const apron = new THREE.Mesh(new THREE.BoxGeometry(22, 0.08, 22), asphaltMat);
+    apron.position.set(58, 0.4, 12);
+    group.add(apron);
+
+    [[-74, -42], [74, -42], [-74, 52], [74, 52], [-40, 52], [40, 52], [0, -52]].forEach(([tx, tz]) => {
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.44, 5.2, 6), trunkMat);
+      trunk.position.set(tx, 2.9, tz);
+      group.add(trunk);
+      const crown = new THREE.Mesh(new THREE.SphereGeometry(2.8, 8, 6), leafMat);
+      crown.position.set(tx, 6.8, tz);
+      crown.castShadow = true;
+      group.add(crown);
+    });
+
+    return group;
+  }
+
+  /**
+   * 111. Cibubur Junction & Gerbang Cibubur
+   * Mal Cibubur: blok mal beratap melengkung, atrium kaca, deret ruko,
+   * parkir, monumen gerbang kota, dan viaduk LRT Harjamukti.
+   */
+  static createCibuburJunction() {
+    const group = new THREE.Group();
+
+    const siteMat = new THREE.MeshStandardMaterial({ color: 0xd6d3d1, roughness: 0.92 });
+    const mallMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.55 });
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, roughness: 0.4, side: THREE.DoubleSide });
+    const glassMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.18, metalness: 0.35, transparent: true, opacity: 0.85 })
+    );
+    const concreteMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.8 });
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
+    const signMat = new THREE.MeshStandardMaterial({ color: 0x0369a1, roughness: 0.5 });
+    const asphaltMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 });
+    const shopMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.7 });
+    const shopRoofMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.6 });
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.5, metalness: 0.5 });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
+    const leafMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.9 });
+
+    const site = new THREE.Mesh(new THREE.BoxGeometry(170, 0.3, 112), siteMat);
+    site.position.set(7, 0.15, 0);
+    site.receiveShadow = true;
+    group.add(site);
+
+    const mall = new THREE.Mesh(new THREE.BoxGeometry(70, 16, 40), mallMat);
+    mall.name = 'cibubur-junction-mall';
+    mall.position.set(44, 8.3, -14);
+    mall.castShadow = true;
+    mall.receiveShadow = true;
+    group.add(mall);
+
+    const atrium = new THREE.Mesh(new THREE.BoxGeometry(24, 18, 18), glassMat);
+    atrium.position.set(44, 9.3, -4);
+    group.add(atrium);
+
+    [5.2, 11.6].forEach((bandY) => {
+      const band = new THREE.Mesh(new THREE.BoxGeometry(64, 2.6, 40.4), glassMat);
+      band.position.set(44, bandY, -14);
+      group.add(band);
+    });
+
+    const barrelRoof = new THREE.Mesh(
+      new THREE.CylinderGeometry(20, 20, 72, 20, 1, true, 0, Math.PI),
+      roofMat
+    );
+    barrelRoof.rotation.z = Math.PI / 2;
+    barrelRoof.scale.set(0.34, 1.0, 1.0);
+    barrelRoof.position.set(44, 16.4, -14);
+    barrelRoof.castShadow = true;
+    group.add(barrelRoof);
+
+    const mallSign = new THREE.Mesh(new THREE.BoxGeometry(30, 3.2, 0.6), signMat);
+    mallSign.position.set(44, 13.2, 6.4);
+    group.add(mallSign);
+
+    const mallSignText = new THREE.Mesh(new THREE.BoxGeometry(21, 1.2, 0.2), whiteMat);
+    mallSignText.position.set(44, 13.2, 6.75);
+    group.add(mallSignText);
+
+    const entranceCanopy = new THREE.Mesh(new THREE.BoxGeometry(30, 0.5, 10), roofMat);
+    entranceCanopy.position.set(44, 8.6, 10);
+    entranceCanopy.castShadow = true;
+    group.add(entranceCanopy);
+
+    [32, 44, 56].forEach((px) => {
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.34, 8, 8), steelMat);
+      col.position.set(px, 4.4, 10);
+      group.add(col);
+    });
+
+    const parkingDeck = new THREE.Mesh(new THREE.BoxGeometry(46, 5, 30), concreteMat);
+    parkingDeck.position.set(-45, 2.6, -22);
+    parkingDeck.castShadow = true;
+    group.add(parkingDeck);
+
+    const parkingRail = new THREE.Mesh(new THREE.BoxGeometry(46.4, 0.5, 30.4), concreteMat);
+    parkingRail.position.set(-45, 5.3, -22);
+    group.add(parkingRail);
+
+    const surfacePark = new THREE.Mesh(new THREE.BoxGeometry(56, 0.1, 26), asphaltMat);
+    surfacePark.position.set(14, 0.36, 28);
+    group.add(surfacePark);
+
+    [-18, -6, 6, 18].forEach((px) => {
+      const mark = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.04, 22), whiteMat);
+      mark.position.set(14 + px, 0.44, 28);
+      group.add(mark);
+    });
+
+    [-44, -24, -4, 16].forEach((sx) => {
+      const shop = new THREE.Mesh(new THREE.BoxGeometry(16, 7, 12), shopMat);
+      shop.position.set(sx, 3.8, 48);
+      shop.castShadow = true;
+      group.add(shop);
+
+      const shopRoof = new THREE.Mesh(new THREE.BoxGeometry(17, 0.5, 13), shopRoofMat);
+      shopRoof.position.set(sx, 7.6, 48);
+      group.add(shopRoof);
+
+      const shopGlass = new THREE.Mesh(new THREE.BoxGeometry(16.4, 2.2, 12.4), glassMat);
+      shopGlass.position.set(sx, 4.4, 48);
+      group.add(shopGlass);
+    });
+
+    const gateway = new THREE.Mesh(new THREE.BoxGeometry(3, 22, 3), whiteMat);
+    gateway.position.set(58, 11.2, 26);
+    gateway.name = 'cibubur-junction-gateway';
+    gateway.castShadow = true;
+    group.add(gateway);
+
+    const gatewayCap = new THREE.Mesh(new THREE.SphereGeometry(3, 12, 8), signMat);
+    gatewayCap.position.set(58, 23, 26);
+    group.add(gatewayCap);
+
+    const gatewayRing = new THREE.Mesh(new THREE.TorusGeometry(5, 0.4, 8, 24), signMat);
+    gatewayRing.rotation.x = Math.PI / 2;
+    gatewayRing.position.set(58, 18.6, 26);
+    group.add(gatewayRing);
+
+    [[-62, -44], [62, -44], [-62, 34], [62, 34]].forEach(([tx, tz]) => {
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.38, 4.6, 6), trunkMat);
+      trunk.position.set(tx, 2.6, tz);
+      group.add(trunk);
+      const crown = new THREE.Mesh(new THREE.SphereGeometry(2.4, 8, 6), leafMat);
+      crown.position.set(tx, 6.2, tz);
+      crown.castShadow = true;
+      group.add(crown);
+    });
+
+    return group;
+  }
 }
 
 

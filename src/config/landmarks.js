@@ -2365,6 +2365,141 @@ export const JAKARTA_LANDMARKS = [
       "Kompleksnya terdiri atas 78 blok empat lantai yang membentang sekitar 1,4 kilometer di atas lahan sekitar 4 hektare.",
       "Rusun Klender dihuni ribuan keluarga dan dilengkapi musala, sekolah, pos kesehatan, serta ruang terbuka bersama."
     ]
+  },
+  // =====================================================
+  // ZONA 13: VOID G — PASAR REBO, CIRACAS, CIPAYUNG & CIBUBUR
+  // =====================================================
+  {
+    id: "terminal-kampung-rambutan",
+    name: "Terminal Kampung Rambutan",
+    shortName: "Terminal Kampung Rambutan",
+    category: "Terminal Bus Tipe A",
+    tagline: "Terminal AKAP Ciracas, Dermaga Berkanopi & Simpul Jl. Raya Bogor",
+    height: "18 meter (Hall & Kanopi Dermaga)",
+    year: "1989 (Revitalisasi 2017)",
+    architect: "Pemerintah Provinsi DKI Jakarta",
+    location: "Jl. Raya Bogor KM 20, Rambutan, Ciracas, Jakarta Timur",
+    coordinates: { lat: -6.3102, lng: 106.8840 },
+    position: [860.0, 0, 1634.0],
+    labelHeight: 30,
+    cameraPosition: [860, 92, 1768],
+    cameraTarget: [860, 8, 1634],
+    description: "Terminal tipe A di Ciracas yang menjadi gerbang bus antarkota dari timur Jakarta. Menampilkan hall tunggu panjang, deretan dermaga bus berkanopi, lajur AKAP dan angkutan kota, bus-bus besar yang mengantre, musala, dek parkir, serta deret ruko dan permukiman padat di tepi Jl. Raya Bogor.",
+    facts: [
+      "Terminal Kampung Rambutan mulai beroperasi pada 1989 di Ciracas, Jakarta Timur dan menjadi salah satu terminal tipe A tersibuk di Jakarta.",
+      "Terminal ini melayani bus AKAP, AKDP, dan angkutan kota, serta terhubung dengan koridor BRT dan LRT Jabodebek melalui halte di Jl. Raya Bogor.",
+      "Revitalisasi pada 2017 menambah dermaga berkanopi, hall tunggu yang lebih lega, dan area parkir bertingkat."
+    ]
+  },
+  {
+    id: "rsud-pasar-rebo",
+    name: "RSUD Pasar Rebo",
+    shortName: "RSUD Pasar Rebo",
+    category: "Rumah Sakit Umum Daerah",
+    tagline: "RS Rujukan Jakarta Timur di Tepi Jl. TB Simatupang",
+    height: "32 meter (Gedung Rawat Inap)",
+    year: "1981 (Gedung Baru 2012)",
+    architect: "Pemerintah Provinsi DKI Jakarta",
+    location: "Jl. TB Simatupang No. 30, Pasar Rebo, Jakarta Timur",
+    coordinates: { lat: -6.3036, lng: 106.8622 },
+    position: [552.0, 0, 1541.0],
+    labelHeight: 28,
+    cameraPosition: [552, 72, 1658],
+    cameraTarget: [552, 8, 1541],
+    description: "Rumah sakit umum daerah di Pasar Rebo yang menjadi rujukan warga Jakarta Timur. Menampilkan menara rawat inap berjendela berjajar, gedung gawat darurat, instalasi kesehatan, helipad, area parkir ambulans, taman penyembuhan, serta gerbang layanan di tepi Jl. TB Simatupang.",
+    facts: [
+      "RSUD Pasar Rebo adalah rumah sakit umum daerah milik Pemprov DKI yang menjadi rujukan warga Jakarta Timur.",
+      "Rumah sakit ini berdiri sejak 1981 dan terus dikembangkan dengan gedung rawat inap serta layanan gawat darurat modern.",
+      "Lokasinya di tepi Jl. TB Simatupang memudahkan akses dari Pasar Rebo, Ciracas, dan kawasan Jakarta Selatan."
+    ]
+  },
+  {
+    id: "stasiun-lrt-ciracas",
+    name: "Stasiun LRT Ciracas",
+    shortName: "LRT Ciracas",
+    category: "Stasiun LRT & Simpul Timur",
+    tagline: "Lin Cibubur, Viaduk 15 Meter & Gerbang Ciracas",
+    height: "22 meter (Viaduk & Peron)",
+    year: "2023",
+    architect: "PT Kereta Api Indonesia & Kementerian Perhubungan",
+    location: "Jl. Raya Bogor, Ciracas, Jakarta Timur",
+    coordinates: { lat: -6.3238, lng: 106.8866 },
+    position: [896.0, 0, 1827.0],
+    labelHeight: 26,
+    cameraPosition: [896, 62, 1938],
+    cameraTarget: [896, 15, 1827],
+    description: "Stasiun LRT Jabodebek Lin Cibubur yang melayang di atas Jl. Raya Bogor. Menampilkan viaduk beton setinggi 15 meter, peron pulau berkanopi, tangga dan lift akses, ruang loket, jembatan penyeberangan, serta deret ruko dan permukiman Ciracas yang padat di bawah viaduk.",
+    facts: [
+      "Stasiun LRT Ciracas melayani Lin Cibubur Jabodebek dan mulai beroperasi penuh pada 2023.",
+      "Peronnya berada di atas viaduk setinggi sekitar 15 meter sehingga terlihat jelas dari Jl. Raya Bogor.",
+      "Stasiun ini menghubungkan warga Ciracas dan Cipayung menuju Cawang, Dukuh Atas, hingga Harjamukti."
+    ]
+  },
+  {
+    id: "rusun-ciracas",
+    name: "Rusun Ciracas",
+    shortName: "Rusun Ciracas",
+    category: "Rumah Susun & Permukiman",
+    tagline: "Blok Walk-Up Ciracas & Hunian Warga Jakarta Timur",
+    height: "16 meter (Blok Walk-Up Lima Lantai)",
+    year: "2003",
+    architect: "Dinas Perumahan Provinsi DKI Jakarta",
+    location: "Jl. Raya Poncol, Ciracas, Jakarta Timur",
+    coordinates: { lat: -6.3261, lng: 106.8684 },
+    position: [639.0, 0, 1860.0],
+    labelHeight: 24,
+    cameraPosition: [639, 56, 1968],
+    cameraTarget: [639, 6, 1860],
+    description: "Kompleks rumah susun sewa di Ciracas yang menampung ribuan warga Jakarta Timur. Menampilkan deretan blok walk-up lima lantai beratap pelana, tangga bersama, koridor antar-blok, musala, taman bermain, lapangan parkir, pos kesehatan, serta pepohonan peneduh di sepanjang jalur hunian.",
+    facts: [
+      "Rusun Ciracas dibangun oleh Pemprov DKI untuk merelokasi warga dari permukiman padat di bantaran kali.",
+      "Kompleks ini terdiri atas deretan blok walk-up dengan fasilitas musala, taman bermain, dan pos kesehatan.",
+      "Rusun Ciracas berada di Kelurahan Ciracas, dekat Stasiun LRT Ciracas dan Terminal Kampung Rambutan."
+    ]
+  },
+  {
+    id: "mabes-tni-cilangkap",
+    name: "Mabes TNI Cilangkap",
+    shortName: "Mabes TNI",
+    category: "Instalasi Pertahanan & Pemerintahan",
+    tagline: "Markas Besar TNI di Cilangkap, Cipayung",
+    height: "26 meter (Gedung Utama)",
+    year: "1999 (Pemindahan Mabes TNI)",
+    architect: "Pemerintah Republik Indonesia",
+    location: "Jl. Raya Cilangkap, Cilangkap, Cipayung, Jakarta Timur",
+    coordinates: { lat: -6.3283401, lng: 106.9135176 },
+    position: [1276.0, 0, 1891.0],
+    labelHeight: 30,
+    cameraPosition: [1276, 84, 2012],
+    cameraTarget: [1276, 8, 1891],
+    description: "Kompleks markas besar TNI di Cilangkap yang menjadi pusat komando pertahanan nasional. Menampilkan gedung markas bertingkat, gerbang utama berpenjagaan, lapangan upacara, asrama, fasilitas pendidikan, helipad, serta deretan pohon besar yang menutupi sebagian kawasan hijau markas.",
+    facts: [
+      "Mabes TNI Cilangkap menjadi pusat komando TNI setelah dipindahkan dari kawasan pusat kota pada akhir 1990-an.",
+      "Kompleks markas mencakup gedung markas besar, lapangan upacara, asrama, dan fasilitas pendidikan TNI.",
+      "Kawasan Cilangkap berada di Kecamatan Cipayung, Jakarta Timur, dekat perbatasan dengan Depok."
+    ]
+  },
+  {
+    id: "cibubur-junction",
+    name: "Cibubur Junction & Gerbang Cibubur",
+    shortName: "Cibubur Junction",
+    category: "Pusat Perbelanjaan & Gerbang Kota",
+    tagline: "Mal Cibubur & Simpul Warga Jakarta–Depok",
+    height: "20 meter (Atrium & Menara Mal)",
+    year: "2008",
+    architect: "Pengembang swasta",
+    location: "Jl. Raya Cibubur, Harjamukti, Cimanggis, Depok (perbatasan Jakarta)",
+    coordinates: { lat: -6.3718, lng: 106.8949 },
+    position: [1013.0, 0, 2508.0],
+    labelHeight: 34,
+    cameraPosition: [1032, 98, 2638],
+    cameraTarget: [1032, 10, 2508],
+    description: "Pusat perbelanjaan di Cibubur yang menjadi penanda gerbang tenggara Jakarta. Menampilkan blok mal beratap melengkung dengan atrium kaca, deret ruko, area parkir luas, gerbang tol dan terminal di sekitarnya, serta viaduk LRT Harjamukti yang melintas di atas Jl. Raya Cibubur.",
+    facts: [
+      "Cibubur Junction adalah pusat perbelanjaan yang menjadi penanda kawasan Cibubur di perbatasan Jakarta dan Depok.",
+      "Kawasan ini dilayani Stasiun LRT Harjamukti dan Terminal Cibubur sehingga menjadi simpul perjalanan warga Jabodetabek.",
+      "Meski bernama Cibubur, sebagian kawasan mal dan terminalnya berada di Harjamukti, Cimanggis, Depok."
+    ]
   }
 ];
 
