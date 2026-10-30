@@ -69,7 +69,7 @@ Semua perbaikan dikunci oleh **Check 40** di `test_landmarks.js`: posisi kamera 
 - **Bundaran HI**: menara dan vegetasi di foreground menutupi sebagian kolam; monumen tetap terbaca, tetapi komposisi bisa lebih bersih.
 - **Simpang Semanggi**: kamera sangat dekat dengan ring flyover sehingga ring mendominasi frame dan sisi timurnya terpotong gedung. Label tetap terlihat.
 - **TMII**: preset masih berupa close-up dua kolam miniatur; label utama (setinggi 65 unit) berada di luar frame. Perbaikan yang disarankan: tarik kamera ke belakang ±150 unit dan naikkan target agar label masuk.
-- **Malam Danau Rawa Buaya & Kelapa Gading**: pemandangan sangat gelap; lampu taman/PJU dan aksen fasad minim. Perlu pass pencahayaan malam khusus, bukan sekadar perbaikan kamera. **Sebagian ditutup 2026-10-30:** aksen fasad dan pita jendela Mall Kelapa Gading sudah menyala (lihat di bawah); PJU kawasan Kelapa Gading dan Danau Rawa Buaya masih menjadi pekerjaan terpisah karena seluruh 193 lampu berada di x ≈ 300 (Void B).
+- **Malam Danau Rawa Buaya & Kelapa Gading**: pemandangan sangat gelap; lampu taman/PJU dan aksen fasad minim. Perlu pass pencahayaan malam khusus, bukan sekadar perbaikan kamera. **Ditutup 2026-10-30:** aksen fasad dan pita jendela Mall Kelapa Gading menyala (lihat P3 di bawah), lalu **42 lampu PJU distrik** dipasang — 20 di Jl. Boulevard Raya Kelapa Gading, 14 di Jl. Boulevard Barat Raya, dan 8 di ring Danau Rawa Buaya — sehingga total 235 lampu, tetap dua `InstancedMesh` dan pool 12 `PointLight`. Rerata luma malam Kelapa Gading **37,2 → 39,4**, Danau Rawa Buaya **32,9 → 33,9**. Sisa: badan air danau masih gelap (material air belum punya emissive malam).
 
 ### P3 — catatan kecil
 
@@ -81,6 +81,6 @@ Semua perbaikan dikunci oleh **Check 40** di `test_landmarks.js`: posisi kamera 
 
 1. **Void C boleh dimulai.** Tidak ada P0; seluruh P1 sudah diperbaiki dan diverifikasi lewat screenshot dari source final.
 2. Tambahkan **regresi visual otomatis** (diff screenshot terhadap baseline ini) saat ada GPU/lingkungan headless yang stabil; baseline saat ini adalah referensi manual.
-3. Jadwalkan **pass pencahayaan malam** untuk Void B dan koridor Kelapa Gading bersamaan dengan pengembangan Void D/E.
+3. **Pass pencahayaan malam** kelapa Gading dan Danau Rawa Buaya selesai 2026-10-30 (PJU distrik + aksen mall). Berikutnya: masukkan PJU gabungan Void B/C/D/E ke pool lampu dan beri material malam pada badan air.
 4. Perbaiki komposisi **TMII** (P2) pada kesempatan berikutnya; tidak menghalangi Void C.
 5. Gunakan statistik **per sudut pandang** dalam klaim performa; jangan menyebut satu angka draw call global.

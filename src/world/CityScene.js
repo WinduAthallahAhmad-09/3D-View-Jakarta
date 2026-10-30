@@ -105,6 +105,7 @@ export class CityScene {
     this.buildEastJakartaInfillAndDistricts();
     this.buildLandmarks();
     this.buildUrbanDistricts();
+    this.buildDistrictPju();
     this.buildStreetVegetation();
     this.buildStreetLampInstances();
     this.buildPjuLightPool();
@@ -2357,8 +2358,37 @@ export class CityScene {
     this.proceduralGroup.add(bidakaraGroup);
   }
 
-  createStreetLamp(x, z, facingEast) {
-    this.pjuLampTransforms.push({ x, z, facingEast });
+  createStreetLamp(x, z, facingEast, arm = null) {
+    this.pjuLampTransforms.push({
+      x,
+      z,
+      facingEast,
+      armX: arm ? arm.x : (facingEast ? 2 : -2),
+      armZ: arm ? arm.z : 0
+    });
+  }
+
+  /** PJU distrik Kelapa Gading & ring Danau Rawa Buaya, tanpa draw call/PointLight baru. */
+  buildDistrictPju() {
+    const addLamp = (x, z, armX, armZ) => {
+      this.createStreetLamp(x, z, armX >= 0, { x: armX, z: armZ });
+    };
+    for (let z = -250; z >= -760; z -= 38) {
+      if (Math.abs(z + 531) < 65) continue;
+      addLamp(1184.5, z, 2, 0);
+      addLamp(1211.5, z, -2, 0);
+    }
+    for (let x = 956; x <= 1344; x += 42) {
+      if (x > 1140 && x < 1255) continue;
+      addLamp(x, -519.5, 0, -2);
+      addLamp(x, -542.5, 0, 2);
+    }
+    const lakeLamps = [
+      [-1112, -366, 0, -2], [-1092, -366, 0, -2], [-1072, -366, 0, -2],
+      [-1112, -434, 0, 2], [-1092, -434, 0, 2], [-1072, -434, 0, 2],
+      [-1128, -384, 2, 0], [-1128, -416, 2, 0]
+    ];
+    lakeLamps.forEach(([x, z, armX, armZ]) => addLamp(x, z, armX, armZ));
   }
 
   buildStreetLampInstances() {
@@ -2391,7 +2421,7 @@ export class CityScene {
       dummy.updateMatrix();
       poleMesh.setMatrixAt(index, dummy.matrix);
 
-      dummy.position.set(lamp.x + (lamp.facingEast ? 2.0 : -2.0), 8.5, lamp.z);
+      dummy.position.set(lamp.x + lamp.armX, 8.5, lamp.z + lamp.armZ);
       dummy.updateMatrix();
       bulbMesh.setMatrixAt(index, dummy.matrix);
     });
@@ -2415,7 +2445,7 @@ export class CityScene {
 
   /**
    * Keep only the nearest PJU lights active at night so the shader never
-   * evaluates all 193 lamps. Refreshes after the camera moves 15 units.
+   * evaluates every lamp in the full set. Refreshes after the camera moves 15 units.
    */
   updatePjuLights(cameraPosition) {
     if (this.currentTimePreset === 'day') {
@@ -2437,8 +2467,8 @@ export class CityScene {
 
     const nearest = this.pjuLampTransforms
       .map((lamp) => {
-        const x = lamp.x + (lamp.facingEast ? 2.0 : -2.0);
-        const z = lamp.z;
+        const x = lamp.x + lamp.armX;
+        const z = lamp.z + lamp.armZ;
         return { x, z, d: (x - cameraPosition.x) ** 2 + (z - cameraPosition.z) ** 2 };
       })
       .sort((a, b) => a.d - b.d);

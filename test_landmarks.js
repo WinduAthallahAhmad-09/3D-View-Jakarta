@@ -1298,7 +1298,7 @@ assert.ok(citySceneContent.includes('this.buildStreetLampInstances();'), 'CitySc
 assert.ok(citySceneContent.includes('this.buildPjuLightPool();'), 'CityScene.js does not build the PJU light pool');
 assert.ok(!citySceneContent.includes('this.streetLights'), 'CityScene.js still creates per-lamp PointLights');
 
-const lampStart = citySceneContent.indexOf('createStreetLamp(x, z, facingEast) {');
+const lampStart = citySceneContent.indexOf('createStreetLamp(x, z, facingEast, arm = null) {');
 const lampEnd = citySceneContent.indexOf('\n  buildStreetLampInstances() {', lampStart);
 assert.ok(lampStart > 0 && lampEnd > lampStart, 'Cannot isolate createStreetLamp');
 const lampMethod = citySceneContent.slice(lampStart, lampEnd);
@@ -2738,7 +2738,58 @@ assert.ok(
   'buildLandmarks must forward the tagged night emissive colour'
 );
 
-console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 60: PJU malam distrik — boulevard Kelapa Gading & ring Danau Rawa Buaya
+const districtPjuStart = citySceneContent.indexOf('buildDistrictPju() {');
+assert.ok(districtPjuStart > 0, 'CityScene.js missing buildDistrictPju');
+const districtPjuEnd = citySceneContent.indexOf('\n  buildStreetLampInstances() {', districtPjuStart);
+assert.ok(districtPjuEnd > districtPjuStart, 'Cannot isolate buildDistrictPju');
+const districtPjuMethod = citySceneContent.slice(districtPjuStart, districtPjuEnd);
+
+assert.ok(
+  citySceneContent.indexOf('this.buildDistrictPju();') > citySceneContent.indexOf('this.buildUrbanDistricts();'),
+  'buildDistrictPju must run after the urban districts'
+);
+assert.ok(
+  citySceneContent.indexOf('this.buildDistrictPju();') < citySceneContent.indexOf('this.buildStreetLampInstances();'),
+  'buildDistrictPju must run before the PJU instances are baked'
+);
+for (const token of [
+  'for (let z = -250; z >= -760; z -= 38)',
+  'Math.abs(z + 531) < 65',
+  'addLamp(1184.5, z, 2, 0);',
+  'addLamp(1211.5, z, -2, 0);',
+  'for (let x = 956; x <= 1344; x += 42)',
+  'if (x > 1140 && x < 1255) continue;',
+  'addLamp(x, -519.5, 0, -2);',
+  'addLamp(x, -542.5, 0, 2);',
+  '[-1112, -366, 0, -2]',
+  '[-1072, -434, 0, 2]',
+  '[-1128, -384, 2, 0]',
+  'lakeLamps.forEach(([x, z, armX, armZ]) => addLamp(x, z, armX, armZ));'
+]) {
+  assert.ok(districtPjuMethod.includes(token), `buildDistrictPju missing ${token}`);
+}
+assert.ok(!districtPjuMethod.includes('PointLight'), 'District PJU must not add PointLights');
+
+assert.ok(
+  lampMethod.includes('armX: arm ? arm.x : (facingEast ? 2 : -2),') &&
+    lampMethod.includes('armZ: arm ? arm.z : 0'),
+  'createStreetLamp must store an optional arm vector'
+);
+assert.ok(
+  instancedLampMethod.includes('lamp.x + lamp.armX') && instancedLampMethod.includes('lamp.z + lamp.armZ'),
+  'Instanced PJU bulbs must use the stored arm vector'
+);
+assert.ok(
+  pjuUpdateMethod.includes('lamp.x + lamp.armX') && pjuUpdateMethod.includes('lamp.z + lamp.armZ'),
+  'PJU light pool must follow the stored arm vector'
+);
+assert.ok(
+  citySceneContent.includes('this.pjuLightPoolSize = 12;'),
+  'District PJU must reuse the capped 12-light pool'
+);
+
+console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
