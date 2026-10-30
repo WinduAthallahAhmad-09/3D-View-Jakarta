@@ -2338,7 +2338,7 @@ assert.ok(voidETransitMethod.includes('parkingBays'), 'Void E transit stats must
   'Jalan Jayapura',
   'Medan',
   'Jalan Komplek Militer',
-  'Jalan Cakung Cilincing Timur',
+  'Jalan Cakung Cilincing Barat',
   'Jalan Malaka IV HB'
 ].forEach((name) => {
   assert.ok(voidETransitMethod.includes(name), `Void E transit missing the ${name} halte corridor`);
@@ -2674,7 +2674,19 @@ const voidBRoofInfill = citySceneContent.slice(
   );
 });
 
-console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 58: peron Halte KBN Cakung di bahu luar barat, bukan di jahitan dua koridor
+assert.ok(
+  voidETransitMethod.includes(
+    "{ name: 'Halte KBN Cakung', shortName: 'KBN Cakung', road: 'Jalan Cakung Cilincing Barat', near: [1640, -700], side: 1 }"
+  ),
+  'Halte KBN Cakung must anchor to the west shoulder of Jalan Cakung Cilincing Barat'
+);
+assert.ok(
+  !voidETransitMethod.includes("road: 'Jalan Cakung Cilincing Timur'"),
+  'Halte KBN Cakung must not return to the Cilincing Timur carriageway seam'
+);
+
+console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

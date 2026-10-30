@@ -7482,7 +7482,11 @@ export class CityScene {
       { name: 'Halte Rumah Si Pitung', shortName: 'Rumah Si Pitung', road: 'Jalan Jayapura', near: [1859, -1400], side: -1 },
       { name: 'Halte Kawasan Logistik Marunda', shortName: 'Logistik Marunda', road: 'Medan', near: [1690, -1063], side: -1 },
       { name: 'Halte Rusunawa Nagrak', shortName: 'Rusunawa Nagrak', road: 'Jalan Komplek Militer', near: [1828, -1046], side: 1 },
-      { name: 'Halte KBN Cakung', shortName: 'KBN Cakung', road: 'Jalan Cakung Cilincing Timur', near: [1640, -700], side: -1 },
+      // Dua ruas trunk 16 unit di sini nyaris tumpang tindih (selisih centerline
+      // 7,1), sehingga sisi -1 pada Timur jatuh tepat di centerline Barat dan
+      // peron terbaca sebagai median. Bahu luar barat menghadap tapak KBN dan
+      // bebas dari jahitan dua koridor.
+      { name: 'Halte KBN Cakung', shortName: 'KBN Cakung', road: 'Jalan Cakung Cilincing Barat', near: [1640, -700], side: 1 },
       // Jalan Rorotan XI seluruhnya berjalan di bawah pelat tapak kampung dan
       // hanya menyisakan 3,6 unit di luar pelat, jadi peron berlabuh di bahu
       // barat Jalan Malaka IV HB sembilan unit dari simpang gerbang kampung.
