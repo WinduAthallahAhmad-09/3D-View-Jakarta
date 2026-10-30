@@ -2394,7 +2394,7 @@ assert.ok(transitCss.includes('.transit-badge {'), 'Transit pin badge style miss
 assert.ok(transitCss.includes('.transit-pin.is-park .transit-badge'), 'Park-and-ride badge style missing');
 assert.ok(transitCss.includes('.transit-pin.is-compact .transit-text'), 'Transit pin compact mode missing');
 assert.ok(
-  mainJsContent.includes('transitLabels: this.city.voidETransitLabels'),
+  mainJsContent.includes('...this.city.voidETransitLabels'),
   'main.js must pass the transit label anchors to UIManager'
 );
 
@@ -2488,7 +2488,90 @@ assert.ok(
   'buildLandmarks must forward the tagged night intensity'
 );
 
-console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 56: label DOM transit Void C dan D — paritas dengan tujuh pin Void E
+assert.ok(
+  citySceneContent.includes('this.voidCTransitLabels = [];') &&
+    citySceneContent.includes('this.voidDTransitLabels = [];'),
+  'CityScene must initialise the Void C/D transit label arrays'
+);
+
+assert.ok(voidCTransitMethod.includes('const halteLabels = [];'), 'Void C transit must collect halte labels');
+assert.ok(voidCTransitMethod.includes('halteLabels.push({'), 'Void C transit must emit one label per halte');
+assert.ok(
+  voidCTransitMethod.includes('position: [hx, 6.4, hz]'),
+  'Void C halte labels must float above the canopy'
+);
+assert.ok(
+  voidCTransitMethod.includes('shortName: spec.shortName,'),
+  'Void C halte labels must forward the short name'
+);
+assert.ok(
+  voidCTransitMethod.includes('this.voidCTransitLabels = ['),
+  'Void C transit must publish its label anchors'
+);
+assert.ok(
+  voidCTransitMethod.includes("shortName: 'P&R Kembangan'"),
+  'Void C park-and-ride label missing the short name'
+);
+assert.ok(
+  voidCTransitMethod.includes('position: [prCenterX, 7.6, prCenterZ]'),
+  'Void C park-and-ride label must clear the shelter roof'
+);
+assert.ok(
+  voidCTransitMethod.includes("kind: 'park'"),
+  'Void C park-and-ride label must use the P badge'
+);
+['Meruya Ilir', 'Joglo Raya', 'Ciledug Raya', 'Puri Kembangan'].forEach((name) => {
+  assert.ok(
+    voidCTransitMethod.includes(`shortName: '${name}'`),
+    `Void C halte label missing the ${name} short name`
+  );
+});
+
+assert.ok(voidDTransitMethod.includes('const halteLabels = [];'), 'Void D transit must collect halte labels');
+assert.ok(voidDTransitMethod.includes('halteLabels.push({'), 'Void D transit must emit one label per halte');
+assert.ok(
+  voidDTransitMethod.includes('position: [hx, 6.4, hz]'),
+  'Void D halte labels must float above the canopy'
+);
+assert.ok(
+  voidDTransitMethod.includes('shortName: spec.shortName,'),
+  'Void D halte labels must forward the short name'
+);
+assert.ok(
+  voidDTransitMethod.includes('this.voidDTransitLabels = ['),
+  'Void D transit must publish its label anchors'
+);
+assert.ok(
+  voidDTransitMethod.includes("name: 'Park and Ride TWA Angke Kapuk'"),
+  'Void D park-and-ride label missing the full name'
+);
+assert.ok(
+  voidDTransitMethod.includes("shortName: 'P&R TWA Angke Kapuk'"),
+  'Void D park-and-ride label missing the short name'
+);
+assert.ok(
+  voidDTransitMethod.includes('position: [prCenterX, 7.6, prCenterZ]'),
+  'Void D park-and-ride label must clear the shelter roof'
+);
+['PIK Avenue', 'TWA Angke Kapuk', 'Kapuk Raya', 'Kapuk Muara', 'Teluk Gong', 'Muara Baru'].forEach(
+  (name) => {
+    assert.ok(
+      voidDTransitMethod.includes(`shortName: '${name}'`),
+      `Void D halte label missing the ${name} short name`
+    );
+  }
+);
+
+assert.ok(
+  mainJsContent.includes('transitLabels: [') &&
+    mainJsContent.includes('...this.city.voidCTransitLabels') &&
+    mainJsContent.includes('...this.city.voidDTransitLabels') &&
+    mainJsContent.includes('...this.city.voidETransitLabels'),
+  'main.js must forward all three transit label arrays to UIManager'
+);
+
+console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

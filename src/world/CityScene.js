@@ -25,6 +25,8 @@ export class CityScene {
     this.vehicleMeshes = null;
     this.vehicleDummy = new THREE.Object3D();
     this.animatedTrains = [];
+    this.voidCTransitLabels = [];
+    this.voidDTransitLabels = [];
     this.voidETransitLabels = [];
     this.pjuLampTransforms = [];
     this.pjuLightPool = [];
@@ -5178,6 +5180,7 @@ export class CityScene {
     const steelGeos = [];
     const signGeos = [];
     const treePositions = [];
+    const halteLabels = [];
 
     const makeBox = (w, h, d, x, y, z, rotY = 0, target = concreteGeos) => {
       const geo = new THREE.BoxGeometry(w, h, d);
@@ -5257,10 +5260,10 @@ export class CityScene {
     // 2. EMPAT FEEDER HALTE DI KORIDOR OSM
     // =========================================================================
     const halteSpecs = [
-      { name: 'Halte Meruya Ilir', road: 'Jalan Meruya Ilir', near: [-1124, 39], side: 1 },
-      { name: 'Halte Joglo Raya', road: 'Jalan Joglo Raya', near: [-1253, 354], side: -1 },
-      { name: 'Halte Ciledug Raya', road: 'Jalan Ciledug Raya', near: [-1257, 538], side: 1 },
-      { name: 'Halte Puri Kembangan', road: 'Jalan Puri Kembangan', near: [-1046, -220], side: -1 }
+      { name: 'Halte Meruya Ilir', shortName: 'Meruya Ilir', road: 'Jalan Meruya Ilir', near: [-1124, 39], side: 1 },
+      { name: 'Halte Joglo Raya', shortName: 'Joglo Raya', road: 'Jalan Joglo Raya', near: [-1253, 354], side: -1 },
+      { name: 'Halte Ciledug Raya', shortName: 'Ciledug Raya', road: 'Jalan Ciledug Raya', near: [-1257, 538], side: 1 },
+      { name: 'Halte Puri Kembangan', shortName: 'Puri Kembangan', road: 'Jalan Puri Kembangan', near: [-1046, -220], side: -1 }
     ];
 
     const findRoadPoint = (roadName, near) => {
@@ -5314,6 +5317,14 @@ export class CityScene {
       const postZ = hz + 4.8 * Math.cos(road.angle);
       makeBox(0.14, 2.5, 0.14, postX, 1.6, postZ, 0, steelGeos);
       makeBox(0.12, 1.0, 2.4, postX, 2.35, postZ, road.angle, signGeos);
+
+      // Anchor label DOM mengambang 3,1 unit di atas kanopi (puncak y 3,31).
+      halteLabels.push({
+        name: spec.name,
+        shortName: spec.shortName,
+        kind: 'halte',
+        position: [hx, 6.4, hz]
+      });
     });
 
     // =========================================================================
@@ -5377,6 +5388,16 @@ export class CityScene {
       this.proceduralGroup.add(trunkMesh);
       this.proceduralGroup.add(foliageMesh);
     }
+
+    this.voidCTransitLabels = [
+      {
+        name: 'Park and Ride Kembangan',
+        shortName: 'P&R Kembangan',
+        kind: 'park',
+        position: [prCenterX, 7.6, prCenterZ]
+      },
+      ...halteLabels
+    ];
 
     this.voidCTransitStats = {
       parkAndRide: 'Park and Ride Kembangan',
@@ -7055,6 +7076,7 @@ export class CityScene {
     const steelGeos = [];
     const signGeos = [];
     const treePositions = [];
+    const halteLabels = [];
 
     const makeBox = (w, h, d, x, y, z, rotY = 0, target = concreteGeos) => {
       const geo = new THREE.BoxGeometry(w, h, d);
@@ -7137,12 +7159,12 @@ export class CityScene {
     // 2. ENAM FEEDER HALTE DI KORIDOR OSM
     // =========================================================================
     const halteSpecs = [
-      { name: 'Halte PIK Avenue', road: 'Jalan Pantai Indah Kapuk', near: [-1180, -1200], side: -1 },
-      { name: 'Halte TWA Angke Kapuk', road: 'Jalan Pantai Indah Utara 2', near: [-870, -1119], side: 1 },
-      { name: 'Halte Kapuk Raya', road: 'Jalan Kapuk Raya', near: [-1050, -880], side: 1 },
-      { name: 'Halte Kapuk Muara', road: 'Jalan Kapuk Muara Raya', near: [-672, -900], side: 1 },
-      { name: 'Halte Teluk Gong', road: 'Jalan Teluk Gong Raya', near: [-660, -808], side: 1 },
-      { name: 'Halte Muara Baru', road: 'Jalan Pluit Utara Raya', near: [-480, -1172], side: 1 }
+      { name: 'Halte PIK Avenue', shortName: 'PIK Avenue', road: 'Jalan Pantai Indah Kapuk', near: [-1180, -1200], side: -1 },
+      { name: 'Halte TWA Angke Kapuk', shortName: 'TWA Angke Kapuk', road: 'Jalan Pantai Indah Utara 2', near: [-870, -1119], side: 1 },
+      { name: 'Halte Kapuk Raya', shortName: 'Kapuk Raya', road: 'Jalan Kapuk Raya', near: [-1050, -880], side: 1 },
+      { name: 'Halte Kapuk Muara', shortName: 'Kapuk Muara', road: 'Jalan Kapuk Muara Raya', near: [-672, -900], side: 1 },
+      { name: 'Halte Teluk Gong', shortName: 'Teluk Gong', road: 'Jalan Teluk Gong Raya', near: [-660, -808], side: 1 },
+      { name: 'Halte Muara Baru', shortName: 'Muara Baru', road: 'Jalan Pluit Utara Raya', near: [-480, -1172], side: 1 }
     ];
 
     const findRoadPoint = (roadName, near) => {
@@ -7200,6 +7222,14 @@ export class CityScene {
       const postZ = hz + 4.8 * cosA;
       makeBox(0.14, 2.5, 0.14, postX, 1.6, postZ, 0, steelGeos);
       makeBox(0.12, 1.0, 2.4, postX, 2.35, postZ, road.angle, signGeos);
+
+      // Anchor label DOM mengambang 3,1 unit di atas kanopi (puncak y 3,31).
+      halteLabels.push({
+        name: spec.name,
+        shortName: spec.shortName,
+        kind: 'halte',
+        position: [hx, 6.4, hz]
+      });
     });
 
     // =========================================================================
@@ -7263,6 +7293,16 @@ export class CityScene {
       this.proceduralGroup.add(trunkMesh);
       this.proceduralGroup.add(foliageMesh);
     }
+
+    this.voidDTransitLabels = [
+      {
+        name: 'Park and Ride TWA Angke Kapuk',
+        shortName: 'P&R TWA Angke Kapuk',
+        kind: 'park',
+        position: [prCenterX, 7.6, prCenterZ]
+      },
+      ...halteLabels
+    ];
 
     this.voidDTransitStats = {
       parkAndRide: 'Park and Ride TWA Angke Kapuk',

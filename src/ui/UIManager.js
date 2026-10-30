@@ -319,7 +319,7 @@ export class UIManager {
   }
 
   /**
-   * Secondary DOM pins for Void E feeder halte and Park and Ride Marunda.
+   * Secondary DOM pins for Void C/D/E feeder halte and park-and-ride.
    * Non-interactive so they never block 3D picking underneath them.
    */
   initTransitLabels() {

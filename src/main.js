@@ -166,7 +166,11 @@ class JakartaApp {
 
     // 5. User Interface Manager
     this.ui = new UIManager({
-      transitLabels: this.city.voidETransitLabels,
+      transitLabels: [
+        ...this.city.voidCTransitLabels,
+        ...this.city.voidDTransitLabels,
+        ...this.city.voidETransitLabels
+      ],
       onSelectPreset: (preset) => {
         if (preset.cameraPosition && preset.cameraTarget) {
           this.cameraController.flyTo(
