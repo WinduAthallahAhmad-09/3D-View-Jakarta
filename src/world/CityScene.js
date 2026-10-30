@@ -8,6 +8,7 @@ import { VOID_C_OSM } from '../data/void_c_osm.js';
 import { VOID_D_OSM } from '../data/void_d_osm.js';
 import { VOID_E_OSM } from '../data/void_e_osm.js';
 import { VOID_F_OSM } from '../data/void_f_osm.js';
+import { VOID_G_OSM } from '../data/void_g_osm.js';
 
 const VOID_C_CONNECTOR_PATHS = [
   [[-1043.2, -422.7], [-1030, -414.5], [-1000, -412.5], [-975, -412.5], [-955, -413.5]],
@@ -90,6 +91,16 @@ const VOID_F_ANCHOR_SITES = [
   [1728, 1922, 172, 306],  // Pulo Gebang
   [1149, 1333, -74, 70],   // JIEP
   [1435, 1543, 357, 413]   // Rusun Klender
+];
+
+// Tapak enam anchor Void G; jalan tetap digambar utuh di bawah pelat tapak.
+const VOID_G_ANCHOR_SITES = [
+  [772, 948, 1576, 1692],   // Terminal Kampung Rambutan
+  [479, 625, 1486, 1596],   // RSUD Pasar Rebo
+  [844, 948, 1794, 1860],   // Stasiun LRT Ciracas
+  [564, 714, 1804, 1916],   // Rusun Ciracas
+  [1193, 1359, 1831, 1951], // Mabes TNI Cilangkap
+  [935, 1105, 2452, 2564]   // Cibubur Junction
 ];
 
 // OBB overlap untuk footprint atap infill; penetrasi di bawah toleransi
@@ -181,6 +192,7 @@ export class CityScene {
     this.buildVoidFCakung();
     this.buildVoidFInfill();
     this.buildVoidFTransit();
+    this.buildVoidGPasarRebo();
     this.buildVoidBInfillAndIndustry();
     this.buildVoidBTransit();
     this.buildEastJakartaInfrastructure();
@@ -6816,6 +6828,345 @@ export class CityScene {
 
   isInsideVoidFAnchorSite(x, z) {
     return VOID_F_ANCHOR_SITES.some(
+      ([x1, x2, z1, z2]) => x >= x1 - 2 && x <= x2 + 2 && z >= z1 - 2 && z <= z2 + 2
+    );
+  }
+
+  /**
+   * Void G Tahap 2: Jaringan jalan, tata air & infrastruktur Pasar Rebo–Ciracas–Cipayung–Cibubur.
+   *
+   * 1. Jalan OSM arteri/kolektor/lokal, trotoar, dan jembatan perlintasan air.
+   * 2. Waterway Ci Liwung–Kali Cipinang–Kali Baru plus 15 situ/waduk sebagai polygon.
+   * 3. PJU dan pohon pada koridor utama; lampu masuk pool PJU gabungan.
+   * Total: sembilan draw call, tanpa PointLight baru.
+   */
+  buildVoidGPasarRebo() {
+    const roadMat = new THREE.MeshStandardMaterial({
+      color: 0x3b4a5f,
+      roughness: 0.78,
+      metalness: 0.12
+    });
+    const sidewalkMat = new THREE.MeshStandardMaterial({
+      map: TextureGenerator.createSidewalkTexture(),
+      color: 0xb9c4d2,
+      roughness: 0.82
+    });
+    const waterMat = new THREE.MeshStandardMaterial({
+      color: 0x075985,
+      roughness: 0.2,
+      metalness: 0.5,
+      transparent: true,
+      opacity: 0.95
+      // FrontSide agar air tidak dirender dua pass, sama seperti jaringan Void D/F.
+    });
+    this.registerNightMaterial(waterMat, {
+      emissive: WATER_NIGHT_EMISSIVE,
+      nightIntensity: WATER_NIGHT_INTENSITY
+    });
+    const bridgeMat = new THREE.MeshStandardMaterial({
+      color: 0x475569,
+      roughness: 0.7
+    });
+    const lampPoleMat = new THREE.MeshStandardMaterial({
+      color: 0x334155,
+      metalness: 0.7,
+      roughness: 0.4
+    });
+
+    const roadGeos = [];
+    const sidewalkGeos = [];
+    const waterGeos = [];
+    const waterBodyGeos = [];
+    const bridgeGeos = [];
+    const lampPoleGeos = [];
+    const lampBulbGeos = [];
+
+    const makeBox = (w, h, d, x, y, z, rotY = 0) => {
+      const g = new THREE.BoxGeometry(w, h, d);
+      if (rotY !== 0) g.rotateY(rotY);
+      g.translate(x, y, z);
+      return g;
+    };
+
+    // Tapak anchor menutupi jalan di bawahnya; hanya lampu, pohon, dan
+    // jembatan yang dihindarkan agar tidak menembus slab tapak.
+    const insideAnchorSite = (x, z) => this.isInsideVoidGAnchorSite(x, z);
+
+    const addRoadPolyline = (points, width, hasSidewalk = true) => {
+      for (let i = 0; i < points.length - 1; i++) {
+        const [x1, z1] = points[i];
+        const [x2, z2] = points[i + 1];
+        const len = Math.hypot(x2 - x1, z2 - z1);
+        if (len < 0.5) continue;
+        const angle = Math.atan2(x2 - x1, z2 - z1);
+        const mx = (x1 + x2) * 0.5;
+        const mz = (z1 + z2) * 0.5;
+
+        roadGeos.push(makeBox(width, 0.25, len + 0.8, mx, 0.125, mz, angle));
+        if (hasSidewalk) {
+          const sw = width >= 14 ? 2.8 : 2.2;
+          [-1, 1].forEach((dir) => {
+            const px = Math.cos(angle) * (width * 0.5 + sw * 0.5) * dir;
+            const pz = -Math.sin(angle) * (width * 0.5 + sw * 0.5) * dir;
+            sidewalkGeos.push(makeBox(sw, 0.4, len + 0.8, mx + px, 0.2, mz + pz, angle));
+          });
+        }
+      }
+    };
+
+    const samplePolyline = (points, step, offset = 0) => {
+      const samples = [];
+      let next = step * 0.5;
+      let travelled = 0;
+      for (let i = 0; i < points.length - 1; i++) {
+        const [x1, z1] = points[i];
+        const [x2, z2] = points[i + 1];
+        const dx = x2 - x1;
+        const dz = z2 - z1;
+        const len = Math.hypot(dx, dz);
+        if (len < 0.5) continue;
+        const angle = Math.atan2(dx, dz);
+        const px = Math.cos(angle) * offset;
+        const pz = -Math.sin(angle) * offset;
+        while (next <= travelled + len) {
+          const t = (next - travelled) / len;
+          samples.push({ x: x1 + dx * t + px, z: z1 + dz * t + pz, angle });
+          next += step;
+        }
+        travelled += len;
+      }
+      return samples;
+    };
+
+    const addLampPost = (x, z, angle, side) => {
+      const px = Math.cos(angle);
+      const pz = -Math.sin(angle);
+      const pole = new THREE.CylinderGeometry(0.16, 0.24, 8.5, 6);
+      pole.translate(x, 4.25, z);
+      lampPoleGeos.push(pole);
+
+      const arm = new THREE.BoxGeometry(3.2, 0.14, 0.14);
+      arm.rotateY(angle);
+      arm.translate(x - px * 1.6 * side, 8.4, z - pz * 1.6 * side);
+      lampPoleGeos.push(arm);
+
+      const bulb = new THREE.SphereGeometry(0.34, 8, 8);
+      bulb.translate(x - px * 3.2 * side, 8.15, z - pz * 3.2 * side);
+      lampBulbGeos.push(bulb);
+      this.recordMergedPjuLamp(x, z, angle, side);
+    };
+
+    const segmentIntersection = (a, b, c, d) => {
+      const rx = b[0] - a[0];
+      const rz = b[1] - a[1];
+      const sx = d[0] - c[0];
+      const sz = d[1] - c[1];
+      const den = rx * sz - rz * sx;
+      if (Math.abs(den) < 1e-9) return null;
+      const t = ((c[0] - a[0]) * sz - (c[1] - a[1]) * sx) / den;
+      const u = ((c[0] - a[0]) * rz - (c[1] - a[1]) * rx) / den;
+      if (t <= 0 || t >= 1 || u <= 0 || u >= 1) return null;
+      return [a[0] + t * rx, a[1] + t * rz];
+    };
+
+    VOID_G_OSM.roads.forEach((road) => {
+      addRoadPolyline(road.points, road.width, road.width >= 10);
+    });
+
+    // Konektor gerbang Mabes TNI Cilangkap dari Jalan Hankam Cilangkap.
+    const mabesConnector = [[1204.5, 1925.2], [1276, 1949]];
+    addRoadPolyline(mabesConnector, 7, true);
+
+    VOID_G_OSM.waterways.forEach((waterway) => {
+      const points = waterway.points;
+      for (let i = 0; i < points.length - 1; i++) {
+        const [x1, z1] = points[i];
+        const [x2, z2] = points[i + 1];
+        const len = Math.hypot(x2 - x1, z2 - z1);
+        if (len < 0.5) continue;
+        const angle = Math.atan2(x2 - x1, z2 - z1);
+        waterGeos.push(
+          makeBox(waterway.width, 0.08, len + 0.6, (x1 + x2) * 0.5, 0.04, (z1 + z2) * 0.5, angle)
+        );
+      }
+    });
+
+    VOID_G_OSM.waterBodies.forEach((body) => {
+      if (body.points.length < 4) return;
+      const shape = new THREE.Shape();
+      shape.moveTo(body.points[0][0], -body.points[0][1]);
+      for (let i = 1; i < body.points.length; i++) {
+        shape.lineTo(body.points[i][0], -body.points[i][1]);
+      }
+      const geometry = new THREE.ShapeGeometry(shape);
+      geometry.rotateX(-Math.PI / 2);
+      geometry.translate(0, 0.045, 0);
+      waterBodyGeos.push(geometry);
+    });
+
+    const crossings = [];
+    const addCrossing = (hit, road, segmentIndex, waterWidth) => {
+      if (insideAnchorSite(hit[0], hit[1])) return;
+      if (crossings.some((c) => Math.hypot(c.x - hit[0], c.z - hit[1]) < 12)) return;
+      crossings.push({
+        x: hit[0],
+        z: hit[1],
+        angle: Math.atan2(
+          road.points[segmentIndex + 1][0] - road.points[segmentIndex][0],
+          road.points[segmentIndex + 1][1] - road.points[segmentIndex][1]
+        ),
+        width: road.width,
+        waterWidth
+      });
+    };
+
+    VOID_G_OSM.roads.forEach((road) => {
+      for (let i = 0; i < road.points.length - 1; i++) {
+        for (const waterway of VOID_G_OSM.waterways) {
+          for (let j = 0; j < waterway.points.length - 1; j++) {
+            const hit = segmentIntersection(
+              road.points[i], road.points[i + 1],
+              waterway.points[j], waterway.points[j + 1]
+            );
+            if (hit) addCrossing(hit, road, i, waterway.width);
+          }
+        }
+      }
+    });
+
+    crossings.forEach((bridge) => {
+      const deckWidth = bridge.width + 12;
+      const deckLength = Math.max(24, bridge.waterWidth + 12);
+      bridgeGeos.push(makeBox(deckWidth, 0.7, deckLength, bridge.x, 0.35, bridge.z, bridge.angle));
+      [-1, 1].forEach((dir) => {
+        const px = Math.cos(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
+        const pz = -Math.sin(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
+        bridgeGeos.push(makeBox(0.6, 0.8, deckLength, bridge.x + px, 0.85, bridge.z + pz, bridge.angle));
+      });
+    });
+
+    if (!this.pjuBulbMat) {
+      this.pjuBulbMat = new THREE.MeshStandardMaterial({
+        color: 0xfef08a,
+        emissive: 0xfef08a,
+        emissiveIntensity: 0.0,
+        roughness: 0.2
+      });
+      this.pjuBulbMat.name = 'pju-bulb';
+      this.glowMaterials.push(this.pjuBulbMat);
+    }
+
+    const lampRoads = [
+      'Jalan Raya Bogor',
+      'Jalan Transyogi',
+      'Jalan Tahi Bonar Simatupang',
+      'Jalan Suprijadi',
+      'Jalan Jambore Raya',
+      'Jalan Mabes Hankam'
+    ];
+    let lampCount = 0;
+    VOID_G_OSM.roads.filter((road) => lampRoads.includes(road.name)).forEach((road) => {
+      [1, -1].forEach((side) => {
+        samplePolyline(road.points, 120, (road.width * 0.5 + 1.4) * side).forEach((p) => {
+          if (insideAnchorSite(p.x, p.z)) return;
+          addLampPost(p.x, p.z, p.angle, side);
+          lampCount++;
+        });
+      });
+    });
+
+    const treePositions = [];
+    const addTree = (x, z, scale) => {
+      if (insideAnchorSite(x, z)) return;
+      if (treePositions.some((t) => Math.hypot(t.x - x, t.z - z) < 7)) return;
+      treePositions.push({ x, z, scale });
+    };
+    ['Jalan Raya Bogor', 'Jalan Suprijadi', 'Jalan Jambore Raya'].forEach((name) => {
+      VOID_G_OSM.roads.filter((road) => road.name === name).forEach((road) => {
+        [1, -1].forEach((side) => {
+          samplePolyline(road.points, 76, (road.width * 0.5 + 6) * side).forEach((p, i) => {
+            addTree(p.x, p.z, 0.85 + (i % 4) * 0.06);
+          });
+        });
+      });
+    });
+    VOID_G_OSM.waterways
+      .filter((waterway) => waterway.name === 'Kali Cipinang' || waterway.name === 'Kali Baru')
+      .forEach((waterway) => {
+        [1, -1].forEach((side) => {
+          samplePolyline(waterway.points, 64, (waterway.width * 0.5 + 6) * side).forEach((p, i) => {
+            addTree(p.x, p.z, 0.9 + (i % 5) * 0.05);
+          });
+        });
+      });
+
+    if (treePositions.length > 0) {
+      const dummy = new THREE.Object3D();
+      const trunkGeo = new THREE.CylinderGeometry(0.26, 0.38, 4.2, 5);
+      const foliageGeo = new THREE.ConeGeometry(2.6, 6.2, 6);
+      const trunkMat = new THREE.MeshStandardMaterial({ color: 0x3e2723, roughness: 0.9 });
+      const foliageMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.85 });
+      const trunkMesh = new THREE.InstancedMesh(trunkGeo, trunkMat, treePositions.length);
+      const foliageMesh = new THREE.InstancedMesh(foliageGeo, foliageMat, treePositions.length);
+      trunkMesh.name = 'voidg-tree-trunks';
+      foliageMesh.name = 'voidg-tree-foliage';
+
+      treePositions.forEach((tree, idx) => {
+        dummy.position.set(tree.x, 2.1 * tree.scale, tree.z);
+        dummy.scale.set(tree.scale, tree.scale, tree.scale);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        trunkMesh.setMatrixAt(idx, dummy.matrix);
+
+        dummy.position.set(tree.x, (4.2 + 3.0) * tree.scale, tree.z);
+        dummy.updateMatrix();
+        foliageMesh.setMatrixAt(idx, dummy.matrix);
+      });
+
+      trunkMesh.castShadow = true;
+      trunkMesh.receiveShadow = true;
+      foliageMesh.castShadow = true;
+      foliageMesh.receiveShadow = true;
+      this.proceduralGroup.add(trunkMesh);
+      this.proceduralGroup.add(foliageMesh);
+    }
+
+    const mergeAndAdd = (geos, mat, name, receiveShadow = true, castShadow = false) => {
+      if (!geos || geos.length === 0) return;
+      const merged = BufferGeometryUtils.mergeGeometries(geos, false);
+      if (merged) {
+        const mesh = new THREE.Mesh(merged, mat);
+        mesh.name = name;
+        mesh.receiveShadow = receiveShadow;
+        mesh.castShadow = castShadow;
+        this.proceduralGroup.add(mesh);
+      }
+    };
+
+    mergeAndAdd(roadGeos, roadMat, 'voidg-roads', true, false);
+    mergeAndAdd(sidewalkGeos, sidewalkMat, 'voidg-sidewalks', true, false);
+    mergeAndAdd(waterGeos, waterMat, 'voidg-water', false, false);
+    mergeAndAdd(waterBodyGeos, waterMat, 'voidg-water-bodies', false, false);
+    mergeAndAdd(bridgeGeos, bridgeMat, 'voidg-bridges', true, true);
+    mergeAndAdd(lampPoleGeos, lampPoleMat, 'voidg-pju-poles', true, false);
+    mergeAndAdd(lampBulbGeos, this.pjuBulbMat, 'voidg-pju-bulbs', false, false);
+
+    this.voidGOsmStats = {
+      roads: VOID_G_OSM.roads.length,
+      roadPoints: VOID_G_OSM.roads.reduce((sum, road) => sum + road.points.length, 0),
+      waterways: VOID_G_OSM.waterways.length,
+      waterPoints: VOID_G_OSM.waterways.reduce((sum, waterway) => sum + waterway.points.length, 0),
+      waterBodies: VOID_G_OSM.waterBodies.length,
+      bridges: crossings.length,
+      lamps: lampCount,
+      trees: treePositions.length,
+      connectors: 1,
+      drawCalls: 9
+    };
+  }
+
+  isInsideVoidGAnchorSite(x, z) {
+    return VOID_G_ANCHOR_SITES.some(
       ([x1, x2, z1, z2]) => x >= x1 - 2 && x <= x2 + 2 && z >= z1 - 2 && z <= z2 + 2
     );
   }

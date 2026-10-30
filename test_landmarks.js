@@ -6,6 +6,7 @@ import { VOID_C_OSM } from './src/data/void_c_osm.js';
 import { VOID_D_OSM } from './src/data/void_d_osm.js';
 import { VOID_E_OSM } from './src/data/void_e_osm.js';
 import { VOID_F_OSM } from './src/data/void_f_osm.js';
+import { VOID_G_OSM } from './src/data/void_g_osm.js';
 
 let assertionCount = 0;
 ['ok', 'equal', 'strictEqual', 'deepStrictEqual', 'notDeepStrictEqual', 'throws'].forEach((method) => {
@@ -2889,15 +2890,15 @@ assert.ok(
 );
 assert.ok(!rawaWaterMethod.includes('PointLight'), 'Danau Rawa Buaya water must not add PointLights');
 
-// Check 62: PJU gabungan Void B/C/D/E/F memberi makan pool 12 PointLight
+// Check 62: PJU gabungan Void B/C/D/E/F/G memberi makan pool 12 PointLight
 assert.ok(
   citySceneContent.includes('this.mergedPjuLampTransforms = [];'),
   'CityScene.js must keep merged PJU lamp heads in a dedicated transform array'
 );
 assert.strictEqual(
   (citySceneContent.match(/this\.recordMergedPjuLamp\(/g) || []).length,
-  5,
-  'Each merged PJU builder (Void B/C/D/E/F) must record its lamp heads exactly once'
+  6,
+  'Each merged PJU builder (Void B/C/D/E/F/G) must record its lamp heads exactly once'
 );
 const mergedLampHelperStart = citySceneContent.indexOf('recordMergedPjuLamp(x, z, angle, side) {');
 assert.ok(mergedLampHelperStart > 0, 'CityScene.js missing the recordMergedPjuLamp helper');
@@ -2914,7 +2915,8 @@ const mergedPjuBuilders = [
   ['buildVoidCMeruya() {', 'Void C Meruya'],
   ['buildVoidDPenjaringan() {', 'Void D Penjaringan'],
   ['buildVoidECilincing() {', 'Void E Cilincing'],
-  ['buildVoidFCakung() {', 'Void F Cakung']
+  ['buildVoidFCakung() {', 'Void F Cakung'],
+  ['buildVoidGPasarRebo() {', 'Void G Pasar Rebo']
 ];
 for (const [token, label] of mergedPjuBuilders) {
   const body = sliceCityBuilder(`  ${token}`);
@@ -3738,7 +3740,268 @@ assert.ok(
   'Terminus Harjamukti harus berjangkar pada waypoint terakhir koridor LRT Cibubur'
 );
 
-console.log(`✅ All 111 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 68: Void G Tahap 2 — dataset OSM & builder jaringan Pasar Rebo–Ciracas–Cipayung–Cibubur
+assert.ok(VOID_G_OSM.meta.source.includes('OpenStreetMap'), 'Void G OSM dataset missing OSM attribution');
+assert.ok(VOID_G_OSM.meta.license.includes('ODbL'), 'Void G OSM dataset missing ODbL license');
+assert.strictEqual(VOID_G_OSM.meta.retrieved, '2026-10-30', 'Void G dataset retrieval date changed');
+assert.ok(VOID_G_OSM.meta.api.includes('overpass-api.de'), 'Void G dataset must record the Overpass endpoint');
+assert.ok(VOID_G_OSM.meta.api.includes('2026-10-30T07:31:25Z'), 'Void G dataset must record the OSM base snapshot');
+assert.strictEqual(VOID_G_OSM.meta.projection, 'projectGpsToScene', 'Void G dataset must use the unscaled GPS projection');
+assert.deepStrictEqual(
+  VOID_G_OSM.meta.projectionConstants,
+  { originLng: 106.823048, originLat: -6.194957, scaleX: 14100, scaleZ: 14180 },
+  'Void G projection constants drifted from projectGpsToScene'
+);
+assert.deepStrictEqual(
+  VOID_G_OSM.meta.bbox,
+  { south: -6.386, west: 106.85, north: -6.292, east: 106.926 },
+  'Void G source bbox changed without re-downloading the extract'
+);
+assert.deepStrictEqual(
+  VOID_G_OSM.meta.clipBox,
+  { minX: 380, maxX: 1450, minZ: 1375, maxZ: 2710 },
+  'Void G clip box changed without updating the layout'
+);
+assert.strictEqual(VOID_G_OSM.meta.simplification, 2, 'Void G simplification must stay at Douglas–Peucker 2.0');
+['Situ Jambore Cibubur', 'Rawa Gede', 'Waduk Giri Kencana'].forEach((name) => {
+  assert.ok(VOID_G_OSM.meta.note.includes(name), `Void G dataset must note the excluded ${name} water body`);
+});
+assert.ok(VOID_G_OSM.meta.note.includes('konektor'), 'Void G dataset must note the Mabes TNI access connector');
+
+assert.strictEqual(VOID_G_OSM.roads.length, 293, `Void G OSM dataset changed size: ${VOID_G_OSM.roads.length} roads`);
+assert.strictEqual(VOID_G_OSM.meta.roadCount, VOID_G_OSM.roads.length, 'Void G roadCount does not match roads array');
+const allVoidGPoints = VOID_G_OSM.roads.flatMap((road) => road.points);
+assert.strictEqual(allVoidGPoints.length, 1039, `Void G road point count changed: ${allVoidGPoints.length}`);
+assert.strictEqual(VOID_G_OSM.meta.roadPointCount, allVoidGPoints.length, 'Void G roadPointCount does not match dataset');
+assert.strictEqual(new Set(VOID_G_OSM.roads.map((road) => road.name)).size, 126, 'Void G road name coverage changed');
+assert.deepStrictEqual(
+  VOID_G_OSM.roads.reduce((counts, road) => {
+    counts[road.type] = (counts[road.type] || 0) + 1;
+    return counts;
+  }, {}),
+  { trunk: 58, primary: 27, secondary: 46, tertiary: 162 },
+  'Void G road class mix changed'
+);
+
+const voidGWidths = { trunk: 16, primary: 18, secondary: 14, tertiary: 11 };
+VOID_G_OSM.roads.forEach((road) => {
+  assert.ok(road.name && road.name.trim().length > 0, 'Void G road missing a name');
+  assert.ok(voidGWidths[road.type] === road.width, `Void G road ${road.name} has unexpected type/width ${road.type}/${road.width}`);
+  assert.ok(road.points.length >= 2, `Void G road ${road.name} has fewer than two points`);
+  road.points.forEach(([x, z]) => {
+    assert.ok(Number.isFinite(x) && Number.isFinite(z), `Void G road ${road.name} contains a non-finite coordinate`);
+    assert.ok(x >= 380 && x <= 1450 && z >= 1375 && z <= 2710, `Void G road ${road.name} point ${x}/${z} outside the clip box`);
+  });
+});
+
+const voidGRoadNames = new Set(VOID_G_OSM.roads.map((road) => road.name));
+[
+  'Jalan Raya Bogor',
+  'Jalan Transyogi',
+  'Jalan Tahi Bonar Simatupang',
+  'Jalan Suprijadi',
+  'Jalan Jambore Raya',
+  'Jalan Mabes Hankam',
+  'Jalan Bina Marga',
+  'Jalan Hankam Cilangkap',
+  'Jalan Kranggan',
+  'Jalan Insinyur Haji Juanda',
+  'Jalan Setu Cipayung',
+  'Jalan Cilangkap Raya',
+  'Jalan Raya Cipayung'
+].forEach((name) => {
+  assert.ok(voidGRoadNames.has(name), `Void G OSM dataset missing ${name}`);
+});
+['Jalan Taman Mini', 'Jalan Raya Pondok Gede', 'Jalan Pintu II TMII'].forEach((prefix) => {
+  assert.ok(
+    !VOID_G_OSM.roads.some((road) => road.name.startsWith(prefix)),
+    `${prefix} ways must stay excluded from the at-grade Void G network`
+  );
+});
+assert.ok(
+  !VOID_G_OSM.roads.some((road) => road.type === 'busway' || road.type === 'motorway'),
+  'Void G dataset must not include busway or toll ways'
+);
+
+const distanceToVoidGRoad = (point) => {
+  let best = Infinity;
+  VOID_G_OSM.roads.forEach((road) => {
+    for (let i = 0; i < road.points.length - 1; i++) {
+      best = Math.min(best, distanceToSegment(point, road.points[i], road.points[i + 1]));
+    }
+  });
+  return best;
+};
+voidGAnchors.forEach(({ id }) => {
+  const lm = JAKARTA_LANDMARKS.find((landmark) => landmark.id === id);
+  const distance = distanceToVoidGRoad([lm.position[0], lm.position[2]]);
+  assert.ok(distance < 80, `Void G landmark ${id} is ${distance.toFixed(1)} units from the nearest OSM road`);
+  if (id === 'mabes-tni-cilangkap') {
+    assert.ok(distance > 60, `Mabes TNI should rely on the access connector, not a road at ${distance.toFixed(1)} units`);
+  }
+});
+
+assert.strictEqual(VOID_G_OSM.waterways.length, 19, `Void G waterway count changed: ${VOID_G_OSM.waterways.length}`);
+assert.strictEqual(VOID_G_OSM.meta.waterwayCount, VOID_G_OSM.waterways.length, 'Void G waterwayCount mismatch');
+const allVoidGWaterPoints = VOID_G_OSM.waterways.flatMap((waterway) => waterway.points);
+assert.strictEqual(allVoidGWaterPoints.length, 287, `Void G waterway point count changed: ${allVoidGWaterPoints.length}`);
+assert.strictEqual(VOID_G_OSM.meta.waterPointCount, allVoidGWaterPoints.length, 'Void G waterPointCount mismatch');
+const voidGWaterWidths = {
+  'Ci Liwung': 16,
+  'Kali Baru': 10,
+  Kalibaru: 9,
+  'Kali Cipinang': 9,
+  'Kali Cijantung': 5
+};
+VOID_G_OSM.waterways.forEach((waterway) => {
+  assert.ok(['river', 'stream'].includes(waterway.kind), `Unexpected Void G waterway kind ${waterway.kind}`);
+  assert.strictEqual(
+    waterway.width,
+    voidGWaterWidths[waterway.name],
+    `Void G waterway ${waterway.name || '(unnamed)'} width drifted to ${waterway.width}`
+  );
+  assert.ok(waterway.points.length >= 2, 'Void G waterway has fewer than two points');
+  waterway.points.forEach(([x, z]) => {
+    assert.ok(Number.isFinite(x) && Number.isFinite(z), 'Void G waterway contains a non-finite coordinate');
+    assert.ok(x >= 380 && x <= 1450 && z >= 1375 && z <= 2710, `Void G waterway point ${x}/${z} outside the clip box`);
+  });
+});
+const voidGWaterNames = new Set(VOID_G_OSM.waterways.map((waterway) => waterway.name));
+['Ci Liwung', 'Kali Baru', 'Kalibaru', 'Kali Cipinang', 'Kali Cijantung'].forEach((name) => {
+  assert.ok(voidGWaterNames.has(name), `Void G OSM dataset missing ${name} waterway`);
+});
+
+assert.strictEqual(VOID_G_OSM.waterBodies.length, 15, `Void G water body count changed: ${VOID_G_OSM.waterBodies.length}`);
+assert.strictEqual(VOID_G_OSM.meta.waterBodyCount, VOID_G_OSM.waterBodies.length, 'Void G waterBodyCount mismatch');
+const allVoidGWaterBodyPoints = VOID_G_OSM.waterBodies.flatMap((body) => body.points);
+assert.strictEqual(allVoidGWaterBodyPoints.length, 161, `Void G water body point count changed: ${allVoidGWaterBodyPoints.length}`);
+assert.strictEqual(VOID_G_OSM.meta.waterBodyPointCount, allVoidGWaterBodyPoints.length, 'Void G waterBodyPointCount mismatch');
+const voidGWaterBodyNames = VOID_G_OSM.waterBodies.map((body) => body.name);
+[
+  'Situ Rawa Dongkal',
+  'Situ Tipar',
+  'Situ Pedongkelan',
+  'Kolam Pemancingan Telaga Mina',
+  'Waduk Sunter Hulu',
+  'Waduk Surilang',
+  'Embung Pekayon',
+  'Situ Pangarengan',
+  'Situ Gadog',
+  'Situ Rawa Babon',
+  'Waduk Pondok Ranggon',
+  'Waduk Setu',
+  'Waduk Kampung Rambutan 2',
+  'Waduk Dukuh 1',
+  'Waduk Dukuh 2'
+].forEach((name) => {
+  assert.ok(voidGWaterBodyNames.includes(name), `Void G OSM dataset missing ${name} water body`);
+});
+['Situ Jambore Cibubur', 'Rawa Gede', 'Waduk Giri Kencana'].forEach((name) => {
+  assert.ok(!voidGWaterBodyNames.includes(name), `${name} must stay excluded from the Void G dataset`);
+});
+const polygonArea = (points) => {
+  let sum = 0;
+  for (let i = 0; i < points.length - 1; i++) {
+    sum += points[i][0] * points[i + 1][1] - points[i + 1][0] * points[i][1];
+  }
+  return Math.abs(sum) / 2;
+};
+const waterShapeArea = (points) => {
+  let sum = 0;
+  for (let i = 0; i < points.length - 1; i++) {
+    sum += points[i][0] * -points[i + 1][1] - points[i + 1][0] * -points[i][1];
+  }
+  return sum / 2;
+};
+VOID_G_OSM.waterBodies.forEach((body) => {
+  assert.ok(['lake', 'water', 'reservoir'].includes(body.kind), `Unexpected Void G water body kind ${body.kind}`);
+  assert.ok(body.points.length >= 5, `Void G water body ${body.name} has fewer than five points`);
+  assert.deepStrictEqual(
+    body.points[0],
+    body.points[body.points.length - 1],
+    `Void G water body ${body.name} ring must be closed`
+  );
+  assert.ok(polygonArea(body.points) >= 100, `Void G water body ${body.name} is too small to model`);
+  assert.ok(
+    waterShapeArea(body.points) > 0,
+    `Void G water body ${body.name} must wind counter-clockwise so the situ face points up`
+  );
+  body.points.forEach(([x, z]) => {
+    assert.ok(Number.isFinite(x) && Number.isFinite(z), `Void G water body ${body.name} contains a non-finite coordinate`);
+    assert.ok(x >= 380 && x <= 1450 && z >= 1375 && z <= 2710, `Void G water body ${body.name} point ${x}/${z} outside the clip box`);
+  });
+});
+
+assert.ok(citySceneContent.includes("from '../data/void_g_osm.js'"), 'CityScene.js does not import the Void G OSM dataset');
+const voidGNetworkCallIndex = citySceneContent.indexOf('this.buildVoidGPasarRebo();');
+assert.ok(voidGNetworkCallIndex > 0, 'CityScene.js does not call buildVoidGPasarRebo');
+assert.ok(
+  voidGNetworkCallIndex > citySceneContent.indexOf('this.buildVoidFTransit();'),
+  'buildVoidGPasarRebo must run after buildVoidFTransit'
+);
+assert.ok(
+  voidGNetworkCallIndex < citySceneContent.indexOf('this.buildVoidBInfillAndIndustry();'),
+  'buildVoidGPasarRebo must run before buildVoidBInfillAndIndustry'
+);
+assert.ok(
+  citySceneContent.includes('isInsideVoidGAnchorSite(x, z)'),
+  'CityScene.js missing the Void G anchor pad mask'
+);
+
+const voidGNetworkMethod = sliceCityBuilder('  buildVoidGPasarRebo() {');
+assert.ok(voidGNetworkMethod.includes('VOID_G_OSM'), 'Void G builder does not consume the OSM dataset');
+assert.ok(voidGNetworkMethod.includes('segmentIntersection'), 'Void G builder missing automatic bridges');
+assert.ok(voidGNetworkMethod.includes('insideAnchorSite'), 'Void G builder must mask bridges and props inside anchor sites');
+assert.ok(voidGNetworkMethod.includes('new THREE.Shape'), 'Void G builder must triangulate the situ polygons');
+assert.ok(
+  voidGNetworkMethod.includes('this.registerNightMaterial(waterMat, {'),
+  'Void G water must join the night material registry'
+);
+assert.ok(
+  voidGNetworkMethod.includes('emissive: WATER_NIGHT_EMISSIVE'),
+  'Void G water must reuse the shared teal night emissive'
+);
+assert.ok(voidGNetworkMethod.includes('pjuBulbMat'), 'Void G builder must share the pju-bulb material');
+assert.ok(voidGNetworkMethod.includes('recordMergedPjuLamp'), 'Void G PJU lamps must feed the shared light pool');
+assert.ok(voidGNetworkMethod.includes('voidGOsmStats'), 'Void G builder must expose runtime stats');
+assert.ok(voidGNetworkMethod.includes('connectors: 1'), 'Void G must record the single Mabes TNI connector');
+assert.ok(voidGNetworkMethod.includes('drawCalls: 9'), 'Void G network should add nine draw calls');
+assert.ok(!voidGNetworkMethod.includes('new THREE.PointLight'), 'Void G network must not add PointLights');
+assert.ok(!voidGNetworkMethod.includes('nightMaterials.push'), 'Void G network must not register new night materials');
+assert.ok(
+  voidGNetworkMethod.includes('[[1204.5, 1925.2], [1276, 1949]]'),
+  'Void G must route the Mabes TNI connector from Jalan Hankam Cilangkap to the gate'
+);
+
+[
+  'voidg-roads',
+  'voidg-sidewalks',
+  'voidg-water',
+  'voidg-water-bodies',
+  'voidg-bridges',
+  'voidg-pju-poles',
+  'voidg-pju-bulbs',
+  'voidg-tree-trunks',
+  'voidg-tree-foliage'
+].forEach((name) => {
+  assert.ok(voidGNetworkMethod.includes(name), `Void G builder missing the ${name} mesh`);
+});
+
+[
+  'Jalan Raya Bogor',
+  'Jalan Transyogi',
+  'Jalan Tahi Bonar Simatupang',
+  'Jalan Suprijadi',
+  'Jalan Jambore Raya',
+  'Jalan Mabes Hankam'
+].forEach((name) => {
+  assert.ok(voidGNetworkMethod.includes(name), `Void G PJU corridor list missing ${name}`);
+});
+['Kali Cipinang', 'Kali Baru'].forEach((name) => {
+  assert.ok(voidGNetworkMethod.includes(name), `Void G tree bank list missing ${name}`);
+});
+
+console.log(`✅ All 111 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
