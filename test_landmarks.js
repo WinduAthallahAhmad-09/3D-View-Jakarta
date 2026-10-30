@@ -3486,7 +3486,124 @@ assert.ok(
 assert.ok(citySceneContent.includes('const VOID_F_KBT_CORRIDOR ='), 'Void F KBT corridor must live at module scope');
 assert.ok(citySceneContent.includes('const distanceToVoidFKbt = (x, z) =>'), 'CityScene.js missing the KBT distance helper');
 
-console.log(`✅ All 105 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 66: Void F Tahap 4 — Park-and-Ride Klender dan enam feeder halte
+assert.ok(citySceneContent.includes('buildVoidFTransit()'), 'CityScene.js missing buildVoidFTransit');
+
+const voidFTransitCall = citySceneContent.indexOf('this.buildVoidFTransit();');
+assert.ok(voidFTransitCall > 0, 'CityScene.js does not call buildVoidFTransit');
+assert.ok(
+  voidFTransitCall > citySceneContent.indexOf('this.buildVoidFInfill();'),
+  'buildVoidFTransit must run after buildVoidFInfill so the P&R plot is reserved'
+);
+assert.ok(
+  voidFTransitCall < citySceneContent.indexOf('this.buildVoidBInfillAndIndustry();'),
+  'buildVoidFTransit must run before buildVoidBInfillAndIndustry'
+);
+
+assert.ok(
+  citySceneContent.includes('const VOID_F_PR_PLOT ='),
+  'Void F P&R plot must live at module scope so infill and transit share it'
+);
+assert.ok(
+  citySceneContent.includes('this.voidFTransitLabels = [];'),
+  'CityScene constructor must initialise the Void F transit label list'
+);
+assert.ok(
+  voidFInfillBody.includes('VOID_F_PR_PLOT') &&
+    voidFInfillBody.includes('transitReservations') &&
+    voidFInfillBody.includes('insideTransitReservation(x, z, radius)'),
+  'Void F infill must reserve the shared P&R plot before placing buildings'
+);
+
+const voidFTransitBody = sliceCityBuilder('  buildVoidFTransit() {');
+assert.ok(!voidFTransitBody.includes('new THREE.PointLight'), 'Void F transit must not add PointLights');
+assert.ok(voidFTransitBody.includes('VOID_F_OSM'), 'Void F transit must anchor halte to the OSM road network');
+assert.ok(voidFTransitBody.includes('findRoadPoint'), 'Void F transit missing the road anchor helper');
+assert.ok(voidFTransitBody.includes('const halteLabels = [];'), 'Void F transit must collect halte labels');
+assert.ok(voidFTransitBody.includes('halteLabels.push({'), 'Void F transit must emit one label per halte');
+assert.ok(
+  voidFTransitBody.includes('position: [hx, 6.4, hz]'),
+  'Void F halte labels must float above the canopy'
+);
+assert.ok(
+  voidFTransitBody.includes('shortName: spec.shortName,'),
+  'Void F halte labels must forward the short name'
+);
+assert.ok(voidFTransitBody.includes("kind: 'halte'"), 'Void F halte labels must carry the halte kind');
+assert.ok(
+  voidFTransitBody.includes('this.voidFTransitLabels = ['),
+  'Void F transit must publish its label anchors'
+);
+
+assert.ok(voidFTransitBody.includes('VOID_F_PR_PLOT'), 'Void F transit must read the shared P&R plot');
+assert.ok(
+  voidFTransitBody.includes('const prCenterX = VOID_F_PR_PLOT.x;'),
+  'Void F P&R centre must come from the shared plot'
+);
+assert.ok(
+  voidFTransitBody.includes("name: 'Park and Ride Klender'"),
+  'Void F P&R label missing the full name'
+);
+assert.ok(voidFTransitBody.includes("shortName: 'P&R Klender'"), 'Void F P&R label missing the short name');
+assert.ok(voidFTransitBody.includes("kind: 'park'"), 'Void F P&R label must use the P badge');
+assert.ok(
+  voidFTransitBody.includes('position: [prCenterX, 7.6, prCenterZ]'),
+  'Void F P&R label must clear the shelter roof'
+);
+assert.ok(voidFTransitBody.includes('const bayCount = 8;'), 'Void F P&R must keep eight parking bays');
+assert.ok(voidFTransitBody.includes('parkingBays: bayCount'), 'Void F transit stats missing the bay count');
+
+[
+  'Halte Stasiun Klender',
+  'Halte Stasiun Buaran',
+  'Halte Stasiun Klender Baru',
+  'Halte Terminal Pulo Gebang',
+  'Halte Kawasan Industri Pulogadung',
+  'Halte Rusun Klender'
+].forEach((name) => {
+  assert.ok(voidFTransitBody.includes(`name: '${name}'`), `Void F transit missing ${name}`);
+});
+
+[
+  ['Stasiun Klender', 'Jalan Pahlawan Revolusi'],
+  ['Stasiun Buaran', 'Jalan Radin Inten'],
+  ['Klender Baru', 'Jalan Raya Pondok Kopi'],
+  ['Terminal Pulo Gebang', 'Jalan Pangeran Komarudin'],
+  ['Kawasan Industri Pulogadung', 'Jalan Puloayang Raya'],
+  ['Rusun Klender', 'Jalan Delima Raya']
+].forEach(([shortName, road]) => {
+  assert.ok(
+    voidFTransitBody.includes(`shortName: '${shortName}'`),
+    `Void F halte label missing the ${shortName} short name`
+  );
+  assert.ok(voidFTransitBody.includes(`road: '${road}'`), `Void F halte missing the ${road} anchor`);
+});
+
+[
+  'voidf-transit-concrete',
+  'voidf-transit-steel',
+  'voidf-transit-sign',
+  'voidf-transit-tree-trunks',
+  'voidf-transit-tree-foliage'
+].forEach((name) => {
+  assert.ok(voidFTransitBody.includes(name), `Void F transit missing the ${name} mesh`);
+});
+
+assert.ok(voidFTransitBody.includes('registerNightMaterial'), 'Void F transit sign must register for night');
+assert.ok(voidFTransitBody.includes('emissive: 0xfff4d6'), 'Void F transit sign night emissive drifted');
+assert.ok(voidFTransitBody.includes('nightIntensity: 0.55'), 'Void F transit sign night intensity drifted');
+assert.ok(voidFTransitBody.includes('voidFTransitStats'), 'Void F transit must expose runtime stats');
+assert.ok(voidFTransitBody.includes('drawCalls: 5'), 'Void F transit should add five draw calls');
+
+assert.ok(
+  mainJsContent.includes('...this.city.voidCTransitLabels') &&
+    mainJsContent.includes('...this.city.voidDTransitLabels') &&
+    mainJsContent.includes('...this.city.voidETransitLabels') &&
+    mainJsContent.includes('...this.city.voidFTransitLabels'),
+  'main.js must forward all four transit label arrays to UIManager'
+);
+
+console.log(`✅ All 105 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

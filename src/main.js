@@ -169,7 +169,8 @@ class JakartaApp {
       transitLabels: [
         ...this.city.voidCTransitLabels,
         ...this.city.voidDTransitLabels,
-        ...this.city.voidETransitLabels
+        ...this.city.voidETransitLabels,
+        ...this.city.voidFTransitLabels
       ],
       onSelectPreset: (preset) => {
         if (preset.cameraPosition && preset.cameraTarget) {
