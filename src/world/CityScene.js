@@ -13,6 +13,39 @@ const VOID_C_CONNECTOR_PATHS = [
   [[-971.8, 169.1], [-962, 168.4], [-950, 168]]
 ];
 
+const INFILL_ROOF_EAVE = 0.6;
+const INFILL_ROOF_TOLERANCE = 0.05;
+
+// OBB overlap untuk footprint atap infill; penetrasi di bawah toleransi
+// dianggap bersentuhan agar deret ruko bertembok parti boleh menempel.
+const roofRectsOverlap = (a, b, tolerance) => {
+  const cosA = Math.cos(a.rotY || 0);
+  const sinA = Math.sin(a.rotY || 0);
+  const cosB = Math.cos(b.rotY || 0);
+  const sinB = Math.sin(b.rotY || 0);
+  const axes = [
+    [cosA, -sinA],
+    [sinA, cosA],
+    [cosB, -sinB],
+    [sinB, cosB]
+  ];
+  const dx = b.x - a.x;
+  const dz = b.z - a.z;
+  const halfWa = a.rw * 0.5;
+  const halfDa = a.rd * 0.5;
+  const halfWb = b.rw * 0.5;
+  const halfDb = b.rd * 0.5;
+  for (let i = 0; i < axes.length; i++) {
+    const nx = axes[i][0];
+    const nz = axes[i][1];
+    const distance = Math.abs(dx * nx + dz * nz);
+    const reachA = halfWa * Math.abs(cosA * nx - sinA * nz) + halfDa * Math.abs(sinA * nx + cosA * nz);
+    const reachB = halfWb * Math.abs(cosB * nx - sinB * nz) + halfDb * Math.abs(sinB * nx + cosB * nz);
+    if (reachA + reachB - distance <= tolerance) return false;
+  }
+  return true;
+};
+
 export class CityScene {
   constructor(scene) {
     this.scene = scene;
@@ -4841,12 +4874,17 @@ export class CityScene {
     };
 
     const placed = [];
-    const isOccupied = (x, z, radius) => {
+    const isRoofOccupied = (x, z, rw, rd, rotY) => {
+      const reach = Math.hypot(rw, rd) * 0.5;
       for (let i = 0; i < placed.length; i++) {
         const p = placed[i];
-        if (Math.hypot(p.x - x, p.z - z) < p.radius + radius + 2) return true;
+        if (Math.hypot(p.x - x, p.z - z) >= p.radius + reach) continue;
+        if (roofRectsOverlap(p, { x, z, rw, rd, rotY }, INFILL_ROOF_TOLERANCE)) return true;
       }
       return false;
+    };
+    const putRoof = (x, z, rw, rd, rotY = 0) => {
+      placed.push({ x, z, rw, rd, rotY, radius: Math.hypot(rw, rd) * 0.5 });
     };
 
     const residentialItems = [];
@@ -4980,8 +5018,9 @@ export class CityScene {
           const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
           const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
           const radius = Math.max(w, d) * 0.5;
-          if (isBlocked(px, pz, radius, ignoreWays) || isOccupied(px, pz, d * 0.45)) return;
-          placed.push({ x: px, z: pz, radius: d * 0.45 });
+          const roofW = w + INFILL_ROOF_EAVE * 2;
+          if (isBlocked(px, pz, radius, ignoreWays) || isRoofOccupied(px, pz, roofW, d, angle)) return;
+          putRoof(px, pz, roofW, d, angle);
           shophouseItems.push({
             x: px,
             y: h * 0.5,
@@ -4997,9 +5036,9 @@ export class CityScene {
             x: px,
             y: h,
             z: pz,
-            w: w + 1.3,
+            w: roofW,
             h: roofH,
-            d: d + 1.3,
+            d,
             rotY: angle,
             color: roofColors[Math.floor(hash * roofColors.length) % roofColors.length]
           });
@@ -5026,8 +5065,10 @@ export class CityScene {
           const radius = Math.max(w, d) * 0.5;
           const px = x + (hash - 0.5) * 4;
           const pz = z + (((hash * 5.7) % 1) - 0.5) * 4;
-          if (isBlocked(px, pz, radius) || isOccupied(px, pz, radius)) continue;
-          placed.push({ x: px, z: pz, radius });
+          const roofW = w + 1.4;
+          const roofD = d + 1.4;
+          if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+          putRoof(px, pz, roofW, roofD);
           warehouseItems.push({
             x: px,
             y: h * 0.5,
@@ -5042,9 +5083,9 @@ export class CityScene {
             x: px,
             y: h,
             z: pz,
-            w: w + 1.4,
+            w: roofW,
             h: roofH,
-            d: d + 1.4,
+            d: roofD,
             color: warehouseRoofColors[Math.floor(hash * warehouseRoofColors.length) % warehouseRoofColors.length]
           });
         }
@@ -5074,8 +5115,10 @@ export class CityScene {
           const radius = Math.max(w, d) * 0.5;
           const px = x + (hash - 0.5) * 2.4;
           const pz = z + (((hash * 7.31) % 1) - 0.5) * 2.4;
-          if (isBlocked(px, pz, radius) || isOccupied(px, pz, radius)) continue;
-          placed.push({ x: px, z: pz, radius });
+          const roofW = w + INFILL_ROOF_EAVE * 2;
+          const roofD = d + INFILL_ROOF_EAVE * 2;
+          if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+          putRoof(px, pz, roofW, roofD);
           residentialItems.push({
             x: px,
             y: h * 0.5,
@@ -5090,9 +5133,9 @@ export class CityScene {
             x: px,
             y: h,
             z: pz,
-            w: w + 1.2,
+            w: roofW,
             h: roofH,
-            d: d + 1.2,
+            d: roofD,
             color: roofColors[Math.floor(hash * roofColors.length) % roofColors.length]
           });
         }
@@ -6240,12 +6283,17 @@ export class CityScene {
     };
 
     const placed = [];
-    const isOccupied = (x, z, radius) => {
+    const isRoofOccupied = (x, z, rw, rd, rotY) => {
+      const reach = Math.hypot(rw, rd) * 0.5;
       for (let i = 0; i < placed.length; i++) {
         const p = placed[i];
-        if (Math.hypot(p.x - x, p.z - z) < p.radius + radius + 2) return true;
+        if (Math.hypot(p.x - x, p.z - z) >= p.radius + reach) continue;
+        if (roofRectsOverlap(p, { x, z, rw, rd, rotY }, INFILL_ROOF_TOLERANCE)) return true;
       }
       return false;
+    };
+    const putRoof = (x, z, rw, rd, rotY = 0) => {
+      placed.push({ x, z, rw, rd, rotY, radius: Math.hypot(rw, rd) * 0.5 });
     };
 
     const residentialItems = [];
@@ -6375,8 +6423,9 @@ export class CityScene {
           const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
           const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
           const radius = Math.max(w, d) * 0.5;
-          if (isBlocked(px, pz, radius, ignoreWays) || isOccupied(px, pz, d * 0.45)) return;
-          placed.push({ x: px, z: pz, radius: d * 0.45 });
+          const roofW = w + INFILL_ROOF_EAVE * 2;
+          if (isBlocked(px, pz, radius, ignoreWays) || isRoofOccupied(px, pz, roofW, d, angle)) return;
+          putRoof(px, pz, roofW, d, angle);
           shophouseItems.push({
             x: px,
             y: h * 0.5,
@@ -6392,9 +6441,9 @@ export class CityScene {
             x: px,
             y: h,
             z: pz,
-            w: w + 1.3,
+            w: roofW,
             h: roofH,
-            d: d + 1.3,
+            d,
             rotY: angle,
             color: roofColors[Math.floor(hash * roofColors.length) % roofColors.length]
           });
@@ -6441,8 +6490,10 @@ export class CityScene {
           const radius = Math.max(w, d) * 0.5;
           const px = x + (hash - 0.5) * 4;
           const pz = z + (((hash * 5.7) % 1) - 0.5) * 4;
-          if (isBlocked(px, pz, radius) || isOccupied(px, pz, radius)) continue;
-          placed.push({ x: px, z: pz, radius });
+          const roofW = w + 1.4;
+          const roofD = d + 1.4;
+          if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+          putRoof(px, pz, roofW, roofD);
           warehouseItems.push({
             x: px,
             y: h * 0.5,
@@ -6457,9 +6508,9 @@ export class CityScene {
             x: px,
             y: h,
             z: pz,
-            w: w + 1.4,
+            w: roofW,
             h: roofH,
-            d: d + 1.4,
+            d: roofD,
             color: warehouseRoofColors[Math.floor(hash * warehouseRoofColors.length) % warehouseRoofColors.length]
           });
         }
@@ -6498,8 +6549,10 @@ export class CityScene {
           const radius = Math.max(w, d) * 0.5;
           const px = x + (hash - 0.5) * 2.4;
           const pz = z + (((hash * 7.31) % 1) - 0.5) * 2.4;
-          if (isBlocked(px, pz, radius) || isOccupied(px, pz, radius)) continue;
-          placed.push({ x: px, z: pz, radius });
+          const roofW = w + INFILL_ROOF_EAVE * 2;
+          const roofD = d + INFILL_ROOF_EAVE * 2;
+          if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+          putRoof(px, pz, roofW, roofD);
           residentialItems.push({
             x: px,
             y: h * 0.5,
@@ -6514,9 +6567,9 @@ export class CityScene {
             x: px,
             y: h,
             z: pz,
-            w: w + 1.2,
+            w: roofW,
             h: roofH,
-            d: d + 1.2,
+            d: roofD,
             color: roofColors[Math.floor(hash * roofColors.length) % roofColors.length]
           });
         }
@@ -6717,12 +6770,17 @@ export class CityScene {
     };
 
     const placed = [];
-    const isOccupied = (x, z, radius) => {
+    const isRoofOccupied = (x, z, rw, rd, rotY) => {
+      const reach = Math.hypot(rw, rd) * 0.5;
       for (let i = 0; i < placed.length; i++) {
         const p = placed[i];
-        if (Math.hypot(p.x - x, p.z - z) < p.radius + radius + 2) return true;
+        if (Math.hypot(p.x - x, p.z - z) >= p.radius + reach) continue;
+        if (roofRectsOverlap(p, { x, z, rw, rd, rotY }, INFILL_ROOF_TOLERANCE)) return true;
       }
       return false;
+    };
+    const putRoof = (x, z, rw, rd, rotY = 0) => {
+      placed.push({ x, z, rw, rd, rotY, radius: Math.hypot(rw, rd) * 0.5 });
     };
 
     const residentialItems = [];
@@ -6853,8 +6911,9 @@ export class CityScene {
           const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
           const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
           const radius = Math.max(w, d) * 0.5;
-          if (isBlocked(px, pz, radius, ignoreWays) || isOccupied(px, pz, d * 0.45)) return;
-          placed.push({ x: px, z: pz, radius: d * 0.45 });
+          const roofW = w + INFILL_ROOF_EAVE * 2;
+          if (isBlocked(px, pz, radius, ignoreWays) || isRoofOccupied(px, pz, roofW, d, angle)) return;
+          putRoof(px, pz, roofW, d, angle);
           shophouseItems.push({
             x: px,
             y: h * 0.5,
@@ -6870,9 +6929,9 @@ export class CityScene {
             x: px,
             y: h,
             z: pz,
-            w: w + 1.3,
+            w: roofW,
             h: roofH,
-            d: d + 1.3,
+            d,
             rotY: angle,
             color: roofColors[Math.floor(hash * roofColors.length) % roofColors.length]
           });
@@ -6906,8 +6965,10 @@ export class CityScene {
           const radius = Math.max(w, d) * 0.5;
           const px = x + (hash - 0.5) * 4;
           const pz = z + (((hash * 5.7) % 1) - 0.5) * 4;
-          if (isBlocked(px, pz, radius) || isOccupied(px, pz, radius)) continue;
-          placed.push({ x: px, z: pz, radius });
+          const roofW = w + 1.4;
+          const roofD = d + 1.4;
+          if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+          putRoof(px, pz, roofW, roofD);
           warehouseItems.push({
             x: px,
             y: h * 0.5,
@@ -6922,9 +6983,9 @@ export class CityScene {
             x: px,
             y: h,
             z: pz,
-            w: w + 1.4,
+            w: roofW,
             h: roofH,
-            d: d + 1.4,
+            d: roofD,
             color: warehouseRoofColors[Math.floor(hash * warehouseRoofColors.length) % warehouseRoofColors.length]
           });
         }
@@ -6969,8 +7030,10 @@ export class CityScene {
           const radius = Math.max(w, d) * 0.5;
           const px = x + (hash - 0.5) * 2.4;
           const pz = z + (((hash * 7.31) % 1) - 0.5) * 2.4;
-          if (isBlocked(px, pz, radius) || isOccupied(px, pz, radius)) continue;
-          placed.push({ x: px, z: pz, radius });
+          const roofW = w + INFILL_ROOF_EAVE * 2;
+          const roofD = d + INFILL_ROOF_EAVE * 2;
+          if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+          putRoof(px, pz, roofW, roofD);
           residentialItems.push({
             x: px,
             y: h * 0.5,
@@ -6985,9 +7048,9 @@ export class CityScene {
             x: px,
             y: h,
             z: pz,
-            w: w + 1.2,
+            w: roofW,
             h: roofH,
-            d: d + 1.2,
+            d: roofD,
             color: roofColors[Math.floor(hash * roofColors.length) % roofColors.length]
           });
         }
@@ -7694,12 +7757,17 @@ export class CityScene {
     };
 
     const placed = [];
-    const isOccupied = (x, z, radius) => {
+    const isRoofOccupied = (x, z, rw, rd, rotY) => {
+      const reach = Math.hypot(rw, rd) * 0.5;
       for (let i = 0; i < placed.length; i++) {
         const p = placed[i];
-        if (Math.hypot(p.x - x, p.z - z) < p.radius + radius + 2) return true;
+        if (Math.hypot(p.x - x, p.z - z) >= p.radius + reach) continue;
+        if (roofRectsOverlap(p, { x, z, rw, rd, rotY }, INFILL_ROOF_TOLERANCE)) return true;
       }
       return false;
+    };
+    const putRoof = (x, z, rw, rd, rotY = 0) => {
+      placed.push({ x, z, rw, rd, rotY, radius: Math.hypot(rw, rd) * 0.5 });
     };
 
     const residentialItems = [];
@@ -7744,8 +7812,10 @@ export class CityScene {
           const radius = Math.max(w, d) * 0.5;
           const px = x + (hash - 0.5) * 2.4;
           const pz = z + (((hash * 7.31) % 1) - 0.5) * 2.4;
-          if (isBlocked(px, pz, radius) || isOccupied(px, pz, radius)) continue;
-          placed.push({ x: px, z: pz, radius });
+          const roofW = w + INFILL_ROOF_EAVE * 2;
+          const roofD = d + INFILL_ROOF_EAVE * 2;
+          if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+          putRoof(px, pz, roofW, roofD);
           residentialItems.push({
             x: px,
             y: h * 0.5,
@@ -7760,9 +7830,9 @@ export class CityScene {
             x: px,
             y: h,
             z: pz,
-            w: w + 1.2,
+            w: roofW,
             h: roofH,
-            d: d + 1.2,
+            d: roofD,
             color: roofColors[Math.floor(hash * roofColors.length) % roofColors.length]
           });
         }
@@ -7870,8 +7940,9 @@ export class CityScene {
           const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
           const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
           const radius = Math.max(w, d) * 0.5;
-          if (isBlocked(px, pz, radius, ignoreWays) || isOccupied(px, pz, d * 0.45)) return;
-          placed.push({ x: px, z: pz, radius: d * 0.45 });
+          const roofW = w + INFILL_ROOF_EAVE * 2;
+          if (isBlocked(px, pz, radius, ignoreWays) || isRoofOccupied(px, pz, roofW, d, angle)) return;
+          putRoof(px, pz, roofW, d, angle);
           shophouseItems.push({
             x: px,
             y: h * 0.5,
@@ -7887,9 +7958,9 @@ export class CityScene {
             x: px,
             y: h,
             z: pz,
-            w: w + 1.3,
+            w: roofW,
             h: roofH,
-            d: d + 1.3,
+            d,
             rotY: angle,
             color: roofColors[Math.floor(hash * roofColors.length) % roofColors.length]
           });
@@ -7944,8 +8015,10 @@ export class CityScene {
           const radius = Math.max(w, d) * 0.5;
           const px = x + (hash - 0.5) * 4;
           const pz = z + (((hash * 5.7) % 1) - 0.5) * 4;
-          if (isBlocked(px, pz, radius) || isOccupied(px, pz, radius)) continue;
-          placed.push({ x: px, z: pz, radius });
+          const roofW = w + 1.4;
+          const roofD = d + 1.4;
+          if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+          putRoof(px, pz, roofW, roofD);
           warehouseItems.push({
             x: px,
             y: h * 0.5,
@@ -7960,9 +8033,9 @@ export class CityScene {
             x: px,
             y: h,
             z: pz,
-            w: w + 1.4,
+            w: roofW,
             h: roofH,
-            d: d + 1.4,
+            d: roofD,
             color: industrialRoofColors[Math.floor(hash * industrialRoofColors.length) % industrialRoofColors.length]
           });
         }

@@ -2571,7 +2571,110 @@ assert.ok(
   'main.js must forward all three transit label arrays to UIManager'
 );
 
-console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 57: atap infill Void B/C/D/E — eave terpangkas dan okupansi OBB atap
+assert.ok(
+  citySceneContent.includes('const INFILL_ROOF_EAVE = 0.6;'),
+  'CityScene missing the shared infill roof eave constant'
+);
+assert.ok(
+  citySceneContent.includes('const INFILL_ROOF_TOLERANCE = 0.05;'),
+  'CityScene missing the infill roof overlap tolerance'
+);
+const roofOverlapStart = citySceneContent.indexOf('const roofRectsOverlap = (a, b, tolerance) => {');
+const roofOverlapEnd = citySceneContent.indexOf('\n};', roofOverlapStart);
+assert.ok(
+  roofOverlapStart > 0 && roofOverlapEnd > roofOverlapStart,
+  'Cannot isolate roofRectsOverlap'
+);
+const roofOverlapHelper = citySceneContent.slice(roofOverlapStart, roofOverlapEnd);
+assert.ok(roofOverlapHelper.includes('const axes = ['), 'Roof overlap must test both rectangle axes');
+assert.ok(
+  roofOverlapHelper.includes('if (reachA + reachB - distance <= tolerance) return false;'),
+  'Roof overlap must treat small penetrations as separation'
+);
+assert.ok(
+  roofOverlapHelper.includes('return true;'),
+  'Roof overlap must report deep interpenetration'
+);
+assert.ok(!citySceneContent.includes('d * 0.45'), 'Shophouse occupancy must not use the shallow facade radius');
+assert.ok(!citySceneContent.includes('w: w + 1.3'), 'Shophouse roofs must use the shared eave constant');
+assert.ok(!citySceneContent.includes('w: w + 1.2'), 'House roofs must use the shared eave constant');
+
+const voidCRoofInfill = citySceneContent.slice(
+  citySceneContent.indexOf('buildVoidCInfill() {'),
+  citySceneContent.indexOf('buildVoidCTransit() {')
+);
+const voidDRoofInfill = citySceneContent.slice(
+  citySceneContent.indexOf('buildVoidDInfill() {'),
+  citySceneContent.indexOf('buildVoidDTransit() {')
+);
+const voidERoofInfill = citySceneContent.slice(
+  citySceneContent.indexOf('buildVoidEInfill() {'),
+  citySceneContent.indexOf('buildVoidDInfill() {')
+);
+const voidBRoofInfill = citySceneContent.slice(
+  citySceneContent.indexOf('buildVoidBInfillAndIndustry() {'),
+  citySceneContent.indexOf('buildVoidBTransit() {')
+);
+[
+  ['Void B', voidBRoofInfill],
+  ['Void C', voidCRoofInfill],
+  ['Void D', voidDRoofInfill],
+  ['Void E', voidERoofInfill]
+].forEach(([label, method]) => {
+  assert.ok(
+    method.includes('const isRoofOccupied = (x, z, rw, rd, rotY) => {'),
+    `${label} infill missing the roof OBB occupancy test`
+  );
+  assert.ok(
+    method.includes('const putRoof = (x, z, rw, rd, rotY = 0) => {'),
+    `${label} infill must register placed roof footprints`
+  );
+  assert.ok(
+    method.includes('roofRectsOverlap(p, { x, z, rw, rd, rotY }, INFILL_ROOF_TOLERANCE)'),
+    `${label} infill occupancy must use the shared roof overlap helper`
+  );
+  assert.ok(!method.includes('isOccupied('), `${label} infill must drop the circle-only occupancy test`);
+  assert.strictEqual(
+    (method.match(/isRoofOccupied\(px, pz/g) || []).length,
+    3,
+    `${label} must test roof occupancy for house, shophouse and warehouse masses`
+  );
+  assert.strictEqual(
+    (method.match(/putRoof\(px, pz/g) || []).length,
+    3,
+    `${label} must register all three roof footprints`
+  );
+  assert.strictEqual(
+    (method.match(/const roofW = w \+ INFILL_ROOF_EAVE \* 2;/g) || []).length,
+    2,
+    `${label} house and shophouse roofs must share the eave constant`
+  );
+  assert.ok(
+    method.includes('const roofW = w + 1.4;'),
+    `${label} warehouse roofs must keep their 1.4 overhang`
+  );
+  assert.strictEqual(
+    (method.match(/w: roofW,/g) || []).length,
+    3,
+    `${label} must emit three roof footprints from the shared widths`
+  );
+  assert.strictEqual(
+    (method.match(/d: roofD,/g) || []).length,
+    2,
+    `${label} house and warehouse roofs must emit the shared depths`
+  );
+  const shophouseRoofStart = method.indexOf('const roofH = 1.8 + hash * 0.8;');
+  assert.ok(shophouseRoofStart > 0, `${label} missing the shophouse roof height`);
+  const shophouseRoofBlock = method.slice(shophouseRoofStart, shophouseRoofStart + 260);
+  assert.ok(shophouseRoofBlock.includes('w: roofW,'), `${label} shophouse roof must use the trimmed width`);
+  assert.ok(
+    shophouseRoofBlock.includes('d,'),
+    `${label} shophouse roofs must sit flush at the party walls`
+  );
+});
+
+console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
