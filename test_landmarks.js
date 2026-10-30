@@ -5,6 +5,7 @@ import { VOID_B_OSM } from './src/data/void_b_osm.js';
 import { VOID_C_OSM } from './src/data/void_c_osm.js';
 import { VOID_D_OSM } from './src/data/void_d_osm.js';
 import { VOID_E_OSM } from './src/data/void_e_osm.js';
+import { VOID_F_OSM } from './src/data/void_f_osm.js';
 
 let assertionCount = 0;
 ['ok', 'equal', 'strictEqual', 'deepStrictEqual', 'notDeepStrictEqual', 'throws'].forEach((method) => {
@@ -2887,15 +2888,15 @@ assert.ok(
 );
 assert.ok(!rawaWaterMethod.includes('PointLight'), 'Danau Rawa Buaya water must not add PointLights');
 
-// Check 62: PJU gabungan Void B/C/D/E memberi makan pool 12 PointLight
+// Check 62: PJU gabungan Void B/C/D/E/F memberi makan pool 12 PointLight
 assert.ok(
   citySceneContent.includes('this.mergedPjuLampTransforms = [];'),
   'CityScene.js must keep merged PJU lamp heads in a dedicated transform array'
 );
 assert.strictEqual(
   (citySceneContent.match(/this\.recordMergedPjuLamp\(/g) || []).length,
-  4,
-  'Each merged PJU builder (Void B/C/D/E) must record its lamp heads exactly once'
+  5,
+  'Each merged PJU builder (Void B/C/D/E/F) must record its lamp heads exactly once'
 );
 const mergedLampHelperStart = citySceneContent.indexOf('recordMergedPjuLamp(x, z, angle, side) {');
 assert.ok(mergedLampHelperStart > 0, 'CityScene.js missing the recordMergedPjuLamp helper');
@@ -2911,7 +2912,8 @@ const mergedPjuBuilders = [
   ['buildVoidBDaanMogot() {', 'Void B Daan Mogot'],
   ['buildVoidCMeruya() {', 'Void C Meruya'],
   ['buildVoidDPenjaringan() {', 'Void D Penjaringan'],
-  ['buildVoidECilincing() {', 'Void E Cilincing']
+  ['buildVoidECilincing() {', 'Void E Cilincing'],
+  ['buildVoidFCakung() {', 'Void F Cakung']
 ];
 for (const [token, label] of mergedPjuBuilders) {
   const body = sliceCityBuilder(`  ${token}`);
@@ -3163,7 +3165,236 @@ assert.ok(
   'DI Panjaitan palm row must skip palms standing in the Cikarang rail corridor'
 );
 
-console.log(`✅ All 105 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 64: Void F Tahap 2 — dataset OSM & builder jaringan Cakung–Klender–Duren Sawit–Pulo Gebang
+assert.ok(VOID_F_OSM.meta.source.includes('OpenStreetMap'), 'Void F OSM dataset missing OSM attribution');
+assert.ok(VOID_F_OSM.meta.license.includes('ODbL'), 'Void F OSM dataset missing ODbL license');
+assert.strictEqual(VOID_F_OSM.meta.retrieved, '2026-10-30', 'Void F dataset retrieval date changed');
+assert.ok(VOID_F_OSM.meta.api.includes('overpass.openstreetmap.fr'), 'Void F dataset must record the Overpass mirror');
+assert.ok(VOID_F_OSM.meta.api.includes('2026-08-10'), 'Void F dataset must record the OSM base snapshot');
+assert.strictEqual(VOID_F_OSM.meta.projection, 'projectGpsToScene', 'Void F dataset must use the unscaled GPS projection');
+assert.deepStrictEqual(
+  VOID_F_OSM.meta.projectionConstants,
+  { originLng: 106.823048, originLat: -6.194957, scaleX: 14100, scaleZ: 14180 },
+  'Void F projection constants drifted from projectGpsToScene'
+);
+assert.deepStrictEqual(
+  VOID_F_OSM.meta.bbox,
+  { south: -6.234, west: 106.891, north: -6.184, east: 106.965 },
+  'Void F source bbox changed without re-downloading the extract'
+);
+assert.deepStrictEqual(
+  VOID_F_OSM.meta.clipBox,
+  { minX: 960, maxX: 1995, minZ: -150, maxZ: 560 },
+  'Void F clip box changed without updating the layout'
+);
+assert.strictEqual(VOID_F_OSM.meta.simplification, 2, 'Void F simplification must stay at Douglas–Peucker 2.0');
+assert.ok(VOID_F_OSM.meta.note.includes('Jalan Layang Cakung'), 'Void F dataset must note the excluded Cakung flyover');
+assert.ok(VOID_F_OSM.meta.note.includes('busway'), 'Void F dataset must note the excluded Transjakarta busway ways');
+assert.ok(VOID_F_OSM.meta.note.includes('konektor'), 'Void F dataset must note the anchor connector decision');
+
+assert.strictEqual(VOID_F_OSM.roads.length, 91, `Void F OSM dataset changed size: ${VOID_F_OSM.roads.length} roads`);
+assert.strictEqual(VOID_F_OSM.meta.roadCount, VOID_F_OSM.roads.length, 'Void F roadCount does not match roads array');
+const allVoidFPoints = VOID_F_OSM.roads.flatMap((road) => road.points);
+assert.strictEqual(allVoidFPoints.length, 439, `Void F road point count changed: ${allVoidFPoints.length}`);
+assert.strictEqual(VOID_F_OSM.meta.roadPointCount, allVoidFPoints.length, 'Void F roadPointCount does not match dataset');
+assert.strictEqual(new Set(VOID_F_OSM.roads.map((road) => road.name)).size, 68, 'Void F road name coverage changed');
+
+const voidFWidths = { trunk: 16, primary: 18, secondary: 14, tertiary: 11 };
+VOID_F_OSM.roads.forEach((road) => {
+  assert.ok(road.name && road.name.trim().length > 0, 'Void F road missing a name');
+  assert.ok(voidFWidths[road.type] === road.width, `Void F road ${road.name} has unexpected type/width ${road.type}/${road.width}`);
+  assert.ok(road.points.length >= 2, `Void F road ${road.name} has fewer than two points`);
+  road.points.forEach(([x, z]) => {
+    assert.ok(Number.isFinite(x) && Number.isFinite(z), `Void F road ${road.name} contains a non-finite coordinate`);
+    assert.ok(x >= 960 && x <= 1995 && z >= -150 && z <= 560, `Void F road ${road.name} point ${x}/${z} outside the clip box`);
+  });
+});
+
+const voidFRoadNames = new Set(VOID_F_OSM.roads.map((road) => road.name));
+[
+  'Jalan Bekasi Raya',
+  'Jalan Kolonel Soegiono',
+  'Jalan Dokter KRT Radjiman Widyodiningrat',
+  'Jalan Pangeran Komarudin',
+  'Jalan Raya Penggilingan',
+  'Jalan Pulokambing Raya',
+  'Jalan Radin Inten',
+  'Jalan Nusa Indah Raya',
+  'Jalan Delima Raya',
+  'Jalan Haji Darip'
+].forEach((name) => {
+  assert.ok(voidFRoadNames.has(name), `Void F OSM dataset missing ${name}`);
+});
+[
+  'Jalan Layang Cakung',
+  'Jalan Inspeksi Kanal Timur',
+  'Jalur Sependa Kanal Banjir Tim.',
+  'Transjakarta Busway Koridor 11',
+  'Transjakarta Busway Koridor 4'
+].forEach((name) => {
+  assert.ok(!voidFRoadNames.has(name), `${name} must stay excluded from the at-grade Void F network`);
+});
+assert.ok(
+  !VOID_F_OSM.roads.some((road) => road.type === 'busway'),
+  'Void F dataset must not include busway ways that duplicate the carriageway'
+);
+
+const voidFRailCorridor = [
+  [420, 200],
+  [540, 240],
+  [666.1, 282.6],
+  [1081, 261],
+  [1411, 291],
+  [1586, 312],
+  [1824, 341]
+];
+const distanceToVoidFRail = (point) => {
+  let best = Infinity;
+  for (let i = 0; i < voidFRailCorridor.length - 1; i++) {
+    best = Math.min(best, distanceToSegment(point, voidFRailCorridor[i], voidFRailCorridor[i + 1]));
+  }
+  return best;
+};
+let voidFRailClearance = Infinity;
+VOID_F_OSM.roads.forEach((road) => {
+  road.points.forEach((point) => {
+    voidFRailClearance = Math.min(voidFRailClearance, distanceToVoidFRail(point));
+  });
+});
+assert.ok(voidFRailClearance >= 8, `Void F roads intrude ${voidFRailClearance.toFixed(2)} units into the Cikarang rail corridor`);
+
+const distanceToVoidFRoad = (point) => {
+  let best = Infinity;
+  VOID_F_OSM.roads.forEach((road) => {
+    for (let i = 0; i < road.points.length - 1; i++) {
+      best = Math.min(best, distanceToSegment(point, road.points[i], road.points[i + 1]));
+    }
+  });
+  return best;
+};
+voidFAnchors.forEach(({ id }) => {
+  const lm = JAKARTA_LANDMARKS.find((landmark) => landmark.id === id);
+  const distance = distanceToVoidFRoad([lm.position[0], lm.position[2]]);
+  assert.ok(distance < 60, `Void F landmark ${id} is ${distance.toFixed(1)} units from the nearest OSM road`);
+});
+
+const voidFKbtCorridor = [[850, 580], [1150, 350], [1320, 100], [1500, -250]];
+const distanceToVoidFKbt = (point) => {
+  let best = Infinity;
+  for (let i = 0; i < voidFKbtCorridor.length - 1; i++) {
+    best = Math.min(best, distanceToSegment(point, voidFKbtCorridor[i], voidFKbtCorridor[i + 1]));
+  }
+  return best;
+};
+VOID_F_OSM.roads.forEach((road) => {
+  const clearance = 26 / 2 + road.width / 2 + 1;
+  let length = 0;
+  let riding = 0;
+  for (let i = 0; i < road.points.length - 1; i++) {
+    const [ax, az] = road.points[i];
+    const [bx, bz] = road.points[i + 1];
+    const segmentLength = Math.hypot(bx - ax, bz - az);
+    if (segmentLength === 0) continue;
+    length += segmentLength;
+    if (distanceToVoidFKbt([(ax + bx) / 2, (az + bz) / 2]) < clearance) riding += segmentLength;
+  }
+  assert.ok(
+    length === 0 || riding / length < 0.6,
+    `Void F road ${road.name} rides the procedural Kanal Banjir Timur centerline`
+  );
+});
+
+assert.strictEqual(VOID_F_OSM.waterways.length, 32, `Void F waterway count changed: ${VOID_F_OSM.waterways.length}`);
+assert.strictEqual(VOID_F_OSM.meta.waterwayCount, VOID_F_OSM.waterways.length, 'Void F waterwayCount mismatch');
+const allVoidFWaterPoints = VOID_F_OSM.waterways.flatMap((waterway) => waterway.points);
+assert.strictEqual(allVoidFWaterPoints.length, 213, `Void F waterway point count changed: ${allVoidFWaterPoints.length}`);
+assert.strictEqual(VOID_F_OSM.meta.waterPointCount, allVoidFWaterPoints.length, 'Void F waterPointCount mismatch');
+VOID_F_OSM.waterways.forEach((waterway) => {
+  assert.ok(['river', 'stream'].includes(waterway.kind), `Unexpected Void F waterway kind ${waterway.kind}`);
+  const expectedWidth = waterway.name === 'Sunter' ? 14 : waterway.name === 'Buaran' ? 10 : waterway.kind === 'river' ? 9 : 5;
+  assert.strictEqual(waterway.width, expectedWidth, `Void F waterway ${waterway.name || '(unnamed)'} width drifted to ${waterway.width}`);
+  assert.ok(waterway.points.length >= 2, 'Void F waterway has fewer than two points');
+  waterway.points.forEach(([x, z]) => {
+    assert.ok(Number.isFinite(x) && Number.isFinite(z), 'Void F waterway contains a non-finite coordinate');
+    assert.ok(x >= 960 && x <= 1995 && z >= -150 && z <= 560, `Void F waterway point ${x}/${z} outside the clip box`);
+  });
+});
+const voidFWaterNames = new Set(VOID_F_OSM.waterways.map((waterway) => waterway.name));
+['Buaran', 'Sunter', 'Cipinang', 'Ci Pinang'].forEach((name) => {
+  assert.ok(voidFWaterNames.has(name), `Void F OSM dataset missing ${name} waterway`);
+});
+assert.ok(!voidFWaterNames.has('Kanal Banjir Timur'), 'Kanal Banjir Timur must stay on the procedural Void F builder');
+
+assert.ok(citySceneContent.includes("from '../data/void_f_osm.js'"), 'CityScene.js does not import the Void F OSM dataset');
+assert.ok(citySceneContent.includes('this.buildVoidFCakung();'), 'CityScene.js does not call buildVoidFCakung');
+
+const voidFNetworkCallIndex = citySceneContent.indexOf('this.buildVoidFCakung();');
+assert.ok(voidFNetworkCallIndex > 0, 'CityScene.js does not call buildVoidFCakung');
+assert.ok(
+  voidFNetworkCallIndex > citySceneContent.indexOf('this.buildVoidETransit();'),
+  'buildVoidFCakung must run after buildVoidETransit'
+);
+assert.ok(
+  voidFNetworkCallIndex < citySceneContent.indexOf('this.buildEastJakartaInfillAndDistricts();'),
+  'buildVoidFCakung must run before buildEastJakartaInfillAndDistricts so the road masks are available'
+);
+
+const voidFNetworkStart = citySceneContent.indexOf('buildVoidFCakung() {');
+const voidFNetworkEnd = citySceneContent.indexOf('getVoidERoadSegments() {', voidFNetworkStart);
+assert.ok(voidFNetworkStart > 0 && voidFNetworkEnd > voidFNetworkStart, 'Cannot isolate buildVoidFCakung');
+const voidFNetworkMethod = citySceneContent.slice(voidFNetworkStart, voidFNetworkEnd);
+assert.ok(voidFNetworkMethod.includes('VOID_F_OSM'), 'Void F builder does not consume the OSM dataset');
+assert.ok(voidFNetworkMethod.includes('segmentIntersection'), 'Void F builder missing automatic bridges');
+assert.ok(voidFNetworkMethod.includes('insideAnchorSite'), 'Void F builder must mask bridges and props inside anchor sites');
+assert.ok(voidFNetworkMethod.includes('VOID_F_KBT_CORRIDOR'), 'Void F builder must bridge the procedural Kanal Banjir Timur');
+assert.ok(voidFNetworkMethod.includes('distanceToCikarangRail'), 'Void F builder must respect the Cikarang rail corridor');
+assert.ok(voidFNetworkMethod.includes('pjuBulbMat'), 'Void F builder must share the pju-bulb material');
+assert.ok(voidFNetworkMethod.includes('recordMergedPjuLamp'), 'Void F PJU lamps must feed the shared light pool');
+assert.ok(voidFNetworkMethod.includes('voidFOsmStats'), 'Void F builder must expose runtime stats');
+assert.ok(voidFNetworkMethod.includes('connectors: 0'), 'All six Void F anchors must be served without access connectors');
+assert.ok(voidFNetworkMethod.includes('drawCalls: 8'), 'Void F network should add eight draw calls');
+assert.ok(!voidFNetworkMethod.includes('new THREE.PointLight'), 'Void F network must not add PointLights');
+assert.ok(!voidFNetworkMethod.includes('nightMaterials.push'), 'Void F network must not register new night materials');
+
+[
+  'voidf-roads',
+  'voidf-sidewalks',
+  'voidf-water',
+  'voidf-bridges',
+  'voidf-pju-poles',
+  'voidf-pju-bulbs',
+  'voidf-tree-trunks',
+  'voidf-tree-foliage'
+].forEach((name) => {
+  assert.ok(voidFNetworkMethod.includes(name), `Void F builder missing the ${name} mesh`);
+});
+
+[
+  'Jalan Dokter KRT Radjiman Widyodiningrat',
+  'Jalan Pangeran Komarudin',
+  'Jalan Bekasi Raya',
+  'Jalan Kolonel Soegiono',
+  'Jalan Pulokambing Raya',
+  'Jalan Jenderal Polisi RS. Soekanto'
+].forEach((name) => {
+  assert.ok(voidFNetworkMethod.includes(name), `Void F PJU corridor list missing ${name}`);
+});
+['Buaran', 'Sunter'].forEach((name) => {
+  assert.ok(voidFNetworkMethod.includes(name), `Void F tree bank list missing ${name}`);
+});
+
+assert.ok(citySceneContent.includes('getVoidFRoadSegments()'), 'CityScene.js missing the Void F road segment cache');
+assert.ok(citySceneContent.includes('isNearVoidFRoad(x, z, clearance = 12)'), 'CityScene.js missing the Void F road corridor mask');
+assert.ok(citySceneContent.includes('isInsideVoidFAnchorSite(x, z)'), 'CityScene.js missing the Void F anchor pad mask');
+
+assert.ok(eastJakartaBody.includes('isNearVoidFRoad('), 'East Jakarta infill must mask buildings against the Void F road corridors');
+assert.ok(eastJakartaBody.includes('isInsideVoidFAnchorSite('), 'East Jakarta infill must clear the six Void F anchor pads');
+assert.ok(
+  eastJakartaBody.includes('distanceToCikarangRail(') && eastJakartaBody.includes('< 16'),
+  'Duren Sawit houses must be cleared from the Cikarang rail ballast'
+);
+
+console.log(`✅ All 105 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
