@@ -22,6 +22,31 @@ const WATER_NIGHT_EMISSIVE = 0x0e7490;
 const WATER_NIGHT_INTENSITY = 0.34;
 const SEA_NIGHT_INTENSITY = 0.22;
 
+// Satu sumber jalur Cikarang: dipakai rel, kereta, dan pembersihan pohon KBT
+// agar tidak ada vegetasi yang berdiri di badan rel.
+const CIKARANG_RAIL_CORRIDOR = [
+  [420, 200],     // Arah Manggarai / Matraman
+  [540, 240],     // Tikungan Pisangan Baru
+  [666.1, 282.6], // Stasiun Jatinegara 1910 (Meester Cornelis)
+  [1081, 261],    // Stasiun Klender
+  [1411, 291],    // Stasiun Buaran
+  [1586, 312],    // Stasiun Klender Baru
+  [1824, 341]     // Terminal Pulo Gebang / Cakung ke Bekasi
+];
+
+const distanceToCikarangRail = (x, z) => {
+  let best = Infinity;
+  for (let i = 0; i < CIKARANG_RAIL_CORRIDOR.length - 1; i++) {
+    const [x1, z1] = CIKARANG_RAIL_CORRIDOR[i];
+    const [x2, z2] = CIKARANG_RAIL_CORRIDOR[i + 1];
+    const dx = x2 - x1;
+    const dz = z2 - z1;
+    const t = Math.max(0, Math.min(1, ((x - x1) * dx + (z - z1) * dz) / (dx * dx + dz * dz)));
+    best = Math.min(best, Math.hypot(x - (x1 + dx * t), z - (z1 + dz * t)));
+  }
+  return best;
+};
+
 // OBB overlap untuk footprint atap infill; penetrasi di bawah toleransi
 // dianggap bersentuhan agar deret ruko bertembok parti boleh menempel.
 const roofRectsOverlap = (a, b, tolerance) => {
@@ -8787,10 +8812,25 @@ export class CityScene {
 
     const factoryItems = [];
 
+    // Tapak JIEP punya model detail sendiri; grid hanggar lama harus
+    // menghindari tapak agar model detail tidak tertimbun.
+    const jiepAnchor = JAKARTA_LANDMARKS.find((l) => l.id === 'kawasan-industri-pulogadung');
+    const jiepClear = jiepAnchor
+      ? {
+          minX: jiepAnchor.position[0] - 100,
+          maxX: jiepAnchor.position[0] + 100,
+          minZ: jiepAnchor.position[2] - 76,
+          maxZ: jiepAnchor.position[2] + 76
+        }
+      : null;
+    const insideJiepAnchor = (x, z) =>
+      jiepClear && x > jiepClear.minX && x < jiepClear.maxX && z > jiepClear.minZ && z < jiepClear.maxZ;
+
     // Kompleks Kawasan Industri Pulogadung (JIEP) di timur laut
     for (let x = 1200; x <= 1450; x += 45) {
       for (let z = -140; z <= 40; z += 45) {
         if (Math.abs(z - (-30)) < 16) continue; // Jl. Pemuda ujung timur
+        if (insideJiepAnchor(x, z)) continue;
 
         const hash = Math.abs(Math.sin(x * 51.23 + z * 19.87));
         const w = 32 + hash * 12; // 32m - 44m lebar gudang pabrik
@@ -8868,6 +8908,10 @@ export class CityScene {
       [850, 580], [950, 500], [1050, 420], [1150, 350],
       [1230, 230], [1320, 100], [1410, -80], [1500, -250]
     ];
+    const addKbtTree = (x, z) => {
+      if (distanceToCikarangRail(x, z) < 14) return;
+      treeTransforms.push({ x, z, scale: 1.15, isPalm: false });
+    };
     for (let i = 0; i < kbtWaypoints.length - 1; i++) {
       const [x1, z1] = kbtWaypoints[i];
       const [x2, z2] = kbtWaypoints[i + 1];
@@ -8884,13 +8928,14 @@ export class CityScene {
         // Pohon di tanggul barat & timur kanal
         const perpX = Math.cos(angle) * 16;
         const perpZ = -Math.sin(angle) * 16;
-        treeTransforms.push({ x: tx + perpX, z: tz + perpZ, scale: 1.15, isPalm: false });
-        treeTransforms.push({ x: tx - perpX, z: tz - perpZ, scale: 1.15, isPalm: false });
+        addKbtTree(tx + perpX, tz + perpZ);
+        addKbtTree(tx - perpX, tz - perpZ);
       }
     }
 
     // Pohon Palem Raja di By-Pass DI Panjaitan & Cawang
     for (let z = 60; z <= 700; z += 24) {
+      if (distanceToCikarangRail(712, z) < 14) continue;
       treeTransforms.push({ x: 712, z, scale: 1.1, isPalm: true });
     }
 
@@ -9040,7 +9085,13 @@ export class CityScene {
       "kawasan-logistik-marunda": () => LandmarkModels.createKawasanLogistikMarunda(),
       "rusunawa-nagrak-cilincing": () => LandmarkModels.createRusunawaNagrak(),
       "kbn-cakung": () => LandmarkModels.createKBNCakung(),
-      "kampung-rorotan": () => LandmarkModels.createKampungRorotan()
+      "kampung-rorotan": () => LandmarkModels.createKampungRorotan(),
+      "stasiun-klender": () => LandmarkModels.createStasiunKlender(),
+      "stasiun-buaran": () => LandmarkModels.createStasiunBuaran(),
+      "stasiun-klender-baru": () => LandmarkModels.createStasiunKlenderBaru(),
+      "terminal-pulo-gebang": () => LandmarkModels.createTerminalPuloGebang(),
+      "kawasan-industri-pulogadung": () => LandmarkModels.createKawasanIndustriPulogadung(),
+      "rusun-klender": () => LandmarkModels.createRusunKlender()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {
@@ -10609,24 +10660,16 @@ export class CityScene {
 
     // =========================================================================
     // Dynamic KRL Commuter Line Lintas Cikarang / Bekasi (DDT Jatinegara)
-    // Melintasi Manggarai/Matraman -> Stasiun Jatinegara 1910 -> Klender -> Buaran -> Cakung
+    // Melintasi Manggarai/Matraman -> Stasiun Jatinegara 1910 -> Klender -> Buaran
+    // -> Klender Baru -> Cakung / Terminal Pulo Gebang menuju Bekasi
     // =========================================================================
-    const cikarangRailPoints = [
-      new THREE.Vector3(420.0, 0.48, 200.0),  // Arah Manggarai / Matraman
-      new THREE.Vector3(540.0, 0.48, 240.0),  // Tikungan Pisangan Baru
-      new THREE.Vector3(666.1, 0.48, 282.6),  // Stasiun Jatinegara 1910 (Meester Cornelis)
-      new THREE.Vector3(950.0, 0.48, 290.0),  // Stasiun Klender
-      new THREE.Vector3(1200.0, 0.48, 295.0), // Stasiun Buaran
-      new THREE.Vector3(1450.0, 0.48, 300.0)  // Stasiun Klender Baru / Cakung ke Bekasi
-    ];
+    const cikarangRailPoints = CIKARANG_RAIL_CORRIDOR.map(
+      ([x, z]) => new THREE.Vector3(x, 0.48, z)
+    );
     this.cikarangRailCurve = new THREE.CatmullRomCurve3(cikarangRailPoints, false, 'catmullrom', 0.15);
     this.cikarangRailCurveLength = this.cikarangRailCurve.getLength();
 
-    const cikarangBallastMesh = new THREE.Mesh(new THREE.BoxGeometry(1050, 0.22, 5.5), ballastMat);
-    cikarangBallastMesh.position.set(935.0, 0.22, 275.0);
-    cikarangBallastMesh.rotation.y = 0.09;
-    cikarangBallastMesh.receiveShadow = true;
-    this.proceduralGroup.add(cikarangBallastMesh);
+    this.addCurveBallastRibbon(this.cikarangRailCurve, 21.5, ballastMat);
 
     // =========================================================================
     // Dynamic LRT Jabodebek Lin Cibubur
@@ -10673,8 +10716,8 @@ export class CityScene {
       { id: 'krl-priok-westbound', curve: this.priokRailCurve, curveLength: this.priokRailCurveLength, carSpacing: 17.8, trackOffset: -1.4, speed: -0.022, progress: 0.7, type: 'krl', carCount: 4 },
       { id: 'krl-tangerang-westbound', curve: this.tangerangRailCurve, curveLength: this.tangerangRailCurveLength, carSpacing: 17.8, trackOffset: -1.35, speed: 0.023, progress: 0.25, type: 'krl', carCount: 4 },
       { id: 'krl-tangerang-eastbound', curve: this.tangerangRailCurve, curveLength: this.tangerangRailCurveLength, carSpacing: 17.8, trackOffset: 1.35, speed: -0.023, progress: 0.75, type: 'krl', carCount: 4 },
-      { id: 'krl-cikarang-eastbound', curve: this.cikarangRailCurve, curveLength: this.cikarangRailCurveLength, carSpacing: 17.8, trackOffset: 1.4, speed: 0.024, progress: 0.2, type: 'krl', carCount: 4 },
-      { id: 'krl-cikarang-westbound', curve: this.cikarangRailCurve, curveLength: this.cikarangRailCurveLength, carSpacing: 17.8, trackOffset: -1.4, speed: -0.024, progress: 0.7, type: 'krl', carCount: 4 },
+      { id: 'krl-cikarang-eastbound', curve: this.cikarangRailCurve, curveLength: this.cikarangRailCurveLength, carSpacing: 17.8, trackOffset: 5.0, speed: 0.024, progress: 0.2, type: 'krl', carCount: 4 },
+      { id: 'krl-cikarang-westbound', curve: this.cikarangRailCurve, curveLength: this.cikarangRailCurveLength, carSpacing: 17.8, trackOffset: -5.0, speed: -0.024, progress: 0.7, type: 'krl', carCount: 4 },
       { id: 'lrt-cibubur-southbound', curve: this.lrtCibuburCurve, curveLength: this.lrtCibuburCurveLength, carSpacing: 16.5, trackOffset: 1.4, speed: 0.026, progress: 0.15, type: 'lrt', carCount: 4 },
       { id: 'lrt-cibubur-northbound', curve: this.lrtCibuburCurve, curveLength: this.lrtCibuburCurveLength, carSpacing: 16.5, trackOffset: -1.4, speed: -0.026, progress: 0.65, type: 'lrt', carCount: 4 },
       { id: 'lrt-velodrome-northbound', curve: this.velodromeLrtCurve, curveLength: this.velodromeLrtCurveLength, carSpacing: 15.8, trackOffset: -1.35, speed: 0.025, progress: 0.2, type: 'lrt-jakarta', carCount: 2 },
@@ -10716,6 +10759,51 @@ export class CityScene {
 
       this.animatedTrains.push(train);
     });
+  }
+
+  addCurveBallastRibbon(curve, width, material) {
+    const divisions = 160;
+    const half = width / 2;
+    const positions = [];
+    const indices = [];
+    const point = new THREE.Vector3();
+    const tangent = new THREE.Vector3();
+
+    for (let i = 0; i <= divisions; i++) {
+      const u = i / divisions;
+      curve.getPointAt(u, point);
+      curve.getTangentAt(u, tangent);
+      const nx = -tangent.z;
+      const nz = tangent.x;
+      const len = Math.hypot(nx, nz) || 1;
+      const ox = (nx / len) * half;
+      const oz = (nz / len) * half;
+      positions.push(
+        point.x + ox, 0.33, point.z + oz,
+        point.x - ox, 0.33, point.z - oz,
+        point.x + ox, 0.02, point.z + oz,
+        point.x - ox, 0.02, point.z - oz
+      );
+    }
+
+    for (let i = 0; i < divisions; i++) {
+      const a = i * 4;
+      const b = (i + 1) * 4;
+      indices.push(a, b, a + 1, b, b + 1, a + 1);
+      indices.push(a, a + 2, b, b, a + 2, b + 2);
+      indices.push(a + 1, b + 1, a + 3, b + 1, b + 3, a + 3);
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
+
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.name = 'cikarang-rail-ballast';
+    mesh.receiveShadow = true;
+    this.proceduralGroup.add(mesh);
+    return mesh;
   }
 
   updateTraffic(delta) {

@@ -2227,6 +2227,144 @@ export const JAKARTA_LANDMARKS = [
       "Rusunawa Rorotan dibangun untuk merelokasi warga yang tinggal di bantaran saluran dan lahan negara.",
       "Kampung Rorotan masih mempertahankan lahan pertanian dan tambak sisa yang menyusut seiring perluasan permukiman."
     ]
+  },
+  // =====================================================
+  // ZONA 12: VOID F — CAKUNG, KLENDER, DUREN SAWIT & BUARAN
+  // =====================================================
+  {
+    id: "stasiun-klender",
+    name: "Stasiun Klender & Koridor KRL Cikarang",
+    shortName: "Stasiun Klender",
+    category: "Stasiun KRL & Simpul Komuter",
+    tagline: "Peron Pulau Empat Jalur, Green Station 2019 & Gerbang Klender",
+    height: "12 meter (Kanopi Peron & Bangunan Stasiun)",
+    year: "2018 (Bangunan Baru) / Green Station 2019",
+    architect: "PT Kereta Api Indonesia & KAI Commuter",
+    location: "Jl. I Gusti Ngurah Rai, Klender, Duren Sawit, Jakarta Timur",
+    coordinates: { lat: -6.2133306, lng: 106.8997194 },
+    position: [1081.0, 0, 261.0],
+    rotationY: -0.011,
+    labelHeight: 24,
+    cameraPosition: [1081, 52, 361],
+    cameraTarget: [1081, 7, 261],
+    description: "Stasiun komuter di koridor Cikarang yang melayani warga Klender dan Duren Sawit. Menampilkan peron pulau beratap kanopi hijau dengan panel surya, empat jalur KRL, bangunan stasiun dua lantai berjendela lebar, jembatan penyeberangan, park-and-ride, serta deretan ruko dan kampung padat di sekelilingnya.",
+    facts: [
+      "Bangunan baru Stasiun Klender diresmikan pada 26 Oktober 2018 dan berada pada ketinggian +10 meter.",
+      "Stasiun ini memiliki empat jalur dan satu peron pulau yang melayani KRL Commuter Line lintas Cikarang.",
+      "Sejak 2019 Klender menjadi salah satu stasiun percontohan Green Station bersama Sudirman dan Jurangmangu, dengan panel surya di atap kanopinya."
+    ]
+  },
+  {
+    id: "stasiun-buaran",
+    name: "Stasiun Buaran & Koridor Duren Sawit",
+    shortName: "Stasiun Buaran",
+    category: "Stasiun KRL & Simpul Komuter",
+    tagline: "Peron Pulau Empat Jalur, Bangunan Baru 2018 & Simpang Buaran",
+    height: "11 meter (Kanopi Peron & Bangunan Stasiun)",
+    year: "2018 (Bangunan Baru)",
+    architect: "PT Kereta Api Indonesia & KAI Commuter",
+    location: "Jl. I Gusti Ngurah Rai, Klender, Duren Sawit, Jakarta Timur",
+    coordinates: { lat: -6.215471870702708, lng: 106.92314452417016 },
+    position: [1411.0, 0, 291.0],
+    rotationY: -0.101,
+    labelHeight: 22,
+    cameraPosition: [1411, 48, 391],
+    cameraTarget: [1411, 6, 291],
+    description: "Stasiun komuter di antara Klender dan Klender Baru yang melayani perjalanan warga Duren Sawit menuju pusat Jakarta. Menampilkan peron pulau dengan kanopi tosca, empat jalur KRL, bangunan stasiun berjendela lebar, jembatan penyeberangan, halte feeder Simpang Buaran, parkir motor, serta ruko dan permukiman padat di sisi jalan.",
+    facts: [
+      "Bangunan baru Stasiun Buaran dibuka pada 9 November 2018.",
+      "Stasiun ini memiliki empat jalur dan satu peron pulau yang melayani KRL Commuter Line lintas Cikarang.",
+      "Buaran berada pada koridor dwiganda Jatinegara–Cakung yang menjadi jalur utama warga Duren Sawit menuju Jakarta pusat."
+    ]
+  },
+  {
+    id: "stasiun-klender-baru",
+    name: "Stasiun Klender Baru & Perbatasan Cakung",
+    shortName: "Stasiun Klender Baru",
+    category: "Stasiun KRL & Simpul Komuter",
+    tagline: "Peron Pulau Empat Jalur, Bangunan Desember 2018 & Gerbang Cakung",
+    height: "12 meter (Kanopi Peron & JPO)",
+    year: "Desember 2018 (Bangunan Baru)",
+    architect: "PT Kereta Api Indonesia & KAI Commuter",
+    location: "Jl. I Gusti Ngurah Rai, Klender, Duren Sawit, Jakarta Timur",
+    coordinates: { lat: -6.21694, lng: 106.93556 },
+    position: [1586.0, 0, 312.0],
+    rotationY: -0.121,
+    labelHeight: 24,
+    cameraPosition: [1586, 52, 414],
+    cameraTarget: [1586, 7, 312],
+    description: "Stasiun komuter di perbatasan Duren Sawit dan Cakung yang menjadi pintu masuk koridor KRL Cikarang dari arah timur. Menampilkan peron pulau beratap kanopi putih-biru, empat jalur, bangunan stasiun dua lantai, jembatan penyeberangan, deret parkir, serta kampung dan gudang kecil di sepanjang jalur.",
+    facts: [
+      "Bangunan baru Stasiun Klender Baru mulai beroperasi pada Desember 2018.",
+      "Stasiun ini memiliki empat jalur dan satu peron pulau yang melayani KRL Commuter Line lintas Cikarang.",
+      "Klender Baru berada dekat perbatasan Duren Sawit dengan Cakung, di antara Stasiun Buaran dan jalur menuju Cakung."
+    ]
+  },
+  {
+    id: "terminal-pulo-gebang",
+    name: "Terminal Terpadu Pulo Gebang",
+    shortName: "Terminal Pulo Gebang",
+    category: "Terminal Bus Tipe A",
+    tagline: "Terminal AKAP Terbesar, Kanopi Dermaga & Gerbang Cakung",
+    height: "22 meter (Hall & Kanopi Dermaga)",
+    year: "2016",
+    architect: "Pemerintah Provinsi DKI Jakarta",
+    location: "Jl. Raya Pulo Gebang, Cakung, Jakarta Timur",
+    coordinates: { lat: -6.21183, lng: 106.95247 },
+    position: [1825.0, 0, 239.0],
+    labelHeight: 34,
+    cameraPosition: [1825, 150, 430],
+    cameraTarget: [1825, 8, 239],
+    description: "Terminal bus tipe A di Cakung yang menggantikan Terminal Pulogadung untuk layanan antarkota. Menampilkan hall tunggu bertingkat beratap lengkung, deretan dermaga bus berkanopi, lajur AKAP dan angkutan kota, bus-bus besar yang mengantre, musala berkubah, dek parkir, gardu listrik kendaraan, serta gerbang kawasan di tepi Jl. Raya Pulo Gebang.",
+    facts: [
+      "Terminal Pulo Gebang mulai beroperasi pada 2016 sebagai terminal tipe A yang menggantikan Terminal Pulogadung untuk layanan bus antarkota.",
+      "Terminal ini melayani bus AKAP, AKDP, dan angkutan kota melalui dermaga keberangkatan berkanopi serta hall tunggu bertingkat.",
+      "Lokasinya di Cakung, Jakarta Timur, dekat pintu Tol Cakung dan kawasan industri Pulogadung."
+    ]
+  },
+  {
+    id: "kawasan-industri-pulogadung",
+    name: "Kawasan Industri Pulogadung (JIEP)",
+    shortName: "Pulogadung JIEP",
+    category: "Kawasan Industri Terencana",
+    tagline: "Gerbang JIEP 1973, Pabrik & Pergudangan Jakarta Timur",
+    height: "24 meter (Menara Air & Cerobong)",
+    year: "1973",
+    architect: "PT Jakarta Industrial Estate Pulogadung",
+    location: "Jl. Raya Bekasi KM 18, Pulogadung, Jakarta Timur",
+    coordinates: { lat: -6.1947897, lng: 106.9110847 },
+    position: [1241.0, 0, -2.0],
+    labelHeight: 30,
+    cameraPosition: [1241, 90, 150],
+    cameraTarget: [1241, 5, -2],
+    description: "Kawasan industri terencana tertua di Jakarta Timur yang menjadi tulang punggung manufaktur dan logistik kota. Menampilkan gerbang kawasan bertanda JIEP, pabrik-pabrik beratap pelana, gudang besar, kantor pengelola berkaca gelap, menara air, lapangan kontainer, jalan internal berpohon, serta truk barang yang melintas di antara blok industri.",
+    facts: [
+      "Kawasan Industri Pulogadung dikembangkan sejak 1973 oleh PT Jakarta Industrial Estate Pulogadung (JIEP).",
+      "Kawasan ini menempati lahan sekitar 433 hektare dan menaungi ratusan perusahaan manufaktur, logistik, dan jasa industri.",
+      "JIEP menjadi salah satu kawasan industri terencana pertama di Jakarta dan menopang ribuan tenaga kerja dari Jakarta Timur dan Bekasi."
+    ]
+  },
+  {
+    id: "rusun-klender",
+    name: "Rusun Klender Malaka Sari",
+    shortName: "Rusun Klender",
+    category: "Rumah Susun & Permukiman",
+    tagline: "78 Blok Walk-Up 1981, Koridor 1,4 Kilometer Duren Sawit",
+    height: "13 meter (Blok Walk-Up Empat Lantai)",
+    year: "1981",
+    architect: "Perum Perumnas",
+    location: "Jl. Rusun Klender, Malaka Sari, Duren Sawit, Jakarta Timur",
+    coordinates: { lat: -6.216567, lng: 106.928680 },
+    position: [1489.0, 0, 385.0],
+    labelHeight: 22,
+    cameraPosition: [1489, 42, 485],
+    cameraTarget: [1489, 5, 385],
+    description: "Kompleks rumah susun sewa tertua di Jakarta Timur yang membentang memanjang di Malaka Sari. Menampilkan deretan blok walk-up empat lantai beratap pelana, tangga bersama, koridor antar-blok, musala, taman bermain, lapangan parkir, serta pepohonan peneduh di sepanjang jalur hunian.",
+    facts: [
+      "Rusun Klender dibangun pada 1981 oleh Perum Perumnas dan menjadi salah satu rumah susun tertua di Indonesia.",
+      "Kompleksnya terdiri atas 78 blok empat lantai yang membentang sekitar 1,4 kilometer di atas lahan sekitar 4 hektare.",
+      "Rusun Klender dihuni ribuan keluarga dan dilengkapi musala, sekolah, pos kesehatan, serta ruang terbuka bersama."
+    ]
   }
 ];
 
