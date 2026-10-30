@@ -278,6 +278,18 @@ Perbaikan ini (selesai 2026-10-30) menutup P2 tumpang-tindih atap di kampung pad
 - **Verifikasi runtime** (Chrome headless 156 SwiftShader, viewport 1280×800, DPR 1): audit OBB mencatat **0 pasangan atap** dengan penetrasi >0,02 di keempat kawasan (sebelumnya 97 pasangan termasuk 1 pasangan grid, maksimum 2,28); audit badan mencatat **0 pasangan badan** >0,05 (sebelumnya 15, maksimum 2,13); 0 error konsol. Empat screenshot siang tersimpan di `docs/verification/screenshots/roof-{voidb,voidc,voidd,voide}-*.png`.
 - **Check 57** mengunci konstanta, helper `roofRectsOverlap`, pemakaian `isRoofOccupied`/`putRoof` di keempat builder, serta larangan occupancy lama (`d * 0.45`, atap ruko `w + 1.2/1.3`).
 
+## Catatan Aksen Malam Mall Kelapa Gading
+
+Perbaikan ini (selesai 2026-10-30) menutup P3 artefak cyan pada audit visual 2026-10-27 sekaligus memberi aksen malam pertama untuk anchor `mall-kelapa-gading`. Audit runtime lebih dulu memisahkan penyebab: menyembunyikan spire menghilangkan bilah cyan, menurunkan `metalness` ke 0 juga menghilangkannya, dan mematikan bloom **tidak** menghilangkannya — jadi bloom hanya memperbesar specular, bukan sumbernya.
+
+- **Akar masalah:** spire tembaga La Piazza memakai `metalness 0,65` / `roughness 0,3` tanpa environment map, sehingga DirectionalLight bulan `#93c5fd` @ 0,45 terpantul sebagai bilah specular memanjang. Empat jam memakai `MeshBasicMaterial` `0xfffbeb` yang selalu penuh terang sehingga bloom membentuk dua halo putih besar.
+- **Material baru:** spire `copperSpireMat` menjadi matte `metalness 0,28` / `roughness 0,55`; jam menjadi `MeshStandardMaterial` dengan emissive hangat `#ffe9a8` @ 0,85; atrium kaca dan skybridge memakai `glassAtriumMat` bertanda malam dengan emissive `#38bdf8` @ 0,38; pita jendela baru `mallWindowMat` `0x0f172a` dengan emissive `#ffc46b` @ 0,5.
+- **Pita jendela:** sepuluh bilah kotak 1,25 unit (dua baris pada empat sisi podium + dua bilah dek atas) digabung lewat `BufferGeometryUtils.mergeGeometries` menjadi satu mesh bernama `mall-window-bands` — 80 triangle, **+1 draw call**, tanpa `PointLight` baru.
+- **Penerusan emissive:** `tagNightWindow(material, nightIntensity, nightEmissive)` kini menerima warna emissive opsional; `buildLandmarks()` meneruskannya ke `registerNightMaterial` lewat `emissive: mat.userData.nightEmissive ?? 0xffc46b`, sehingga kaca atrium tetap biru dingin sementara jendela lain tetap amber.
+- **Verifikasi runtime** (Chrome headless 156 SwiftShader, viewport 1264×705, DPR 1): piksel cyan pada crop campanile **163 → 0**; rerata luma kawasan mall **37,7 → 39,2**, porsi piksel terang (>70) **8,2% → 10,5%**; `nightMaterials` **30**; golden menskalakan ke 0,34 jam / 0,152 atrium / 0,2 pita, siang 0 pada semuanya; siang tetap 125 draw call / 86.336 triangle; 0 error konsol. Screenshot `night-03-kelapa-gading.png` dan `day-08-kelapa-gading.png` diperbarui.
+- **Check 59** mengunci metalness/roughness spire, ketiadaan `MeshBasicMaterial` jam, pemanggilan `tagNightWindow` jam/atrium/pita beserta argumennya, penggabungan `mall-window-bands`, larangan `PointLight`, dan penerusan `nightEmissive` di `CityScene`.
+- **Sisa:** PJU kawasan Kelapa Gading dan Danau Rawa Buaya belum ada (seluruh 193 lampu berada di x ≈ 300 / Void B); pass pencahayaan malam distrik menjadi tahap terpisah.
+
 ## Catatan F4 — Optimasi performa
 
 F4 dibagi menjadi tiga tahap yang diverifikasi dan di-commit terpisah. Keputusan yang disetujui: bayangan dibuat statis dan kereta tidak lagi menjadi shadow caster.
@@ -295,8 +307,8 @@ Gerbang sebelum Void C: audit 11 sudut pandang siang dan 3 malam di Chrome headl
 
 - **P0: tidak ada.** Aplikasi memuat dan merender semua sudut pandang tanpa error konsol.
 - **Sembilan P1 diperbaiki dan diverifikasi ulang:** F-01 bangunan di badan Danau Rawa Buaya dihapus lewat exclusion zone; F-02–F-07 preset Monas, Daan Mogot, Kelapa Gading, Halim, Rawa Buaya, dan SCBD diperbaiki agar landmark utuh dan label terlihat; F-08 metalness fasad SCBD diturunkan 0,8 → 0,5 agar tidak hitam tanpa environment map; F-09 preset Tanjung Priok diangkat dari atap stasiun dan metalness kubah baja diturunkan 0,8 → 0,35.
-- **P2 yang masih terbuka:** foreground Bundaran HI, jarak kamera Semanggi, close-up TMII tanpa label utama, serta pencahayaan malam Rawa Buaya/Kelapa Gading yang terlalu gelap.
-- **P3:** artefak berkas cyan di atas campanile Kelapa Gading saat malam; aerial 2.193 draw call / 300.686 triangle sebagai kandidat optimasi F5.
+- **P2 yang masih terbuka:** foreground Bundaran HI, jarak kamera Semanggi, close-up TMII tanpa label utama, serta pencahayaan malam Rawa Buaya/Kelapa Gading yang terlalu gelap. Aksen fasad Mall Kelapa Gading sudah ditutup 2026-10-30; PJU kawasan tetap terbuka.
+- **P3:** artefak berkas cyan di atas campanile Kelapa Gading **diperbaiki 2026-10-30** (spire matte + jam emissive + pita jendela); aerial 2.193 draw call / 300.686 triangle sebagai kandidat optimasi F5.
 - **Statistik siang final:** aerial **2.193 draw call / 300.686 triangle**; pandangan level jalan **92–775 draw call**; SCBD **1.438 draw call** karena skyline padat. Statistik malam tidak valid karena pass bloom menimpa `renderer.info`; FPS tidak diklaim karena SwiftShader.
 
 ## Kebijakan akurasi posisi

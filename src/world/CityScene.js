@@ -8979,7 +8979,7 @@ export class CityScene {
           mats.forEach((mat) => {
             if (!mat || !mat.userData?.nightWindow) return;
             this.registerNightMaterial(mat, {
-              emissive: 0xffc46b,
+              emissive: mat.userData.nightEmissive ?? 0xffc46b,
               nightIntensity: mat.userData.nightIntensity ?? 0.62
             });
           });

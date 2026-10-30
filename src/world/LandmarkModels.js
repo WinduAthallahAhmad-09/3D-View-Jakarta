@@ -12,11 +12,12 @@ export class LandmarkModels {
    * nightMaterials saat model dipasang; intensitas malam bisa dibedakan
    * per material tanpa PointLight tambahan.
    */
-  static tagNightWindow(material, nightIntensity = 0.62) {
+  static tagNightWindow(material, nightIntensity = 0.62, nightEmissive = 0xffc46b) {
     if (!material) return material;
     material.userData = material.userData || {};
     material.userData.nightWindow = true;
     material.userData.nightIntensity = nightIntensity;
+    material.userData.nightEmissive = nightEmissive;
     return material;
   }
 
@@ -4581,10 +4582,24 @@ export class LandmarkModels {
     const group = new THREE.Group();
 
     const mallFacadeMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.55 });
-    const glassAtriumMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.15, metalness: 0.85 });
+    const glassAtriumMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.15, metalness: 0.85 }),
+      0.38,
+      0x38bdf8
+    );
     const brickTowerMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.7 });
-    const copperSpireMat = new THREE.MeshStandardMaterial({ color: 0x0d9488, metalness: 0.65, roughness: 0.3 });
-    const clockFaceMat = new THREE.MeshBasicMaterial({ color: 0xfffbeb });
+    // Metalness tinggi tanpa env map memantulkan lampu bulan sebagai bilah
+    // cyan di atas campanile; patina tembaga harus matte.
+    const copperSpireMat = new THREE.MeshStandardMaterial({ color: 0x0d9488, metalness: 0.28, roughness: 0.55 });
+    const clockFaceMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0xfff7e0, roughness: 0.45 }),
+      0.85,
+      0xffe9a8
+    );
+    const mallWindowMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.1, roughness: 0.5 }),
+      0.5
+    );
 
     // 1. Multi-Tier Commercial Podium (MKG 1 to 5)
     const podiumMain = new THREE.Mesh(new THREE.BoxGeometry(95, 18, 65), mallFacadeMat);
@@ -4609,6 +4624,26 @@ export class LandmarkModels {
     const skybridge = new THREE.Mesh(new THREE.BoxGeometry(32, 4.5, 6), glassAtriumMat);
     skybridge.position.set(0, 14, 34);
     group.add(skybridge);
+
+    // Pita jendela malam: sepuluh bilah digabung menjadi satu mesh.
+    const bandGeos = [];
+    const addWindowBand = (length, x, y, z, rotationY = 0) => {
+      const bandGeo = new THREE.BoxGeometry(length, 1.25, 0.3);
+      if (rotationY) bandGeo.rotateY(rotationY);
+      bandGeo.translate(x, y, z);
+      bandGeos.push(bandGeo);
+    };
+    [5.5, 9.5].forEach((y) => {
+      addWindowBand(92, 0, y, 32.65);
+      addWindowBand(92, 0, y, -32.65);
+      addWindowBand(62, 47.65, y, 0, Math.PI / 2);
+      addWindowBand(62, -47.65, y, 0, Math.PI / 2);
+    });
+    addWindowBand(66, 0, 22, 17.65);
+    addWindowBand(66, 0, 22, -27.65);
+    const windowBands = new THREE.Mesh(BufferGeometryUtils.mergeGeometries(bandGeos), mallWindowMat);
+    windowBands.name = 'mall-window-bands';
+    group.add(windowBands);
 
     // 3. La Piazza Campanile Clock Tower (H=36m)
     const towerGroup = new THREE.Group();

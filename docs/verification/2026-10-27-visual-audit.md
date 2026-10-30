@@ -69,11 +69,11 @@ Semua perbaikan dikunci oleh **Check 40** di `test_landmarks.js`: posisi kamera 
 - **Bundaran HI**: menara dan vegetasi di foreground menutupi sebagian kolam; monumen tetap terbaca, tetapi komposisi bisa lebih bersih.
 - **Simpang Semanggi**: kamera sangat dekat dengan ring flyover sehingga ring mendominasi frame dan sisi timurnya terpotong gedung. Label tetap terlihat.
 - **TMII**: preset masih berupa close-up dua kolam miniatur; label utama (setinggi 65 unit) berada di luar frame. Perbaikan yang disarankan: tarik kamera ke belakang ±150 unit dan naikkan target agar label masuk.
-- **Malam Danau Rawa Buaya & Kelapa Gading**: pemandangan sangat gelap; lampu taman/pJU dan aksen fasad minim. Perlu pass pencahayaan malam khusus, bukan sekadar perbaikan kamera.
+- **Malam Danau Rawa Buaya & Kelapa Gading**: pemandangan sangat gelap; lampu taman/PJU dan aksen fasad minim. Perlu pass pencahayaan malam khusus, bukan sekadar perbaikan kamera. **Sebagian ditutup 2026-10-30:** aksen fasad dan pita jendela Mall Kelapa Gading sudah menyala (lihat di bawah); PJU kawasan Kelapa Gading dan Danau Rawa Buaya masih menjadi pekerjaan terpisah karena seluruh 193 lampu berada di x ≈ 300 (Void B).
 
 ### P3 — catatan kecil
 
-- **Berkas cyan di atas campanile Kelapa Gading (malam)**: kemungkinan artefak bloom atau sorot lampu; tidak mengganggu pembacaan.
+- **Berkas cyan di atas campanile Kelapa Gading (malam)** — **diperbaiki 2026-10-30.** Akar masalah bukan bloom: spire tembaga `0x0d9488` memakai `metalness 0,65` / `roughness 0,3` tanpa environment map, sehingga DirectionalLight bulan `#93c5fd` memantul sebagai bilah specular memanjang; bloom hanya memperbesarnya. Spire kini matte (`metalness 0,28` / `roughness 0,55`). Empat jam yang sebelumnya `MeshBasicMaterial` penuh terang (dua halo putih besar) kini `MeshStandardMaterial` dengan emissive hangat `#ffe9a8` @ 0,85, atrium kaca mendapat emissive `#38bdf8` @ 0,38, dan sepuluh pita jendela digabung menjadi satu mesh `mall-window-bands` (emissive `#ffc46b` @ 0,5; +1 draw call). Verifikasi runtime: piksel cyan pada crop campanile **163 → 0**, rerata luma kawasan mall **37,7 → 39,2**, `nightMaterials` 30, siang tanpa emissive, 0 error konsol. Check 59 mengunci material dan mesh ini.
 - **Aerial 2.193 draw call / 300.686 triangle**: kandidat optimasi F5 (LOD/merge lanjutan) bila target perangkat menuntut. Tidak ada klaim FPS.
 - **Bayangan statis**: fokus shadow di-snap per 40 unit; pada perpindahan kamera cepat, tepi bayangan dapat bergeser halus. Tidak terlihat sebagai cacat pada baseline.
 

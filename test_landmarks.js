@@ -2460,17 +2460,21 @@ assert.ok(!nightHelperMethod.includes('new THREE.PointLight'), 'Night windows mu
 });
 
 assert.ok(
-  landmarkModelsContent.includes('static tagNightWindow(material, nightIntensity = 0.62)'),
+  landmarkModelsContent.includes('static tagNightWindow(material, nightIntensity = 0.62, nightEmissive = 0xffc46b)'),
   'LandmarkModels missing the night window tagger'
 );
 assert.ok(
   landmarkModelsContent.includes('material.userData.nightWindow = true;'),
   'Night window tagger must flag the material'
 );
+assert.ok(
+  landmarkModelsContent.includes('material.userData.nightEmissive = nightEmissive;'),
+  'Night window tagger must store the per-material emissive colour'
+);
 assert.strictEqual(
   (landmarkModelsContent.match(/LandmarkModels\.tagNightWindow\(/g) || []).length,
-  11,
-  'Expected 11 tagged window/glass materials across the Void C/D/E anchors'
+  14,
+  'Expected 14 tagged window/glass materials across the Void C/D/E anchors and Mall Kelapa Gading'
 );
 assert.ok(
   landmarkModelsContent.includes('createUniversitasMercuBuana') &&
@@ -2686,7 +2690,55 @@ assert.ok(
   'Halte KBN Cakung must not return to the Cilincing Timur carriageway seam'
 );
 
-console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 59: malam Mall Kelapa Gading — bilah cyan campanile & aksen fasad
+const mallMethodStart = landmarkModelsContent.indexOf('static createMallKelapaGading() {');
+assert.ok(mallMethodStart > 0, 'Cannot isolate createMallKelapaGading');
+const mallMethodEnd = landmarkModelsContent.indexOf('static createTanjungPriokPort()', mallMethodStart);
+assert.ok(mallMethodEnd > mallMethodStart, 'Cannot delimit createMallKelapaGading');
+const mallMethod = landmarkModelsContent.slice(mallMethodStart, mallMethodEnd);
+
+assert.ok(
+  /copperSpireMat = new THREE\.MeshStandardMaterial\(\{ color: 0x0d9488, metalness: 0\.28, roughness: 0\.55 \}\)/.test(mallMethod),
+  'Campanile spire must stay matte so the moon light cannot smear a cyan blade'
+);
+assert.ok(
+  !mallMethod.includes('new THREE.MeshBasicMaterial({ color: 0xfffbeb })'),
+  'Clock faces must not remain a full-bright basic material'
+);
+assert.ok(
+  /clockFaceMat = LandmarkModels\.tagNightWindow\(\s*new THREE\.MeshStandardMaterial\(\{ color: 0xfff7e0, roughness: 0\.45 \}\),\s*0\.85,\s*0xffe9a8\s*\)/.test(mallMethod),
+  'Clock faces must become warm standard material with a registered night glow'
+);
+assert.ok(
+  /glassAtriumMat = LandmarkModels\.tagNightWindow\(\s*new THREE\.MeshStandardMaterial\(\{ color: 0x0284c7, roughness: 0\.15, metalness: 0\.85 \}\),\s*0\.38,\s*0x38bdf8\s*\)/.test(mallMethod),
+  'Atrium glass must glow cool cyan at night instead of reading as a black hole'
+);
+assert.ok(
+  /mallWindowMat = LandmarkModels\.tagNightWindow\(\s*new THREE\.MeshStandardMaterial\(\{ color: 0x0f172a, metalness: 0\.1, roughness: 0\.5 \}\),\s*0\.5\s*\)/.test(mallMethod),
+  'Mall window bands must register a warm night glow'
+);
+assert.ok(
+  mallMethod.includes('[5.5, 9.5].forEach((y) => {'),
+  'Mall window bands must wrap both podium rows'
+);
+assert.ok(
+  mallMethod.includes('BufferGeometryUtils.mergeGeometries(bandGeos)'),
+  'Mall window bands must merge into a single geometry'
+);
+assert.ok(
+  mallMethod.includes("windowBands.name = 'mall-window-bands';"),
+  'Merged window band mesh must be named for verification'
+);
+assert.ok(
+  !mallMethod.includes('PointLight'),
+  'Mall night accents must not add PointLights'
+);
+assert.ok(
+  citySceneContent.includes('emissive: mat.userData.nightEmissive ?? 0xffc46b,'),
+  'buildLandmarks must forward the tagged night emissive colour'
+);
+
+console.log(`✅ All 99 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
