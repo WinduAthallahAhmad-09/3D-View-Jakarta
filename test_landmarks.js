@@ -3281,7 +3281,10 @@ voidFAnchors.forEach(({ id }) => {
   assert.ok(distance < 60, `Void F landmark ${id} is ${distance.toFixed(1)} units from the nearest OSM road`);
 });
 
-const voidFKbtCorridor = [[850, 580], [1150, 350], [1320, 100], [1500, -250]];
+const voidFKbtCorridor = [
+  [850, 580], [1150, 350], [1320, 100], [1500, -250],
+  [1620, -300], [1760, -330], [1900, -390], [2000, -430], [2088.6, -478.4]
+];
 const distanceToVoidFKbt = (point) => {
   let best = Infinity;
   for (let i = 0; i < voidFKbtCorridor.length - 1; i++) {
@@ -4228,7 +4231,190 @@ assert.ok(
   'main.js must forward the Void G transit labels to UIManager'
 );
 
-console.log(`✅ All 111 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 71: Visual P2 — jembatan girder rel Cikarang di KBT & konektor KBT–Void E
+const eastInfraBody = sliceCityBuilder('  buildEastJakartaInfrastructure() {');
+const eastDistrictBody = sliceCityBuilder('  buildEastJakartaInfillAndDistricts() {');
+
+assert.ok(
+  citySceneModuleScope.includes('const CIKARANG_RAIL_KBT_CROSSING ='),
+  'CityScene.js must expose the audited rail x KBT crossing'
+);
+assert.ok(
+  citySceneModuleScope.includes('const KBT_RAIL_BRIDGE_GAP = 23;'),
+  'KBT rail bridge gap must clear the full 48-unit deck at its skewed crossing'
+);
+
+const railKbtCrossingMatch = citySceneModuleScope.match(
+  /const CIKARANG_RAIL_KBT_CROSSING = \{ x: (-?[\d.]+), z: (-?[\d.]+), angle: (-?[\d.]+) \};/
+);
+assert.ok(railKbtCrossingMatch, 'CIKARANG_RAIL_KBT_CROSSING must keep an audited literal');
+
+const railKbtCrossing = (() => {
+  const tension = 0.15;
+  const cubic = (a, b, c, d, w) => {
+    const t0 = tension * (c - a);
+    const t1 = tension * (d - b);
+    return b + t0 * w + (-3 * b + 3 * c - 2 * t0 - t1) * w * w + (2 * b - 2 * c + t0 + t1) * w * w * w;
+  };
+  const pointAt = (u) => {
+    const l = cikarangCorridor.length;
+    const p = (l - 1) * u;
+    let i = Math.floor(p);
+    let w = p - i;
+    if (w === 0 && i === l - 1) {
+      i = l - 2;
+      w = 1;
+    }
+    const p0 = i > 0
+      ? cikarangCorridor[i - 1]
+      : [2 * cikarangCorridor[0][0] - cikarangCorridor[1][0], 2 * cikarangCorridor[0][1] - cikarangCorridor[1][1]];
+    const p1 = cikarangCorridor[i];
+    const p2 = cikarangCorridor[i + 1];
+    const p3 = i + 2 < l
+      ? cikarangCorridor[i + 2]
+      : [2 * cikarangCorridor[l - 1][0] - cikarangCorridor[l - 2][0], 2 * cikarangCorridor[l - 1][1] - cikarangCorridor[l - 2][1]];
+    return [cubic(p0[0], p1[0], p2[0], p3[0], w), cubic(p0[1], p1[1], p2[1], p3[1], w)];
+  };
+  const [ax, az, bx, bz] = [1150, 350, 1320, 100];
+  const side = ([x, z]) => (x - ax) * (bz - az) - (z - az) * (bx - ax);
+  let lo = 0;
+  let hi = 1;
+  let prev = side(pointAt(0));
+  for (let i = 1; i <= 2000; i++) {
+    const u = i / 2000;
+    const next = side(pointAt(u));
+    if (prev * next <= 0) {
+      lo = (i - 1) / 2000;
+      hi = u;
+      break;
+    }
+    prev = next;
+  }
+  for (let i = 0; i < 60; i++) {
+    const mid = (lo + hi) / 2;
+    if (side(pointAt(lo)) * side(pointAt(mid)) <= 0) hi = mid;
+    else lo = mid;
+  }
+  const u = (lo + hi) / 2;
+  const point = pointAt(u);
+  const before = pointAt(u - 1e-6);
+  const after = pointAt(u + 1e-6);
+  return {
+    x: point[0],
+    z: point[1],
+    angle: Math.atan2(after[0] - before[0], after[1] - before[1])
+  };
+})();
+
+assert.ok(
+  Math.abs(railKbtCrossing.x - Number(railKbtCrossingMatch[1])) < 0.5 &&
+    Math.abs(railKbtCrossing.z - Number(railKbtCrossingMatch[2])) < 0.5,
+  'CIKARANG_RAIL_KBT_CROSSING drifted from the driven Cikarang curve'
+);
+assert.ok(
+  Math.abs(railKbtCrossing.angle - Number(railKbtCrossingMatch[3])) < 0.01,
+  'CIKARANG_RAIL_KBT_CROSSING angle drifted from the driven Cikarang curve'
+);
+
+assert.ok(
+  eastInfraBody.includes(
+    'const addRiverSegment = (x1, z1, x2, z2, width = 26, depth = 1.4, drawWalls = true) => {'
+  ),
+  'KBT river helper must support a wall-free segment under the rail bridge'
+);
+assert.ok(eastInfraBody.includes('if (drawWalls) {'), 'KBT rail bridge gap must skip canal walls');
+assert.ok(
+  eastInfraBody.includes('const kbtSeg2DirX = 170 / kbtSeg2Length;') &&
+    eastInfraBody.includes('const kbtSeg2DirZ = -250 / kbtSeg2Length;'),
+  'KBT segmen 2 split must follow the audited canal direction'
+);
+[
+  'x - kbtSeg2DirX * KBT_RAIL_BRIDGE_GAP',
+  'z - kbtSeg2DirZ * KBT_RAIL_BRIDGE_GAP',
+  'x + kbtSeg2DirX * KBT_RAIL_BRIDGE_GAP',
+  'z + kbtSeg2DirZ * KBT_RAIL_BRIDGE_GAP'
+].forEach((token) => {
+  assert.ok(eastInfraBody.includes(token), `KBT rail gap must be centred on the crossing via ${token}`);
+});
+
+[
+  'addRiverSegment(1150, 350, kbtRailGapBefore[0], kbtRailGapBefore[1], 26, 1.4);',
+  'addRiverSegment(kbtRailGapBefore[0], kbtRailGapBefore[1], kbtRailGapAfter[0], kbtRailGapAfter[1], 26, 1.4, false);',
+  'addRiverSegment(kbtRailGapAfter[0], kbtRailGapAfter[1], 1320, 100, 26, 1.4);'
+].forEach((call) => {
+  assert.ok(eastInfraBody.includes(call), `KBT segmen 2 must be split for the rail bridge: ${call}`);
+});
+
+[
+  'addRiverSegment(1500, -250, 1620, -300, 26, 1.4);',
+  'addRiverSegment(1620, -300, 1760, -330, 26, 1.4);',
+  'addRiverSegment(1760, -330, 1900, -390, 26, 1.4);',
+  'addRiverSegment(1900, -390, 2000, -430, 26, 1.4);',
+  'addRiverSegment(2000, -430, 2088.6, -478.4, 26, 1.4);'
+].forEach((call) => {
+  assert.ok(eastInfraBody.includes(call), `KBT connector missing ${call}`);
+});
+
+const voidFKbtMatch = citySceneModuleScope.match(/const VOID_F_KBT_CORRIDOR = \[([\s\S]*?)\];/);
+assert.ok(voidFKbtMatch, 'VOID_F_KBT_CORRIDOR must keep an inline waypoint list');
+[
+  [850, 580], [1150, 350], [1320, 100], [1500, -250],
+  [1620, -300], [1760, -330], [1900, -390], [2000, -430], [2088.6, -478.4]
+].forEach(([x, z]) => {
+  assert.ok(
+    voidFKbtMatch[1].includes(`[${x}, ${z}]`),
+    `VOID_F_KBT_CORRIDOR missing connector waypoint [${x}, ${z}]`
+  );
+});
+
+const voidEKbtHead = VOID_E_OSM.waterways.find((waterway) => waterway.name === 'Kanal Banjir Timur');
+assert.ok(voidEKbtHead, 'Void E dataset missing the Kanal Banjir Timur head');
+assert.deepStrictEqual(
+  voidEKbtHead.points[0],
+  [2088.6, -478.4],
+  'KBT connector must meet the Void E OSM canal head'
+);
+
+const railBridgeHelperIndex = eastInfraBody.indexOf('const addRailBridgeOverKbt = (x, z, angle) => {');
+assert.ok(railBridgeHelperIndex > 0, 'East Jakarta infrastructure missing the rail bridge helper');
+[
+  'const width = 24;',
+  'const length = 48;',
+  'bridgeGeos.push(makeBox(width, 0.6, length, x, 0.0, z, angle));',
+  'bridgeGeos.push(makeBox(0.7, 1.35, length, x + px, 0.95, z + pz, angle));',
+  'bridgeGeos.push(makeBox(width, 1.25, 2.6, ax, -0.35, az, angle));'
+].forEach((token) => {
+  assert.ok(eastInfraBody.includes(token), `Rail bridge over KBT missing ${token}`);
+});
+
+const railBridgeCallIndex = eastInfraBody.indexOf('addRailBridgeOverKbt(\n');
+assert.ok(railBridgeCallIndex > railBridgeHelperIndex, 'Rail bridge helper must be called for the KBT crossing');
+assert.ok(
+  railBridgeCallIndex < eastInfraBody.indexOf('mergeAndAdd(bridgeGeos'),
+  'Rail bridge must be pushed before the bridge geometries are merged'
+);
+assert.ok(
+  eastInfraBody
+    .slice(railBridgeCallIndex, railBridgeCallIndex + 220)
+    .includes('CIKARANG_RAIL_KBT_CROSSING.angle'),
+  'Rail bridge must be anchored to the audited crossing constant'
+);
+
+assert.strictEqual(
+  (eastInfraBody.match(/mergeAndAdd\(/g) || []).length,
+  9,
+  'P2 must merge the bridge and connector into the existing nine procedural meshes'
+);
+assert.ok(!eastInfraBody.includes('new THREE.PointLight'), 'P2 must not add PointLights');
+
+[[1620, -300], [1760, -330], [1900, -390], [2000, -430], [2088.6, -478.4]].forEach(([x, z]) => {
+  assert.ok(
+    eastDistrictBody.includes(`[${x}, ${z}]`),
+    `KBT tree belt must follow the connector through [${x}, ${z}]`
+  );
+});
+
+console.log(`✅ All 111 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

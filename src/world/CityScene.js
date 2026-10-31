@@ -50,8 +50,18 @@ const distanceToCikarangRail = (x, z) => {
 };
 
 // Kanal Banjir Timur tetap prosedural; koridor dipakai bersama oleh dek
-// jembatan Tahap 2 dan mask infill Tahap 3.
-const VOID_F_KBT_CORRIDOR = [[850, 580], [1150, 350], [1320, 100], [1500, -250]];
+// jembatan Tahap 2 dan mask infill Tahap 3. Lima titik terakhir melanjutkan
+// kanal ke kepala badan air OSM Void E di (2088.6, -478.4).
+const VOID_F_KBT_CORRIDOR = [
+  [850, 580], [1150, 350], [1320, 100], [1500, -250],
+  [1620, -300], [1760, -330], [1900, -390], [2000, -430], [2088.6, -478.4]
+];
+
+// Titik potong rel Cikarang dengan KBT dihitung dari kurva Catmull-Rom yang
+// sama dengan ballast. Gap dinding 23 unit menutup dek jembatan 48 x 24 pada
+// skew ~60 derajat sehingga tidak ada dinding kanal yang menembus dek.
+const CIKARANG_RAIL_KBT_CROSSING = { x: 1203.85, z: 270.81, angle: 1.4784 };
+const KBT_RAIL_BRIDGE_GAP = 23;
 
 // Lahan Park and Ride Klender dipakai bersama oleh reservasi infill Tahap 3
 // dan plaza transit Tahap 4 agar keduanya tidak bergeser.
@@ -3501,7 +3511,7 @@ export class CityScene {
       pierGeos.push(makeBox(2.2, my, 2.2, mx, my * 0.5, mz, angle));
     };
 
-    const addRiverSegment = (x1, z1, x2, z2, width = 26, depth = 1.4) => {
+    const addRiverSegment = (x1, z1, x2, z2, width = 26, depth = 1.4, drawWalls = true) => {
       const dx = x2 - x1;
       const dz = z2 - z1;
       const len = Math.hypot(dx, dz);
@@ -3513,15 +3523,38 @@ export class CityScene {
       waterGeos.push(makeBox(width, 0.2, len + 0.4, mx, -0.05, mz, angle));
 
       // Stone/Concrete canal retaining walls
-      [-1, 1].forEach((dir) => {
-        const perpX = Math.cos(angle) * (width * 0.5 + 0.6) * dir;
-        const perpZ = -Math.sin(angle) * (width * 0.5 + 0.6) * dir;
-        canalWallGeos.push(makeBox(1.2, depth + 0.4, len + 0.4, mx + perpX, 0.2, mz + perpZ, angle));
-      });
+      if (drawWalls) {
+        [-1, 1].forEach((dir) => {
+          const perpX = Math.cos(angle) * (width * 0.5 + 0.6) * dir;
+          const perpZ = -Math.sin(angle) * (width * 0.5 + 0.6) * dir;
+          canalWallGeos.push(makeBox(1.2, depth + 0.4, len + 0.4, mx + perpX, 0.2, mz + perpZ, angle));
+        });
+      }
     };
 
     const addBridge = (x, y, z, width, height, length, rotY = 0) => {
       bridgeGeos.push(makeBox(width, height, length, x, y, z, rotY));
+    };
+
+    // Jembatan rel di atas KBT: dek tetap di bawah permukaan ballast (0,33)
+    // agar pita rel tidak tertutup, sedangkan girder samping dan abutment
+    // memberi dukungan visual di kedua tebing kanal.
+    const addRailBridgeOverKbt = (x, z, angle) => {
+      const width = 24;
+      const length = 48;
+      const sinA = Math.sin(angle);
+      const cosA = Math.cos(angle);
+      bridgeGeos.push(makeBox(width, 0.6, length, x, 0.0, z, angle));
+      [-1, 1].forEach((dir) => {
+        const px = cosA * (width * 0.5 - 0.35) * dir;
+        const pz = -sinA * (width * 0.5 - 0.35) * dir;
+        bridgeGeos.push(makeBox(0.7, 1.35, length, x + px, 0.95, z + pz, angle));
+      });
+      [-1, 1].forEach((dir) => {
+        const ax = x + sinA * 22.5 * dir;
+        const az = z + cosA * 22.5 * dir;
+        bridgeGeos.push(makeBox(width, 1.25, 2.6, ax, -0.35, az, angle));
+      });
     };
 
     // =========================================================================
@@ -3620,8 +3653,29 @@ export class CityScene {
     // A. Kanal Banjir Timur (KBT / Eastern Flood Canal)
     // Mengalir megah dari Cipinang melengkung ke Duren Sawit, Pondok Bambu, hingga Cakung
     addRiverSegment(850, 580, 1150, 350, 26, 1.4);  // KBT Segmen 1: Cipinang ke Duren Sawit
-    addRiverSegment(1150, 350, 1320, 100, 26, 1.4); // KBT Segmen 2: Duren Sawit ke Pondok Bambu
+    const kbtSeg2Length = Math.hypot(170, 250);
+    const kbtSeg2DirX = 170 / kbtSeg2Length;
+    const kbtSeg2DirZ = -250 / kbtSeg2Length;
+    const kbtRailGapBefore = [
+      CIKARANG_RAIL_KBT_CROSSING.x - kbtSeg2DirX * KBT_RAIL_BRIDGE_GAP,
+      CIKARANG_RAIL_KBT_CROSSING.z - kbtSeg2DirZ * KBT_RAIL_BRIDGE_GAP
+    ];
+    const kbtRailGapAfter = [
+      CIKARANG_RAIL_KBT_CROSSING.x + kbtSeg2DirX * KBT_RAIL_BRIDGE_GAP,
+      CIKARANG_RAIL_KBT_CROSSING.z + kbtSeg2DirZ * KBT_RAIL_BRIDGE_GAP
+    ];
+    addRiverSegment(1150, 350, kbtRailGapBefore[0], kbtRailGapBefore[1], 26, 1.4); // KBT Segmen 2a: Duren Sawit ke jembatan rel
+    addRiverSegment(kbtRailGapBefore[0], kbtRailGapBefore[1], kbtRailGapAfter[0], kbtRailGapAfter[1], 26, 1.4, false); // Air tanpa dinding di bawah jembatan rel
+    addRiverSegment(kbtRailGapAfter[0], kbtRailGapAfter[1], 1320, 100, 26, 1.4); // KBT Segmen 2b: jembatan rel ke Pondok Bambu
     addRiverSegment(1320, 100, 1500, -250, 26, 1.4); // KBT Segmen 3: Pondok Bambu ke Pulogebang / Cakung
+
+    // Konektor KBT ke kepala badan air OSM Void E di (2088.6, -478.4) agar
+    // kanal tidak berakhir buntu di ujung segmen Pulogebang.
+    addRiverSegment(1500, -250, 1620, -300, 26, 1.4);
+    addRiverSegment(1620, -300, 1760, -330, 26, 1.4);
+    addRiverSegment(1760, -330, 1900, -390, 26, 1.4);
+    addRiverSegment(1900, -390, 2000, -430, 26, 1.4);
+    addRiverSegment(2000, -430, 2088.6, -478.4, 26, 1.4);
 
     // Jalan Inspeksi Ganda & Jalur Hijau Tanggul KBT
     addRoad(855, 595, 1155, 365, 8, false); // Inspeksi Sisi Timur Segmen 1
@@ -3658,6 +3712,11 @@ export class CityScene {
     addBridge(890, 8.2, 680, 26, 1.4, 22, 0);     // Jembatan Tol Becakayu & Arteri atas Kali Malang
     addBridge(570, 1.2, 380, 26, 1.4, 24, 0);     // Jembatan Kampung Melayu atas Kali Ciliwung
     addBridge(712, 1.2, 640, 26, 1.4, 22, 0);     // Jembatan Arteri Otista / MT Haryono atas Ciliwung Cawang
+    addRailBridgeOverKbt(
+      CIKARANG_RAIL_KBT_CROSSING.x,
+      CIKARANG_RAIL_KBT_CROSSING.z,
+      CIKARANG_RAIL_KBT_CROSSING.angle
+    ); // Jembatan girder rel Cikarang di atas KBT
 
     // =========================================================================
     // 9. MERGE GEOMETRIES & ADD TO SCENE (Hanya 9 Draw Calls!)
@@ -11319,7 +11378,8 @@ export class CityScene {
     // Berjejer di sepanjang kedua tepi kanal
     const kbtWaypoints = [
       [850, 580], [950, 500], [1050, 420], [1150, 350],
-      [1230, 230], [1320, 100], [1410, -80], [1500, -250]
+      [1230, 230], [1320, 100], [1410, -80], [1500, -250],
+      [1620, -300], [1760, -330], [1900, -390], [2000, -430], [2088.6, -478.4]
     ];
     const addKbtTree = (x, z) => {
       if (distanceToCikarangRail(x, z) < 14) return;
