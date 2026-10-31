@@ -24,6 +24,16 @@ const WATER_NIGHT_EMISSIVE = 0x0e7490;
 const WATER_NIGHT_INTENSITY = 0.34;
 const SEA_NIGHT_INTENSITY = 0.22;
 
+// Kanal Banjir Timur: satu definisi untuk jaringan prosedural Jakarta Timur dan
+// waterway OSM Void E agar warna air tidak berubah di titik temu
+// (2.088,6; -478,4). Opak + DoubleSide tetap satu pass render.
+const createCanalWaterMaterial = () => new THREE.MeshStandardMaterial({
+  color: 0x0369a1,
+  roughness: 0.15,
+  metalness: 0.85,
+  side: THREE.DoubleSide
+});
+
 // Satu sumber jalur Cikarang: dipakai rel, kereta, dan pembersihan pohon KBT
 // agar tidak ada vegetasi yang berdiri di badan rel.
 const CIKARANG_RAIL_CORRIDOR = [
@@ -3400,12 +3410,7 @@ export class CityScene {
       color: 0x64748b,
       roughness: 0.6
     });
-    const waterMat = new THREE.MeshStandardMaterial({
-      color: 0x0369a1,
-      roughness: 0.15,
-      metalness: 0.85,
-      side: THREE.DoubleSide
-    });
+    const waterMat = createCanalWaterMaterial();
     this.registerNightMaterial(waterMat, {
       emissive: WATER_NIGHT_EMISSIVE,
       nightIntensity: WATER_NIGHT_INTENSITY
@@ -3721,11 +3726,12 @@ export class CityScene {
     // =========================================================================
     // 9. MERGE GEOMETRIES & ADD TO SCENE (Hanya 9 Draw Calls!)
     // =========================================================================
-    const mergeAndAdd = (geos, mat, receiveShadow = true, castShadow = false) => {
+    const mergeAndAdd = (geos, mat, receiveShadow = true, castShadow = false, name = null) => {
       if (!geos || geos.length === 0) return;
       const merged = BufferGeometryUtils.mergeGeometries(geos, false);
       if (merged) {
         const mesh = new THREE.Mesh(merged, mat);
+        if (name) mesh.name = name;
         mesh.receiveShadow = receiveShadow;
         mesh.castShadow = castShadow;
         this.proceduralGroup.add(mesh);
@@ -3738,7 +3744,7 @@ export class CityScene {
     mergeAndAdd(viaductGeos, viaductMat, true, false);
     mergeAndAdd(barrierGeos, barrierMat, true, false);
     mergeAndAdd(pierGeos, pierMat, true, false);
-    mergeAndAdd(waterGeos, waterMat, false, false);
+    mergeAndAdd(waterGeos, waterMat, false, false, 'eastjakarta-water');
     mergeAndAdd(canalWallGeos, canalWallMat, true, false);
     mergeAndAdd(bridgeGeos, bridgeMat, true, false);
   }
@@ -6215,15 +6221,9 @@ export class CityScene {
       color: 0xb9c4d2,
       roughness: 0.82
     });
-    const waterMat = new THREE.MeshStandardMaterial({
-      color: 0x075985,
-      roughness: 0.2,
-      metalness: 0.5,
-      transparent: true,
-      opacity: 0.95
-      // FrontSide, bukan DoubleSide: air berupa box tipis di atas tanah dan
-      // DoubleSide + transparent membuat three.js merender dua pass per mesh.
-    });
+    // Material kanal bersama dengan KBT prosedural agar air menyatu di kepala
+    // badan air OSM (2.088,6; -478,4) tanpa garis warna siang maupun malam.
+    const waterMat = createCanalWaterMaterial();
     this.registerNightMaterial(waterMat, {
       emissive: WATER_NIGHT_EMISSIVE,
       nightIntensity: WATER_NIGHT_INTENSITY

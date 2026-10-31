@@ -4523,9 +4523,66 @@ assert.strictEqual(
   6,
   'East Jakarta builder must keep three mass meshes, one roof mesh and two vegetation meshes'
 );
+
 assert.ok(!eastDistrictBody.includes('new THREE.PointLight'), 'East Jakarta retrofit must not add PointLights');
 
-console.log(`✅ All 111 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 73: sambungan KBT–Void E memakai satu material air di (2.088,6; -478,4)
+assert.ok(
+  citySceneModuleScope.includes('const createCanalWaterMaterial = () => new THREE.MeshStandardMaterial({'),
+  'CityScene.js must define one canal water factory for the KBT and Void E'
+);
+[
+  'color: 0x0369a1,',
+  'roughness: 0.15,',
+  'metalness: 0.85,',
+  'side: THREE.DoubleSide'
+].forEach((token) => {
+  assert.ok(citySceneModuleScope.includes(token), `Canal water factory missing ${token}`);
+});
+const eastWaterBody = sliceCityBuilder('  buildEastJakartaInfrastructure() {');
+const voidEWaterBody = sliceCityBuilder('  buildVoidECilincing() {');
+[eastWaterBody, voidEWaterBody].forEach((body, idx) => {
+  const label = idx === 0 ? 'East Jakarta' : 'Void E';
+  assert.ok(
+    body.includes('const waterMat = createCanalWaterMaterial();'),
+    `${label} must reuse the shared canal water material`
+  );
+  assert.ok(
+    !body.includes('const waterMat = new THREE.MeshStandardMaterial({'),
+    `${label} must not inline a diverging water material`
+  );
+  assert.ok(
+    body.includes('this.registerNightMaterial(waterMat, {') &&
+      body.includes('emissive: WATER_NIGHT_EMISSIVE') &&
+      body.includes('nightIntensity: WATER_NIGHT_INTENSITY'),
+    `${label} canal water must keep the shared night glow registration`
+  );
+});
+assert.strictEqual(
+  (citySceneContent.match(/= createCanalWaterMaterial\(\);/g) || []).length,
+  2,
+  'Canal water factory must serve exactly the KBT and Void E builders'
+);
+assert.ok(
+  !voidEWaterBody.includes('color: 0x075985') &&
+    !voidEWaterBody.includes('transparent: true') &&
+    !voidEWaterBody.includes('opacity: 0.95'),
+  'Void E water must drop the old diverging colour and transparency'
+);
+assert.ok(
+  eastWaterBody.includes("mergeAndAdd(waterGeos, waterMat, false, false, 'eastjakarta-water');"),
+  'East Jakarta water mesh must be named for runtime audits'
+);
+assert.ok(
+  voidEWaterBody.includes("mergeAndAdd(waterGeos, waterMat, 'voide-water', false, false);"),
+  'Void E water mesh must keep its runtime name'
+);
+assert.ok(
+  citySceneModuleScope.includes('[2000, -430], [2088.6, -478.4]'),
+  'KBT must still end exactly at the Void E canal head'
+);
+
+console.log(`✅ All 111 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
