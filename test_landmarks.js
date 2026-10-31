@@ -4102,7 +4102,133 @@ assert.ok(
   'Void G P&R plot drifted from the audited Stasiun LRT Ciracas parcel'
 );
 
-console.log(`✅ All 111 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 70: Void G Tahap 4 — Park-and-Ride Ciracas dan enam feeder halte
+assert.ok(citySceneContent.includes('buildVoidGTransit()'), 'CityScene.js missing buildVoidGTransit');
+
+const voidGTransitCall = citySceneContent.indexOf('this.buildVoidGTransit();');
+assert.ok(voidGTransitCall > 0, 'CityScene.js does not call buildVoidGTransit');
+assert.ok(
+  voidGTransitCall > citySceneContent.indexOf('this.buildVoidGInfill();'),
+  'buildVoidGTransit must run after buildVoidGInfill so the P&R plot is reserved'
+);
+assert.ok(
+  voidGTransitCall < citySceneContent.indexOf('this.buildVoidBInfillAndIndustry();'),
+  'buildVoidGTransit must run before buildVoidBInfillAndIndustry'
+);
+
+assert.ok(
+  citySceneContent.includes('this.voidGTransitLabels = [];'),
+  'CityScene constructor must initialise the Void G transit label list'
+);
+
+const voidGDrivewayMatch = citySceneContent.match(/const VOID_G_PR_DRIVEWAY = \{([^}]*)\};/);
+assert.ok(voidGDrivewayMatch, 'Void G P&R driveway constant unreadable');
+assert.ok(
+  voidGDrivewayMatch[1].includes('x: 991') &&
+    voidGDrivewayMatch[1].includes('z: 1800.5') &&
+    voidGDrivewayMatch[1].includes('w: 14') &&
+    voidGDrivewayMatch[1].includes('d: 23'),
+  'Void G P&R driveway drifted from the audited Jalam Beringin Raya access strip'
+);
+assert.ok(
+  voidGInfillBody.includes('VOID_G_PR_DRIVEWAY'),
+  'Void G infill must reserve the P&R driveway so houses do not block access'
+);
+
+const voidGTransitBody = sliceCityBuilder('  buildVoidGTransit() {');
+assert.ok(!voidGTransitBody.includes('new THREE.PointLight'), 'Void G transit must not add PointLights');
+assert.ok(voidGTransitBody.includes('VOID_G_OSM'), 'Void G transit must anchor halte to the OSM road network');
+assert.ok(voidGTransitBody.includes('findRoadPoint'), 'Void G transit missing the road anchor helper');
+assert.ok(voidGTransitBody.includes('const halteLabels = [];'), 'Void G transit must collect halte labels');
+assert.ok(voidGTransitBody.includes('halteLabels.push({'), 'Void G transit must emit one label per halte');
+assert.ok(
+  voidGTransitBody.includes('position: [hx, 6.4, hz]'),
+  'Void G halte labels must float above the canopy'
+);
+assert.ok(
+  voidGTransitBody.includes('shortName: spec.shortName,'),
+  'Void G halte labels must forward the short name'
+);
+assert.ok(voidGTransitBody.includes("kind: 'halte'"), 'Void G halte labels must carry the halte kind');
+assert.ok(
+  voidGTransitBody.includes('this.voidGTransitLabels = ['),
+  'Void G transit must publish its label anchors'
+);
+
+assert.ok(voidGTransitBody.includes('VOID_G_PR_PLOT'), 'Void G transit must read the shared P&R plot');
+assert.ok(
+  voidGTransitBody.includes('const prCenterX = VOID_G_PR_PLOT.x;'),
+  'Void G P&R centre must come from the shared plot'
+);
+assert.ok(
+  voidGTransitBody.includes('VOID_G_PR_DRIVEWAY.w') && voidGTransitBody.includes('VOID_G_PR_DRIVEWAY.d'),
+  'Void G P&R driveway must use the shared access strip so infill and transit stay aligned'
+);
+assert.ok(
+  voidGTransitBody.includes("name: 'Park and Ride Ciracas'"),
+  'Void G P&R label missing the full name'
+);
+assert.ok(voidGTransitBody.includes("shortName: 'P&R Ciracas'"), 'Void G P&R label missing the short name');
+assert.ok(voidGTransitBody.includes("kind: 'park'"), 'Void G P&R label must use the P badge');
+assert.ok(
+  voidGTransitBody.includes('position: [prCenterX, 7.6, prCenterZ]'),
+  'Void G P&R label must clear the shelter roof'
+);
+assert.ok(voidGTransitBody.includes('const bayCount = 8;'), 'Void G P&R must keep eight parking bays');
+assert.ok(voidGTransitBody.includes('parkingBays: bayCount'), 'Void G transit stats missing the bay count');
+
+[
+  'Halte Terminal Kampung Rambutan',
+  'Halte RSUD Pasar Rebo',
+  'Halte Stasiun LRT Ciracas',
+  'Halte Rusun Ciracas',
+  'Halte Mabes TNI Cilangkap',
+  'Halte Cibubur Junction'
+].forEach((name) => {
+  assert.ok(voidGTransitBody.includes(`name: '${name}'`), `Void G transit missing ${name}`);
+});
+
+[
+  ['Terminal Kampung Rambutan', 'Jalan Mabes Hankam', 'near: [901.4, 1561.5], side: 1'],
+  ['RSUD Pasar Rebo', 'Jalan Raya Tengah', 'near: [516.0, 1477.4], side: 1'],
+  ['Stasiun LRT Ciracas', 'Jalan Bina Marga', 'near: [914.5, 1869.5], side: 1'],
+  ['Rusun Ciracas', 'Jalan Ciracas', 'near: [713.7, 1913.4], side: 1'],
+  ['Mabes TNI Cilangkap', 'Jalan Hankam Cilangkap', 'near: [1186.0, 1925.1], side: 1'],
+  ['Cibubur Junction', 'Jalan Transyogi', 'near: [1042.4, 2570.3], side: 1']
+].forEach(([shortName, road, anchor]) => {
+  assert.ok(
+    voidGTransitBody.includes(`shortName: '${shortName}'`),
+    `Void G halte label missing the ${shortName} short name`
+  );
+  assert.ok(voidGTransitBody.includes(`road: '${road}'`), `Void G halte missing the ${road} anchor`);
+  assert.ok(
+    voidGTransitBody.includes(anchor),
+    `Void G halte ${shortName} drifted from its audited shoulder point`
+  );
+});
+
+[
+  'voidg-transit-concrete',
+  'voidg-transit-steel',
+  'voidg-transit-sign',
+  'voidg-transit-tree-trunks',
+  'voidg-transit-tree-foliage'
+].forEach((name) => {
+  assert.ok(voidGTransitBody.includes(name), `Void G transit missing the ${name} mesh`);
+});
+
+assert.ok(voidGTransitBody.includes('registerNightMaterial'), 'Void G transit sign must register for night');
+assert.ok(voidGTransitBody.includes('emissive: 0xfff4d6'), 'Void G transit sign night emissive drifted');
+assert.ok(voidGTransitBody.includes('nightIntensity: 0.55'), 'Void G transit sign night intensity drifted');
+assert.ok(voidGTransitBody.includes('voidGTransitStats'), 'Void G transit must expose runtime stats');
+assert.ok(voidGTransitBody.includes('drawCalls: 5'), 'Void G transit should add five draw calls');
+
+assert.ok(
+  mainJsContent.includes('...this.city.voidGTransitLabels'),
+  'main.js must forward the Void G transit labels to UIManager'
+);
+
+console.log(`✅ All 111 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
