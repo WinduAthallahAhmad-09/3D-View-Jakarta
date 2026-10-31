@@ -4582,6 +4582,45 @@ assert.ok(
   'KBT must still end exactly at the Void E canal head'
 );
 
+// Check 74: enam model detail Void F di-bake per material, penanda tetap hidup
+assert.ok(
+  landmarkModelsContent.includes('static mergeLandmarkMeshesByMaterial(group) {'),
+  'LandmarkModels.js must expose mergeLandmarkMeshesByMaterial for the six Void F models'
+);
+const mergeLandmarkBody = sliceLandmarkBuilder('static mergeLandmarkMeshesByMaterial(group) {');
+assert.ok(
+  mergeLandmarkBody.includes('if (mesh.name) return;'),
+  'Merge helper must keep named marker meshes unmerged'
+);
+assert.ok(
+  mergeLandmarkBody.includes('mesh.matrixWorld'),
+  'Merge helper must bake transforms of meshes nested in marker groups'
+);
+assert.ok(
+  mergeLandmarkBody.includes('BufferGeometryUtils.mergeGeometries('),
+  'Merge helper must merge geometries per material bucket'
+);
+voidFAnchors.forEach(({ builder, marker }) => {
+  const body = sliceLandmarkBuilder(`static ${builder}() {`);
+  assert.ok(
+    body.includes('return LandmarkModels.mergeLandmarkMeshesByMaterial(group);'),
+    `Builder ${builder} must bake unnamed meshes before returning`
+  );
+  assert.ok(
+    body.includes(`'${marker}'`),
+    `Builder ${builder} must keep its ${marker} marker`
+  );
+});
+assert.strictEqual(
+  (landmarkModelsContent.match(/LandmarkModels\.mergeLandmarkMeshesByMaterial\(group\)/g) || []).length,
+  6,
+  'Exactly the six Void F builders must use the landmark merge helper'
+);
+assert.ok(
+  !sliceLandmarkBuilder('static createTerminalKampungRambutan() {').includes('mergeLandmarkMeshesByMaterial'),
+  'Void G models must stay out of this merge stage'
+);
+
 console.log(`✅ All 111 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 

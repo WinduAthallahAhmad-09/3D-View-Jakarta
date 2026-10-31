@@ -1801,6 +1801,50 @@ export class LandmarkModels {
   }
 
   /**
+   * Bake every unnamed mesh of a landmark group into one mesh per material and
+   * shadow bucket. Named meshes and groups survive as marker anchors, so the
+   * station platform or terminal canopy names stay auditable at runtime.
+   * Called inside the builder while the group is still at the origin, so the
+   * baked matrixWorld is local to the model.
+   */
+  static mergeLandmarkMeshesByMaterial(group) {
+    group.updateMatrixWorld(true);
+    const buckets = new Map();
+
+    group.traverse((mesh) => {
+      if (!mesh.isMesh) return;
+      if (mesh.name) return;
+      if (Array.isArray(mesh.material)) return;
+      const key = `${mesh.material.uuid}|${mesh.receiveShadow ? 1 : 0}|${mesh.castShadow ? 1 : 0}`;
+      let bucket = buckets.get(key);
+      if (!bucket) {
+        bucket = {
+          material: mesh.material,
+          receiveShadow: mesh.receiveShadow,
+          castShadow: mesh.castShadow,
+          entries: []
+        };
+        buckets.set(key, bucket);
+      }
+      const geometry = mesh.geometry.clone();
+      geometry.applyMatrix4(mesh.matrixWorld);
+      bucket.entries.push({ mesh, geometry });
+    });
+
+    buckets.forEach(({ material, receiveShadow, castShadow, entries }) => {
+      const merged = BufferGeometryUtils.mergeGeometries(entries.map((entry) => entry.geometry), false);
+      if (!merged) return;
+      entries.forEach(({ mesh }) => mesh.parent.remove(mesh));
+      const baked = new THREE.Mesh(merged, material);
+      baked.receiveShadow = receiveShadow;
+      baked.castShadow = castShadow;
+      group.add(baked);
+    });
+
+    return group;
+  }
+
+  /**
    * Kereta Rel Listrik (KRL) Commuter Line Train Consist (Series JR 205 / Tokyo Metro)
    * 4-car commuter train with stainless-steel body, signature red & yellow stripes,
    * dark tinted passenger windows, pantographs, and driver cab headlights.
@@ -10130,7 +10174,7 @@ export class LandmarkModels {
       group.add(crown);
     });
 
-    return group;
+    return LandmarkModels.mergeLandmarkMeshesByMaterial(group);
   }
 
   /**
@@ -10267,7 +10311,7 @@ export class LandmarkModels {
       group.add(crown);
     });
 
-    return group;
+    return LandmarkModels.mergeLandmarkMeshesByMaterial(group);
   }
 
   /**
@@ -10402,7 +10446,7 @@ export class LandmarkModels {
       group.add(crown);
     });
 
-    return group;
+    return LandmarkModels.mergeLandmarkMeshesByMaterial(group);
   }
 
   /**
@@ -10570,7 +10614,7 @@ export class LandmarkModels {
       group.add(crown);
     });
 
-    return group;
+    return LandmarkModels.mergeLandmarkMeshesByMaterial(group);
   }
 
   /**
@@ -10738,7 +10782,7 @@ export class LandmarkModels {
       group.add(crown);
     });
 
-    return group;
+    return LandmarkModels.mergeLandmarkMeshesByMaterial(group);
   }
 
   /**
@@ -10843,7 +10887,7 @@ export class LandmarkModels {
       group.add(crown);
     });
 
-    return group;
+    return LandmarkModels.mergeLandmarkMeshesByMaterial(group);
   }
 
   /**
