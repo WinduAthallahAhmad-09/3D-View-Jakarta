@@ -11060,11 +11060,45 @@ export class CityScene {
    * 2. 210+ Residensial modern Duren Sawit, Pondok Bambu & Cipinang (townhouse & perumahan asri).
    * 3. 28+ Fasilitas industri & pergudangan logistik Kawasan Industri Pulogadung (PT JIEP) & Hanggar Halim.
    * 4. 180+ Vegetasi perkotaan tropis: Sabuk Hijau Kanal Banjir Timur (KBT), Palem By-Pass DI Panjaitan & Hutan Kota TMII.
-   * Total penambahan draw calls: Hanya 5 draw calls!
+   * Retrofit atap pelana bersama + jendela malam menyatukan gaya dengan infill Void B-G.
+   * Total penambahan draw calls: 3 massa + 1 atap + 1 jendela malam + 2 vegetasi = 7.
    */
   buildEastJakartaInfillAndDistricts() {
     const dummy = new THREE.Object3D();
     const baseBoxGeo = new THREE.BoxGeometry(1, 1, 1);
+
+    // Prisma atap pelana: ridge sejajar sumbu Z lokal, alas di y=0.
+    const roofGeo = new THREE.BufferGeometry();
+    roofGeo.setAttribute(
+      'position',
+      new THREE.Float32BufferAttribute([
+        -0.5, 0, -0.5, 0.5, 0, -0.5, -0.5, 0, 0.5, 0.5, 0, 0.5,
+        0, 1, -0.5, 0, 1, 0.5
+      ], 3)
+    );
+    roofGeo.setIndex([
+      0, 2, 5, 0, 5, 4,
+      1, 4, 5, 1, 5, 3,
+      0, 4, 1,
+      2, 3, 5,
+      0, 1, 3, 0, 3, 2
+    ]);
+    roofGeo.computeVertexNormals();
+
+    const roofItems = [];
+    const placed = [];
+    const isRoofOccupied = (x, z, rw, rd, rotY) => {
+      const reach = Math.hypot(rw, rd) * 0.5;
+      for (let i = 0; i < placed.length; i++) {
+        const p = placed[i];
+        if (Math.hypot(p.x - x, p.z - z) >= p.radius + reach) continue;
+        if (roofRectsOverlap(p, { x, z, rw, rd, rotY }, INFILL_ROOF_TOLERANCE)) return true;
+      }
+      return false;
+    };
+    const putRoof = (x, z, rw, rd, rotY = 0) => {
+      placed.push({ x, z, rw, rd, rotY, radius: Math.hypot(rw, rd) * 0.5 });
+    };
 
     // =========================================================================
     // 1. RUKO KOMERSIAL & SENTRA USAHA RAWAMANGUN, JATINEGARA & OTISTA (1 Draw Call)
@@ -11078,6 +11112,12 @@ export class CityScene {
       new THREE.Color(0x0284c7), // Modern Cyan Glass
       new THREE.Color(0x334155), // Slate Gray
       new THREE.Color(0xb45309)  // Terracotta
+    ];
+    const roofColors = [
+      new THREE.Color(0xb45309),
+      new THREE.Color(0x9a3412),
+      new THREE.Color(0x991b1b),
+      new THREE.Color(0x78350f)
     ];
 
     const commItems = [];
@@ -11098,6 +11138,11 @@ export class CityScene {
         const pz = z + (hash - 0.5) * 3;
         if (this.isNearVoidFRoad(px, pz, Math.max(w, d) / 2 + 1)) continue;
 
+        const roofW = w + INFILL_ROOF_EAVE * 2;
+        const roofD = d + INFILL_ROOF_EAVE * 2;
+        if (isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+        putRoof(px, pz, roofW, roofD, 0);
+
         commItems.push({
           x: px,
           y: h * 0.5,
@@ -11106,6 +11151,15 @@ export class CityScene {
           h,
           d,
           color: commColors[colIdx]
+        });
+        roofItems.push({
+          x: px,
+          y: h,
+          z: pz,
+          w: roofW,
+          h: 1.8 + hash * 1.0,
+          d: roofD,
+          color: roofColors[colIdx % roofColors.length]
         });
       }
     }
@@ -11122,15 +11176,31 @@ export class CityScene {
         const w = 11 + hash * 3;
         const d = 12 + (1 - hash) * 3;
         const colIdx = Math.floor(hash * commColors.length) % commColors.length;
+        const px = x + (hash - 0.5) * 2;
+        const pz = z + (hash - 0.5) * 2;
+
+        const roofW = w + INFILL_ROOF_EAVE * 2;
+        const roofD = d + INFILL_ROOF_EAVE * 2;
+        if (isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+        putRoof(px, pz, roofW, roofD, 0);
 
         commItems.push({
-          x: x + (hash - 0.5) * 2,
+          x: px,
           y: h * 0.5,
-          z: z + (hash - 0.5) * 2,
+          z: pz,
           w,
           h,
           d,
           color: commColors[colIdx]
+        });
+        roofItems.push({
+          x: px,
+          y: h,
+          z: pz,
+          w: roofW,
+          h: 1.8 + hash * 1.0,
+          d: roofD,
+          color: roofColors[colIdx % roofColors.length]
         });
       }
     }
@@ -11147,21 +11217,38 @@ export class CityScene {
         const w = 13 + hash * 4;
         const d = 14 + (1 - hash) * 4;
         const colIdx = Math.floor(hash * commColors.length) % commColors.length;
+        const px = x + (hash - 0.5) * 3;
+        const pz = z + (hash - 0.5) * 3;
+
+        const roofW = w + INFILL_ROOF_EAVE * 2;
+        const roofD = d + INFILL_ROOF_EAVE * 2;
+        if (isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+        putRoof(px, pz, roofW, roofD, 0);
 
         commItems.push({
-          x: x + (hash - 0.5) * 3,
+          x: px,
           y: h * 0.5,
-          z: z + (hash - 0.5) * 3,
+          z: pz,
           w,
           h,
           d,
           color: commColors[colIdx]
+        });
+        roofItems.push({
+          x: px,
+          y: h,
+          z: pz,
+          w: roofW,
+          h: 1.8 + hash * 1.0,
+          d: roofD,
+          color: roofColors[colIdx % roofColors.length]
         });
       }
     }
 
     if (commItems.length > 0) {
       const commMesh = new THREE.InstancedMesh(baseBoxGeo, commMat, commItems.length);
+      commMesh.name = 'eastjakarta-comm';
       commMesh.receiveShadow = true;
       commMesh.castShadow = true;
 
@@ -11212,6 +11299,11 @@ export class CityScene {
         if (distanceToCikarangRail(px, pz) < 16) continue;
         if (this.isInsideVoidFAnchorSite(px, pz)) continue;
 
+        const roofW = w + INFILL_ROOF_EAVE * 2;
+        const roofD = d + INFILL_ROOF_EAVE * 2;
+        if (isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+        putRoof(px, pz, roofW, roofD, 0);
+
         resItems.push({
           x: px,
           y: h * 0.5,
@@ -11220,6 +11312,15 @@ export class CityScene {
           h,
           d,
           color: resColors[colIdx]
+        });
+        roofItems.push({
+          x: px,
+          y: h,
+          z: pz,
+          w: roofW,
+          h: 1.5 + hash * 0.9,
+          d: roofD,
+          color: roofColors[colIdx % roofColors.length]
         });
       }
     }
@@ -11235,21 +11336,38 @@ export class CityScene {
         const w = 11 + hash * 3;
         const d = 12 + (1 - hash) * 3;
         const colIdx = Math.floor(hash * resColors.length) % resColors.length;
+        const px = x + (hash - 0.5) * 2;
+        const pz = z + (hash - 0.5) * 2;
+
+        const roofW = w + INFILL_ROOF_EAVE * 2;
+        const roofD = d + INFILL_ROOF_EAVE * 2;
+        if (isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+        putRoof(px, pz, roofW, roofD, 0);
 
         resItems.push({
-          x: x + (hash - 0.5) * 2,
+          x: px,
           y: h * 0.5,
-          z: z + (hash - 0.5) * 2,
+          z: pz,
           w,
           h,
           d,
           color: resColors[colIdx]
+        });
+        roofItems.push({
+          x: px,
+          y: h,
+          z: pz,
+          w: roofW,
+          h: 1.5 + hash * 0.9,
+          d: roofD,
+          color: roofColors[colIdx % roofColors.length]
         });
       }
     }
 
     if (resItems.length > 0) {
       const resMesh = new THREE.InstancedMesh(baseBoxGeo, resMat, resItems.length);
+      resMesh.name = 'eastjakarta-res';
       resMesh.receiveShadow = true;
       resMesh.castShadow = true;
 
@@ -11277,6 +11395,12 @@ export class CityScene {
       new THREE.Color(0x0284c7), // Corporate Blue Warehouse
       new THREE.Color(0x64748b), // Galvanized Zinc
       new THREE.Color(0xf1f5f9)  // Clean Logistics White
+    ];
+    const industrialRoofColors = [
+      new THREE.Color(0x334155),
+      new THREE.Color(0x475569),
+      new THREE.Color(0x64748b),
+      new THREE.Color(0x0e7490)
     ];
 
     const factoryItems = [];
@@ -11310,6 +11434,11 @@ export class CityScene {
         const pz = z + (hash - 0.5) * 5;
         if (this.isNearVoidFRoad(px, pz, Math.max(w, d) / 2 + 1)) continue;
 
+        const roofW = w + INFILL_ROOF_EAVE * 2;
+        const roofD = d + INFILL_ROOF_EAVE * 2;
+        if (isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+        putRoof(px, pz, roofW, roofD, 0);
+
         factoryItems.push({
           x: px,
           y: h * 0.5,
@@ -11318,6 +11447,15 @@ export class CityScene {
           h,
           d,
           color: factoryColors[colIdx]
+        });
+        roofItems.push({
+          x: px,
+          y: h,
+          z: pz,
+          w: roofW,
+          h: 1.6 + hash * 1.2,
+          d: roofD,
+          color: industrialRoofColors[colIdx % industrialRoofColors.length]
         });
       }
     }
@@ -11334,21 +11472,38 @@ export class CityScene {
         const d = 30 + (1 - hash) * 8;
         const h = 10 + hash * 4;
         const colIdx = Math.floor(hash * factoryColors.length) % factoryColors.length;
+        const px = x + (hash - 0.5) * 4;
+        const pz = z + (hash - 0.5) * 4;
+
+        const roofW = w + INFILL_ROOF_EAVE * 2;
+        const roofD = d + INFILL_ROOF_EAVE * 2;
+        if (isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+        putRoof(px, pz, roofW, roofD, 0);
 
         factoryItems.push({
-          x: x + (hash - 0.5) * 4,
+          x: px,
           y: h * 0.5,
-          z: z + (hash - 0.5) * 4,
+          z: pz,
           w,
           h,
           d,
           color: factoryColors[colIdx]
+        });
+        roofItems.push({
+          x: px,
+          y: h,
+          z: pz,
+          w: roofW,
+          h: 1.6 + hash * 1.2,
+          d: roofD,
+          color: industrialRoofColors[colIdx % industrialRoofColors.length]
         });
       }
     }
 
     if (factoryItems.length > 0) {
       const factMesh = new THREE.InstancedMesh(baseBoxGeo, factoryMat, factoryItems.length);
+      factMesh.name = 'eastjakarta-factory';
       factMesh.receiveShadow = true;
       factMesh.castShadow = true;
 
@@ -11365,6 +11520,44 @@ export class CityScene {
       if (factMesh.instanceColor) factMesh.instanceColor.needsUpdate = true;
       this.proceduralGroup.add(factMesh);
     }
+
+    // =========================================================================
+    // 3b. ATAP PELANA BERSAMA + JENDELA MALAM (2 Draw Calls)
+    // =========================================================================
+    if (roofItems.length > 0) {
+      const roofMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 });
+      const roofMesh = new THREE.InstancedMesh(roofGeo, roofMaterial, roofItems.length);
+      roofMesh.name = 'eastjakarta-infill-roofs';
+      roofMesh.receiveShadow = true;
+      roofMesh.castShadow = true;
+
+      roofItems.forEach((r, idx) => {
+        dummy.position.set(r.x, r.y, r.z);
+        dummy.scale.set(r.w, r.h, r.d);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        roofMesh.setMatrixAt(idx, dummy.matrix);
+        roofMesh.setColorAt(idx, r.color);
+      });
+
+      roofMesh.instanceMatrix.needsUpdate = true;
+      if (roofMesh.instanceColor) roofMesh.instanceColor.needsUpdate = true;
+      this.proceduralGroup.add(roofMesh);
+    }
+
+    const nightWindows = this.addInfillNightWindows(
+      [...commItems, ...resItems],
+      'eastjakarta-night-windows'
+    );
+
+    this.eastJakartaInfillStats = {
+      comm: commItems.length,
+      residential: resItems.length,
+      factories: factoryItems.length,
+      roofs: roofItems.length,
+      nightWindows,
+      drawCalls: 5
+    };
 
     // =========================================================================
     // 4. VEGETASI PERKOTAAN TROPIS JAKARTA TIMUR (Instanced Trees, 2 Draw Calls)

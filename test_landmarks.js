@@ -4414,7 +4414,118 @@ assert.ok(!eastInfraBody.includes('new THREE.PointLight'), 'P2 must not add Poin
   );
 });
 
-console.log(`✅ All 111 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 72: retrofit infill lama Jakarta Timur — atap pelana + jendela malam
+assert.ok(
+  eastDistrictBody.includes('const roofGeo = new THREE.BufferGeometry();'),
+  'East Jakarta infill must build a shared prism roof geometry'
+);
+[
+  '-0.5, 0, -0.5, 0.5, 0, -0.5, -0.5, 0, 0.5, 0.5, 0, 0.5,',
+  '0, 1, -0.5, 0, 1, 0.5'
+].forEach((token) => {
+  assert.ok(eastDistrictBody.includes(token), `East Jakarta roof prism missing ${token}`);
+});
+assert.ok(
+  eastDistrictBody.includes('0, 2, 5, 0, 5, 4,') &&
+    eastDistrictBody.includes('0, 1, 3, 0, 3, 2'),
+  'East Jakarta roof prism must reuse the audited Void C/F/G index set'
+);
+assert.ok(eastDistrictBody.includes('const roofColors = ['), 'East Jakarta infill missing the residential roof palette');
+assert.ok(
+  eastDistrictBody.includes('const industrialRoofColors = ['),
+  'East Jakarta infill missing the industrial roof palette'
+);
+assert.ok(
+  eastDistrictBody.includes('const isRoofOccupied = (x, z, rw, rd, rotY) => {') &&
+    eastDistrictBody.includes('const putRoof = (x, z, rw, rd, rotY = 0) => {'),
+  'East Jakarta infill must dedupe roofs with the shared OBB occupancy helpers'
+);
+assert.ok(
+  eastDistrictBody.includes('INFILL_ROOF_EAVE') && eastDistrictBody.includes('INFILL_ROOF_TOLERANCE'),
+  'East Jakarta infill must reuse the shared eave trim and roof tolerance'
+);
+assert.strictEqual(
+  (eastDistrictBody.match(/const roofW = w \+ INFILL_ROOF_EAVE \* 2;/g) || []).length,
+  7,
+  'All seven East Jakarta mass loops must expand the footprint by the shared eave'
+);
+assert.strictEqual(
+  (eastDistrictBody.match(/if \(isRoofOccupied\(px, pz, roofW, roofD, 0\)\) continue;/g) || []).length,
+  7,
+  'All seven East Jakarta mass loops must skip overlapping roofs'
+);
+assert.strictEqual(
+  (eastDistrictBody.match(/putRoof\(px, pz, roofW, roofD, 0\);/g) || []).length,
+  7,
+  'All seven East Jakarta mass loops must record their roof footprint'
+);
+assert.strictEqual(
+  (eastDistrictBody.match(/roofItems\.push\(\{/g) || []).length,
+  7,
+  'East Jakarta must emit one roof per placed mass'
+);
+assert.strictEqual(
+  (eastDistrictBody.match(/^ +y: h,$/gm) || []).length,
+  7,
+  'East Jakarta roofs must sit exactly on top of each mass'
+);
+assert.ok(
+  eastDistrictBody.includes('h: 1.8 + hash * 1.0,') &&
+    eastDistrictBody.includes('h: 1.5 + hash * 0.9,') &&
+    eastDistrictBody.includes('h: 1.6 + hash * 1.2,'),
+  'East Jakarta roof heights drifted from the commercial, residential and industrial profiles'
+);
+assert.ok(
+  eastDistrictBody.includes("commMesh.name = 'eastjakarta-comm';"),
+  'East Jakarta commercial mass mesh must be named for runtime audits'
+);
+assert.ok(
+  eastDistrictBody.includes("resMesh.name = 'eastjakarta-res';"),
+  'East Jakarta residential mass mesh must be named for runtime audits'
+);
+assert.ok(
+  eastDistrictBody.includes("factMesh.name = 'eastjakarta-factory';"),
+  'East Jakarta industrial mass mesh must be named for runtime audits'
+);
+assert.ok(
+  eastDistrictBody.includes('new THREE.InstancedMesh(roofGeo, roofMaterial, roofItems.length)'),
+  'East Jakarta must merge every gable roof into one instanced mesh'
+);
+assert.ok(
+  eastDistrictBody.includes("roofMesh.name = 'eastjakarta-infill-roofs';"),
+  'East Jakarta roof mesh must be named for runtime audits'
+);
+assert.ok(
+  eastDistrictBody.includes('roofMesh.setColorAt(idx, r.color)'),
+  'East Jakarta roofs must keep their per-instance colours'
+);
+assert.ok(
+  eastDistrictBody.includes('this.addInfillNightWindows(') &&
+    eastDistrictBody.includes('[...commItems, ...resItems],') &&
+    eastDistrictBody.includes("'eastjakarta-night-windows'"),
+  'East Jakarta infill must add night windows for the commercial and residential masses'
+);
+assert.ok(
+  eastDistrictBody.includes('this.eastJakartaInfillStats = {'),
+  'East Jakarta infill must expose runtime stats'
+);
+['comm: commItems.length,', 'residential: resItems.length,', 'factories: factoryItems.length,', 'roofs: roofItems.length,', 'nightWindows,'].forEach(
+  (key) => {
+    assert.ok(eastDistrictBody.includes(key), `East Jakarta infill stats missing ${key}`);
+  }
+);
+assert.ok(
+  eastDistrictBody.includes('drawCalls: 5'),
+  'East Jakarta infill retrofit should total three mass meshes plus roofs and night windows'
+);
+assert.strictEqual(
+  (eastDistrictBody.match(/new THREE\.InstancedMesh\(/g) || []).length,
+  6,
+  'East Jakarta builder must keep three mass meshes, one roof mesh and two vegetation meshes'
+);
+assert.ok(!eastDistrictBody.includes('new THREE.PointLight'), 'East Jakarta retrofit must not add PointLights');
+
+console.log(`✅ All 111 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
