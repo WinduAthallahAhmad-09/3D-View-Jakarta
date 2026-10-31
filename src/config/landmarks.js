@@ -1,5 +1,5 @@
 /**
- * Geospatial configuration for 117 Jakarta landmarks across all city regions.
+ * Geospatial configuration for 123 Jakarta landmarks across all city regions.
  * Scene coordinates use a uniform metric projection centered at Bundaran Hotel Indonesia
  * (-6.194957°, 106.823048° -> [0, 0, 0]):
  *   X = (lng - 106.823048) * 14100.0   (~7.81 meters per scene unit)
@@ -2634,6 +2634,141 @@ export const JAKARTA_LANDMARKS = [
       "Setu Babakan ditetapkan sebagai Perkampungan Budaya Betawi pada 2004 untuk melestarikan budaya Betawi.",
       "Danau atau setu ini dimanfaatkan untuk budidaya ikan, perahu, dan kegiatan budaya warga.",
       "Rumah kebaya panggung dengan atap pelana dan teras terbuka menjadi ciri arsitektur khas kawasan ini."
+    ]
+  },
+  // =====================================================
+  // ZONA 15: VOID I — BINTARO, PETUKANGAN, ULUJAMI & GANDARIA SELATAN
+  // =====================================================
+  {
+    id: "bintaro-jaya-xchange",
+    name: "Bintaro Jaya Xchange Mall",
+    shortName: "Bintaro Jaya Xchange",
+    category: "Mal & Kawasan Terpadu",
+    tagline: "Pusat belanja dan rekreasi kawasan Bintaro Jaya",
+    height: "32 meter (Atrium & Menara Kantor)",
+    year: "2011",
+    architect: "PT Jaya Real Property",
+    location: "Jl. Bintaro Jaya Boulevard, Pondok Aren, Tangerang Selatan",
+    coordinates: { lat: -6.28558, lng: 106.72802 },
+    position: [-1352.0, 0, 1244.0],
+    labelHeight: 28,
+    cameraPosition: [-1352, 62, 1362],
+    cameraTarget: [-1352, 10, 1244],
+    description: "Mal superblok di jantung Bintaro Jaya yang berdiri di atas lahan bekas Bintaro Jaya Xchange. Menampilkan podium berlapis dengan atrium kaca setinggi tiga lantai, plaza atap terbuka, menara kantor, area drop-off, dan deret pertokoan serta ruko di sepanjang boulevard kawasan.",
+    facts: [
+      "Bintaro Jaya Xchange dikembangkan sebagai pusat komersial kawasan Bintaro Jaya pada 2011.",
+      "Atrium kacanya menjadi penanda gerbang selatan kawasan Bintaro dan terhubung dengan ruko serta perkantoran di sekitarnya.",
+      "Mal ini berada di Pondok Aren, Tangerang Selatan, dan menjadi salah satu pusat belanja terbesar di koridor Bintaro–Pondok Indah."
+    ]
+  },
+  {
+    id: "stasiun-jurangmangu",
+    name: "Stasiun Jurangmangu",
+    shortName: "Stasiun Jurangmangu",
+    category: "Stasiun KRL & Transit Selatan",
+    tagline: "Stasiun Commuter Line di perbatasan Bintaro",
+    height: "18 meter (Hall & Kanopi Peron)",
+    year: "1987 (Revitalisasi 2019)",
+    architect: "PT Kereta Api Indonesia & KAI Commuter",
+    location: "Jl. Jurangmangu Barat, Pondok Aren, Tangerang Selatan",
+    coordinates: { lat: -6.28861194, lng: 106.72915389 },
+    position: [-1323.9, 0, 1328.0],
+    labelHeight: 24,
+    cameraPosition: [-1323.9, 56, 1448],
+    cameraTarget: [-1323.9, 8, 1328],
+    description: "Stasiun Commuter Line di perbatasan Bintaro Jaya yang melayani koridor Serpong–Tanah Abang. Menampilkan hall berlantai dua, dua peron berkanopi, rel ganda, jembatan penyeberangan, area park-and-ride, serta permukiman dan ruko yang tumbuh di sekeliling stasiun.",
+    facts: [
+      "Stasiun Jurangmangu melayani KRL Commuter Line Lin Rangkasbitung di sisi barat daya Jakarta.",
+      "Stasiun ini berada di Jl. Jurangmangu Barat dan menjadi akses utama warga Bintaro Jaya sektor 1–9.",
+      "Revitalisasi 2019 menambah kanopi peron dan fasilitas berpindah moda ke angkutan kota serta ojek daring."
+    ]
+  },
+  {
+    id: "universitas-budi-luhur",
+    name: "Universitas Budi Luhur",
+    shortName: "Universitas Budi Luhur",
+    category: "Kampus & Pendidikan",
+    tagline: "Kampus teknologi di Petukangan Utara",
+    height: "32 meter (Menara Rektorat)",
+    year: "1979",
+    architect: "Yayasan Pendidikan Budi Luhur",
+    location: "Jl. Ciledug Raya, Petukangan Utara, Pesanggrahan, Jakarta Selatan",
+    coordinates: { lat: -6.2361356, lng: 106.7472947 },
+    position: [-1068.1, 0, 583.9],
+    labelHeight: 30,
+    cameraPosition: [-1068.1, 64, 703.9],
+    cameraTarget: [-1068.1, 12, 583.9],
+    description: "Kampus swasta di Petukangan Utara yang menjadi penanda koridor Ciledug Raya. Menampilkan gerbang kampus, menara rektorat berpita kaca, podium akademik, plaza upacara, deret pohon peneduh, serta kawasan permukiman padat dan ruko di sekelilingnya.",
+    facts: [
+      "Universitas Budi Luhur berdiri pada 1979 dan dikenal dengan program studi teknologi informasi serta sistem informasi.",
+      "Kampus ini berada di Jl. Ciledug Raya, Petukangan Utara, tepat di sisi barat Kali Pesanggrahan.",
+      "Menara rektorat dan gerbang kampusnya menjadi penanda koridor Ciledug Raya yang menghubungkan Jakarta Selatan dan Tangerang."
+    ]
+  },
+  {
+    id: "pasar-ulujami",
+    name: "Pasar Ulujami",
+    shortName: "Pasar Ulujami",
+    category: "Pasar Tradisional & Ekonomi Rakyat",
+    tagline: "Pasar warga di jantung Ulujami Raya",
+    height: "12 meter (Atap Pelana Hall)",
+    year: "1970-an (Revitalisasi 2018)",
+    architect: "PD Pasar Jaya",
+    location: "Jl. Ulujami Raya, Ulujami, Pesanggrahan, Jakarta Selatan",
+    coordinates: { lat: -6.238, lng: 106.7638 },
+    position: [-835.4, 0, 610.4],
+    labelHeight: 22,
+    cameraPosition: [-835.4, 52, 730.4],
+    cameraTarget: [-835.4, 6, 610.4],
+    description: "Pasar tradisional di jantung Kelurahan Ulujami yang melayani warga Pesanggrahan. Menampilkan hall beratap pelana dengan jendela clerestory, barisan los kios, kanopi pedagang, plaza bongkar muat, musala, area parkir, serta jalan lingkungan yang padat aktivitas.",
+    facts: [
+      "Pasar Ulujami melayani kebutuhan harian warga Ulujami, Pesanggrahan, dan perumahan di sekitarnya.",
+      "Pasar ini berada di Jl. Ulujami Raya, koridor ekonomi utama kelurahan yang menghubungkan Ciledug Raya dan Bintaro.",
+      "Revitalisasi 2018 menata los kios, saluran air, dan area bongkar muat agar pasar lebih bersih dan tertib."
+    ]
+  },
+  {
+    id: "gandaria-city",
+    name: "Gandaria City",
+    shortName: "Gandaria City",
+    category: "Mal & Kawasan Terpadu",
+    tagline: "Mal keluarga di koridor Gandaria–Kebayoran",
+    height: "40 meter (Menara Kantor)",
+    year: "2010",
+    architect: "PT Pakuwon Jati",
+    location: "Jl. Sultan Iskandar Muda, Kebayoran Lama, Jakarta Selatan",
+    coordinates: { lat: -6.2445, lng: 106.7838 },
+    position: [-553.4, 0, 702.5],
+    labelHeight: 30,
+    cameraPosition: [-553.4, 68, 822.5],
+    cameraTarget: [-553.4, 12, 702.5],
+    description: "Mal keluarga di koridor Gandaria–Kebayoran Lama yang berdiri di atas lahan bekas Gandaria City. Menampilkan podium mal yang luas, atrium kaca melengkung, menara kantor, area drop-off, plaza, serta deret ruko dan permukiman di sepanjang Jl. Sultan Iskandar Muda.",
+    facts: [
+      "Gandaria City dibuka pada 2010 dan menjadi salah satu mal terbesar di koridor Kebayoran Lama.",
+      "Kompleks ini menggabungkan mal, menara kantor, dan hunian dalam satu superblok di Jl. Sultan Iskandar Muda.",
+      "Lokasinya berada di sisi barat jalur MRT Lebak Bulus–Bundaran HI dan menjadi simpul belanja warga Jakarta Selatan."
+    ]
+  },
+  {
+    id: "stasiun-mrt-haji-nawi",
+    name: "Stasiun MRT Haji Nawi",
+    shortName: "Stasiun MRT Haji Nawi",
+    category: "Stasiun MRT & Transit Selatan",
+    tagline: "Stasiun layang MRT di koridor Fatmawati",
+    height: "22 meter (Atap Peron Layang)",
+    year: "2019",
+    architect: "PT MRT Jakarta",
+    location: "Jl. RS Fatmawati, Cipete Utara, Kebayoran Baru, Jakarta Selatan",
+    coordinates: { lat: -6.2667982, lng: 106.7973162 },
+    position: [-372.0, 0, 885.0],
+    labelHeight: 32,
+    cameraPosition: [-372, 64, 1005],
+    cameraTarget: [-372, 14, 885],
+    description: "Stasiun layang MRT Jakarta di koridor Fatmawati yang melayani warga Cipete Utara dan Haji Nawi. Stasiun ini berdiri di atas viaduk rel ganda dengan dua peron sisi beratap, dinding kaca, tangga serta lift akses ke jalan, papan nama stasiun, dan kawasan pertokoan di bawahnya.",
+    facts: [
+      "Stasiun MRT Haji Nawi melayani jalur Lebak Bulus–Bundaran HI dan mulai beroperasi pada 2019.",
+      "Stasiun layang ini berada di atas Jl. RS Fatmawati dan memiliki dua peron sisi dengan pintu kaca di sepanjang tepi peron.",
+      "Nama Haji Nawi diambil dari kawasan permukiman di sisi timur stasiun yang dikenal dengan pasar dan pertokoannya."
     ]
   }
 ];

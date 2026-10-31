@@ -12877,7 +12877,13 @@ export class CityScene {
       "taman-margasatwa-ragunan": () => LandmarkModels.createTamanMargasatwaRagunan(),
       "stasiun-lenteng-agung": () => LandmarkModels.createStasiunLentengAgung(),
       "universitas-pancasila": () => LandmarkModels.createUniversitasPancasila(),
-      "setu-babakan": () => LandmarkModels.createSetuBabakan()
+      "setu-babakan": () => LandmarkModels.createSetuBabakan(),
+      "bintaro-jaya-xchange": () => LandmarkModels.createBintaroJayaXchange(),
+      "stasiun-jurangmangu": () => LandmarkModels.createStasiunJurangmangu(),
+      "universitas-budi-luhur": () => LandmarkModels.createUniversitasBudiLuhur(),
+      "pasar-ulujami": () => LandmarkModels.createPasarUlujami(),
+      "gandaria-city": () => LandmarkModels.createGandariaCity(),
+      "stasiun-mrt-haji-nawi": () => LandmarkModels.createStasiunMrtHajiNawi()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {
