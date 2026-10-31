@@ -4621,7 +4621,80 @@ assert.ok(
   'Void G models must stay out of this merge stage'
 );
 
-console.log(`✅ All 111 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 75: preset kamera DPR/MPR bebas dari tapak Stasiun Palmerah
+const dprPreset = JAKARTA_LANDMARKS.find((l) => l.id === 'gedung-dpr-mpr');
+const palmerahFootprint = { min: [-320.7, 0, 227.9], max: [-249, 62, 272] };
+const gbkFootprint = { min: [-342, 0, 291], max: [-250, 14.5, 381] };
+const isInsideAabb = (p, box) =>
+  p[0] >= box.min[0] && p[0] <= box.max[0] &&
+  p[1] >= box.min[1] && p[1] <= box.max[1] &&
+  p[2] >= box.min[2] && p[2] <= box.max[2];
+const segmentHitsAabb = (a, b, box) => {
+  let tMin = 0;
+  let tMax = 1;
+  for (let axis = 0; axis < 3; axis++) {
+    const delta = b[axis] - a[axis];
+    if (Math.abs(delta) < 1e-9) {
+      if (a[axis] < box.min[axis] || a[axis] > box.max[axis]) return false;
+      continue;
+    }
+    const inv = 1 / delta;
+    let t1 = (box.min[axis] - a[axis]) * inv;
+    let t2 = (box.max[axis] - a[axis]) * inv;
+    if (t1 > t2) [t1, t2] = [t2, t1];
+    tMin = Math.max(tMin, t1);
+    tMax = Math.min(tMax, t2);
+    if (tMin > tMax) return false;
+  }
+  return true;
+};
+assert.ok(dprPreset, 'Missing DPR/MPR anchor for camera preset check');
+assert.ok(
+  !isInsideAabb(dprPreset.cameraPosition, palmerahFootprint),
+  'DPR/MPR camera preset must stay outside the Stasiun Palmerah footprint'
+);
+assert.ok(
+  !segmentHitsAabb(dprPreset.cameraPosition, dprPreset.cameraTarget, palmerahFootprint),
+  'DPR/MPR sightline must not cross the Stasiun Palmerah footprint'
+);
+assert.ok(
+  !isInsideAabb(dprPreset.cameraPosition, gbkFootprint),
+  'DPR/MPR camera preset must stay outside the GBK roof footprint'
+);
+assert.ok(
+  dprPreset.cameraPosition[0] <= dprPreset.position[0] - 10,
+  'DPR/MPR camera must frame the dome from the southwest corridor'
+);
+assert.ok(
+  dprPreset.cameraPosition[2] >= dprPreset.position[2] + 80,
+  'DPR/MPR camera must stay south of the dome'
+);
+assert.ok(
+  Math.hypot(
+    dprPreset.cameraTarget[0] - dprPreset.position[0],
+    dprPreset.cameraTarget[2] - dprPreset.position[2]
+  ) <= 10,
+  'DPR/MPR camera target must stay on the landmark anchor'
+);
+const dprFocusDistance = Math.hypot(
+  dprPreset.cameraPosition[0] - dprPreset.cameraTarget[0],
+  dprPreset.cameraPosition[1] - dprPreset.cameraTarget[1],
+  dprPreset.cameraPosition[2] - dprPreset.cameraTarget[2]
+);
+assert.ok(
+  dprFocusDistance >= 105 && dprFocusDistance <= 150,
+  `DPR/MPR focus distance ${dprFocusDistance.toFixed(1)} must keep the 68-unit tower inside the frame`
+);
+assert.ok(
+  dprPreset.cameraPosition[1] >= 40 && dprPreset.cameraPosition[1] <= 70,
+  'DPR/MPR camera height must stay between 40 and 70'
+);
+assert.ok(
+  dprPreset.cameraTarget[1] >= 20 && dprPreset.cameraTarget[1] <= 30,
+  'DPR/MPR target height must stay between 20 and 30'
+);
+
+console.log(`✅ All 111 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

@@ -437,8 +437,8 @@ export const JAKARTA_LANDMARKS = [
     position: [-323, 0, 218],
     rotationY: 0.52,
     labelHeight: 48,
-    cameraPosition: [-265, 58, 280],
-    cameraTarget: [-323, 18, 218],
+    cameraPosition: [-355, 52, 335],
+    cameraTarget: [-323, 24, 218],
     description: "Kompleks Parlemen Republik Indonesia di sisi barat daya koridor Jl. Gatot Subroto (barat laut Simpang Semanggi). Gedung Nusantara memiliki atap kubah parabolik hijau terbelah dua yang melambangkan kepakan sayap burung Garuda.",
     facts: [
       "Dirancang oleh Soejoedi Wirjoatmodjo pada tahun 1965 atas mandat Presiden Soekarno."
