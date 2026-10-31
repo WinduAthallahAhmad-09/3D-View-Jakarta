@@ -57,6 +57,10 @@ const VOID_F_KBT_CORRIDOR = [[850, 580], [1150, 350], [1320, 100], [1500, -250]]
 // dan plaza transit Tahap 4 agar keduanya tidak bergeser.
 const VOID_F_PR_PLOT = { x: 1000, z: 190, w: 38, d: 20 };
 
+// Lahan Park and Ride Void G dipakai bersama oleh reservasi infill Tahap 3
+// dan plaza transit Tahap 4 di sisi timur Stasiun LRT Ciracas.
+const VOID_G_PR_PLOT = { x: 980, z: 1823, w: 40, d: 22 };
+
 // Satu sumber jalur LRT Cibubur: dek viaduk dan animasi kereta harus
 // memakai titik yang sama agar kereta tidak melayang tanpa jalur layang.
 const LRT_CIBUBUR_CORRIDOR = [
@@ -75,6 +79,19 @@ const distanceToVoidFKbt = (x, z) => {
   for (let i = 0; i < VOID_F_KBT_CORRIDOR.length - 1; i++) {
     const [x1, z1] = VOID_F_KBT_CORRIDOR[i];
     const [x2, z2] = VOID_F_KBT_CORRIDOR[i + 1];
+    const dx = x2 - x1;
+    const dz = z2 - z1;
+    const t = Math.max(0, Math.min(1, ((x - x1) * dx + (z - z1) * dz) / (dx * dx + dz * dz)));
+    best = Math.min(best, Math.hypot(x - (x1 + dx * t), z - (z1 + dz * t)));
+  }
+  return best;
+};
+
+const distanceToLrtCibubur = (x, z) => {
+  let best = Infinity;
+  for (let i = 0; i < LRT_CIBUBUR_CORRIDOR.length - 1; i++) {
+    const [x1, z1] = LRT_CIBUBUR_CORRIDOR[i];
+    const [x2, z2] = LRT_CIBUBUR_CORRIDOR[i + 1];
     const dx = x2 - x1;
     const dz = z2 - z1;
     const t = Math.max(0, Math.min(1, ((x - x1) * dx + (z - z1) * dz) / (dx * dx + dz * dz)));
@@ -105,6 +122,21 @@ const VOID_G_ANCHOR_SITES = [
 
 // OBB overlap untuk footprint atap infill; penetrasi di bawah toleransi
 // dianggap bersentuhan agar deret ruko bertembok parti boleh menempel.
+// Titik-dalam-polygon untuk situ/waduk Void G; ring dataset selalu tertutup.
+const pointInPolygon = (x, z, points) => {
+  let inside = false;
+  for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+    const xi = points[i][0];
+    const zi = points[i][1];
+    const xj = points[j][0];
+    const zj = points[j][1];
+    if ((zi > z) !== (zj > z) && x < ((xj - xi) * (z - zi)) / (zj - zi) + xi) {
+      inside = !inside;
+    }
+  }
+  return inside;
+};
+
 const roofRectsOverlap = (a, b, tolerance) => {
   const cosA = Math.cos(a.rotY || 0);
   const sinA = Math.sin(a.rotY || 0);
@@ -193,6 +225,7 @@ export class CityScene {
     this.buildVoidFInfill();
     this.buildVoidFTransit();
     this.buildVoidGPasarRebo();
+    this.buildVoidGInfill();
     this.buildVoidBInfillAndIndustry();
     this.buildVoidBTransit();
     this.buildEastJakartaInfrastructure();
@@ -7171,6 +7204,68 @@ export class CityScene {
     );
   }
 
+  getVoidGRoadSegments() {
+    if (!this.voidGRoadSegments) {
+      const segments = [];
+      VOID_G_OSM.roads.forEach((road) => {
+        for (let i = 0; i < road.points.length - 1; i++) {
+          segments.push({
+            ax: road.points[i][0],
+            az: road.points[i][1],
+            bx: road.points[i + 1][0],
+            bz: road.points[i + 1][1],
+            halfWidth: road.width * 0.5,
+            way: road
+          });
+        }
+      });
+      this.voidGRoadSegments = segments;
+    }
+    return this.voidGRoadSegments;
+  }
+
+  isNearVoidGRoad(x, z, clearance = 12) {
+    for (const s of this.getVoidGRoadSegments()) {
+      const pad = clearance + s.halfWidth;
+      if (
+        x < Math.min(s.ax, s.bx) - pad || x > Math.max(s.ax, s.bx) + pad ||
+        z < Math.min(s.az, s.bz) - pad || z > Math.max(s.az, s.bz) + pad
+      ) continue;
+      const dx = s.bx - s.ax;
+      const dz = s.bz - s.az;
+      const len2 = dx * dx + dz * dz;
+      let t = len2 ? ((x - s.ax) * dx + (z - s.az) * dz) / len2 : 0;
+      t = Math.max(0, Math.min(1, t));
+      if (Math.hypot(x - (s.ax + t * dx), z - (s.az + t * dz)) < pad) return true;
+    }
+    return false;
+  }
+
+  isInsideVoidGWaterBody(x, z, margin = 6) {
+    for (const body of VOID_G_OSM.waterBodies) {
+      const points = body.points;
+      if (pointInPolygon(x, z, points)) return true;
+      for (let i = 0; i < points.length - 1; i++) {
+        const ax = points[i][0];
+        const az = points[i][1];
+        const bx = points[i + 1][0];
+        const bz = points[i + 1][1];
+        const dx = bx - ax;
+        const dz = bz - az;
+        const len2 = dx * dx + dz * dz;
+        let t = len2 ? ((x - ax) * dx + (z - az) * dz) / len2 : 0;
+        t = Math.max(0, Math.min(1, t));
+        if (Math.hypot(x - (ax + t * dx), z - (az + t * dz)) < margin) return true;
+      }
+    }
+    return false;
+  }
+
+  isInsideVoidGTMII(x, z, margin = 0) {
+    if (x > 985 - margin && x < 1095 + margin && z > 1504 - margin && z < 1599 + margin) return true;
+    return Math.hypot(x - 1040.2, z - 1551.5) < 62 + margin;
+  }
+
   /**
    * Void F Tahap 3: Infill urban fabric Cakung, Klender, Duren Sawit & Pulo Gebang.
    *
@@ -7618,6 +7713,449 @@ export class CityScene {
     );
 
     this.voidFInfillStats = {
+      houses: residentialItems.length,
+      shophouses: shophouseItems.length,
+      warehouses: warehouseItems.length,
+      zones: residentialZones.length,
+      corridors: shophouseRoads.size,
+      nightWindows,
+      drawCalls: 6
+    };
+  }
+
+  /**
+   * Void G Tahap 3: Infill urban fabric Pasar Rebo–Ciracas–Cipayung–Cibubur.
+   *
+   * 1. Rumah kampung/perumahan beratap pelana di sepuluh zona permukiman.
+   * 2. Ruko dua sisi mengikuti tujuh koridor jalan OSM kawasan timur-tenggara.
+   * 3. Gudang ringan di dua klaster logistik Pasar Rebo dan Cibubur.
+   * 4. Mask jalan, kali, polygon situ, anchor, TMII, viaduk LRT, dan lahan P&R.
+   * Total penambahan: lima InstancedMesh massa + jendela malam = 6 draw call.
+   */
+  buildVoidGInfill() {
+    const dummy = new THREE.Object3D();
+    const baseBoxGeo = new THREE.BoxGeometry(1, 1, 1);
+
+    const roofGeo = new THREE.BufferGeometry();
+    roofGeo.setAttribute(
+      'position',
+      new THREE.Float32BufferAttribute([
+        -0.5, 0, -0.5, 0.5, 0, -0.5, -0.5, 0, 0.5, 0.5, 0, 0.5,
+        0, 1, -0.5, 0, 1, 0.5
+      ], 3)
+    );
+    roofGeo.setIndex([
+      0, 2, 5, 0, 5, 4,
+      1, 4, 5, 1, 5, 3,
+      0, 4, 1,
+      2, 3, 5,
+      0, 1, 3, 0, 3, 2
+    ]);
+    roofGeo.computeVertexNormals();
+
+    const waterSegments = [];
+    VOID_G_OSM.waterways.forEach((waterway) => {
+      for (let i = 0; i < waterway.points.length - 1; i++) {
+        waterSegments.push({
+          ax: waterway.points[i][0],
+          az: waterway.points[i][1],
+          bx: waterway.points[i + 1][0],
+          bz: waterway.points[i + 1][1],
+          half: waterway.width * 0.5 + 4
+        });
+      }
+    });
+
+    const distanceToSegment = (x, z, s) => {
+      const dx = s.bx - s.ax;
+      const dz = s.bz - s.az;
+      const len2 = dx * dx + dz * dz;
+      let t = len2 ? ((x - s.ax) * dx + (z - s.az) * dz) / len2 : 0;
+      t = Math.max(0, Math.min(1, t));
+      return Math.hypot(x - (s.ax + t * dx), z - (s.az + t * dz));
+    };
+
+    const isNearVoidGWater = (x, z) => {
+      for (const s of waterSegments) {
+        if (distanceToSegment(x, z, s) < s.half + 2) return true;
+      }
+      return false;
+    };
+
+    const insideAnchorExclusion = (x, z, margin) => VOID_G_ANCHOR_SITES.some(
+      ([minX, maxX, minZ, maxZ]) => x > minX - margin && x < maxX + margin &&
+        z > minZ - margin && z < maxZ + margin
+    );
+
+    // Plaza Park and Ride Stasiun LRT Ciracas dipesan sebelum infill agar
+    // deret rumah di zona R4 tidak menutup lahan transit Tahap 4.
+    const transitReservations = [
+      [
+        VOID_G_PR_PLOT.x - VOID_G_PR_PLOT.w / 2 - 6,
+        VOID_G_PR_PLOT.x + VOID_G_PR_PLOT.w / 2 + 6,
+        VOID_G_PR_PLOT.z - VOID_G_PR_PLOT.d / 2 - 6,
+        VOID_G_PR_PLOT.z + VOID_G_PR_PLOT.d / 2 + 6
+      ]
+    ];
+    const insideTransitReservation = (x, z, margin) => transitReservations.some(
+      ([minX, maxX, minZ, maxZ]) => x > minX - margin && x < maxX + margin &&
+        z > minZ - margin && z < maxZ + margin
+    );
+
+    // Ruko berdiri di tepi koridornya sendiri; segmen milik deret memakai
+    // batas lebih rapat, pola yang sama dengan infill Void C/D/E/F.
+    const isBlocked = (x, z, radius, ignoreWays) => {
+      if (ignoreWays) {
+        for (const s of this.getVoidGRoadSegments()) {
+          const pad = ignoreWays.has(s.way) ? s.halfWidth + radius - 2 : s.halfWidth + radius + 2;
+          if (distanceToSegment(x, z, s) < pad) return true;
+        }
+      } else if (this.isNearVoidGRoad(x, z, radius + 2)) {
+        return true;
+      }
+      if (isNearVoidGWater(x, z)) return true;
+      if (this.isInsideVoidGWaterBody(x, z, 6 + radius * 0.5)) return true;
+      if (insideAnchorExclusion(x, z, radius * 0.5)) return true;
+      if (insideTransitReservation(x, z, radius)) return true;
+      if (this.isInsideVoidGTMII(x, z, radius * 0.5 + 8)) return true;
+      // Viaduk LRT Cibubur (LRT_CIBUBUR_CORRIDOR) tetap terbuka di atas rumah.
+      if (distanceToLrtCibubur(x, z) < 14) return true;
+      return false;
+    };
+
+    const placed = [];
+    const isRoofOccupied = (x, z, rw, rd, rotY) => {
+      const reach = Math.hypot(rw, rd) * 0.5;
+      for (let i = 0; i < placed.length; i++) {
+        const p = placed[i];
+        if (Math.hypot(p.x - x, p.z - z) >= p.radius + reach) continue;
+        if (roofRectsOverlap(p, { x, z, rw, rd, rotY }, INFILL_ROOF_TOLERANCE)) return true;
+      }
+      return false;
+    };
+    const putRoof = (x, z, rw, rd, rotY = 0) => {
+      placed.push({ x, z, rw, rd, rotY, radius: Math.hypot(rw, rd) * 0.5 });
+    };
+
+    const residentialItems = [];
+    const shophouseItems = [];
+    const roofItems = [];
+    const warehouseItems = [];
+    const warehouseRoofItems = [];
+
+    const residentialColors = [
+      new THREE.Color(0xf8fafc),
+      new THREE.Color(0xe7e5e4),
+      new THREE.Color(0xfef3c7),
+      new THREE.Color(0xbae6fd),
+      new THREE.Color(0xfed7aa),
+      new THREE.Color(0xa7f3d0)
+    ];
+    const roofColors = [
+      new THREE.Color(0xb45309),
+      new THREE.Color(0x9a3412),
+      new THREE.Color(0x991b1b),
+      new THREE.Color(0x78350f)
+    ];
+    const shophouseColors = [
+      new THREE.Color(0xf1f5f9),
+      new THREE.Color(0xe2e8f0),
+      new THREE.Color(0xfed7aa),
+      new THREE.Color(0xbae6fd),
+      new THREE.Color(0x0f766e),
+      new THREE.Color(0x1e293b),
+      new THREE.Color(0xd97706)
+    ];
+    const warehouseColors = [
+      new THREE.Color(0x64748b),
+      new THREE.Color(0x94a3b8),
+      new THREE.Color(0x475569),
+      new THREE.Color(0x0e7490),
+      new THREE.Color(0xb45309)
+    ];
+    const warehouseRoofColors = [
+      new THREE.Color(0x334155),
+      new THREE.Color(0x475569),
+      new THREE.Color(0x64748b),
+      new THREE.Color(0x94a3b8)
+    ];
+
+    const buildRoadChains = (ways) => {
+      const keyOf = (p) => `${Math.round(p[0])}:${Math.round(p[1])}`;
+      const pending = ways.map((road) => ({
+        points: road.points.map((p) => [p[0], p[1]]),
+        ways: new Set([road])
+      }));
+      const chains = [];
+      while (pending.length > 0) {
+        const chain = pending.pop();
+        let extended = true;
+        while (extended) {
+          extended = false;
+          const head = chain.points[0];
+          const tail = chain.points[chain.points.length - 1];
+          for (let i = 0; i < pending.length; i++) {
+            const way = pending[i].points;
+            if (keyOf(way[way.length - 1]) === keyOf(tail)) {
+              chain.points.push(...way.slice(0, -1).reverse());
+            } else if (keyOf(way[0]) === keyOf(tail)) {
+              chain.points.push(...way.slice(1));
+            } else if (keyOf(way[0]) === keyOf(head)) {
+              chain.points.unshift(...way.slice(1).reverse());
+            } else if (keyOf(way[way.length - 1]) === keyOf(head)) {
+              chain.points.unshift(...way.slice(0, -1));
+            } else {
+              continue;
+            }
+            pending[i].ways.forEach((road) => chain.ways.add(road));
+            pending.splice(i, 1);
+            extended = true;
+            break;
+          }
+        }
+        chains.push(chain);
+      }
+      return chains;
+    };
+
+    const visitChain = (chain, spacing, visit) => {
+      let offset = spacing * 0.5;
+      for (let i = 0; i < chain.length - 1; i++) {
+        const a = chain[i];
+        const b = chain[i + 1];
+        const dx = b[0] - a[0];
+        const dz = b[1] - a[1];
+        const len = Math.hypot(dx, dz);
+        if (len < 0.01) continue;
+        let cursor = offset;
+        while (cursor <= len) {
+          const t = cursor / len;
+          visit(a[0] + dx * t, a[1] + dz * t, Math.atan2(dx, dz));
+          cursor += spacing;
+        }
+        offset = cursor - len;
+      }
+    };
+
+    const shophouseRoads = new Set([
+      'Jalan Raya Bogor',
+      'Jalan Ciracas',
+      'Jalan Kelapa Dua Wetan',
+      'Jalan Setu Cipayung',
+      'Jalan Cilangkap Raya',
+      'Jalan Jambore Raya',
+      'Jalan Transyogi'
+    ]);
+    const shophouseWaysByName = new Map();
+    VOID_G_OSM.roads.forEach((road) => {
+      if (!shophouseRoads.has(road.name)) return;
+      if (!shophouseWaysByName.has(road.name)) shophouseWaysByName.set(road.name, []);
+      shophouseWaysByName.get(road.name).push(road);
+    });
+
+    const placeShophouseRow = (roadWidth, chain, ignoreWays) => {
+      visitChain(chain, 13, (bx, bz, angle) => {
+        const nx = Math.cos(angle);
+        const nz = -Math.sin(angle);
+        [-1, 1].forEach((side) => {
+          const hash = Math.abs(Math.sin(bx * 8.13 + bz * 4.71 + side * 3.7));
+          const w = 11 + (1 - hash) * 4;
+          const d = 10.5 + hash * 2.5;
+          const h = 9 + hash * 7;
+          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
+          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
+          const radius = Math.max(w, d) * 0.5;
+          const roofW = w + INFILL_ROOF_EAVE * 2;
+          if (isBlocked(px, pz, radius, ignoreWays) || isRoofOccupied(px, pz, roofW, d, angle)) return;
+          putRoof(px, pz, roofW, d, angle);
+          shophouseItems.push({
+            x: px,
+            y: h * 0.5,
+            z: pz,
+            w,
+            h,
+            d,
+            rotY: angle,
+            color: shophouseColors[Math.floor(hash * shophouseColors.length) % shophouseColors.length]
+          });
+          const roofH = 1.8 + hash * 0.8;
+          roofItems.push({
+            x: px,
+            y: h,
+            z: pz,
+            w: roofW,
+            h: roofH,
+            d,
+            rotY: angle,
+            color: roofColors[Math.floor(hash * roofColors.length) % roofColors.length]
+          });
+        });
+      });
+    };
+
+    shophouseWaysByName.forEach((ways) => {
+      const roadWidth = Math.max(...ways.map((road) => road.width));
+      buildRoadChains(ways).forEach((chain) => placeShophouseRow(roadWidth, chain.points, chain.ways));
+    });
+
+    const warehouseZones = [
+      // W1 Pasar Rebo logistik: gudang ringan tepi selatan Jalan Raya Bogor.
+      { minX: 492, maxX: 572, minZ: 2320, maxZ: 2400, stepX: 28, stepZ: 24 },
+      // W2 Cibubur logistik: pergudangan antara Jambore Raya dan Kranggan.
+      { minX: 1190, maxX: 1280, minZ: 2340, maxZ: 2400, stepX: 28, stepZ: 24 }
+    ];
+    warehouseZones.forEach((zone, zoneIndex) => {
+      for (let x = zone.minX; x <= zone.maxX; x += zone.stepX) {
+        for (let z = zone.minZ; z <= zone.maxZ; z += zone.stepZ) {
+          const hash = Math.abs(Math.sin(x * 4.71 + z * 9.13 + zoneIndex));
+          const w = 19 + hash * 5;
+          const d = 21 + (1 - hash) * 6;
+          const h = 8 + hash * 4;
+          const radius = Math.max(w, d) * 0.5;
+          const px = x + (hash - 0.5) * 4;
+          const pz = z + (((hash * 5.7) % 1) - 0.5) * 4;
+          const roofW = w + 1.4;
+          const roofD = d + 1.4;
+          if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+          putRoof(px, pz, roofW, roofD);
+          warehouseItems.push({
+            x: px,
+            y: h * 0.5,
+            z: pz,
+            w,
+            h,
+            d,
+            color: warehouseColors[Math.floor(hash * warehouseColors.length) % warehouseColors.length]
+          });
+          const roofH = 1.6 + hash * 1.2;
+          warehouseRoofItems.push({
+            x: px,
+            y: h,
+            z: pz,
+            w: roofW,
+            h: roofH,
+            d: roofD,
+            color: warehouseRoofColors[Math.floor(hash * warehouseRoofColors.length) % warehouseRoofColors.length]
+          });
+        }
+      }
+    });
+
+    const residentialZones = [
+      // R1 Pasar Rebo barat: kampung tepi Jalan Raya Bogor.
+      { minX: 420, maxX: 540, minZ: 1820, maxZ: 1940, step: 16 },
+      // R2 Cibubur barat: permukiman antara Raya Bogor dan Insinyur Haji Juanda.
+      { minX: 580, maxX: 700, minZ: 2300, maxZ: 2420, step: 16 },
+      // R3 Cibubur barat daya: kampung tepi Jalan Insinyur Haji Juanda.
+      { minX: 700, maxX: 820, minZ: 2460, maxZ: 2580, step: 16 },
+      // R4 Ciracas: permukiman padat di utara Stasiun LRT Ciracas.
+      { minX: 900, maxX: 1020, minZ: 1740, maxZ: 1860, step: 16 },
+      // R5 Cibubur utara: rumah antara Jambore Raya dan Cibubur Junction.
+      { minX: 940, maxX: 1060, minZ: 2220, maxZ: 2340, step: 16 },
+      // R6 Cibubur tengah: kampung di utara gerbang Cibubur.
+      { minX: 1060, maxX: 1180, minZ: 2340, maxZ: 2460, step: 16 },
+      // R7 Cipayung barat: permukiman antara Setu Cipayung dan Cilangkap Raya.
+      { minX: 1140, maxX: 1260, minZ: 1900, maxZ: 2020, step: 16 },
+      // R8 Cipayung timur: kampung tepi Jalan Kranggan.
+      { minX: 1300, maxX: 1420, minZ: 2380, maxZ: 2500, step: 16 },
+      // R9 Cibubur selatan: permukiman barat Cibubur Junction.
+      { minX: 900, maxX: 1020, minZ: 2540, maxZ: 2660, step: 16 },
+      // R10 Cibubur tenggara: kampung antara Transyogi dan Kranggan.
+      { minX: 1020, maxX: 1140, minZ: 2540, maxZ: 2660, step: 16 }
+    ];
+    residentialZones.forEach((zone, zoneIndex) => {
+      for (let x = zone.minX; x <= zone.maxX; x += zone.step) {
+        for (let z = zone.minZ; z <= zone.maxZ; z += zone.step) {
+          const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233 + zoneIndex));
+          const w = 9 + hash * 3;
+          const d = 10 + (1 - hash) * 3;
+          const h = 6.5 + hash * 3.5;
+          const radius = Math.max(w, d) * 0.5;
+          const px = x + (hash - 0.5) * 2.4;
+          const pz = z + (((hash * 7.31) % 1) - 0.5) * 2.4;
+          const roofW = w + INFILL_ROOF_EAVE * 2;
+          const roofD = d + INFILL_ROOF_EAVE * 2;
+          if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+          putRoof(px, pz, roofW, roofD);
+          residentialItems.push({
+            x: px,
+            y: h * 0.5,
+            z: pz,
+            w,
+            h,
+            d,
+            color: residentialColors[Math.floor(hash * residentialColors.length) % residentialColors.length]
+          });
+          const roofH = 1.5 + hash * 0.9;
+          roofItems.push({
+            x: px,
+            y: h,
+            z: pz,
+            w: roofW,
+            h: roofH,
+            d: roofD,
+            color: roofColors[Math.floor(hash * roofColors.length) % roofColors.length]
+          });
+        }
+      }
+    });
+
+    const addInstanced = (geo, mat, items, name) => {
+      if (items.length === 0) return;
+      const mesh = new THREE.InstancedMesh(geo, mat, items.length);
+      mesh.name = name;
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      items.forEach((item, idx) => {
+        dummy.position.set(item.x, item.y, item.z);
+        dummy.scale.set(item.w, item.h, item.d);
+        dummy.rotation.set(0, item.rotY || 0, 0);
+        dummy.updateMatrix();
+        mesh.setMatrixAt(idx, dummy.matrix);
+        mesh.setColorAt(idx, item.color);
+      });
+      mesh.instanceMatrix.needsUpdate = true;
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+      this.proceduralGroup.add(mesh);
+    };
+
+    addInstanced(
+      baseBoxGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.78 }),
+      residentialItems,
+      'voidg-infill-houses'
+    );
+    addInstanced(
+      baseBoxGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6, metalness: 0.15 }),
+      shophouseItems,
+      'voidg-infill-shophouses'
+    );
+    addInstanced(
+      roofGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }),
+      roofItems,
+      'voidg-infill-house-roofs'
+    );
+    addInstanced(
+      baseBoxGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.65, metalness: 0.25 }),
+      warehouseItems,
+      'voidg-infill-warehouses'
+    );
+    addInstanced(
+      roofGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.65, metalness: 0.25 }),
+      warehouseRoofItems,
+      'voidg-infill-warehouse-roofs'
+    );
+
+    const nightWindows = this.addInfillNightWindows(
+      [...residentialItems, ...shophouseItems],
+      'voidg-night-windows'
+    );
+
+    this.voidGInfillStats = {
       houses: residentialItems.length,
       shophouses: shophouseItems.length,
       warehouses: warehouseItems.length,

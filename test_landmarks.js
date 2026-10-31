@@ -4001,7 +4001,108 @@ assert.ok(
   assert.ok(voidGNetworkMethod.includes(name), `Void G tree bank list missing ${name}`);
 });
 
-console.log(`✅ All 111 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 69: Void G Tahap 3 — infill urban fabric Pasar Rebo–Ciracas–Cipayung–Cibubur
+assert.ok(citySceneContent.includes('buildVoidGInfill()'), 'CityScene.js missing buildVoidGInfill');
+
+const voidGInfillCall = citySceneContent.indexOf('this.buildVoidGInfill();');
+assert.ok(voidGInfillCall > 0, 'CityScene.js does not call buildVoidGInfill');
+assert.ok(
+  voidGInfillCall > citySceneContent.indexOf('this.buildVoidGPasarRebo();'),
+  'buildVoidGInfill must run after buildVoidGPasarRebo so the OSM network exists'
+);
+assert.ok(
+  voidGInfillCall < citySceneContent.indexOf('this.buildVoidBInfillAndIndustry();'),
+  'buildVoidGInfill must run before buildVoidBInfillAndIndustry'
+);
+
+const voidGInfillBody = sliceCityBuilder('  buildVoidGInfill() {');
+assert.ok(!voidGInfillBody.includes('new THREE.PointLight'), 'Void G infill must not add PointLights');
+assert.ok(!voidGInfillBody.includes('nightMaterials.push'), 'Void G infill must register night windows through the shared helper');
+assert.ok(voidGInfillBody.includes('addInfillNightWindows'), 'Void G infill must reuse the shared night window helper');
+assert.ok(voidGInfillBody.includes('voidg-night-windows'), 'Void G infill missing the night window mesh');
+assert.ok(voidGInfillBody.includes('VOID_G_OSM'), 'Void G infill must mask against the OSM roads, waterways and situ');
+assert.ok(voidGInfillBody.includes('isNearVoidGRoad'), 'Void G infill missing the road corridor mask');
+assert.ok(voidGInfillBody.includes('isNearVoidGWater'), 'Void G infill missing the waterway mask');
+assert.ok(voidGInfillBody.includes('width * 0.5 + 4'), 'Void G water mask must add a four-unit bank buffer');
+assert.ok(voidGInfillBody.includes('isInsideVoidGWaterBody'), 'Void G infill must keep buildings out of the situ polygons');
+assert.ok(voidGInfillBody.includes('isInsideVoidGTMII'), 'Void G infill must clear the Taman Mini Indonesia Indah plate and tree ring');
+assert.ok(voidGInfillBody.includes('VOID_G_ANCHOR_SITES'), 'Void G infill must exclude the six anchor pads');
+assert.ok(voidGInfillBody.includes('VOID_G_PR_PLOT'), 'Void G infill must reserve the shared P&R plot');
+assert.ok(voidGInfillBody.includes('transitReservations'), 'Void G infill missing the transit reservation list');
+assert.ok(voidGInfillBody.includes('insideTransitReservation(x, z, radius)'), 'Void G infill must carve the P&R plot out of the building masks');
+assert.ok(voidGInfillBody.includes('LRT_CIBUBUR_CORRIDOR'), 'Void G infill must clear the LRT Cibubur viaduct corridor');
+assert.ok(voidGInfillBody.includes('voidGInfillStats'), 'Void G infill must expose runtime stats');
+assert.ok(voidGInfillBody.includes('drawCalls: 6'), 'Void G infill should add six instanced draw calls');
+assert.ok(
+  voidGInfillBody.includes('INFILL_ROOF_EAVE') && voidGInfillBody.includes('INFILL_ROOF_TOLERANCE'),
+  'Void G infill must reuse the shared eave trim and roof occupancy constants'
+);
+assert.ok(
+  voidGInfillBody.includes('ignoreWays') &&
+    voidGInfillBody.includes('placeShophouseRow(roadWidth, chain.points, chain.ways)'),
+  'Void G shophouse rows must ignore their own road corridor'
+);
+
+[
+  'voidg-infill-houses',
+  'voidg-infill-shophouses',
+  'voidg-infill-house-roofs',
+  'voidg-infill-warehouses',
+  'voidg-infill-warehouse-roofs'
+].forEach((name) => {
+  assert.ok(voidGInfillBody.includes(name), `Void G infill missing the ${name} instanced mesh`);
+});
+
+[
+  'Jalan Raya Bogor',
+  'Jalan Ciracas',
+  'Jalan Kelapa Dua Wetan',
+  'Jalan Setu Cipayung',
+  'Jalan Cilangkap Raya',
+  'Jalan Jambore Raya',
+  'Jalan Transyogi'
+].forEach((name) => {
+  assert.ok(voidGInfillBody.includes(name), `Void G infill missing the ${name} shophouse corridor`);
+});
+
+[
+  'R1 Pasar Rebo barat',
+  'R2 Cibubur barat',
+  'R3 Cibubur barat daya',
+  'R4 Ciracas',
+  'R5 Cibubur utara',
+  'R6 Cibubur tengah',
+  'R7 Cipayung barat',
+  'R8 Cipayung timur',
+  'R9 Cibubur selatan',
+  'R10 Cibubur tenggara'
+].forEach((zone) => {
+  assert.ok(voidGInfillBody.includes(zone), `Void G infill missing the ${zone} residential zone`);
+});
+
+['W1 Pasar Rebo logistik', 'W2 Cibubur logistik'].forEach((zone) => {
+  assert.ok(voidGInfillBody.includes(zone), `Void G infill missing the ${zone} warehouse cluster`);
+});
+
+assert.ok(citySceneContent.includes('const VOID_G_PR_PLOT ='), 'Void G P&R plot must live at module scope so infill and transit share it');
+assert.ok(citySceneContent.includes('isInsideVoidGWaterBody(x, z, margin = 6)'), 'CityScene.js missing the situ polygon mask');
+assert.ok(citySceneContent.includes('isInsideVoidGTMII(x, z, margin = 0)'), 'CityScene.js missing the TMII exclusion mask');
+assert.ok(citySceneContent.includes('getVoidGRoadSegments() {'), 'CityScene.js missing the Void G road segment cache');
+assert.ok(citySceneContent.includes('isNearVoidGRoad(x, z, clearance = 12) {'), 'CityScene.js missing the Void G road clearance helper');
+assert.ok(citySceneContent.includes('const pointInPolygon = (x, z, points) =>'), 'CityScene.js missing the polygon containment helper');
+assert.ok(citySceneContent.includes('const distanceToLrtCibubur = (x, z) =>'), 'CityScene.js missing the LRT Cibubur distance helper');
+
+const voidGPrPlotMatch = citySceneContent.match(/const VOID_G_PR_PLOT = \{([^}]*)\};/);
+assert.ok(voidGPrPlotMatch, 'Void G P&R plot constant unreadable');
+assert.ok(
+  voidGPrPlotMatch[1].includes('x: 980') &&
+    voidGPrPlotMatch[1].includes('z: 1823') &&
+    voidGPrPlotMatch[1].includes('w: 40') &&
+    voidGPrPlotMatch[1].includes('d: 22'),
+  'Void G P&R plot drifted from the audited Stasiun LRT Ciracas parcel'
+);
+
+console.log(`✅ All 111 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Visual P1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
