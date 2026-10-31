@@ -11763,7 +11763,13 @@ export class CityScene {
       "stasiun-lrt-ciracas": () => LandmarkModels.createStasiunLrtCiracas(),
       "rusun-ciracas": () => LandmarkModels.createRusunCiracas(),
       "mabes-tni-cilangkap": () => LandmarkModels.createMabesTniCilangkap(),
-      "cibubur-junction": () => LandmarkModels.createCibuburJunction()
+      "cibubur-junction": () => LandmarkModels.createCibuburJunction(),
+      "stasiun-pasar-minggu": () => LandmarkModels.createStasiunPasarMinggu(),
+      "tmp-kalibata": () => LandmarkModels.createTmpKalibata(),
+      "taman-margasatwa-ragunan": () => LandmarkModels.createTamanMargasatwaRagunan(),
+      "stasiun-lenteng-agung": () => LandmarkModels.createStasiunLentengAgung(),
+      "universitas-pancasila": () => LandmarkModels.createUniversitasPancasila(),
+      "setu-babakan": () => LandmarkModels.createSetuBabakan()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {

@@ -1,5 +1,5 @@
 /**
- * Geospatial configuration for 87 Jakarta landmarks across all city regions.
+ * Geospatial configuration for 117 Jakarta landmarks across all city regions.
  * Scene coordinates use a uniform metric projection centered at Bundaran Hotel Indonesia
  * (-6.194957°, 106.823048° -> [0, 0, 0]):
  *   X = (lng - 106.823048) * 14100.0   (~7.81 meters per scene unit)
@@ -2499,6 +2499,141 @@ export const JAKARTA_LANDMARKS = [
       "Cibubur Junction adalah pusat perbelanjaan yang menjadi penanda kawasan Cibubur di perbatasan Jakarta dan Depok.",
       "Kawasan ini dilayani Stasiun LRT Harjamukti dan Terminal Cibubur sehingga menjadi simpul perjalanan warga Jabodetabek.",
       "Meski bernama Cibubur, sebagian kawasan mal dan terminalnya berada di Harjamukti, Cimanggis, Depok."
+    ]
+  },
+  // =====================================================
+  // ZONA 14: VOID H — PASAR MINGGU, KALIBATA, RAGUNAN & LENTENG AGUNG
+  // =====================================================
+  {
+    id: "stasiun-pasar-minggu",
+    name: "Stasiun Pasar Minggu",
+    shortName: "Stasiun Pasar Minggu",
+    category: "Stasiun KRL & Transit Selatan",
+    tagline: "Simpul Commuter Line di Jl. Raya Pasar Minggu",
+    height: "18 meter (Hall & Kanopi Peron)",
+    year: "Awal 1900-an (Revitalisasi 2018)",
+    architect: "PT Kereta Api Indonesia & KAI Commuter",
+    location: "Jl. Raya Pasar Minggu, Pasar Minggu, Jakarta Selatan",
+    coordinates: { lat: -6.28417, lng: 106.84444 },
+    position: [301.6, 0, 1265.0],
+    labelHeight: 24,
+    cameraPosition: [301.6, 56, 1385],
+    cameraTarget: [301.6, 8, 1265],
+    description: "Stasiun Commuter Line di tepi Jl. Raya Pasar Minggu yang melayani koridor selatan Jakarta. Menampilkan hall berlantai dua, dua peron berkanopi, jembatan penyeberangan, rel ganda, area park-and-ride, serta deret pertokoan dan permukiman padat di sekeliling stasiun.",
+    facts: [
+      "Stasiun Pasar Minggu melayani KRL Commuter Line Lin Bogor di sisi selatan Jakarta.",
+      "Stasiun ini berada di tepi Jl. Raya Pasar Minggu dan menjadi akses utama warga Pasar Minggu, Pejaten, dan Kalibata.",
+      "Revitalisasi 2018 menambah hall baru, kanopi peron, jembatan penyeberangan, dan fasilitas park-and-ride."
+    ]
+  },
+  {
+    id: "tmp-kalibata",
+    name: "Taman Makam Pahlawan Nasional Kalibata",
+    shortName: "TMP Kalibata",
+    category: "Taman Makam Pahlawan Nasional",
+    tagline: "Makam Para Pahlawan Bangsa di Kalibata",
+    height: "24 meter (Monumen & Gerbang)",
+    year: "1953 (Diresmikan 1954)",
+    architect: "Pemerintah Republik Indonesia",
+    location: "Jl. Raya Kalibata, Kalibata, Pancoran, Jakarta Selatan",
+    coordinates: { lat: -6.2980, lng: 106.8465 },
+    position: [330.7, 0, 1461.1],
+    labelHeight: 30,
+    cameraPosition: [330.7, 70, 1595],
+    cameraTarget: [330.7, 10, 1461.1],
+    description: "Taman Makam Pahlawan Nasional Utama di Kalibata yang menjadi tempat peristirahatan para pahlawan bangsa. Menampilkan gerbang kolonade, monumen obelisk berbintang, plaza upacara, barisan nisan putih yang tertata rapi, serta pepohonan peneduh di kawasan yang tenang dan khidmat.",
+    facts: [
+      "TMP Kalibata dibangun pada 1953 dan diresmikan setahun kemudian sebagai taman makam pahlawan nasional utama.",
+      "Upacara Hari Pahlawan setiap 10 November dipusatkan di kawasan ini.",
+      "Di sini dimakamkan para pahlawan nasional, tokoh militer, dan pejuang kemerdekaan dari berbagai daerah."
+    ]
+  },
+  {
+    id: "taman-margasatwa-ragunan",
+    name: "Taman Margasatwa Ragunan",
+    shortName: "Ragunan",
+    category: "Konservasi Satwa & Ruang Terbuka",
+    tagline: "Kebun Binatang Tertua Indonesia di Ragunan",
+    height: "18 meter (Gerbang & Paviliun Tiket)",
+    year: "1864 (Pindah ke Ragunan 1966)",
+    architect: "Dinas Pertamanan dan Kehutanan DKI Jakarta",
+    location: "Jl. Harsono RM No. 1, Ragunan, Pasar Minggu, Jakarta Selatan",
+    coordinates: { lat: -6.31167, lng: 106.82000 },
+    position: [-43.0, 0, 1655.0],
+    labelHeight: 30,
+    cameraPosition: [-43, 80, 1790],
+    cameraTarget: [-43, 12, 1655],
+    description: "Taman margasatwa seluas lebih dari 140 hektare di Ragunan yang menjadi kebun binatang tertua di Indonesia. Menampilkan gerbang utama berpatung satwa, paviliun tiket berkaca, plaza kedatangan, kubah aviarium, jalur pejalan kaki, serta kanopi pohon besar yang menaungi koleksi satwa.",
+    facts: [
+      "Taman Margasatwa Ragunan berakar dari kebun binatang Cikini yang dibuka pada 1864, menjadikannya yang tertua di Indonesia.",
+      "Kebun binatang ini dipindahkan ke Ragunan pada 1966 dan menempati lahan lebih dari 140 hektare.",
+      "Ragunan berfungsi sebagai konservasi, penelitian, pendidikan, dan rekreasi satwa dengan koleksi ratusan spesies."
+    ]
+  },
+  {
+    id: "stasiun-lenteng-agung",
+    name: "Stasiun Lenteng Agung",
+    shortName: "Stasiun Lenteng Agung",
+    category: "Stasiun KRL & Simpul Jagakarsa",
+    tagline: "Stasiun KRL di Tepi Kampus Universitas Indonesia",
+    height: "16 meter (Hall & Kanopi Peron)",
+    year: "Awal 1900-an (Revitalisasi 2021)",
+    architect: "PT Kereta Api Indonesia & KAI Commuter",
+    location: "Jl. Raya Lenteng Agung, Lenteng Agung, Jagakarsa, Jakarta Selatan",
+    coordinates: { lat: -6.3350, lng: 106.8333 },
+    position: [144.6, 0, 1985.8],
+    labelHeight: 22,
+    cameraPosition: [262, 58, 2072],
+    cameraTarget: [144.6, 8, 1985.8],
+    description: "Stasiun Commuter Line di Lenteng Agung yang melayani perjalanan warga Jagakarsa dan mahasiswa menuju Depok. Menampilkan hall utama, dua peron berkanopi, rel ganda, jembatan penyeberangan, parkir motor, serta deret ruko dan pepohonan di sepanjang Jl. Raya Lenteng Agung.",
+    facts: [
+      "Stasiun Lenteng Agung melayani Commuter Line Lin Bogor di koridor selatan Jakarta.",
+      "Stasiun ini menjadi akses utama mahasiswa dan warga menuju kampus Universitas Indonesia di Depok.",
+      "Revitalisasi awal 2020-an menghadirkan hall baru, peron berkanopi, dan jembatan penyeberangan."
+    ]
+  },
+  {
+    id: "universitas-pancasila",
+    name: "Universitas Pancasila",
+    shortName: "Universitas Pancasila",
+    category: "Kampus & Pendidikan Tinggi",
+    tagline: "Kampus Universitas Pancasila di Jagakarsa",
+    height: "34 meter (Menara Rektorat)",
+    year: "1966",
+    architect: "Yayasan Pendidikan dan Pembina Universitas Pancasila",
+    location: "Jl. Srengseng Sawah, Jagakarsa, Jakarta Selatan",
+    coordinates: { lat: -6.3402, lng: 106.8312 },
+    position: [114.9, 0, 2059.5],
+    labelHeight: 28,
+    cameraPosition: [114.9, 66, 2172],
+    cameraTarget: [114.9, 12, 2059.5],
+    description: "Kampus Universitas Pancasila di Srengseng Sawah yang menjadi salah satu perguruan tinggi swasta besar di Jakarta Selatan. Menampilkan gerbang kampus, plaza upacara, menara rektorat berjendela kaca, dua sayap fakultas, lapangan parkir, serta deretan pohon peneduh di dalam kawasan hijau kampus.",
+    facts: [
+      "Universitas Pancasila didirikan pada 1966 dan berpusat di kampus Srengseng Sawah, Jagakarsa.",
+      "Kampus ini memiliki fakultas teknik, ekonomi, hukum, kedokteran, farmasi, dan program pascasarjana.",
+      "Lokasinya dekat Stasiun Lenteng Agung sehingga terhubung langsung dengan Commuter Line Lin Bogor."
+    ]
+  },
+  {
+    id: "setu-babakan",
+    name: "Setu Babakan & Perkampungan Betawi",
+    shortName: "Setu Babakan",
+    category: "Cagar Budaya Betawi & Danau",
+    tagline: "Perkampungan Budaya Betawi di Tepi Setu Babakan",
+    height: "12 meter (Rumah Kebaya Panggung)",
+    year: "2004 (Kawasan Perkampungan Budaya)",
+    architect: "Pemerintah Provinsi DKI Jakarta",
+    location: "Jl. Mohamad Kahfi II, Srengseng Sawah, Jagakarsa, Jakarta Selatan",
+    coordinates: { lat: -6.3394, lng: 106.8239 },
+    position: [12.0, 0, 2048.2],
+    labelHeight: 22,
+    cameraPosition: [12, 60, 2178],
+    cameraTarget: [12, 3, 2048.2],
+    description: "Kawasan perkampungan budaya Betawi di tepi Setu Babakan yang menjadi pusat pelestarian tradisi Betawi. Menampilkan danau seluas beberapa hektare, rumah kebaya panggung beratap pelana, dermaga kayu, perahu, panggung budaya, serta pepohonan rindang di sepanjang tepian setu.",
+    facts: [
+      "Setu Babakan ditetapkan sebagai Perkampungan Budaya Betawi pada 2004 untuk melestarikan budaya Betawi.",
+      "Danau atau setu ini dimanfaatkan untuk budidaya ikan, perahu, dan kegiatan budaya warga.",
+      "Rumah kebaya panggung dengan atap pelana dan teras terbuka menjadi ciri arsitektur khas kawasan ini."
     ]
   }
 ];
