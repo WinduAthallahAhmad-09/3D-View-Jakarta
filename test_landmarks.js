@@ -5141,7 +5141,255 @@ const voidHRoadClearance = (x, z) => {
   );
 });
 
-console.log(`✅ All 117 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 79: Void H Tahap 4 — Park-and-Ride Pasar Minggu dan enam feeder halte
+assert.ok(citySceneContent.includes('buildVoidHTransit()'), 'CityScene.js missing buildVoidHTransit');
+
+const voidHTransitCall = citySceneContent.indexOf('this.buildVoidHTransit();');
+assert.ok(voidHTransitCall > 0, 'CityScene.js does not call buildVoidHTransit');
+assert.ok(
+  voidHTransitCall > citySceneContent.indexOf('this.buildVoidHInfill();'),
+  'buildVoidHTransit must run after buildVoidHInfill so the P&R plot is reserved'
+);
+assert.ok(
+  voidHTransitCall < citySceneContent.indexOf('this.buildVoidBInfillAndIndustry();'),
+  'buildVoidHTransit must run before buildVoidBInfillAndIndustry'
+);
+
+assert.ok(
+  citySceneContent.includes('this.voidHTransitLabels = [];'),
+  'CityScene constructor must initialise the Void H transit label list'
+);
+
+const voidHTransitBody = sliceCityBuilder('  buildVoidHTransit() {');
+assert.ok(!voidHTransitBody.includes('new THREE.PointLight'), 'Void H transit must not add PointLights');
+assert.ok(voidHTransitBody.includes('VOID_H_OSM'), 'Void H transit must anchor halte to the OSM road network');
+assert.ok(voidHTransitBody.includes('findRoadPoint'), 'Void H transit missing the road anchor helper');
+assert.ok(voidHTransitBody.includes('const halteLabels = [];'), 'Void H transit must collect halte labels');
+assert.ok(voidHTransitBody.includes('halteLabels.push({'), 'Void H transit must emit one label per halte');
+assert.ok(
+  voidHTransitBody.includes('position: [hx, 6.4, hz]'),
+  'Void H halte labels must float above the canopy'
+);
+assert.ok(
+  voidHTransitBody.includes('shortName: spec.shortName,'),
+  'Void H halte labels must forward the short name'
+);
+assert.ok(voidHTransitBody.includes("kind: 'halte'"), 'Void H halte labels must carry the halte kind');
+assert.ok(
+  voidHTransitBody.includes('this.voidHTransitLabels = ['),
+  'Void H transit must publish its label anchors'
+);
+
+assert.ok(voidHTransitBody.includes('VOID_H_PR_PLOT'), 'Void H transit must read the shared P&R plot');
+assert.ok(
+  voidHTransitBody.includes('const prCenterX = VOID_H_PR_PLOT.x;'),
+  'Void H P&R centre must come from the shared plot'
+);
+assert.ok(
+  voidHTransitBody.includes('VOID_H_PR_DRIVEWAY.w') && voidHTransitBody.includes('VOID_H_PR_DRIVEWAY.d'),
+  'Void H P&R driveway must use the shared access strip so infill and transit stay aligned'
+);
+assert.ok(
+  voidHTransitBody.includes("name: 'Park and Ride Pasar Minggu'"),
+  'Void H P&R label missing the full name'
+);
+assert.ok(voidHTransitBody.includes("shortName: 'P&R Pasar Minggu'"), 'Void H P&R label missing the short name');
+assert.ok(voidHTransitBody.includes("kind: 'park'"), 'Void H P&R label must use the P badge');
+assert.ok(
+  voidHTransitBody.includes('position: [prCenterX, 7.6, prCenterZ]'),
+  'Void H P&R label must clear the shelter roof'
+);
+assert.ok(voidHTransitBody.includes('const bayCount = 8;'), 'Void H P&R must keep eight parking bays');
+assert.ok(voidHTransitBody.includes('parkingBays: bayCount'), 'Void H transit stats missing the bay count');
+
+const voidHHalteSpecs = [
+  ['Halte Stasiun Pasar Minggu', 'Stasiun Pasar Minggu', 'Jalan Raya Ragunan', [265.7, 1281.9], 1, [301.6, 1265.0]],
+  ['Halte TMP Kalibata', 'TMP Kalibata', 'Jalan Poltangan Raya', [366.0, 1460.2], -1, [330.7, 1461.1]],
+  ['Halte Taman Margasatwa Ragunan', 'Taman Margasatwa Ragunan', 'Jalan Margasatwa', [-98.1, 1640.3], -1, [-43.0, 1655.0]],
+  ['Halte Stasiun Lenteng Agung', 'Stasiun Lenteng Agung', 'Jalan Lenteng Agung Raya', [168.3, 1989.7], -1, [144.6, 1985.8]],
+  ['Halte Universitas Pancasila', 'Universitas Pancasila', 'Jalan Lenteng Agung Raya', [157.7, 2058.7], -1, [114.9, 2059.5]],
+  ['Halte Setu Babakan', 'Setu Babakan', 'Jalan Mohamad Kafi II', [29.5, 2007.1], -1, [12.0, 2048.2]]
+];
+
+voidHHalteSpecs.forEach(([name, shortName, road, near, side]) => {
+  assert.ok(voidHTransitBody.includes(`name: '${name}'`), `Void H transit missing ${name}`);
+  assert.ok(voidHTransitBody.includes(`shortName: '${shortName}'`), `Void H halte label missing the ${shortName} short name`);
+  assert.ok(voidHTransitBody.includes(`road: '${road}'`), `Void H halte missing the ${road} anchor`);
+  assert.ok(
+    voidHTransitBody.includes(`near: [${near[0]}, ${near[1]}], side: ${side}`),
+    `Void H halte ${shortName} drifted from its audited shoulder point`
+  );
+});
+
+[
+  'voidh-transit-concrete',
+  'voidh-transit-steel',
+  'voidh-transit-sign',
+  'voidh-transit-tree-trunks',
+  'voidh-transit-tree-foliage'
+].forEach((name) => {
+  assert.ok(voidHTransitBody.includes(name), `Void H transit missing the ${name} mesh`);
+});
+
+assert.ok(voidHTransitBody.includes('registerNightMaterial'), 'Void H transit sign must register for night');
+assert.ok(voidHTransitBody.includes('emissive: 0xfff4d6'), 'Void H transit sign night emissive drifted');
+assert.ok(voidHTransitBody.includes('nightIntensity: 0.55'), 'Void H transit sign night intensity drifted');
+assert.ok(voidHTransitBody.includes('voidHTransitStats'), 'Void H transit must expose runtime stats');
+assert.ok(voidHTransitBody.includes('drawCalls: 5'), 'Void H transit should add five draw calls');
+
+assert.ok(
+  mainJsContent.includes('...this.city.voidHTransitLabels'),
+  'main.js must forward the Void H transit labels to UIManager'
+);
+
+const voidHFindRoadPoint = (roadName, near) => {
+  let best = null;
+  VOID_H_OSM.roads.forEach((road) => {
+    if (road.name !== roadName) return;
+    for (let i = 0; i < road.points.length - 1; i++) {
+      const a = road.points[i];
+      const b = road.points[i + 1];
+      const dx = b[0] - a[0];
+      const dz = b[1] - a[1];
+      const len2 = dx * dx + dz * dz;
+      let t = len2 ? ((near[0] - a[0]) * dx + (near[1] - a[1]) * dz) / len2 : 0;
+      t = Math.max(0, Math.min(1, t));
+      const x = a[0] + dx * t;
+      const z = a[1] + dz * t;
+      const d = Math.hypot(near[0] - x, near[1] - z);
+      if (!best || d < best.d) best = { x, z, d, angle: Math.atan2(dx, dz), width: road.width };
+    }
+  });
+  return best;
+};
+
+const voidHAnchorPads = [
+  [276, 327, 1236, 1294],
+  [299, 362, 1434, 1489],
+  [-89, 3, 1620, 1690],
+  [122, 167, 1960, 2011],
+  [85, 144, 2034, 2085],
+  [-23, 47, 2021, 2076]
+];
+const voidHRectClearance = (rect, x, z) =>
+  Math.hypot(Math.max(rect[0] - x, 0, x - rect[1]), Math.max(rect[2] - z, 0, z - rect[3]));
+const voidHKissRide = [284.6, 318.6, 1294.5, 1303.5];
+const voidHWaterBodyAt = (x, z) =>
+  VOID_H_OSM.waterBodies.some((body) => {
+    const pts = body.points;
+    let inside = false;
+    for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+      const xi = pts[i][0];
+      const zi = pts[i][1];
+      const xj = pts[j][0];
+      const zj = pts[j][1];
+      if ((zi > z) !== (zj > z) && x < ((xj - xi) * (z - zi)) / (zj - zi) + xi) inside = !inside;
+    }
+    return inside;
+  });
+
+const voidHHalteCenters = voidHHalteSpecs.map(([name, shortName, road, near, side, anchor]) => {
+  const snapped = voidHFindRoadPoint(road, near);
+  assert.ok(snapped, `Void H halte ${shortName} lost its ${road} anchor`);
+  assert.ok(snapped.d <= 1, `Void H halte ${shortName} near point must sit on ${road}`);
+  const nx = Math.cos(snapped.angle);
+  const nz = -Math.sin(snapped.angle);
+  const ux = Math.sin(snapped.angle);
+  const uz = Math.cos(snapped.angle);
+  const offset = snapped.width * 0.5 - 0.2;
+  const hx = snapped.x + nx * offset * side;
+  const hz = snapped.z + nz * offset * side;
+
+  let minPad = Infinity;
+  let minWater = Infinity;
+  let minKiss = Infinity;
+  [-6, 0, 6].forEach((lz) => {
+    [-1.3, 0, 1.3].forEach((lx) => {
+      const cx = hx + lx * nx + lz * ux;
+      const cz = hz + lx * nz + lz * uz;
+      voidHAnchorPads.forEach((pad) => {
+        minPad = Math.min(minPad, voidHRectClearance(pad, cx, cz));
+      });
+      VOID_H_OSM.waterways.forEach((waterway) => {
+        for (let i = 0; i < waterway.points.length - 1; i++) {
+          const edge = distanceToSegment([cx, cz], waterway.points[i], waterway.points[i + 1]) -
+            waterway.width * 0.5;
+          minWater = Math.min(minWater, edge);
+        }
+      });
+      minKiss = Math.min(minKiss, voidHRectClearance(voidHKissRide, cx, cz));
+    });
+  });
+
+  assert.ok(minPad >= 1.5, `Void H halte ${shortName} peron must clear all anchor pads (min ${minPad.toFixed(2)})`);
+  assert.ok(minWater >= 0, `Void H halte ${shortName} peron must stay off the waterways (min ${minWater.toFixed(2)})`);
+  assert.ok(minKiss >= 1.5, `Void H halte ${shortName} peron must clear the station kiss-and-ride`);
+  assert.ok(!voidHWaterBodyAt(hx, hz), `Void H halte ${shortName} must not sit inside a situ/waduk`);
+  assert.ok(
+    Math.hypot(hx - anchor[0], hz - anchor[1]) <= 65,
+    `Void H halte ${shortName} drifted too far from its anchor`
+  );
+  assert.ok(
+    hx >= VOID_H_OSM.meta.clipBox.minX &&
+      hx <= VOID_H_OSM.meta.clipBox.maxX &&
+      hz >= VOID_H_OSM.meta.clipBox.minZ &&
+      hz <= VOID_H_OSM.meta.clipBox.maxZ,
+    `Void H halte ${shortName} fell outside the OSM clip box`
+  );
+  return [hx, hz];
+});
+
+for (let i = 0; i < voidHHalteCenters.length; i++) {
+  for (let j = i + 1; j < voidHHalteCenters.length; j++) {
+    const gap = Math.hypot(
+      voidHHalteCenters[i][0] - voidHHalteCenters[j][0],
+      voidHHalteCenters[i][1] - voidHHalteCenters[j][1]
+    );
+    assert.ok(gap >= 25, `Void H transit haltes ${i} and ${j} are only ${gap.toFixed(1)} units apart`);
+  }
+}
+
+const voidHPrRect = [256 - 15, 256 + 15, 1256 - 9, 1256 + 9];
+const voidHPrDriveRect = [257 - 6, 257 + 6, 1271 - 5, 1271 + 5];
+assert.ok(
+  voidHPrDriveRect[2] - voidHPrRect[3] <= 1.5,
+  'Void H P&R driveway must meet the plaza edge'
+);
+let voidHDrivewayRoadEdge = Infinity;
+[
+  [voidHPrDriveRect[0], voidHPrDriveRect[2]],
+  [voidHPrDriveRect[1], voidHPrDriveRect[2]],
+  [voidHPrDriveRect[0], voidHPrDriveRect[3]],
+  [voidHPrDriveRect[1], voidHPrDriveRect[3]]
+].forEach(([cx, cz]) => {
+  VOID_H_OSM.roads.forEach((road) => {
+    for (let i = 0; i < road.points.length - 1; i++) {
+      voidHDrivewayRoadEdge = Math.min(
+        voidHDrivewayRoadEdge,
+        distanceToSegment([cx, cz], road.points[i], road.points[i + 1]) - road.width * 0.5
+      );
+    }
+  });
+});
+assert.ok(
+  voidHDrivewayRoadEdge <= 1.5,
+  `Void H P&R driveway must reach a road edge (gap ${voidHDrivewayRoadEdge.toFixed(2)})`
+);
+[
+  [voidHPrDriveRect[0], voidHPrDriveRect[2]],
+  [voidHPrDriveRect[1], voidHPrDriveRect[2]],
+  [voidHPrDriveRect[0], voidHPrDriveRect[3]],
+  [voidHPrDriveRect[1], voidHPrDriveRect[3]]
+].forEach(([cx, cz]) => {
+  voidHAnchorPads.forEach((pad) => {
+    assert.ok(
+      voidHRectClearance(pad, cx, cz) >= 0.5,
+      `Void H P&R driveway corner ${cx}/${cz} crowds an anchor pad`
+    );
+  });
+});
+
+console.log(`✅ All 117 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
