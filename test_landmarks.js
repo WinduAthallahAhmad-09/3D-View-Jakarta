@@ -5000,7 +5000,148 @@ assert.ok(citySceneContent.includes('getVoidHRoadSegments() {'), 'CityScene.js m
 assert.ok(citySceneContent.includes('isNearVoidHRoad(x, z, clearance = 12) {'), 'CityScene.js missing the Void H road clearance helper');
 assert.ok(citySceneContent.includes('isInsideVoidHWaterBody(x, z, margin = 6)'), 'CityScene.js missing the Void H situ polygon mask');
 
-console.log(`✅ All 117 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 78: Void H Tahap 3 — infill urban fabric Pasar Minggu–Kalibata–Ragunan–Lenteng Agung
+assert.ok(citySceneContent.includes('buildVoidHInfill()'), 'CityScene.js missing buildVoidHInfill');
+
+const voidHInfillCall = citySceneContent.indexOf('this.buildVoidHInfill();');
+assert.ok(voidHInfillCall > 0, 'CityScene.js does not call buildVoidHInfill');
+assert.ok(
+  voidHInfillCall > citySceneContent.indexOf('this.buildVoidHPasarMinggu();'),
+  'buildVoidHInfill must run after buildVoidHPasarMinggu so the OSM network exists'
+);
+assert.ok(
+  voidHInfillCall < citySceneContent.indexOf('this.buildVoidBInfillAndIndustry();'),
+  'buildVoidHInfill must run before buildVoidBInfillAndIndustry'
+);
+
+const voidHInfillBody = sliceCityBuilder('  buildVoidHInfill() {');
+assert.ok(!voidHInfillBody.includes('new THREE.PointLight'), 'Void H infill must not add PointLights');
+assert.ok(!voidHInfillBody.includes('nightMaterials.push'), 'Void H infill must register night windows through the shared helper');
+assert.ok(voidHInfillBody.includes('addInfillNightWindows'), 'Void H infill must reuse the shared night window helper');
+assert.ok(voidHInfillBody.includes('voidh-night-windows'), 'Void H infill missing the night window mesh');
+assert.ok(voidHInfillBody.includes('VOID_H_OSM'), 'Void H infill must mask against the OSM roads, waterways and situ');
+assert.ok(voidHInfillBody.includes('isNearVoidHRoad'), 'Void H infill missing the road corridor mask');
+assert.ok(voidHInfillBody.includes('isNearVoidHWater'), 'Void H infill missing the waterway mask');
+assert.ok(voidHInfillBody.includes('width * 0.5 + 4'), 'Void H water mask must add a four-unit bank buffer');
+assert.ok(voidHInfillBody.includes('isInsideVoidHWaterBody'), 'Void H infill must keep buildings out of the situ polygons');
+assert.ok(voidHInfillBody.includes('VOID_H_ANCHOR_SITES'), 'Void H infill must exclude the six anchor pads');
+assert.ok(voidHInfillBody.includes('VOID_H_PR_PLOT'), 'Void H infill must reserve the shared P&R plot');
+assert.ok(voidHInfillBody.includes('VOID_H_PR_DRIVEWAY'), 'Void H infill must reserve the P&R driveway');
+assert.ok(voidHInfillBody.includes('transitReservations'), 'Void H infill missing the transit reservation list');
+assert.ok(voidHInfillBody.includes('insideTransitReservation(x, z, radius)'), 'Void H infill must carve the P&R plot out of the building masks');
+assert.ok(voidHInfillBody.includes('voidHInfillStats'), 'Void H infill must expose runtime stats');
+assert.ok(voidHInfillBody.includes('drawCalls: 6'), 'Void H infill should add six instanced draw calls');
+assert.ok(
+  voidHInfillBody.includes('INFILL_ROOF_EAVE') && voidHInfillBody.includes('INFILL_ROOF_TOLERANCE'),
+  'Void H infill must reuse the shared eave trim and roof occupancy constants'
+);
+assert.ok(
+  voidHInfillBody.includes('ignoreWays') &&
+    voidHInfillBody.includes('placeShophouseRow(roadWidth, chain.points, chain.ways)'),
+  'Void H shophouse rows must ignore their own road corridor'
+);
+
+[
+  'voidh-infill-houses',
+  'voidh-infill-shophouses',
+  'voidh-infill-house-roofs',
+  'voidh-infill-warehouses',
+  'voidh-infill-warehouse-roofs'
+].forEach((name) => {
+  assert.ok(voidHInfillBody.includes(name), `Void H infill missing the ${name} instanced mesh`);
+});
+
+[
+  'Jalan Pasar Minggu Raya',
+  'Jalan Lenteng Agung Raya',
+  'Jalan Raya Ragunan',
+  'Jalan Warung Jati Barat',
+  'Jalan Mohamad Kafi II',
+  'Jalan Jagakarsa',
+  'Jalan Buncit Raya',
+  'Jalan RA. Fadillah',
+  'Jalan Kebagusan Raya',
+  'Jalan Tanjung Barat'
+].forEach((name) => {
+  assert.ok(voidHInfillBody.includes(name), `Void H infill missing the ${name} shophouse corridor`);
+});
+
+[
+  'R1 Pasar Minggu barat',
+  'R2 Pasar Minggu timur',
+  'R3 Pejaten',
+  'R4 Cilandak KKO utara',
+  'R5 Cilandak KKO selatan',
+  'R6 Kalibata',
+  'R7 Ragunan barat',
+  'R8 Ragunan selatan',
+  'R9 Jagakarsa',
+  'R10 Srengseng Sawah',
+  'R11 Lenteng Agung timur',
+  'R12 Lenteng Agung barat'
+].forEach((zone) => {
+  assert.ok(voidHInfillBody.includes(zone), `Void H infill missing the ${zone} residential zone`);
+});
+
+['W1 Kalibata timur', 'W2 Pasar Minggu pasar'].forEach((zone) => {
+  assert.ok(voidHInfillBody.includes(zone), `Void H infill missing the ${zone} warehouse cluster`);
+});
+
+assert.ok(citySceneContent.includes('const VOID_H_PR_PLOT ='), 'Void H P&R plot must live at module scope so infill and transit share it');
+assert.ok(citySceneContent.includes('const VOID_H_PR_DRIVEWAY ='), 'Void H P&R driveway must live at module scope');
+
+const voidHPrPlotMatch = citySceneContent.match(/const VOID_H_PR_PLOT = \{([^}]*)\};/);
+assert.ok(voidHPrPlotMatch, 'Void H P&R plot constant unreadable');
+assert.ok(
+  voidHPrPlotMatch[1].includes('x: 256') &&
+    voidHPrPlotMatch[1].includes('z: 1256') &&
+    voidHPrPlotMatch[1].includes('w: 30') &&
+    voidHPrPlotMatch[1].includes('d: 18'),
+  'Void H P&R plot drifted from the audited Stasiun Pasar Minggu parcel'
+);
+const voidHPrDrivewayMatch = citySceneContent.match(/const VOID_H_PR_DRIVEWAY = \{([^}]*)\};/);
+assert.ok(voidHPrDrivewayMatch, 'Void H P&R driveway constant unreadable');
+assert.ok(
+  voidHPrDrivewayMatch[1].includes('x: 257') &&
+    voidHPrDrivewayMatch[1].includes('z: 1271') &&
+    voidHPrDrivewayMatch[1].includes('w: 12') &&
+    voidHPrDrivewayMatch[1].includes('d: 10'),
+  'Void H P&R driveway drifted from the audited Jalan Raya Ragunan access'
+);
+
+const voidHRoadClearance = (x, z) => {
+  let best = Infinity;
+  VOID_H_OSM.roads.forEach((road) => {
+    for (let i = 0; i < road.points.length - 1; i++) {
+      best = Math.min(best, distanceToSegment([x, z], road.points[i], road.points[i + 1]) - road.width * 0.5);
+    }
+  });
+  return best;
+};
+[
+  [256 - 15, 1256 - 9],
+  [256 + 15, 1256 - 9],
+  [256 - 15, 1256 + 9],
+  [256 + 15, 1256 + 9],
+  [256, 1256]
+].forEach(([x, z]) => {
+  assert.ok(voidHRoadClearance(x, z) > 0, `Void H P&R plot point ${x}/${z} overlaps the OSM roadway`);
+});
+[
+  [276, 327, 1236, 1294],
+  [299, 362, 1434, 1489],
+  [-89, 3, 1620, 1690],
+  [122, 167, 1960, 2011],
+  [85, 144, 2034, 2085],
+  [-23, 47, 2021, 2076]
+].forEach(([x1, x2, z1, z2]) => {
+  assert.ok(
+    256 + 15 <= x1 || 256 - 15 >= x2 || 1256 + 9 <= z1 || 1256 - 9 >= z2,
+    `Void H P&R plot intersects the anchor pad [${x1}, ${x2}, ${z1}, ${z2}]`
+  );
+});
+
+console.log(`✅ All 117 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
