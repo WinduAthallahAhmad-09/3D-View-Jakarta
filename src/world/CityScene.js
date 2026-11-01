@@ -8484,7 +8484,13 @@ export class CityScene {
     const medianGeos = [];
     const arrowGeos = [];
     const junctionCrosswalkGeos = [];
+    const junctionLampGeos = [];
     const junctionZebraMat = new THREE.MeshStandardMaterial({ color: 0xe5e7eb, roughness: 0.85 });
+    this.registerNightMaterial(junctionZebraMat, { emissive: 0xe5e7eb, nightIntensity: 0.45 });
+    const junctionLampMat = this.registerNightMaterial(
+      new THREE.MeshStandardMaterial({ color: 0xfde68a, roughness: 0.55 }),
+      { emissive: 0xfde68a, nightIntensity: 0.6 }
+    );
 
     // Marka duduk 0.008 di atas aspal (0.25) tapi tetap di bawah zebra (0.27).
     const DASH_LEN = 3.5;
@@ -8497,6 +8503,7 @@ export class CityScene {
     let medians = 0;
     let junctionGaps = 0;
     let junctionCrosswalks = 0;
+    let junctionLamps = 0;
     let arrows = 0;
 
     const makeBox = (w, h, d, x, y, z, rotY = 0) => {
@@ -8579,6 +8586,15 @@ export class CityScene {
           );
         }
         junctionCrosswalks++;
+        const px = Math.cos(arm.angle);
+        const pz = -Math.sin(arm.angle);
+        [-1, 1].forEach((side) => {
+          const offset = (arm.width * 0.5 - 1) * side;
+          junctionLampGeos.push(
+            makeBox(0.16, 0.95, 0.16, cx + px * offset, 0.72, cz + pz * offset, arm.angle)
+          );
+        });
+        junctionLamps += 2;
       });
     });
 
@@ -9002,6 +9018,7 @@ export class CityScene {
     mergeAndAdd(medianGeos, medianMat, 'voidi-road-medians', true, false);
     mergeAndAdd(arrowGeos, markingMat, 'voidi-road-arrows', false, false);
     mergeAndAdd(junctionCrosswalkGeos, junctionZebraMat, 'voidi-road-junction-zebras', false, false);
+    mergeAndAdd(junctionLampGeos, junctionLampMat, 'voidi-junction-lamps', false, false);
 
     this.voidIMarkingStats = {
       roadSegments,
@@ -9010,8 +9027,9 @@ export class CityScene {
       medians,
       junctionGaps,
       junctionCrosswalks,
+      junctionLamps,
       arrows,
-      drawCalls: 4
+      drawCalls: 5
     };
 
     this.voidIOsmStats = {
