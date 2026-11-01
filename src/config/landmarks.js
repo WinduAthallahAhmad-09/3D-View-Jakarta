@@ -2770,6 +2770,75 @@ export const JAKARTA_LANDMARKS = [
       "Stasiun layang ini berada di atas Jl. RS Fatmawati dan memiliki dua peron sisi dengan pintu kaca di sepanjang tepi peron.",
       "Nama Haji Nawi diambil dari kawasan permukiman di sisi timur stasiun yang dikenal dengan pasar dan pertokoannya."
     ]
+  },
+  // =====================================================
+  // ZONA 13: JAKARTA UTARA TENGAH (SUNTER, ANCOL & KOJA)
+  // =====================================================
+  {
+    id: "stasiun-ancol",
+    name: "Stasiun Ancol",
+    shortName: "Stasiun Ancol",
+    category: "Stasiun KRL & Transit Pesisir",
+    tagline: "Stasiun KRL di gerbang Taman Impian Jaya Ancol",
+    height: "12 meter (Kanopi Peron)",
+    year: "1992",
+    architect: "PT Kereta Api Indonesia (Persero)",
+    location: "Jl. Baan II, Ancol, Pademangan, Jakarta Utara",
+    coordinates: { lat: -6.1279, lng: 106.8380 },
+    position: [211.0, 0, -951.0],
+    labelHeight: 34,
+    cameraPosition: [211, 72, -831],
+    cameraTarget: [211, 10, -951],
+    description: "Stasiun KRL di tepi kawasan rekreasi Ancol yang melayani jalur Tanjung Priok–Jakarta Kota. Menampilkan dua peron sisi sejajar empat jalur rel, kanopi baja melengkung, dinding kaca, papan nama stasiun, jalur taktil kuning, serta deretan pohon peneduh di sepanjang emplasemen.",
+    facts: [
+      "Stasiun Ancol berada di jalur KRL Tanjung Priok–Jakarta Kota dan menjadi akses kereta terdekat ke kawasan rekreasi Ancol.",
+      "Stasiun ini melayani warga Pademangan dan Ancol, dengan jarak jalan kaki pendek ke gerbang Taman Impian Jaya Ancol.",
+      "Kawasan Ancol dikembangkan sebagai taman rekreasi terpadu sejak 1960-an di atas lahan reklamasi pantai utara Jakarta."
+    ]
+  },
+  {
+    id: "rusunawa-sunter",
+    name: "Rusunawa Sunter Jaya",
+    shortName: "Rusunawa Sunter",
+    category: "Hunian Vertikal & Permukiman",
+    tagline: "Rumah susun sewa di koridor industri Sunter",
+    height: "34 meter (Blok Hunian Enam Lantai)",
+    year: "2005",
+    architect: "Dinas Perumahan Rakyat DKI Jakarta",
+    location: "Jl. Sunter Jaya, Sunter Jaya, Tanjung Priok, Jakarta Utara",
+    coordinates: { lat: -6.1420, lng: 106.8690 },
+    position: [648.0, 0, -751.0],
+    labelHeight: 52,
+    cameraPosition: [648, 105, -621],
+    cameraTarget: [648, 20, -751],
+    description: "Kompleks rumah susun sewa di Sunter Jaya yang menampung warga relokasi bantaran kali dan pekerja kawasan industri. Menampilkan tiga blok hunian berjenjang dengan pita jendela, tangga akses, plaza bersama, area parkir, taman bermain, serta deretan pohon peneduh di dalam tapak.",
+    facts: [
+      "Rusunawa Sunter Jaya dikelola Pemerintah Provinsi DKI Jakarta untuk relokasi warga bantaran kali dan pekerja industri Sunter.",
+      "Kawasan Sunter dikembangkan sejak 1970-an sebagai pusat industri ringan sekaligus perumahan terencana di Jakarta Utara.",
+      "Kali Sunter mengalir melewati kawasan ini menuju Kanal Banjir Timur sebelum bermuara di Teluk Jakarta."
+    ]
+  },
+  {
+    id: "rsud-koja",
+    name: "RSUD Koja",
+    shortName: "RSUD Koja",
+    category: "Fasilitas Kesehatan & Layanan Publik",
+    tagline: "Rumah sakit rujukan warga Jakarta Utara di koridor Koja",
+    height: "36 meter (Menara Rawat Inap)",
+    year: "1998",
+    architect: "Dinas Kesehatan Provinsi DKI Jakarta",
+    location: "Jl. Deli No. 4, Koja, Jakarta Utara",
+    coordinates: { lat: -6.1285, lng: 106.9006 },
+    position: [1094.0, 0, -942.0],
+    labelHeight: 62,
+    cameraPosition: [1094, 130, -806],
+    cameraTarget: [1094, 24, -942],
+    description: "Rumah sakit umum daerah milik Pemerintah Provinsi DKI Jakarta yang menjadi rujukan warga Jakarta Utara. Menampilkan menara rawat inap, sayap gawat darurat dengan kanopi ambulans, helipad di atap, jalan masuk kendaraan, papan nama rumah sakit, dan deretan pohon peneduh di dalam tapak.",
+    facts: [
+      "RSUD Koja adalah rumah sakit milik Pemprov DKI yang melayani rujukan warga Jakarta Utara dan pernah ditetapkan sebagai RS rujukan COVID-19.",
+      "Lokasinya di Jl. Deli, Koja, dekat kawasan industri dan pelabuhan Tanjung Priok.",
+      "Fasilitasnya mencakup gawat darurat 24 jam, rawat inap, dan helipad untuk evakuasi udara."
+    ]
   }
 ];
 

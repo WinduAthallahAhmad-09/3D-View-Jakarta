@@ -14424,7 +14424,10 @@ export class CityScene {
       "universitas-budi-luhur": () => LandmarkModels.createUniversitasBudiLuhur(),
       "pasar-ulujami": () => LandmarkModels.createPasarUlujami(),
       "gandaria-city": () => LandmarkModels.createGandariaCity(),
-      "stasiun-mrt-haji-nawi": () => LandmarkModels.createStasiunMrtHajiNawi()
+      "stasiun-mrt-haji-nawi": () => LandmarkModels.createStasiunMrtHajiNawi(),
+      "stasiun-ancol": () => LandmarkModels.createStasiunAncol(),
+      "rusunawa-sunter": () => LandmarkModels.createRusunawaSunter(),
+      "rsud-koja": () => LandmarkModels.createRSUDKoja()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {
