@@ -9278,6 +9278,8 @@ export class CityScene {
     const glassGeos = [];
     const pavingGeos = [];
     const walkwayGeos = [];
+    const crosswalkGeos = [];
+    const bollardGeos = [];
     const halteLabels = [];
 
     const makeBox = (w, h, d, x, y, z, rotY = 0, target = concreteGeos) => {
@@ -9394,7 +9396,36 @@ export class CityScene {
         }
         const run = Math.min(18, Math.max(8, anchorDist + 6));
         const walkAngle = Math.atan2(dirX, dirZ);
-        makeBox(2.4, 0.12, run, hx + (dirX * run) / 2, 0.36, hz + (dirZ * run) / 2, walkAngle, walkwayGeos);
+        const walkMidX = hx + (dirX * run) / 2;
+        const walkMidZ = hz + (dirZ * run) / 2;
+        makeBox(2.4, 0.12, run, walkMidX, 0.36, walkMidZ, walkAngle, walkwayGeos);
+
+        // Zebra melintang jalan di samping halte, lima garis putih.
+        const zebraX = road.x + sinA * 5;
+        const zebraZ = road.z + cosA * 5;
+        for (let i = 0; i < 5; i++) {
+          const shift = (i - 2) * 1.1;
+          makeBox(
+            road.width - 2.4,
+            0.02,
+            0.55,
+            zebraX + sinA * shift,
+            0.26,
+            zebraZ + cosA * shift,
+            road.angle,
+            crosswalkGeos
+          );
+        }
+
+        // Tiga bollard menyala di tepi walkway.
+        const lateralX = dirZ;
+        const lateralZ = -dirX;
+        [-run / 3, 0, run / 3].forEach((along) => {
+          const bx = walkMidX + dirX * along + lateralX * 1.35;
+          const bz = walkMidZ + dirZ * along + lateralZ * 1.35;
+          makeBox(0.18, 1.0, 0.18, bx, 0.86, bz, 0, bollardGeos);
+          makeBox(0.24, 0.18, 0.24, bx, 1.45, bz, 0, bollardGeos);
+        });
       }
 
       halteLabels.push({
@@ -9450,6 +9481,21 @@ export class CityScene {
       'voidi-transit-walkways',
       false
     );
+    addMerged(
+      crosswalkGeos,
+      new THREE.MeshStandardMaterial({ color: 0xe5e7eb, roughness: 0.85 }),
+      'voidi-transit-crosswalks',
+      false
+    );
+    addMerged(
+      bollardGeos,
+      this.registerNightMaterial(
+        new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.35, metalness: 0.3 }),
+        { emissive: 0xfde68a, nightIntensity: 0.6 }
+      ),
+      'voidi-transit-bollards',
+      false
+    );
 
     this.voidITransitLabels = [...halteLabels];
 
@@ -9457,7 +9503,9 @@ export class CityScene {
       halte: halteSpecs.map((spec) => spec.name),
       labels: this.voidITransitLabels.length,
       walkways: halteSpecs.length,
-      drawCalls: 6
+      crosswalks: halteSpecs.length,
+      bollards: halteSpecs.length * 3,
+      drawCalls: 8
     };
   }
 
