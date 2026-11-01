@@ -252,6 +252,7 @@ export class CityScene {
     this.voidFTransitLabels = [];
     this.voidGTransitLabels = [];
     this.voidHTransitLabels = [];
+    this.voidITransitLabels = [];
     this.pjuLampTransforms = [];
     this.mergedPjuLampTransforms = [];
     this.pjuLightPool = [];
@@ -303,6 +304,7 @@ export class CityScene {
     this.buildVoidHTransit();
     this.buildVoidIBintaro();
     this.buildVoidIInfill();
+    this.buildVoidITransit();
     this.buildVoidBInfillAndIndustry();
     this.buildVoidBTransit();
     this.buildEastJakartaInfrastructure();
@@ -9260,6 +9262,159 @@ export class CityScene {
       corridors: shophouseRoads.size,
       nightWindows,
       drawCalls: 6
+    };
+  }
+
+  /**
+   * Void I Tahap 4 — lima feeder halte di gerbang anchor
+   * Bintaro Jaya Xchange, Jurangmangu, Budi Luhur, Ulujami, dan Gandaria City.
+   * Stasiun MRT Haji Nawi tidak diberi halte karena dek MRT tidak dilalui
+   * jalan OSM; peron bus terdekat berjarak >100 unit dari tapak.
+   */
+  buildVoidITransit() {
+    const concreteGeos = [];
+    const steelGeos = [];
+    const signGeos = [];
+    const glassGeos = [];
+    const pavingGeos = [];
+    const halteLabels = [];
+
+    const makeBox = (w, h, d, x, y, z, rotY = 0, target = concreteGeos) => {
+      const geo = new THREE.BoxGeometry(w, h, d);
+      if (rotY !== 0) geo.rotateY(rotY);
+      geo.translate(x, y, z);
+      target.push(geo);
+    };
+
+    const addMerged = (geos, material, name, castShadow = false) => {
+      if (geos.length === 0) return;
+      const merged = BufferGeometryUtils.mergeGeometries(geos, false);
+      if (!merged) return;
+      const mesh = new THREE.Mesh(merged, material);
+      mesh.name = name;
+      mesh.castShadow = castShadow;
+      mesh.receiveShadow = true;
+      this.proceduralGroup.add(mesh);
+    };
+
+    const halteSpecs = [
+      { name: 'Halte Bintaro Jaya Xchange', shortName: 'Bintaro Jaya Xchange', road: 'Jalan Lingkar Bintaro Xchange', near: [-1350.6, 1283.7], side: -1 },
+      { name: 'Halte Stasiun Jurangmangu', shortName: 'Stasiun Jurangmangu', road: 'Jalan Tegal Rotan Raya', near: [-1345.5, 1316.1], side: 1 },
+      { name: 'Halte Universitas Budi Luhur', shortName: 'Universitas Budi Luhur', road: 'Jalan Ciledug Raya', near: [-1068.3, 586.9], side: -1 },
+      { name: 'Halte Pasar Ulujami', shortName: 'Pasar Ulujami', road: 'Jalan Ciledug Raya', near: [-814.7, 606.5], side: -1 },
+      { name: 'Halte Gandaria City', shortName: 'Gandaria City', road: "Jalan KH. Muhammad Syafi'i Hadzami", near: [-553.9, 718.9], side: -1 }
+    ];
+
+    const findRoadPoint = (roadName, near) => {
+      let best = null;
+      VOID_I_OSM.roads.forEach((road) => {
+        if (road.name !== roadName) return;
+        for (let i = 0; i < road.points.length - 1; i++) {
+          const a = road.points[i];
+          const b = road.points[i + 1];
+          const dx = b[0] - a[0];
+          const dz = b[1] - a[1];
+          const len2 = dx * dx + dz * dz;
+          let t = len2 ? ((near[0] - a[0]) * dx + (near[1] - a[1]) * dz) / len2 : 0;
+          t = Math.max(0, Math.min(1, t));
+          const x = a[0] + dx * t;
+          const z = a[1] + dz * t;
+          const d = Math.hypot(near[0] - x, near[1] - z);
+          if (!best || d < best.d) {
+            best = { x, z, d, angle: Math.atan2(dx, dz), width: road.width };
+          }
+        }
+      });
+      return best;
+    };
+
+    halteSpecs.forEach((spec) => {
+      const road = findRoadPoint(spec.road, spec.near);
+      if (!road) return;
+      const nx = Math.cos(road.angle);
+      const nz = -Math.sin(road.angle);
+      const offset = road.width * 0.5 - 0.2;
+      const hx = road.x + nx * offset * spec.side;
+      const hz = road.z + nz * offset * spec.side;
+
+      // Peron 12 m x 2,6 m sejajar jalan, kanopi baja di empat kolom.
+      makeBox(2.6, 0.7, 12, hx, 0.35, hz, road.angle);
+      const cosA = Math.cos(road.angle);
+      const sinA = Math.sin(road.angle);
+      [-5.2, 5.2].forEach((lz) => {
+        [-1.0, 1.0].forEach((lx) => {
+          const px = hx + lx * cosA + lz * sinA;
+          const pz = hz - lx * sinA + lz * cosA;
+          makeBox(0.16, 2.7, 0.16, px, 1.85, pz, 0, steelGeos);
+        });
+      });
+      makeBox(2.8, 0.22, 12.6, hx, 3.2, hz, road.angle);
+
+      // Dinding kaca di sisi darat, bangku beton, dan papan rute di ujung peron.
+      makeBox(0.08, 1.9, 10.8, hx + nx * 1.15 * spec.side, 1.85, hz + nz * 1.15 * spec.side, road.angle, glassGeos);
+      makeBox(0.7, 0.45, 3.6, hx - nx * 0.35, 0.925, hz - nz * 0.35, road.angle);
+      const postX = hx + 4.8 * sinA;
+      const postZ = hz + 4.8 * cosA;
+      makeBox(0.14, 2.5, 0.14, postX, 1.6, postZ, 0, steelGeos);
+      makeBox(0.12, 1.0, 2.4, postX, 2.35, postZ, road.angle, signGeos);
+
+      // Ubin taktil kuning di tepi peron sisi jalan.
+      makeBox(0.5, 0.06, 11.4, hx - nx * 1.05 * spec.side, 0.73, hz - nz * 1.05 * spec.side, road.angle, pavingGeos);
+
+      halteLabels.push({
+        name: spec.name,
+        shortName: spec.shortName,
+        kind: 'halte',
+        position: [hx, 6.4, hz]
+      });
+    });
+
+    addMerged(
+      concreteGeos,
+      new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.72 }),
+      'voidi-transit-concrete',
+      true
+    );
+    addMerged(
+      steelGeos,
+      new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.42, metalness: 0.55 }),
+      'voidi-transit-steel',
+      true
+    );
+    addMerged(
+      signGeos,
+      this.registerNightMaterial(
+        new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.45 }),
+        { emissive: 0xfff4d6, nightIntensity: 0.55 }
+      ),
+      'voidi-transit-sign',
+      false
+    );
+    addMerged(
+      glassGeos,
+      new THREE.MeshStandardMaterial({
+        color: 0x93c5fd,
+        roughness: 0.16,
+        metalness: 0.05,
+        transparent: true,
+        opacity: 0.38
+      }),
+      'voidi-transit-glass',
+      false
+    );
+    addMerged(
+      pavingGeos,
+      new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.8 }),
+      'voidi-transit-paving',
+      false
+    );
+
+    this.voidITransitLabels = [...halteLabels];
+
+    this.voidITransitStats = {
+      halte: halteSpecs.map((spec) => spec.name),
+      labels: this.voidITransitLabels.length,
+      drawCalls: 5
     };
   }
 

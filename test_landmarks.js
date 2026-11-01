@@ -5891,7 +5891,115 @@ assert.ok(
   'Void I infill must exclude the southern Void C building strip'
 );
 
-console.log(`✅ All 123 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 83: Void I Tahap 4 — lima feeder halte Bintaro–Gandaria Selatan
+assert.ok(citySceneContent.includes('buildVoidITransit()'), 'CityScene.js missing buildVoidITransit');
+const voidITransitCall = citySceneContent.indexOf('this.buildVoidITransit();');
+assert.ok(voidITransitCall > 0, 'CityScene.js does not call buildVoidITransit');
+assert.ok(
+  voidITransitCall > citySceneContent.indexOf('this.buildVoidIInfill();'),
+  'buildVoidITransit must run after buildVoidIInfill'
+);
+assert.ok(
+  voidITransitCall < citySceneContent.indexOf('this.buildVoidBInfillAndIndustry();'),
+  'buildVoidITransit must run before buildVoidBInfillAndIndustry'
+);
+assert.ok(
+  citySceneContent.includes('this.voidITransitLabels = [];'),
+  'CityScene constructor must initialise the Void I transit label list'
+);
+
+const voidITransitBody = sliceCityBuilder('  buildVoidITransit() {');
+assert.ok(!voidITransitBody.includes('new THREE.PointLight'), 'Void I transit must not add PointLights');
+assert.ok(voidITransitBody.includes('VOID_I_OSM'), 'Void I transit must anchor halte to the OSM road network');
+assert.ok(voidITransitBody.includes('findRoadPoint'), 'Void I transit missing the road anchor helper');
+assert.ok(voidITransitBody.includes('const halteLabels = [];'), 'Void I transit must collect halte labels');
+assert.ok(voidITransitBody.includes('halteLabels.push({'), 'Void I transit must emit one label per halte');
+assert.ok(
+  voidITransitBody.includes('position: [hx, 6.4, hz]'),
+  'Void I halte labels must float above the canopy'
+);
+assert.ok(voidITransitBody.includes("kind: 'halte'"), 'Void I halte labels must carry the halte kind');
+assert.ok(
+  voidITransitBody.includes('this.voidITransitLabels = ['),
+  'Void I transit must publish its label anchors'
+);
+assert.ok(voidITransitBody.includes('registerNightMaterial'), 'Void I transit sign must register for night');
+assert.ok(voidITransitBody.includes('emissive: 0xfff4d6'), 'Void I transit sign night emissive drifted');
+assert.ok(voidITransitBody.includes('nightIntensity: 0.55'), 'Void I transit sign night intensity drifted');
+assert.ok(voidITransitBody.includes('voidITransitStats'), 'Void I transit must expose runtime stats');
+assert.ok(voidITransitBody.includes('drawCalls: 5'), 'Void I transit should add five draw calls');
+assert.ok(voidITransitBody.includes('halte: halteSpecs.map'), 'Void I transit stats missing the halte list');
+
+const voidITransitSpecs = [
+  ['Halte Bintaro Jaya Xchange', 'Bintaro Jaya Xchange', 'Jalan Lingkar Bintaro Xchange', [-1350.6, 1283.7], -1],
+  ['Halte Stasiun Jurangmangu', 'Stasiun Jurangmangu', 'Jalan Tegal Rotan Raya', [-1345.5, 1316.1], 1],
+  ['Halte Universitas Budi Luhur', 'Universitas Budi Luhur', 'Jalan Ciledug Raya', [-1068.3, 586.9], -1],
+  ['Halte Pasar Ulujami', 'Pasar Ulujami', 'Jalan Ciledug Raya', [-814.7, 606.5], -1],
+  ['Halte Gandaria City', 'Gandaria City', "Jalan KH. Muhammad Syafi'i Hadzami", [-553.9, 718.9], -1]
+];
+
+voidITransitSpecs.forEach(([name, shortName, road, near, side]) => {
+  assert.ok(voidITransitBody.includes(`name: '${name}'`), `Void I transit missing ${name}`);
+  assert.ok(voidITransitBody.includes(`shortName: '${shortName}'`), `Void I halte label missing the ${shortName} short name`);
+  assert.ok(voidITransitBody.includes(road), `Void I halte missing the ${road} anchor`);
+  assert.ok(
+    voidITransitBody.includes(`near: [${near[0]}, ${near[1]}], side: ${side}`),
+    `Void I halte ${shortName} drifted from its audited shoulder point`
+  );
+});
+
+[
+  'voidi-transit-concrete',
+  'voidi-transit-steel',
+  'voidi-transit-sign',
+  'voidi-transit-glass',
+  'voidi-transit-paving'
+].forEach((name) => {
+  assert.ok(voidITransitBody.includes(name), `Void I transit missing the ${name} mesh`);
+});
+
+const voidIFindRoadPoint = (roadName, near) => {
+  let best = null;
+  VOID_I_OSM.roads.forEach((road) => {
+    if (road.name !== roadName) return;
+    for (let i = 0; i < road.points.length - 1; i++) {
+      const a = road.points[i];
+      const b = road.points[i + 1];
+      const dx = b[0] - a[0];
+      const dz = b[1] - a[1];
+      const len2 = dx * dx + dz * dz;
+      let t = len2 ? ((near[0] - a[0]) * dx + (near[1] - a[1]) * dz) / len2 : 0;
+      t = Math.max(0, Math.min(1, t));
+      const x = a[0] + dx * t;
+      const z = a[1] + dz * t;
+      const d = Math.hypot(near[0] - x, near[1] - z);
+      if (!best || d < best.d) best = { x, z, d, angle: Math.atan2(dx, dz), width: road.width };
+    }
+  });
+  return best;
+};
+
+voidITransitSpecs.forEach(([, shortName, road, near, side]) => {
+  const snapped = voidIFindRoadPoint(road, near);
+  assert.ok(snapped, `Void I halte ${shortName} lost its ${road} anchor`);
+  assert.ok(snapped.d <= 1, `Void I halte ${shortName} near point must sit on ${road}`);
+  const nx = Math.cos(snapped.angle);
+  const nz = -Math.sin(snapped.angle);
+  const offset = snapped.width * 0.5 - 0.2;
+  const hx = snapped.x + nx * offset * side;
+  const hz = snapped.z + nz * offset * side;
+  assert.ok(
+    hx > -1520 && hx < -240 && hz > 535 && hz < 1460,
+    `Void I halte ${shortName} centre must stay inside the Void I clip box`
+  );
+});
+
+assert.ok(
+  mainJsContent.includes('...this.city.voidITransitLabels'),
+  'main.js must forward the Void I transit labels to UIManager'
+);
+
+console.log(`✅ All 123 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
