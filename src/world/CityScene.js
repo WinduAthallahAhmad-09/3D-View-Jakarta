@@ -8463,6 +8463,11 @@ export class CityScene {
       metalness: 0.75,
       roughness: 0.45
     });
+    const markingMat = new THREE.MeshBasicMaterial({ color: 0x94a3b8 });
+    const medianMat = new THREE.MeshStandardMaterial({
+      color: 0x15803d,
+      roughness: 0.85
+    });
 
     const roadGeos = [];
     const sidewalkGeos = [];
@@ -8475,6 +8480,18 @@ export class CityScene {
     const railTrackGeos = [];
     const railSleeperGeos = [];
     const railCatenaryGeos = [];
+    const markingGeos = [];
+    const medianGeos = [];
+
+    // Marka duduk 0.008 di atas aspal (0.25) tapi tetap di bawah zebra (0.27).
+    const DASH_LEN = 3.5;
+    const DASH_STEP = 9;
+    const EDGE_INSET = 0.9;
+    const MEDIAN_WIDTH = 1.6;
+    let roadSegments = 0;
+    let dashedStrokes = 0;
+    let edgeStrokes = 0;
+    let medians = 0;
 
     const makeBox = (w, h, d, x, y, z, rotY = 0) => {
       const g = new THREE.BoxGeometry(w, h, d);
@@ -8485,7 +8502,7 @@ export class CityScene {
 
     const insideAnchorSite = (x, z) => this.isInsideVoidIAnchorSite(x, z);
 
-    const addRoadPolyline = (points, width, hasSidewalk = true) => {
+    const addRoadPolyline = (points, width, hasSidewalk = true, hasMedian = false) => {
       for (let i = 0; i < points.length - 1; i++) {
         const [x1, z1] = points[i];
         const [x2, z2] = points[i + 1];
@@ -8494,6 +8511,7 @@ export class CityScene {
         const angle = Math.atan2(x2 - x1, z2 - z1);
         const mx = (x1 + x2) * 0.5;
         const mz = (z1 + z2) * 0.5;
+        roadSegments++;
 
         roadGeos.push(makeBox(width, 0.25, len + 0.8, mx, 0.125, mz, angle));
         if (hasSidewalk) {
@@ -8503,6 +8521,40 @@ export class CityScene {
             const pz = -Math.sin(angle) * (width * 0.5 + sw * 0.5) * dir;
             sidewalkGeos.push(makeBox(sw, 0.4, len + 0.8, mx + px, 0.2, mz + pz, angle));
           });
+        }
+
+        if (width >= 11) {
+          [-1, 1].forEach((dir) => {
+            const px = Math.cos(angle) * (width * 0.5 - EDGE_INSET) * dir;
+            const pz = -Math.sin(angle) * (width * 0.5 - EDGE_INSET) * dir;
+            markingGeos.push(makeBox(0.2, 0.014, len + 0.3, mx + px, 0.258, mz + pz, angle));
+            edgeStrokes++;
+          });
+        }
+
+        if (hasMedian) {
+          if (len >= 12) {
+            medianGeos.push(makeBox(MEDIAN_WIDTH, 0.32, len - 3, mx, 0.41, mz, angle));
+            medians++;
+          }
+        } else if (len > DASH_LEN + 3.2) {
+          const count = Math.floor((len - 3.2 - DASH_LEN) / DASH_STEP) + 1;
+          for (let d = 0; d < count; d++) {
+            const along = 1.6 + DASH_LEN * 0.5 + d * DASH_STEP;
+            const t = along / len;
+            markingGeos.push(
+              makeBox(
+                0.28,
+                0.014,
+                DASH_LEN,
+                x1 + (x2 - x1) * t,
+                0.258,
+                z1 + (z2 - z1) * t,
+                angle
+              )
+            );
+            dashedStrokes++;
+          }
         }
       }
     };
@@ -8613,8 +8665,9 @@ export class CityScene {
       }
     };
 
-    VOID_I_OSM.roads.forEach((road) => {
-      addRoadPolyline(road.points, road.width, road.width >= 10);
+    VOID_I_OSM.roads.forEach((r) => {
+      const hasMedian = (r.type === 'motorway' || r.type === 'trunk') && r.width >= 16;
+      addRoadPolyline(r.points, r.width, r.width >= 10, hasMedian);
     });
 
     VOID_I_OSM.waterways.forEach((waterway) => {
@@ -8804,6 +8857,16 @@ export class CityScene {
     mergeAndAdd(railTrackGeos, steelRailMat, 'voidi-rail-tracks', false, false);
     mergeAndAdd(railSleeperGeos, sleeperMat, 'voidi-rail-sleepers', true, false);
     mergeAndAdd(railCatenaryGeos, catenaryMat, 'voidi-rail-catenary', false, false);
+    mergeAndAdd(markingGeos, markingMat, 'voidi-road-markings', false, false);
+    mergeAndAdd(medianGeos, medianMat, 'voidi-road-medians', true, false);
+
+    this.voidIMarkingStats = {
+      roadSegments,
+      dashedStrokes,
+      edgeStrokes,
+      medians,
+      drawCalls: 2
+    };
 
     this.voidIOsmStats = {
       roads: VOID_I_OSM.roads.length,

@@ -6126,7 +6126,67 @@ assert.ok(
 );
 assert.ok(!voidITransitBody.includes('new THREE.PointLight'), 'Void I crosswalk and bollards must not add PointLights');
 
-console.log(`✅ All 123 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 86: Void I Tahap 7 — marka tepi/tengah & median jalan OSM
+assert.ok(
+  voidINetworkMethod.includes('const markingGeos = [];'),
+  'Void I road network must collect lane marking geometry'
+);
+assert.ok(
+  voidINetworkMethod.includes('const medianGeos = [];'),
+  'Void I road network must collect median geometry'
+);
+assert.ok(
+  voidINetworkMethod.includes("'voidi-road-markings'"),
+  'Void I road network missing the merged marking mesh'
+);
+assert.ok(
+  voidINetworkMethod.includes("'voidi-road-medians'"),
+  'Void I road network missing the merged median mesh'
+);
+assert.ok(
+  voidINetworkMethod.includes("r.type === 'motorway' || r.type === 'trunk'"),
+  'Void I median must be limited to motorway and trunk roads'
+);
+assert.ok(
+  voidINetworkMethod.includes('r.width >= 16'),
+  'Void I median must require a wide carriageway'
+);
+assert.ok(
+  voidINetworkMethod.includes('const DASH_LEN = 3.5;') && voidINetworkMethod.includes('const DASH_STEP = 9;'),
+  'Void I dashed center line spacing drifted'
+);
+assert.ok(
+  voidINetworkMethod.includes('width * 0.5 - EDGE_INSET'),
+  'Void I edge line must inset from the carriageway edge'
+);
+assert.ok(
+  voidINetworkMethod.includes('new THREE.MeshBasicMaterial') &&
+  voidINetworkMethod.includes('0x94a3b8'),
+  'Void I lane markings must use the neutral basic material'
+);
+assert.ok(
+  voidINetworkMethod.includes('0x15803d'),
+  'Void I green median material drifted'
+);
+assert.ok(
+  voidINetworkMethod.includes('voidIMarkingStats') &&
+  voidINetworkMethod.includes('dashedStrokes') &&
+  voidINetworkMethod.includes('edgeStrokes') &&
+  voidINetworkMethod.includes('medians') &&
+  voidINetworkMethod.includes('drawCalls: 2'),
+  'Void I marking stats must report strokes, medians, and two draw calls'
+);
+assert.ok(
+  !voidINetworkMethod.includes('registerNightMaterial(markingMat') &&
+  !voidINetworkMethod.includes('registerNightMaterial(medianMat'),
+  'Void I lane markings must stay out of nightMaterials'
+);
+assert.ok(
+  !voidINetworkMethod.includes('new THREE.PointLight'),
+  'Void I lane markings must not add PointLights'
+);
+
+console.log(`✅ All 123 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
