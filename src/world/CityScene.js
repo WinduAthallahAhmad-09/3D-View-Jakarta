@@ -191,6 +191,27 @@ const VOID_J_RAIL_CONNECTOR = [
   [222.6, -615.2]
 ];
 
+// Tapak anchor lama yang beririsan bbox Void J; massa bawaan ketiganya
+// (stadion, Dufan, JIExpo) tidak boleh tertimpa infill.
+const VOID_J_NEIGHBOR_SITES = [
+  [440, 616, -1055, -935],   // jis-stadium x=528 z=-995
+  [80, 215, -1080, -930],    // ancol-dufan x=147 z=-999
+  [248, 372, -750, -638]     // jiexpo-kemayoran x=309.5 z=-691.4
+];
+
+// Massa bangun-tangan yang sudah ada di dalam bbox Void J: tiga baris Sunter
+// di x=505/655/795 dan strip ruko Kelapa Gading x=1110-1285.
+const VOID_J_LEGACY_INFILL_RECTS = [
+  [491, 519, -866, -638],
+  [641, 669, -866, -638],
+  [781, 809, -866, -638],
+  [1098, 1302, -775, -612]
+];
+
+// Lahan Park-and-Ride Ancol untuk Tahap 4, dijaga agar tidak ditempati infill.
+const VOID_J_PR_PLOT = [282, 318, -912, -888];
+const VOID_J_PR_DRIVEWAY = [296, 322, -888, -870];
+
 // Rect massa lama yang tidak boleh ditimpa infill Void I: blok Kebayoran/
 // Pondok Indah (inti Jakarta Selatan) dan strip selatan infill Void C.
 const VOID_I_LEGACY_INFILL_RECTS = [
@@ -323,6 +344,7 @@ export class CityScene {
     this.buildVoidIInfill();
     this.buildVoidITransit();
     this.buildVoidJNorthJakarta();
+    this.buildVoidJInfill();
     this.buildVoidBInfillAndIndustry();
     this.buildVoidBTransit();
     this.buildEastJakartaInfrastructure();
@@ -9527,6 +9549,442 @@ export class CityScene {
       railPoints: VOID_J_OSM.railways.reduce((sum, rail) => sum + rail.points.length, 0),
       connectors: 1,
       drawCalls: 13
+    };
+  }
+
+  /**
+   * Void J Tahap 3: Infill urban fabric Sunter-Ancol-Koja-Pademangan.
+   *
+   * 1. Rumah kampung kecil (7-9,5 x 8-10,5) di sembilan kantong padat
+   *    Pademangan, Ancol, Sunter, Warakas, Papanggo, Koja, dan Rawa Badak.
+   * 2. Ruko menyusur sepuluh koridor OSM, kedua sisi jalan, dengan jarak
+   *    muka 3,2 unit agar tidak menimpa trotoar 2,2-2,8 unit.
+   * 3. Gudang ringan di klaster Warakas, Pademangan, dan Sunter Jaya.
+   *
+   * Mask menutup jalan OSM (koridor ruko hanya dikecualikan untuk ruas
+   * bernama sama), waterway, badan air, rel KRL, tiga tapak anchor Void J,
+   * tiga anchor tetangga (JIS/Dufan/JIExpo), empat strip massa lama, serta
+   * lahan Park-and-Ride Tahap 4. Lima InstancedMesh plus jendela malam,
+   * tanpa PointLight baru.
+   */
+  buildVoidJInfill() {
+    const dummy = new THREE.Object3D();
+    const baseBoxGeo = new THREE.BoxGeometry(1, 1, 1);
+
+    const roofGeo = new THREE.BufferGeometry();
+    roofGeo.setAttribute(
+      'position',
+      new THREE.Float32BufferAttribute([
+        -0.5, 0, -0.5, 0.5, 0, -0.5, -0.5, 0, 0.5, 0.5, 0, 0.5,
+        0, 1, -0.5, 0, 1, 0.5
+      ], 3)
+    );
+    roofGeo.setIndex([
+      0, 2, 5, 0, 5, 4,
+      1, 4, 5, 1, 5, 3,
+      0, 4, 1,
+      2, 3, 5,
+      0, 1, 3, 0, 3, 2
+    ]);
+    roofGeo.computeVertexNormals();
+
+    const waterSegments = [];
+    VOID_J_OSM.waterways.forEach((waterway) => {
+      for (let i = 0; i < waterway.points.length - 1; i++) {
+        waterSegments.push({
+          ax: waterway.points[i][0],
+          az: waterway.points[i][1],
+          bx: waterway.points[i + 1][0],
+          bz: waterway.points[i + 1][1],
+          half: waterway.width * 0.5 + 4
+        });
+      }
+    });
+
+    const distanceToSegment = (x, z, s) => {
+      const dx = s.bx - s.ax;
+      const dz = s.bz - s.az;
+      const len2 = dx * dx + dz * dz;
+      let t = len2 ? ((x - s.ax) * dx + (z - s.az) * dz) / len2 : 0;
+      t = Math.max(0, Math.min(1, t));
+      return Math.hypot(x - (s.ax + t * dx), z - (s.az + t * dz));
+    };
+
+    const isNearVoidJWater = (x, z) => {
+      for (const s of waterSegments) {
+        if (distanceToSegment(x, z, s) < s.half + 2) return true;
+      }
+      return false;
+    };
+
+    const insideRects = (rects, x, z, margin) => rects.some(
+      ([minX, maxX, minZ, maxZ]) => x > minX - margin && x < maxX + margin &&
+        z > minZ - margin && z < maxZ + margin
+    );
+
+    const isBlocked = (x, z, radius, ignoreRoadNames) => {
+      if (ignoreRoadNames) {
+        for (const s of this.getVoidJRoadSegments()) {
+          const pad = ignoreRoadNames.has(s.way.name) ? s.halfWidth + radius - 2 : s.halfWidth + radius + 1;
+          if (distanceToSegment(x, z, s) < pad) return true;
+        }
+      } else if (this.isNearVoidJRoad(x, z, radius + 2)) {
+        return true;
+      }
+      if (isNearVoidJWater(x, z)) return true;
+      if (this.isInsideVoidJWaterBody(x, z, 6 + radius * 0.5)) return true;
+      if (this.isInsideVoidJAnchorSite(x, z)) return true;
+      if (insideRects(VOID_J_ANCHOR_SITES, x, z, radius * 0.5)) return true;
+      if (insideRects(VOID_J_NEIGHBOR_SITES, x, z, radius * 0.5)) return true;
+      if (insideRects(VOID_J_LEGACY_INFILL_RECTS, x, z, radius * 0.5)) return true;
+      if (insideRects([VOID_J_PR_PLOT, VOID_J_PR_DRIVEWAY], x, z, radius * 0.5)) return true;
+      if (this.isNearVoidJRail(x, z, 10 + radius)) return true;
+      return false;
+    };
+
+    const placed = [];
+    const isRoofOccupied = (x, z, rw, rd, rotY) => {
+      const reach = Math.hypot(rw, rd) * 0.5;
+      for (let i = 0; i < placed.length; i++) {
+        const p = placed[i];
+        if (Math.hypot(p.x - x, p.z - z) >= p.radius + reach) continue;
+        if (roofRectsOverlap(p, { x, z, rw, rd, rotY }, INFILL_ROOF_TOLERANCE)) return true;
+      }
+      return false;
+    };
+    const putRoof = (x, z, rw, rd, rotY = 0) => {
+      placed.push({ x, z, rw, rd, rotY, radius: Math.hypot(rw, rd) * 0.5 });
+    };
+
+    const residentialItems = [];
+    const shophouseItems = [];
+    const roofItems = [];
+    const warehouseItems = [];
+    const warehouseRoofItems = [];
+
+    const residentialColors = [
+      new THREE.Color(0xf8fafc),
+      new THREE.Color(0xe7e5e4),
+      new THREE.Color(0xfef3c7),
+      new THREE.Color(0xbae6fd),
+      new THREE.Color(0xfed7aa),
+      new THREE.Color(0xa7f3d0)
+    ];
+    const roofColors = [
+      new THREE.Color(0xb45309),
+      new THREE.Color(0x9a3412),
+      new THREE.Color(0x991b1b),
+      new THREE.Color(0x78350f)
+    ];
+    const shophouseColors = [
+      new THREE.Color(0xf1f5f9),
+      new THREE.Color(0xe2e8f0),
+      new THREE.Color(0xfed7aa),
+      new THREE.Color(0xbae6fd),
+      new THREE.Color(0x0f766e),
+      new THREE.Color(0x1e293b),
+      new THREE.Color(0xd97706)
+    ];
+    const warehouseColors = [
+      new THREE.Color(0x64748b),
+      new THREE.Color(0x94a3b8),
+      new THREE.Color(0x475569),
+      new THREE.Color(0x0e7490),
+      new THREE.Color(0xb45309)
+    ];
+    const warehouseRoofColors = [
+      new THREE.Color(0x334155),
+      new THREE.Color(0x475569),
+      new THREE.Color(0x64748b),
+      new THREE.Color(0x94a3b8)
+    ];
+
+    const buildRoadChains = (ways) => {
+      const keyOf = (p) => `${Math.round(p[0])}:${Math.round(p[1])}`;
+      const pending = ways.map((road) => ({
+        points: road.points.map((p) => [p[0], p[1]]),
+        ways: new Set([road])
+      }));
+      const chains = [];
+      while (pending.length > 0) {
+        const chain = pending.pop();
+        let extended = true;
+        while (extended) {
+          extended = false;
+          const head = chain.points[0];
+          const tail = chain.points[chain.points.length - 1];
+          for (let i = 0; i < pending.length; i++) {
+            const way = pending[i].points;
+            if (keyOf(way[way.length - 1]) === keyOf(tail)) {
+              chain.points.push(...way.slice(0, -1).reverse());
+            } else if (keyOf(way[0]) === keyOf(tail)) {
+              chain.points.push(...way.slice(1));
+            } else if (keyOf(way[0]) === keyOf(head)) {
+              chain.points.unshift(...way.slice(1).reverse());
+            } else if (keyOf(way[way.length - 1]) === keyOf(head)) {
+              chain.points.unshift(...way.slice(0, -1));
+            } else {
+              continue;
+            }
+            pending[i].ways.forEach((road) => chain.ways.add(road));
+            pending.splice(i, 1);
+            extended = true;
+            break;
+          }
+        }
+        chains.push(chain);
+      }
+      return chains;
+    };
+
+    const visitChain = (chain, spacing, visit) => {
+      let offset = spacing * 0.5;
+      for (let i = 0; i < chain.length - 1; i++) {
+        const a = chain[i];
+        const b = chain[i + 1];
+        const dx = b[0] - a[0];
+        const dz = b[1] - a[1];
+        const len = Math.hypot(dx, dz);
+        if (len < 0.01) continue;
+        let cursor = offset;
+        while (cursor <= len) {
+          const t = cursor / len;
+          visit(a[0] + dx * t, a[1] + dz * t, Math.atan2(dx, dz));
+          cursor += spacing;
+        }
+        offset = cursor - len;
+      }
+    };
+
+    const shophouseRoads = new Set([
+      'Jalan Yos Sudarso',
+      'Jalan Gunung Sahari Raya',
+      'Jalan Industri Raya',
+      'Jalan Griya Utama',
+      'Jalan Pesanggrahan Raya',
+      'Jalan Pangeran Jayakarta',
+      'Jalan Sunter Permai Raya',
+      'Jalan Bisma Raya',
+      'Jalan Artha Gading Boulevard',
+      'Jalan Mitra Sunter Boulevard'
+    ]);
+    const shophouseWaysByName = new Map();
+    VOID_J_OSM.roads.forEach((road) => {
+      if (!shophouseRoads.has(road.name)) return;
+      if (!shophouseWaysByName.has(road.name)) shophouseWaysByName.set(road.name, []);
+      shophouseWaysByName.get(road.name).push(road);
+    });
+
+    const placeShophouseRow = (roadWidth, chain, ignoreRoadNames) => {
+      visitChain(chain, 13, (bx, bz, angle) => {
+        const nx = Math.cos(angle);
+        const nz = -Math.sin(angle);
+        [-1, 1].forEach((side) => {
+          const hash = Math.abs(Math.sin(bx * 8.13 + bz * 4.71 + side * 3.7));
+          const w = 11 + (1 - hash) * 4;
+          const d = 10.5 + hash * 2.5;
+          const h = 9 + hash * 7;
+          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 3.2) * side;
+          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 3.2) * side;
+          const radius = Math.max(w, d) * 0.5;
+          const roofW = w + INFILL_ROOF_EAVE * 2;
+          if (isBlocked(px, pz, radius, ignoreRoadNames) || isRoofOccupied(px, pz, roofW, d, angle)) return;
+          putRoof(px, pz, roofW, d, angle);
+          shophouseItems.push({
+            x: px,
+            y: h * 0.5,
+            z: pz,
+            w,
+            h,
+            d,
+            rotY: angle,
+            color: shophouseColors[Math.floor(hash * shophouseColors.length) % shophouseColors.length]
+          });
+          const roofH = 1.8 + hash * 0.8;
+          roofItems.push({
+            x: px,
+            y: h,
+            z: pz,
+            w: roofW,
+            h: roofH,
+            d,
+            rotY: angle,
+            color: roofColors[Math.floor(hash * roofColors.length) % roofColors.length]
+          });
+        });
+      });
+    };
+
+    shophouseWaysByName.forEach((ways) => {
+      const roadWidth = Math.max(...ways.map((road) => road.width));
+      buildRoadChains(ways).forEach((chain) => placeShophouseRow(roadWidth, chain.points, shophouseRoads));
+    });
+
+    const warehouseZones = [
+      // W1 Warakas logistik: gudang antara Yos Sudarso dan RSUD Koja.
+      { minX: 1010, maxX: 1100, minZ: -870, maxZ: -790, stepX: 28, stepZ: 24 },
+      // W2 Pademangan industri: bengkel dan gudang di utara Stasiun Ancol.
+      { minX: 220, maxX: 320, minZ: -1100, maxZ: -1010, stepX: 28, stepZ: 24 },
+      // W3 Sunter Jaya industri: gudang ringan dekat Jalan Gaya Motor Raya.
+      { minX: 850, maxX: 950, minZ: -750, maxZ: -660, stepX: 28, stepZ: 24 }
+    ];
+    warehouseZones.forEach((zone, zoneIndex) => {
+      for (let x = zone.minX; x <= zone.maxX; x += zone.stepX) {
+        for (let z = zone.minZ; z <= zone.maxZ; z += zone.stepZ) {
+          const hash = Math.abs(Math.sin(x * 4.71 + z * 9.13 + zoneIndex));
+          const w = 19 + hash * 5;
+          const d = 21 + (1 - hash) * 6;
+          const h = 8 + hash * 4;
+          const radius = Math.max(w, d) * 0.5;
+          const px = x + (hash - 0.5) * 4;
+          const pz = z + (((hash * 5.7) % 1) - 0.5) * 4;
+          const roofW = w + 1.4;
+          const roofD = d + 1.4;
+          if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+          putRoof(px, pz, roofW, roofD);
+          warehouseItems.push({
+            x: px,
+            y: h * 0.5,
+            z: pz,
+            w,
+            h,
+            d,
+            color: warehouseColors[Math.floor(hash * warehouseColors.length) % warehouseColors.length]
+          });
+          const roofH = 1.6 + hash * 1.2;
+          warehouseRoofItems.push({
+            x: px,
+            y: h,
+            z: pz,
+            w: roofW,
+            h: roofH,
+            d: roofD,
+            color: warehouseRoofColors[Math.floor(hash * warehouseRoofColors.length) % warehouseRoofColors.length]
+          });
+        }
+      }
+    });
+
+    const residentialZones = [
+      // R1 Pademangan Utara: kampung padat di utara Stasiun Ancol dan Dufan.
+      { minX: 100, maxX: 360, minZ: -1105, maxZ: -965, step: 13 },
+      // R2 Ancol Timur: permukiman pesisir antara Ancol dan JIS.
+      { minX: 400, maxX: 700, minZ: -1105, maxZ: -1000, step: 13 },
+      // R3 Sunter Agung: kampung di barat JIS dan selatan Ancol.
+      { minX: 330, maxX: 470, minZ: -915, maxZ: -775, step: 13 },
+      // R4 Sunter Jaya Timur: rumah di timur Rusunawa Sunter.
+      { minX: 810, maxX: 950, minZ: -760, maxZ: -620, step: 13 },
+      // R5 Warakas-Papanggo: permukiman di barat RSUD Koja.
+      { minX: 990, maxX: 1130, minZ: -890, maxZ: -750, step: 13 },
+      // R6 Sunter Utara: kampung padat tepi Jalan Bisma Raya.
+      { minX: 840, maxX: 980, minZ: -940, maxZ: -800, step: 13 },
+      // R7 Koja Timur: rumah di timur RSUD Koja menuju Priok.
+      { minX: 1130, maxX: 1270, minZ: -930, maxZ: -790, step: 13 },
+      // R8 Rawa Badak: kampung antara Sunter dan Koja.
+      { minX: 720, maxX: 860, minZ: -930, maxZ: -790, step: 13 },
+      // R9 Sunter Agung Selatan: rumah antara Griya Utama dan Pesanggrahan.
+      { minX: 340, maxX: 460, minZ: -900, maxZ: -790, step: 13 }
+    ];
+    residentialZones.forEach((zone, zoneIndex) => {
+      for (let x = zone.minX; x <= zone.maxX; x += zone.step) {
+        for (let z = zone.minZ; z <= zone.maxZ; z += zone.step) {
+          const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233 + zoneIndex));
+          const w = 7 + hash * 2.5;
+          const d = 8 + (1 - hash) * 2.5;
+          const h = 6.5 + hash * 3.5;
+          const radius = Math.max(w, d) * 0.5;
+          const px = x + (hash - 0.5) * 2.4;
+          const pz = z + (((hash * 7.31) % 1) - 0.5) * 2.4;
+          const roofW = w + INFILL_ROOF_EAVE * 2;
+          const roofD = d + INFILL_ROOF_EAVE * 2;
+          if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+          putRoof(px, pz, roofW, roofD);
+          residentialItems.push({
+            x: px,
+            y: h * 0.5,
+            z: pz,
+            w,
+            h,
+            d,
+            color: residentialColors[Math.floor(hash * residentialColors.length) % residentialColors.length]
+          });
+          const roofH = 1.5 + hash * 0.9;
+          roofItems.push({
+            x: px,
+            y: h,
+            z: pz,
+            w: roofW,
+            h: roofH,
+            d: roofD,
+            color: roofColors[Math.floor(hash * roofColors.length) % roofColors.length]
+          });
+        }
+      }
+    });
+
+    const addInstanced = (geo, mat, items, name) => {
+      if (items.length === 0) return;
+      const mesh = new THREE.InstancedMesh(geo, mat, items.length);
+      mesh.name = name;
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      items.forEach((item, idx) => {
+        dummy.position.set(item.x, item.y, item.z);
+        dummy.scale.set(item.w, item.h, item.d);
+        dummy.rotation.set(0, item.rotY || 0, 0);
+        dummy.updateMatrix();
+        mesh.setMatrixAt(idx, dummy.matrix);
+        mesh.setColorAt(idx, item.color);
+      });
+      mesh.instanceMatrix.needsUpdate = true;
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+      this.proceduralGroup.add(mesh);
+    };
+
+    addInstanced(
+      baseBoxGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.78 }),
+      residentialItems,
+      'voidj-infill-houses'
+    );
+    addInstanced(
+      baseBoxGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6, metalness: 0.15 }),
+      shophouseItems,
+      'voidj-infill-shophouses'
+    );
+    addInstanced(
+      roofGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }),
+      roofItems,
+      'voidj-infill-house-roofs'
+    );
+    addInstanced(
+      baseBoxGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.65, metalness: 0.25 }),
+      warehouseItems,
+      'voidj-infill-warehouses'
+    );
+    addInstanced(
+      roofGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.65, metalness: 0.25 }),
+      warehouseRoofItems,
+      'voidj-infill-warehouse-roofs'
+    );
+
+    const nightWindows = this.addInfillNightWindows(
+      [...residentialItems, ...shophouseItems],
+      'voidj-night-windows'
+    );
+
+    this.voidJInfillStats = {
+      houses: residentialItems.length,
+      shophouses: shophouseItems.length,
+      warehouses: warehouseItems.length,
+      zones: residentialZones.length,
+      corridors: shophouseRoads.size,
+      nightWindows,
+      drawCalls: 6
     };
   }
 

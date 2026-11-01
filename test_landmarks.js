@@ -6701,7 +6701,90 @@ assert.ok(!voidJNetworkMethod.includes('nightMaterials.push'), 'Void J network m
   assert.ok(voidJNetworkMethod.includes(name), `Void J tree bank list missing ${name}`);
 });
 
-console.log(`✅ All 126 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 93: Void J Tahap 3 — urban fabric Sunter-Ancol-Koja
+const voidJInfillMethod = sliceCityBuilder('  buildVoidJInfill() {');
+const voidJInfillCallIndex = citySceneContent.indexOf('this.buildVoidJInfill();');
+assert.ok(voidJInfillCallIndex > 0, 'CityScene.js does not call buildVoidJInfill');
+assert.ok(
+  voidJInfillCallIndex > voidJNetworkCallIndex,
+  'buildVoidJInfill must run after buildVoidJNorthJakarta'
+);
+assert.ok(
+  voidJInfillCallIndex < citySceneContent.indexOf('this.buildVoidBInfillAndIndustry();'),
+  'buildVoidJInfill must run before the second Void B pass'
+);
+
+[
+  'voidj-infill-houses',
+  'voidj-infill-shophouses',
+  'voidj-infill-house-roofs',
+  'voidj-infill-warehouses',
+  'voidj-infill-warehouse-roofs',
+  'voidj-night-windows'
+].forEach((name) => {
+  assert.ok(voidJInfillMethod.includes(name), `Void J infill builder missing the ${name} mesh`);
+});
+
+assert.ok(voidJInfillMethod.includes('VOID_J_OSM'), 'Void J infill must consume the OSM road graph');
+assert.ok(voidJInfillMethod.includes('getVoidJRoadSegments'), 'Void J infill must mask ruko against their own corridors');
+assert.ok(voidJInfillMethod.includes('isNearVoidJRoad'), 'Void J infill must clear all OSM roads');
+assert.ok(voidJInfillMethod.includes('isInsideVoidJWaterBody'), 'Void J infill must clear the OSM water bodies');
+assert.ok(voidJInfillMethod.includes('isNearVoidJRail'), 'Void J infill must clear the KRL corridor');
+assert.ok(voidJInfillMethod.includes('isInsideVoidJAnchorSite'), 'Void J infill must clear the three J anchor sites');
+assert.ok(voidJInfillMethod.includes('VOID_J_NEIGHBOR_SITES'), 'Void J infill must clear the JIS, Dufan, and JIExpo footprints');
+assert.ok(voidJInfillMethod.includes('VOID_J_LEGACY_INFILL_RECTS'), 'Void J infill must clear the pre-existing Sunter and Kelapa Gading masses');
+assert.ok(voidJInfillMethod.includes('VOID_J_PR_PLOT'), 'Void J infill must reserve the future Park-and-Ride plot');
+assert.ok(voidJInfillMethod.includes('VOID_J_PR_DRIVEWAY'), 'Void J infill must reserve the future Park-and-Ride driveway');
+assert.ok(voidJInfillMethod.includes('addInfillNightWindows'), 'Void J infill must add night windows');
+assert.ok(voidJInfillMethod.includes('voidJInfillStats'), 'Void J infill must expose runtime stats');
+assert.ok(voidJInfillMethod.includes('drawCalls: 6'), 'Void J infill should add six draw calls');
+assert.ok(!voidJInfillMethod.includes('new THREE.PointLight'), 'Void J infill must not add PointLights');
+
+const voidJResidentialZones = voidJInfillMethod.match(/const residentialZones = \[([\s\S]*?)\n    \];/);
+assert.ok(voidJResidentialZones, 'Void J infill missing the residential zone list');
+assert.strictEqual(
+  (voidJResidentialZones[1].match(/minX:/g) || []).length,
+  9,
+  'Void J infill must keep nine residential zones'
+);
+const voidJWarehouseZones = voidJInfillMethod.match(/const warehouseZones = \[([\s\S]*?)\n    \];/);
+assert.ok(voidJWarehouseZones, 'Void J infill missing the warehouse zone list');
+assert.strictEqual(
+  (voidJWarehouseZones[1].match(/minX:/g) || []).length,
+  3,
+  'Void J infill must keep three warehouse zones'
+);
+[
+  'Jalan Yos Sudarso',
+  'Jalan Gunung Sahari Raya',
+  'Jalan Industri Raya',
+  'Jalan Griya Utama',
+  'Jalan Pesanggrahan Raya',
+  'Jalan Pangeran Jayakarta',
+  'Jalan Sunter Permai Raya',
+  'Jalan Bisma Raya',
+  'Jalan Artha Gading Boulevard',
+  'Jalan Mitra Sunter Boulevard'
+].forEach((name) => {
+  assert.ok(voidJInfillMethod.includes(name), `Void J shophouse corridor list missing ${name}`);
+});
+
+const voidJNeighborSitesMatch = citySceneContent.match(/const VOID_J_NEIGHBOR_SITES = \[([\s\S]*?)\n\];/);
+assert.ok(voidJNeighborSitesMatch, 'CityScene.js missing the Void J neighbor anchor footprints');
+['jis-stadium', 'ancol-dufan', 'jiexpo-kemayoran'].forEach((id) => {
+  assert.ok(voidJNeighborSitesMatch[1].includes(id), `Void J neighbor site mask missing ${id}`);
+});
+const voidJLegacyRectsMatch = citySceneContent.match(/const VOID_J_LEGACY_INFILL_RECTS = \[([\s\S]*?)\n\];/);
+assert.ok(voidJLegacyRectsMatch, 'CityScene.js missing the Void J legacy infill rects');
+assert.strictEqual(
+  (voidJLegacyRectsMatch[1].match(/\[/g) || []).length,
+  4,
+  'Void J must clear four pre-existing mass strips'
+);
+assert.ok(citySceneContent.includes('const VOID_J_PR_PLOT'), 'CityScene.js missing the Void J P&R plot reservation');
+assert.ok(citySceneContent.includes('const VOID_J_PR_DRIVEWAY'), 'CityScene.js missing the Void J P&R driveway reservation');
+
+console.log(`✅ All 126 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
