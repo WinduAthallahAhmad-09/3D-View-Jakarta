@@ -8485,6 +8485,8 @@ export class CityScene {
     const arrowGeos = [];
     const junctionCrosswalkGeos = [];
     const junctionLampGeos = [];
+    const junctionRefugeGeos = [];
+    const junctionTactileGeos = [];
     const junctionZebraMat = new THREE.MeshStandardMaterial({ color: 0xe5e7eb, roughness: 0.85 });
     this.registerNightMaterial(junctionZebraMat, { emissive: 0xe5e7eb, nightIntensity: 0.45 });
     const junctionLampMat = this.registerNightMaterial(
@@ -8495,6 +8497,9 @@ export class CityScene {
     // Marka duduk 0.008 di atas aspal (0.25) tapi tetap di bawah zebra (0.27).
     const DASH_LEN = 3.5;
     const DASH_STEP = 9;
+    // Pulau hanya pada lengan selebar 14 (secondary) yang tidak bermedian.
+    const JUNCTION_REFUGE_WIDTH = 1.4;
+    const JUNCTION_REFUGE_CLEARANCE = 1.8;
     const EDGE_INSET = 0.9;
     const MEDIAN_WIDTH = 1.6;
     let roadSegments = 0;
@@ -8504,6 +8509,7 @@ export class CityScene {
     let junctionGaps = 0;
     let junctionCrosswalks = 0;
     let junctionLamps = 0;
+    let junctionRefuges = 0;
     let arrows = 0;
 
     const makeBox = (w, h, d, x, y, z, rotY = 0) => {
@@ -8579,15 +8585,48 @@ export class CityScene {
         const reach = arm.width * 0.5 + 3;
         const cx = jx + ux * reach;
         const cz = jz + uz * reach;
-        for (let i = 0; i < 5; i++) {
-          const shift = (i - 2) * 1.1;
-          junctionCrosswalkGeos.push(
-            makeBox(arm.width - 2.4, 0.02, 0.55, cx + ux * shift, 0.26, cz + uz * shift, arm.angle)
-          );
-        }
-        junctionCrosswalks++;
         const px = Math.cos(arm.angle);
         const pz = -Math.sin(arm.angle);
+        const hasRefuge = arm.width === 14;
+        if (hasRefuge) {
+          const halfWidth = (arm.width - 2.4 - JUNCTION_REFUGE_CLEARANCE) * 0.5;
+          [-1, 1].forEach((side) => {
+            const lateral = (JUNCTION_REFUGE_WIDTH * 0.5 + 0.2 + halfWidth * 0.5) * side;
+            for (let i = 0; i < 5; i++) {
+              const shift = (i - 2) * 1.1;
+              junctionCrosswalkGeos.push(
+                makeBox(
+                  halfWidth,
+                  0.02,
+                  0.55,
+                  cx + px * lateral + ux * shift,
+                  0.26,
+                  cz + pz * lateral + uz * shift,
+                  arm.angle
+                )
+              );
+            }
+          });
+        } else {
+          for (let i = 0; i < 5; i++) {
+            const shift = (i - 2) * 1.1;
+            junctionCrosswalkGeos.push(
+              makeBox(arm.width - 2.4, 0.02, 0.55, cx + ux * shift, 0.26, cz + uz * shift, arm.angle)
+            );
+          }
+        }
+        junctionCrosswalks++;
+        if (hasRefuge) {
+          junctionRefugeGeos.push(
+            makeBox(JUNCTION_REFUGE_WIDTH, 0.14, 3.6, cx, 0.32, cz, arm.angle)
+          );
+          [-1, 1].forEach((dir) => {
+            junctionTactileGeos.push(
+              makeBox(0.9, 0.06, 0.5, cx + ux * 1.3 * dir, 0.42, cz + uz * 1.3 * dir, arm.angle)
+            );
+          });
+          junctionRefuges++;
+        }
         [-1, 1].forEach((side) => {
           const offset = (arm.width * 0.5 - 1) * side;
           junctionLampGeos.push(
@@ -9019,6 +9058,20 @@ export class CityScene {
     mergeAndAdd(arrowGeos, markingMat, 'voidi-road-arrows', false, false);
     mergeAndAdd(junctionCrosswalkGeos, junctionZebraMat, 'voidi-road-junction-zebras', false, false);
     mergeAndAdd(junctionLampGeos, junctionLampMat, 'voidi-junction-lamps', false, false);
+    mergeAndAdd(
+      junctionRefugeGeos,
+      new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.72 }),
+      'voidi-junction-refuges',
+      false,
+      false
+    );
+    mergeAndAdd(
+      junctionTactileGeos,
+      new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.8 }),
+      'voidi-junction-tactile',
+      false,
+      false
+    );
 
     this.voidIMarkingStats = {
       roadSegments,
@@ -9028,8 +9081,9 @@ export class CityScene {
       junctionGaps,
       junctionCrosswalks,
       junctionLamps,
+      junctionRefuges,
       arrows,
-      drawCalls: 5
+      drawCalls: 7
     };
 
     this.voidIOsmStats = {

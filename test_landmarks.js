@@ -6173,8 +6173,8 @@ assert.ok(
   voidINetworkMethod.includes('dashedStrokes') &&
   voidINetworkMethod.includes('edgeStrokes') &&
   voidINetworkMethod.includes('medians') &&
-  voidINetworkMethod.includes('drawCalls: 5'),
-  'Void I marking stats must report strokes, medians, and five draw calls'
+  voidINetworkMethod.includes('drawCalls: 7'),
+  'Void I marking stats must report strokes, medians, and seven draw calls'
 );
 assert.ok(
   !voidINetworkMethod.includes('registerNightMaterial(markingMat') &&
@@ -6288,8 +6288,8 @@ assert.ok(
   'Void I marking stats must report junction zebras and arrows'
 );
 assert.ok(
-  voidINetworkMethod.includes('drawCalls: 5'),
-  'Void I markings should add five draw calls after junction lamps'
+  voidINetworkMethod.includes('drawCalls: 7'),
+  'Void I markings should add seven draw calls after junction refuge islands'
 );
 assert.ok(
   !voidINetworkMethod.includes("registerNightMaterial(markingMat"),
@@ -6323,8 +6323,31 @@ assert.ok(
   voidINetworkMethod.includes('junctionLamps'),
   'Void I marking stats must report pedestrian lamps'
 );
+assert.ok(
+  voidINetworkMethod.includes('const junctionRefugeGeos = [];') &&
+  voidINetworkMethod.includes('const junctionTactileGeos = [];') &&
+  voidINetworkMethod.includes("'voidi-junction-refuges'") &&
+  voidINetworkMethod.includes("'voidi-junction-tactile'"),
+  'Void I junction crossings with width 14 must get refuge islands and tactile plates'
+);
+assert.ok(
+  voidINetworkMethod.includes('arm.width === 14') &&
+  voidINetworkMethod.includes('JUNCTION_REFUGE_WIDTH') &&
+  voidINetworkMethod.includes('JUNCTION_REFUGE_CLEARANCE'),
+  'Void I refuge islands must stay on median-free width 14 arms'
+);
+assert.ok(
+  voidINetworkMethod.includes('junctionRefuges') &&
+  voidINetworkMethod.includes('drawCalls: 7'),
+  'Void I marking stats must report junction refuge islands and seven draw calls'
+);
+assert.ok(
+  !voidINetworkMethod.includes('registerNightMaterial(junctionRefuge') &&
+  !voidINetworkMethod.includes('registerNightMaterial(junctionTactile'),
+  'Void I junction refuge islands must stay out of nightMaterials'
+);
 
-console.log(`✅ All 123 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+console.log(`✅ All 123 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
