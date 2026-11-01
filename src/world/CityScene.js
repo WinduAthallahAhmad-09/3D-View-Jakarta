@@ -8492,6 +8492,7 @@ export class CityScene {
     let dashedStrokes = 0;
     let edgeStrokes = 0;
     let medians = 0;
+    let junctionGaps = 0;
 
     const makeBox = (w, h, d, x, y, z, rotY = 0) => {
       const g = new THREE.BoxGeometry(w, h, d);
@@ -8501,6 +8502,47 @@ export class CityScene {
     };
 
     const insideAnchorSite = (x, z) => this.isInsideVoidIAnchorSite(x, z);
+
+    // Persimpangan OSM: titik way berbeda yang bertemu dalam 2 unit.
+    const junctionPoints = [];
+    const junctionKeys = new Set();
+    for (let i = 0; i < VOID_I_OSM.roads.length; i++) {
+      const ra = VOID_I_OSM.roads[i];
+      for (let j = i + 1; j < VOID_I_OSM.roads.length; j++) {
+        const rb = VOID_I_OSM.roads[j];
+        if (ra.name === rb.name) continue;
+        ra.points.forEach(([ax, az]) => {
+          rb.points.forEach(([bx, bz]) => {
+            if (Math.abs(ax - bx) > 2 || Math.abs(az - bz) > 2) return;
+            if (Math.hypot(ax - bx, az - bz) > 2) return;
+            const mx = (ax + bx) * 0.5;
+            const mz = (az + bz) * 0.5;
+            const key = `${Math.round(mx)},${Math.round(mz)}`;
+            if (junctionKeys.has(key)) return;
+            junctionKeys.add(key);
+            junctionPoints.push([mx, mz]);
+          });
+        });
+      }
+    }
+
+    const findMedianGap = (x1, z1, x2, z2, width) => {
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len2 = dx * dx + dz * dz;
+      let bestT = -1;
+      let bestD = Infinity;
+      for (let i = 0; i < junctionPoints.length; i++) {
+        const [jx, jz] = junctionPoints[i];
+        const t = ((jx - x1) * dx + (jz - z1) * dz) / len2;
+        if (t < 0 || t > 1) continue;
+        const d = Math.hypot(jx - (x1 + dx * t), jz - (z1 + dz * t));
+        if (d > width * 0.5 + 6 || d >= bestD) continue;
+        bestD = d;
+        bestT = t;
+      }
+      return bestT;
+    };
 
     const addRoadPolyline = (points, width, hasSidewalk = true, hasMedian = false) => {
       for (let i = 0; i < points.length - 1; i++) {
@@ -8534,8 +8576,28 @@ export class CityScene {
 
         if (hasMedian) {
           if (len >= 12) {
-            medianGeos.push(makeBox(MEDIAN_WIDTH, 0.32, len - 3, mx, 0.41, mz, angle));
-            medians++;
+            const gapT = findMedianGap(x1, z1, x2, z2, width);
+            if (gapT > 0) {
+              junctionGaps++;
+              const gapHalf = 5 / len;
+              const startT = 1.5 / len;
+              const endT = 1 - startT;
+              [
+                [startT, Math.max(startT, gapT - gapHalf)],
+                [Math.min(endT, gapT + gapHalf), endT]
+              ].forEach(([t0, t1]) => {
+                const run = (t1 - t0) * len;
+                if (run < 2.5) return;
+                const t = (t0 + t1) * 0.5;
+                medianGeos.push(
+                  makeBox(MEDIAN_WIDTH, 0.32, run, x1 + (x2 - x1) * t, 0.41, z1 + (z2 - z1) * t, angle)
+                );
+                medians++;
+              });
+            } else {
+              medianGeos.push(makeBox(MEDIAN_WIDTH, 0.32, len - 3, mx, 0.41, mz, angle));
+              medians++;
+            }
           }
         } else if (len > DASH_LEN + 3.2) {
           const count = Math.floor((len - 3.2 - DASH_LEN) / DASH_STEP) + 1;
@@ -8865,6 +8927,7 @@ export class CityScene {
       dashedStrokes,
       edgeStrokes,
       medians,
+      junctionGaps,
       drawCalls: 2
     };
 
@@ -9342,8 +9405,11 @@ export class CityScene {
     const pavingGeos = [];
     const walkwayGeos = [];
     const crosswalkGeos = [];
+    const refugeGeos = [];
     const bollardGeos = [];
     const halteLabels = [];
+    const ISLAND_WIDTH = 1.4;
+    const ISLAND_CLEARANCE = 1.8;
 
     const makeBox = (w, h, d, x, y, z, rotY = 0, target = concreteGeos) => {
       const geo = new THREE.BoxGeometry(w, h, d);
@@ -9463,22 +9529,34 @@ export class CityScene {
         const walkMidZ = hz + (dirZ * run) / 2;
         makeBox(2.4, 0.12, run, walkMidX, 0.36, walkMidZ, walkAngle, walkwayGeos);
 
-        // Zebra melintang jalan di samping halte, lima garis putih.
+        // Zebra melintang jalan di samping halte, terbelah dua oleh pulau tengah.
         const zebraX = road.x + sinA * 5;
         const zebraZ = road.z + cosA * 5;
-        for (let i = 0; i < 5; i++) {
-          const shift = (i - 2) * 1.1;
-          makeBox(
-            road.width - 2.4,
-            0.02,
-            0.55,
-            zebraX + sinA * shift,
-            0.26,
-            zebraZ + cosA * shift,
-            road.angle,
-            crosswalkGeos
-          );
-        }
+        const halfWidth = (road.width - 2.4 - ISLAND_CLEARANCE) * 0.5;
+        [-1, 1].forEach((side) => {
+          const lateral = (ISLAND_WIDTH * 0.5 + 0.2 + halfWidth * 0.5) * side;
+          for (let i = 0; i < 5; i++) {
+            const shift = (i - 2) * 1.1;
+            makeBox(
+              halfWidth,
+              0.02,
+              0.55,
+              zebraX + nx * lateral + sinA * shift,
+              0.26,
+              zebraZ + nz * lateral + cosA * shift,
+              road.angle,
+              crosswalkGeos
+            );
+          }
+        });
+
+        // Pulau penyeberangan: badan beton, taktil kuning dua ujung, dua bollard.
+        makeBox(ISLAND_WIDTH, 0.14, 3.6, zebraX, 0.32, zebraZ, road.angle, refugeGeos);
+        [-1, 1].forEach((dir) => {
+          makeBox(0.9, 0.06, 0.5, zebraX + sinA * 1.3 * dir, 0.42, zebraZ + cosA * 1.3 * dir, road.angle, pavingGeos);
+          makeBox(0.18, 1.0, 0.18, zebraX + sinA * 1.2 * dir, 0.89, zebraZ + cosA * 1.2 * dir, 0, bollardGeos);
+          makeBox(0.24, 0.18, 0.24, zebraX + sinA * 1.2 * dir, 1.48, zebraZ + cosA * 1.2 * dir, 0, bollardGeos);
+        });
 
         // Tiga bollard menyala di tepi walkway.
         const lateralX = dirZ;
@@ -9551,6 +9629,12 @@ export class CityScene {
       false
     );
     addMerged(
+      refugeGeos,
+      new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.72 }),
+      'voidi-transit-refuges',
+      false
+    );
+    addMerged(
       bollardGeos,
       this.registerNightMaterial(
         new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.35, metalness: 0.3 }),
@@ -9567,8 +9651,9 @@ export class CityScene {
       labels: this.voidITransitLabels.length,
       walkways: halteSpecs.length,
       crosswalks: halteSpecs.length,
-      bollards: halteSpecs.length * 3,
-      drawCalls: 8
+      refuges: halteSpecs.length,
+      bollards: halteSpecs.length * 5,
+      drawCalls: 9
     };
   }
 

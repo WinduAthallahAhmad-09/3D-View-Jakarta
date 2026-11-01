@@ -5927,7 +5927,7 @@ assert.ok(voidITransitBody.includes('registerNightMaterial'), 'Void I transit si
 assert.ok(voidITransitBody.includes('emissive: 0xfff4d6'), 'Void I transit sign night emissive drifted');
 assert.ok(voidITransitBody.includes('nightIntensity: 0.55'), 'Void I transit sign night intensity drifted');
 assert.ok(voidITransitBody.includes('voidITransitStats'), 'Void I transit must expose runtime stats');
-assert.ok(voidITransitBody.includes('drawCalls: 8'), 'Void I transit should add eight draw calls');
+assert.ok(voidITransitBody.includes('drawCalls: 9'), 'Void I transit should add nine draw calls');
 assert.ok(voidITransitBody.includes('halte: halteSpecs.map'), 'Void I transit stats missing the halte list');
 
 const voidITransitSpecs = [
@@ -6109,8 +6109,8 @@ assert.ok(
   'Void I transit stats must report the crosswalk count'
 );
 assert.ok(
-  voidITransitBody.includes('bollards: halteSpecs.length * 3'),
-  'Void I transit stats must report three bollards per walkway'
+  voidITransitBody.includes('bollards: halteSpecs.length * 5'),
+  'Void I transit stats must report three walkway bollards plus two refuge bollards per halte'
 );
 assert.ok(
   voidITransitBody.includes('emissive: 0xfde68a'),
@@ -6186,7 +6186,61 @@ assert.ok(
   'Void I lane markings must not add PointLights'
 );
 
-console.log(`✅ All 123 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 87: Void I Tahap 8 — pulau penyeberangan & pemutus median di simpang
+assert.ok(
+  voidITransitBody.includes('const refugeGeos = [];'),
+  'Void I transit must collect pedestrian refuge geometry'
+);
+assert.ok(
+  voidITransitBody.includes("'voidi-transit-refuges'"),
+  'Void I transit missing the merged refuge island mesh'
+);
+assert.ok(
+  voidITransitBody.includes('ISLAND_WIDTH') && voidITransitBody.includes('ISLAND_CLEARANCE'),
+  'Void I refuge island dimensions drifted'
+);
+assert.ok(
+  voidITransitBody.includes('road.width - 2.4 - ISLAND_CLEARANCE'),
+  'Void I zebra must split around the refuge island'
+);
+assert.ok(
+  voidITransitBody.includes('refuges: halteSpecs.length'),
+  'Void I transit stats must report the refuge count'
+);
+assert.ok(
+  voidITransitBody.includes('bollards: halteSpecs.length * 5'),
+  'Void I stats must count three walkway bollards plus two refuge bollards'
+);
+assert.ok(
+  voidITransitBody.includes('drawCalls: 9'),
+  'Void I transit should add nine draw calls after the refuge mesh'
+);
+assert.ok(
+  voidINetworkMethod.includes('const junctionPoints = [];'),
+  'Void I road network must collect OSM junction points'
+);
+assert.ok(
+  voidINetworkMethod.includes('findMedianGap'),
+  'Void I median must query junction gaps'
+);
+assert.ok(
+  voidINetworkMethod.includes('gapHalf'),
+  'Void I median must leave a gap at junctions'
+);
+assert.ok(
+  voidINetworkMethod.includes('junctionGaps'),
+  'Void I marking stats must report junction median gaps'
+);
+assert.ok(
+  voidINetworkMethod.includes('ra.name === rb.name'),
+  'Void I junction scan must ignore way self-intersections'
+);
+assert.ok(
+  !voidINetworkMethod.includes('new THREE.PointLight') && !voidITransitBody.includes('new THREE.PointLight'),
+  'Void I refuge and median gaps must not add PointLights'
+);
+
+console.log(`✅ All 123 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
