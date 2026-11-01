@@ -8482,6 +8482,9 @@ export class CityScene {
     const railCatenaryGeos = [];
     const markingGeos = [];
     const medianGeos = [];
+    const arrowGeos = [];
+    const junctionCrosswalkGeos = [];
+    const junctionZebraMat = new THREE.MeshStandardMaterial({ color: 0xe5e7eb, roughness: 0.85 });
 
     // Marka duduk 0.008 di atas aspal (0.25) tapi tetap di bawah zebra (0.27).
     const DASH_LEN = 3.5;
@@ -8493,6 +8496,8 @@ export class CityScene {
     let edgeStrokes = 0;
     let medians = 0;
     let junctionGaps = 0;
+    let junctionCrosswalks = 0;
+    let arrows = 0;
 
     const makeBox = (w, h, d, x, y, z, rotY = 0) => {
       const g = new THREE.BoxGeometry(w, h, d);
@@ -8525,6 +8530,80 @@ export class CityScene {
         });
       }
     }
+
+    // Lengan simpang: arah keluar dari titik simpang, satu entri per arah jalan.
+    const junctionArms = junctionPoints.map(([jx, jz]) => {
+      const arms = [];
+      const seen = new Set();
+      VOID_I_OSM.roads.forEach((road) => {
+        for (let i = 0; i < road.points.length - 1; i++) {
+          const a = road.points[i];
+          const b = road.points[i + 1];
+          const dx = b[0] - a[0];
+          const dz = b[1] - a[1];
+          const len2 = dx * dx + dz * dz;
+          const t = len2 ? ((jx - a[0]) * dx + (jz - a[1]) * dz) / len2 : 0;
+          if (t < 0 || t > 1) continue;
+          const d = Math.hypot(jx - (a[0] + dx * t), jz - (a[1] + dz * t));
+          if (d > road.width * 0.5 + 6) continue;
+          const angle = Math.atan2(dx, dz);
+          const key = `${road.name}|${Math.round(angle * 4)}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          arms.push({
+            angle,
+            away: t <= 0.5 ? 1 : -1,
+            width: road.width,
+            type: road.type,
+            len: Math.sqrt(len2)
+          });
+        }
+      });
+      return arms;
+    });
+
+    junctionArms.forEach((arms, index) => {
+      if (arms.length < 3) return;
+      const [jx, jz] = junctionPoints[index];
+      arms.forEach((arm) => {
+        if (arm.width < 14 || arm.len < arm.width * 0.5 + 8) return;
+        const ux = Math.sin(arm.angle) * arm.away;
+        const uz = Math.cos(arm.angle) * arm.away;
+        const reach = arm.width * 0.5 + 3;
+        const cx = jx + ux * reach;
+        const cz = jz + uz * reach;
+        for (let i = 0; i < 5; i++) {
+          const shift = (i - 2) * 1.1;
+          junctionCrosswalkGeos.push(
+            makeBox(arm.width - 2.4, 0.02, 0.55, cx + ux * shift, 0.26, cz + uz * shift, arm.angle)
+          );
+        }
+        junctionCrosswalks++;
+      });
+    });
+
+    junctionArms.forEach((arms, index) => {
+      const [jx, jz] = junctionPoints[index];
+      arms.forEach((arm) => {
+        if (arm.len < 24 || arm.width < 11) return;
+        if ((arm.type === 'motorway' || arm.type === 'trunk') && arm.width >= 16) return;
+        const ux = Math.sin(arm.angle) * arm.away;
+        const uz = Math.cos(arm.angle) * arm.away;
+        const along = arm.width * 0.5 + 9;
+        if (arm.len < along + 3) return;
+        const headX = jx + ux * (along - 1.4);
+        const headZ = jz + uz * (along - 1.4);
+        const stemX = jx + ux * along;
+        const stemZ = jz + uz * along;
+        arrowGeos.push(makeBox(0.32, 0.014, 2.6, stemX, 0.262, stemZ, arm.angle));
+        [-0.55, 0.55].forEach((tilt) => {
+          const hx = Math.sin(arm.angle + tilt) * arm.away * 0.6;
+          const hz = Math.cos(arm.angle + tilt) * arm.away * 0.6;
+          arrowGeos.push(makeBox(0.3, 0.014, 1.2, headX + hx, 0.262, headZ + hz, arm.angle + tilt));
+        });
+        arrows++;
+      });
+    });
 
     const findMedianGap = (x1, z1, x2, z2, width) => {
       const dx = x2 - x1;
@@ -8728,7 +8807,7 @@ export class CityScene {
     };
 
     VOID_I_OSM.roads.forEach((r) => {
-      const hasMedian = (r.type === 'motorway' || r.type === 'trunk') && r.width >= 16;
+      const hasMedian = (r.type === 'motorway' || r.type === 'trunk' || r.type === 'primary') && r.width >= 16;
       addRoadPolyline(r.points, r.width, r.width >= 10, hasMedian);
     });
 
@@ -8921,6 +9000,8 @@ export class CityScene {
     mergeAndAdd(railCatenaryGeos, catenaryMat, 'voidi-rail-catenary', false, false);
     mergeAndAdd(markingGeos, markingMat, 'voidi-road-markings', false, false);
     mergeAndAdd(medianGeos, medianMat, 'voidi-road-medians', true, false);
+    mergeAndAdd(arrowGeos, markingMat, 'voidi-road-arrows', false, false);
+    mergeAndAdd(junctionCrosswalkGeos, junctionZebraMat, 'voidi-road-junction-zebras', false, false);
 
     this.voidIMarkingStats = {
       roadSegments,
@@ -8928,7 +9009,9 @@ export class CityScene {
       edgeStrokes,
       medians,
       junctionGaps,
-      drawCalls: 2
+      junctionCrosswalks,
+      arrows,
+      drawCalls: 4
     };
 
     this.voidIOsmStats = {
