@@ -5816,7 +5816,82 @@ assert.ok(citySceneContent.includes('isNearVoidIRoad(x, z, clearance = 12) {'), 
 assert.ok(citySceneContent.includes('isInsideVoidIWaterBody(x, z, margin = 6)'), 'CityScene.js missing the Void I situ polygon mask');
 assert.ok(citySceneContent.includes('getVoidIRailSegments() {'), 'CityScene.js missing the Void I rail segment cache');
 
-console.log(`✅ All 123 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 82: Void I Tahap 3 — infill urban fabric Bintaro-Petukangan-Ulujami-Gandaria Selatan
+assert.ok(citySceneContent.includes('buildVoidIInfill()'), 'CityScene.js missing buildVoidIInfill');
+
+const voidIInfillCall = citySceneContent.indexOf('this.buildVoidIInfill();');
+assert.ok(voidIInfillCall > 0, 'CityScene.js does not call buildVoidIInfill');
+assert.ok(
+  voidIInfillCall > citySceneContent.indexOf('this.buildVoidIBintaro();'),
+  'buildVoidIInfill must run after buildVoidIBintaro so the OSM network exists'
+);
+assert.ok(
+  voidIInfillCall < citySceneContent.indexOf('this.buildVoidBInfillAndIndustry();'),
+  'buildVoidIInfill must run before buildVoidBInfillAndIndustry'
+);
+
+const voidIInfillBody = sliceCityBuilder('  buildVoidIInfill() {');
+assert.ok(!voidIInfillBody.includes('new THREE.PointLight'), 'Void I infill must not add PointLights');
+assert.ok(!voidIInfillBody.includes('nightMaterials.push'), 'Void I infill must register night windows through the shared helper');
+assert.ok(voidIInfillBody.includes('addInfillNightWindows'), 'Void I infill must reuse the shared night window helper');
+assert.ok(voidIInfillBody.includes('voidi-night-windows'), 'Void I infill missing the night window mesh');
+assert.ok(voidIInfillBody.includes('VOID_I_OSM'), 'Void I infill must mask against the OSM roads, waterways and situ');
+assert.ok(voidIInfillBody.includes('isNearVoidIRoad'), 'Void I infill missing the road corridor mask');
+assert.ok(voidIInfillBody.includes('getVoidIRoadSegments'), 'Void I shophouse rows must ignore their own road corridor via the segment cache');
+assert.ok(voidIInfillBody.includes('isNearVoidIRail'), 'Void I infill missing the KRL corridor mask');
+assert.ok(voidIInfillBody.includes('isInsideVoidIWaterBody'), 'Void I infill must keep buildings out of the situ polygons');
+assert.ok(voidIInfillBody.includes('isInsideVoidIAnchorSite'), 'Void I infill must exclude the six anchor pads');
+assert.ok(voidIInfillBody.includes('VOID_I_LEGACY_INFILL_RECTS'), 'Void I infill must exclude the central Jakarta and Void C rects');
+assert.ok(voidIInfillBody.includes('width * 0.5 + 4'), 'Void I water mask must add a four-unit bank buffer');
+assert.ok(voidIInfillBody.includes('voidIInfillStats'), 'Void I infill must expose runtime stats');
+assert.ok(voidIInfillBody.includes('drawCalls: 6'), 'Void I infill should add six instanced draw calls');
+assert.ok(
+  voidIInfillBody.includes('INFILL_ROOF_EAVE') && voidIInfillBody.includes('INFILL_ROOF_TOLERANCE'),
+  'Void I infill must reuse the shared eave trim and roof occupancy constants'
+);
+assert.ok(
+  voidIInfillBody.includes('ignoreWays') &&
+    voidIInfillBody.includes('placeShophouseRow(roadWidth, chain.points, chain.ways)'),
+  'Void I shophouse rows must ignore their own road corridor'
+);
+
+[
+  'voidi-infill-houses',
+  'voidi-infill-shophouses',
+  'voidi-infill-house-roofs',
+  'voidi-infill-warehouses',
+  'voidi-infill-warehouse-roofs'
+].forEach((name) => {
+  assert.ok(voidIInfillBody.includes(name), `Void I infill missing the ${name} instanced mesh`);
+});
+
+[
+  'Jalan Boulevard Bintaro Jaya',
+  'Jalan Ciledug Raya',
+  'Jalan Raden Ajeng Kartini',
+  'Jalan RC. Veteran',
+  'Jalan Raya Pasar Jumat',
+  'Jalan Tegal Rotan Raya',
+  'Jalan Bintaro Utama 3A',
+  'Jalan Gedung Hijau Raya',
+  'Jalan Bintaro Permai',
+  'Jalan Ceger Raya'
+].forEach((name) => {
+  assert.ok(voidIInfillBody.includes(name), `Void I shophouse corridor list missing ${name}`);
+});
+
+const voidILegacyRectsMatch = citySceneContent.match(/const VOID_I_LEGACY_INFILL_RECTS = \[([\s\S]*?)\n\];/);
+assert.ok(voidILegacyRectsMatch, 'CityScene.js missing the Void I legacy infill exclusion rects');
+assert.ok(
+  voidILegacyRectsMatch[1].includes('[-600, -50, 470, 1010]'),
+  'Void I infill must exclude the central Jakarta Selatan building clusters'
+);
+assert.ok(
+  voidILegacyRectsMatch[1].includes('[-1428, -1092, 422, 583]'),
+  'Void I infill must exclude the southern Void C building strip'
+);
+
+console.log(`✅ All 123 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
