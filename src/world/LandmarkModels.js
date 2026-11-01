@@ -12482,6 +12482,34 @@ export class LandmarkModels {
     atriumRoof.position.set(0, 15.6, 8);
     group.add(atriumRoof);
 
+    const ribGeos = [];
+    const ribCount = 24;
+    for (let i = 0; i < ribCount; i++) {
+      const angle = (i / ribCount) * Math.PI * 2;
+      const rib = new THREE.BoxGeometry(0.22, 15, 0.5);
+      rib.applyMatrix4(new THREE.Matrix4().makeRotationY(angle));
+      rib.translate(Math.sin(angle) * 9.1, 7.8, 8 + Math.cos(angle) * 9.1);
+      ribGeos.push(rib);
+    }
+    const bintaroRibs = new THREE.Mesh(
+      BufferGeometryUtils.mergeGeometries(ribGeos, false),
+      panelMat
+    );
+    bintaroRibs.name = 'bintaro-jaya-xchange-facade-ribs';
+    group.add(bintaroRibs);
+
+    const bandGeos = [3.4, 8.4, 13.4].map((bandY) => {
+      const band = new THREE.CylinderGeometry(9.16, 9.16, 0.35, 24, 1, true);
+      band.translate(0, bandY, 8);
+      return band;
+    });
+    const bintaroBands = new THREE.Mesh(
+      BufferGeometryUtils.mergeGeometries(bandGeos, false),
+      accentMat
+    );
+    bintaroBands.name = 'bintaro-jaya-xchange-facade-bands';
+    group.add(bintaroBands);
+
     const entrance = new THREE.Mesh(new THREE.BoxGeometry(20, 6, 0.5), glassMat);
     entrance.position.set(0, 3.2, 17.3);
     group.add(entrance);
@@ -12921,6 +12949,34 @@ export class LandmarkModels {
     atriumRoof.position.set(0, 18.3, 6);
     group.add(atriumRoof);
 
+    const ribGeos = [];
+    const ribCount = 28;
+    for (let i = 0; i < ribCount; i++) {
+      const angle = (i / ribCount) * Math.PI * 2;
+      const rib = new THREE.BoxGeometry(0.26, 18, 0.55);
+      rib.applyMatrix4(new THREE.Matrix4().makeRotationY(angle));
+      rib.translate(Math.sin(angle) * 11.12, 9, 6 + Math.cos(angle) * 11.12);
+      ribGeos.push(rib);
+    }
+    const gandariaRibs = new THREE.Mesh(
+      BufferGeometryUtils.mergeGeometries(ribGeos, false),
+      towerMat
+    );
+    gandariaRibs.name = 'gandaria-city-facade-ribs';
+    group.add(gandariaRibs);
+
+    const bandGeos = [3.8, 9.4, 15].map((bandY) => {
+      const band = new THREE.CylinderGeometry(11.18, 11.18, 0.4, 28, 1, true);
+      band.translate(0, bandY, 6);
+      return band;
+    });
+    const gandariaBands = new THREE.Mesh(
+      BufferGeometryUtils.mergeGeometries(bandGeos, false),
+      accentMat
+    );
+    gandariaBands.name = 'gandaria-city-facade-bands';
+    group.add(gandariaBands);
+
     const entrance = new THREE.Mesh(new THREE.BoxGeometry(26, 7, 0.5), glassMat);
     entrance.position.set(0, 3.5, 20.2);
     group.add(entrance);
@@ -13002,8 +13058,9 @@ export class LandmarkModels {
     );
     const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
     const signMat = new THREE.MeshStandardMaterial({ color: 0x134e4a, roughness: 0.45 });
-    const tactileMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.6 });
+    const tactileMat = new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.6 });
     const pavingMat = new THREE.MeshStandardMaterial({ color: 0xd6d3d1, roughness: 0.9 });
+    const tactileGeos = [];
 
     [-1, 1].forEach((side) => {
       const platform = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.5, 58), platformMat);
@@ -13013,9 +13070,9 @@ export class LandmarkModels {
       platform.receiveShadow = true;
       group.add(platform);
 
-      const tactile = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.06, 56), tactileMat);
-      tactile.position.set(side * 4.55, 13.83, 0);
-      group.add(tactile);
+      const tactile = new THREE.BoxGeometry(0.35, 0.06, 56);
+      tactile.translate(side * 4.55, 13.83, 0);
+      tactileGeos.push(tactile);
 
       const glassWall = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4.8, 54), glassMat);
       glassWall.position.set(side * 10.5, 17.2, 0);
@@ -13058,6 +13115,13 @@ export class LandmarkModels {
     const roofFascia = new THREE.Mesh(new THREE.BoxGeometry(25, 0.5, 59), accentMat);
     roofFascia.position.set(0, 21.9, 0);
     group.add(roofFascia);
+
+    const tactileStrips = new THREE.Mesh(
+      BufferGeometryUtils.mergeGeometries(tactileGeos, false),
+      tactileMat
+    );
+    tactileStrips.name = 'stasiun-mrt-haji-nawi-tactile';
+    group.add(tactileStrips);
 
     const nameBoard = new THREE.Mesh(new THREE.BoxGeometry(18, 2.6, 0.5), signMat);
     nameBoard.position.set(0, 23.4, 29.6);

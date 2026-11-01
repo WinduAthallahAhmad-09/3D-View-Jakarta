@@ -5927,7 +5927,7 @@ assert.ok(voidITransitBody.includes('registerNightMaterial'), 'Void I transit si
 assert.ok(voidITransitBody.includes('emissive: 0xfff4d6'), 'Void I transit sign night emissive drifted');
 assert.ok(voidITransitBody.includes('nightIntensity: 0.55'), 'Void I transit sign night intensity drifted');
 assert.ok(voidITransitBody.includes('voidITransitStats'), 'Void I transit must expose runtime stats');
-assert.ok(voidITransitBody.includes('drawCalls: 5'), 'Void I transit should add five draw calls');
+assert.ok(voidITransitBody.includes('drawCalls: 6'), 'Void I transit should add six draw calls');
 assert.ok(voidITransitBody.includes('halte: halteSpecs.map'), 'Void I transit stats missing the halte list');
 
 const voidITransitSpecs = [
@@ -5953,7 +5953,8 @@ voidITransitSpecs.forEach(([name, shortName, road, near, side]) => {
   'voidi-transit-steel',
   'voidi-transit-sign',
   'voidi-transit-glass',
-  'voidi-transit-paving'
+  'voidi-transit-paving',
+  'voidi-transit-walkways'
 ].forEach((name) => {
   assert.ok(voidITransitBody.includes(name), `Void I transit missing the ${name} mesh`);
 });
@@ -5999,7 +6000,84 @@ assert.ok(
   'main.js must forward the Void I transit labels to UIManager'
 );
 
-console.log(`✅ All 123 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 84: Void I Tahap 5 — fasad atrium, taktil Haji Nawi, walkway halte
+const voidIBintaroSlice = landmarkModelsContent.slice(
+  landmarkModelsContent.indexOf('static createBintaroJayaXchange()'),
+  landmarkModelsContent.indexOf('static createStasiunJurangmangu()')
+);
+assert.ok(
+  voidIBintaroSlice.includes("'bintaro-jaya-xchange-facade-ribs'"),
+  'Bintaro Jaya Xchange missing the facade rib mesh'
+);
+assert.ok(
+  voidIBintaroSlice.includes("'bintaro-jaya-xchange-facade-bands'"),
+  'Bintaro Jaya Xchange missing the facade band mesh'
+);
+assert.ok(
+  voidIBintaroSlice.includes('const ribCount = 24;'),
+  'Bintaro Jaya Xchange atrium must keep 24 vertical ribs'
+);
+assert.ok(
+  voidIBintaroSlice.includes('BufferGeometryUtils.mergeGeometries(ribGeos'),
+  'Bintaro Jaya Xchange ribs must merge into one draw call'
+);
+
+const voidIGandariaSlice = landmarkModelsContent.slice(
+  landmarkModelsContent.indexOf('static createGandariaCity()'),
+  landmarkModelsContent.indexOf('static createStasiunMrtHajiNawi()')
+);
+assert.ok(
+  voidIGandariaSlice.includes("'gandaria-city-facade-ribs'"),
+  'Gandaria City missing the facade rib mesh'
+);
+assert.ok(
+  voidIGandariaSlice.includes("'gandaria-city-facade-bands'"),
+  'Gandaria City missing the facade band mesh'
+);
+assert.ok(
+  voidIGandariaSlice.includes('const ribCount = 28;'),
+  'Gandaria City atrium must keep 28 vertical ribs'
+);
+assert.ok(
+  voidIGandariaSlice.includes('BufferGeometryUtils.mergeGeometries(ribGeos'),
+  'Gandaria City ribs must merge into one draw call'
+);
+
+const voidIHajiNawiSlice = landmarkModelsContent.slice(
+  landmarkModelsContent.indexOf('static createStasiunMrtHajiNawi()'),
+  landmarkModelsContent.indexOf('static createStasiunMrtHajiNawi()') + 12000
+);
+assert.ok(
+  voidIHajiNawiSlice.includes("'stasiun-mrt-haji-nawi-tactile'"),
+  'Stasiun MRT Haji Nawi missing the tactile platform mesh'
+);
+assert.ok(
+  voidIHajiNawiSlice.includes('0xeab308'),
+  'Stasiun MRT Haji Nawi tactile strip must use the yellow tactile colour'
+);
+assert.ok(
+  voidIHajiNawiSlice.includes('tactileGeos'),
+  'Stasiun MRT Haji Nawi tactile strips must merge into one geometry'
+);
+
+assert.ok(
+  voidITransitBody.includes('walkwayGeos'),
+  'Void I transit must collect pedestrian walkway geometry'
+);
+assert.ok(
+  voidITransitBody.includes('VOID_I_ANCHOR_SITES'),
+  'Void I walkways must aim at the anchor sites'
+);
+assert.ok(
+  voidITransitBody.includes('Math.min(18'),
+  'Void I walkways must stay capped at 18 scene units'
+);
+assert.ok(
+  voidITransitBody.includes('walkways: halteSpecs.length'),
+  'Void I transit stats must report the walkway count'
+);
+
+console.log(`✅ All 123 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

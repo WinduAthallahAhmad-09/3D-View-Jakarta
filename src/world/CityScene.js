@@ -9277,6 +9277,7 @@ export class CityScene {
     const signGeos = [];
     const glassGeos = [];
     const pavingGeos = [];
+    const walkwayGeos = [];
     const halteLabels = [];
 
     const makeBox = (w, h, d, x, y, z, rotY = 0, target = concreteGeos) => {
@@ -9361,6 +9362,41 @@ export class CityScene {
       // Ubin taktil kuning di tepi peron sisi jalan.
       makeBox(0.5, 0.06, 11.4, hx - nx * 1.05 * spec.side, 0.73, hz - nz * 1.05 * spec.side, road.angle, pavingGeos);
 
+      // Trotoar penghubung halte ke tepi tapak anchor terdekat.
+      let anchorRect = null;
+      let anchorDist = Infinity;
+      let anchorX = hx;
+      let anchorZ = hz;
+      VOID_I_ANCHOR_SITES.forEach((rect) => {
+        const cx = Math.max(rect[0], Math.min(hx, rect[1]));
+        const cz = Math.max(rect[2], Math.min(hz, rect[3]));
+        const d = Math.hypot(hx - cx, hz - cz);
+        if (d < anchorDist) {
+          anchorDist = d;
+          anchorRect = rect;
+          anchorX = cx;
+          anchorZ = cz;
+        }
+      });
+      if (anchorRect) {
+        let dirX;
+        let dirZ;
+        if (anchorDist > 1) {
+          dirX = (anchorX - hx) / anchorDist;
+          dirZ = (anchorZ - hz) / anchorDist;
+        } else {
+          const ux = Math.sin(road.angle);
+          const uz = Math.cos(road.angle);
+          const towards = (anchorRect[0] + anchorRect[1] - 2 * hx) * ux +
+            (anchorRect[2] + anchorRect[3] - 2 * hz) * uz >= 0 ? 1 : -1;
+          dirX = ux * towards;
+          dirZ = uz * towards;
+        }
+        const run = Math.min(18, Math.max(8, anchorDist + 6));
+        const walkAngle = Math.atan2(dirX, dirZ);
+        makeBox(2.4, 0.12, run, hx + (dirX * run) / 2, 0.36, hz + (dirZ * run) / 2, walkAngle, walkwayGeos);
+      }
+
       halteLabels.push({
         name: spec.name,
         shortName: spec.shortName,
@@ -9408,13 +9444,20 @@ export class CityScene {
       'voidi-transit-paving',
       false
     );
+    addMerged(
+      walkwayGeos,
+      new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.9 }),
+      'voidi-transit-walkways',
+      false
+    );
 
     this.voidITransitLabels = [...halteLabels];
 
     this.voidITransitStats = {
       halte: halteSpecs.map((spec) => spec.name),
       labels: this.voidITransitLabels.length,
-      drawCalls: 5
+      walkways: halteSpecs.length,
+      drawCalls: 6
     };
   }
 
