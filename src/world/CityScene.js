@@ -15708,7 +15708,10 @@ export class CityScene {
       "rusunawa-sunter": () => LandmarkModels.createRusunawaSunter(),
       "rsud-koja": () => LandmarkModels.createRSUDKoja(),
       "pasar-pademangan": () => LandmarkModels.createPasarPademangan(),
-      "wisma-atlet-kemayoran": () => LandmarkModels.createWismaAtletKemayoran()
+      "wisma-atlet-kemayoran": () => LandmarkModels.createWismaAtletKemayoran(),
+      "pasar-cakung": () => LandmarkModels.createPasarCakung(),
+      "rusun-pinus-elok": () => LandmarkModels.createRusunPinusElok(),
+      "pasar-ujung-menteng": () => LandmarkModels.createPasarUjungMenteng()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {

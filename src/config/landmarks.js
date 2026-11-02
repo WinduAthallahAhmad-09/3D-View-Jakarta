@@ -2883,6 +2883,75 @@ export const JAKARTA_LANDMARKS = [
       "Tujuh menara di Blok D-10 menyediakan 5.494 unit hunian dan menampung sekitar 16.482 atlet serta ofisial selama Asian Games 2018.",
       "Pada 2020–2021 kompleks ini difungsikan sebagai Rumah Sakit Darurat COVID-19 sebelum dikembalikan sebagai hunian."
     ]
+  },
+  // =====================================================
+  // ZONA 14: JAKARTA TIMUR LAUT (CAKUNG & PULO GEBANG)
+  // =====================================================
+  {
+    id: "pasar-cakung",
+    name: "Pasar Cakung",
+    shortName: "Pasar Cakung",
+    category: "Pasar Tradisional & Ekonomi Rakyat",
+    tagline: "Pasar lingkungan di koridor Bekasi Raya, Cakung Barat",
+    height: "14 meter (Balai Pasar Dua Lantai)",
+    year: "Tidak tercatat",
+    architect: "Perumda Pasar Jaya",
+    location: "Jl. Bekasi Raya, Cakung Barat, Cakung, Jakarta Timur",
+    coordinates: { lat: -6.18311, lng: 106.9344785 },
+    position: [1571.2, 0, -168.0],
+    labelHeight: 46,
+    cameraPosition: [1571.2, 92, -48],
+    cameraTarget: [1571.2, 10, -168],
+    description: "Pasar lingkungan di Jl. Bekasi Raya yang melayani warga Cakung Barat dan Penggilingan. Menampilkan balai pasar dua lantai beratap pelana, deret kios sayur dan sembako, ruko tepi jalan, area bongkar muat, parkir, serta pohon peneduh di dalam tapak.",
+    facts: [
+      "Pasar Cakung berada di Jl. Bekasi Raya, Cakung Barat, dan menjadi pasar lingkungan utama di koridor timur Jakarta.",
+      "Pasar ini melayani warga Cakung Barat, Penggilingan, serta permukiman di sisi utara Jl. Bekasi Raya.",
+      "Lokasinya dekat simpang Jl. Tipar Cakung dan kawasan industri Pulogadung–Cakung."
+    ]
+  },
+  {
+    id: "rusun-pinus-elok",
+    name: "Rusun Pinus Elok",
+    shortName: "Rusun Pinus Elok",
+    category: "Hunian Vertikal & Permukiman",
+    tagline: "Rumah susun sewa di koridor Boulevard Raya, Penggilingan",
+    height: "22 meter (Blok Hunian Lima Lantai)",
+    year: "Tidak tercatat",
+    architect: "Dinas Perumahan Rakyat DKI Jakarta",
+    location: "Jl. Boulevard Raya, Penggilingan, Cakung, Jakarta Timur",
+    coordinates: { lat: -6.198762, lng: 106.939316 },
+    position: [1639.4, 0, 54.0],
+    labelHeight: 56,
+    cameraPosition: [1639.4, 112, 176],
+    cameraTarget: [1639.4, 20, 54],
+    description: "Kompleks rumah susun sewa di Penggilingan yang menghadap Jl. Boulevard Raya. Menampilkan beberapa blok hunian berjendela pita, balai warga, plaza bersama, area parkir, taman bermain, serta deretan pohon peneduh di dalam tapak.",
+    facts: [
+      "Rusun Pinus Elok berada di Jl. Boulevard Raya, Penggilingan, Cakung.",
+      "Kompleks rumah susun sewa ini melayani relokasi warga bantaran kali dan pekerja kawasan industri Cakung.",
+      "Blok huniannya dikelilingi jalan lingkungan Meranti Elok, Terentang Elok, dan Damar Elok."
+    ]
+  },
+  {
+    id: "pasar-ujung-menteng",
+    name: "Pasar Ujung Menteng",
+    shortName: "Pasar Ujung Menteng",
+    category: "Pasar Tradisional & Ekonomi Rakyat",
+    tagline: "Pasar perbatasan Jakarta–Bekasi di Jl. Bekasi Raya",
+    height: "12 meter (Balai Pasar Dua Lantai)",
+    year: "Tidak tercatat",
+    architect: "Perumda Pasar Jaya",
+    location: "Jl. Bekasi Raya, Ujung Menteng, Cakung, Jakarta Timur",
+    coordinates: { lat: -6.1901127, lng: 106.9668945 },
+    position: [2028.2, 0, -68.7],
+    labelHeight: 42,
+    cameraPosition: [2028.2, 84, 52],
+    cameraTarget: [2028.2, 8, -68.7],
+    description: "Pasar lingkungan di Jl. Bekasi Raya yang melayani warga Ujung Menteng dan permukiman perbatasan Jakarta–Bekasi. Menampilkan balai pasar dua lantai, deret kios, ruko tepi jalan, area parkir, papan nama pasar, serta pohon peneduh di dalam tapak.",
+    facts: [
+      "Pasar Ujung Menteng berada di Jl. Bekasi Raya, Ujung Menteng, Cakung.",
+      "Pasar ini melayani warga Ujung Menteng dan permukiman perbatasan Jakarta–Bekasi.",
+      "Lokasinya berdekatan dengan Electronic City Ujung Menteng dan SPBU di koridor Bekasi Raya."
+    ]
   }
 ];
 
