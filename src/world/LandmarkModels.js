@@ -13313,7 +13313,16 @@ export class LandmarkModels {
       group.add(line);
     }
 
+    // Tiga menara dibedakan agar rusunawa tidak terbaca sebagai tiga kotak
+    // identik: sirip barat, pita jendela tengah, pasangan jendela timur.
+    const facadeStyles = ['fins', 'bands', 'pairs'];
+    const finGeos = [];
+    const balconyGeos = [];
+    const pairWindowGeos = [];
+
     [-38, 0, 38].forEach((tx, index) => {
+      const style = facadeStyles[index];
+
       const tower = new THREE.Mesh(new THREE.BoxGeometry(16, 32, 12), towerMat);
       if (index === 1) tower.name = 'rusunawa-sunter-tower';
       tower.position.set(tx, 16.5, -18);
@@ -13325,11 +13334,55 @@ export class LandmarkModels {
       roof.position.set(tx, 32.9, -18);
       group.add(roof);
 
-      [6, 12, 18, 24, 30].forEach((by) => {
-        const band = new THREE.Mesh(new THREE.BoxGeometry(16.3, 1.1, 12.3), windowMat);
-        band.position.set(tx, by, -18);
-        group.add(band);
-      });
+      if (style === 'pairs') {
+        [6, 12, 18, 24, 30].forEach((by) => {
+          const sill = new THREE.BoxGeometry(15.4, 0.2, 0.4);
+          sill.translate(tx, by - 0.8, -12.2);
+          finGeos.push(sill);
+          [-4.6, 0, 4.6].forEach((cx) => {
+            [-1.2, 1.2].forEach((px) => {
+              const win = new THREE.BoxGeometry(1.8, 1.2, 0.3);
+              win.translate(tx + cx + px, by, -12.15);
+              pairWindowGeos.push(win);
+            });
+          });
+        });
+      } else {
+        [6, 12, 18, 24, 30].forEach((by) => {
+          const band = new THREE.Mesh(new THREE.BoxGeometry(16.3, 1.1, 12.3), windowMat);
+          band.position.set(tx, by, -18);
+          group.add(band);
+        });
+      }
+
+      if (style === 'fins') {
+        for (let f = -6; f <= 6; f += 2) {
+          const fin = new THREE.BoxGeometry(0.36, 30, 0.8);
+          fin.translate(tx + f, 16.5, -12.4);
+          finGeos.push(fin);
+        }
+        [9, 21].forEach((by) => {
+          const slab = new THREE.BoxGeometry(12.6, 0.3, 1.6);
+          slab.translate(tx, by, -11.4);
+          balconyGeos.push(slab);
+          const rail = new THREE.BoxGeometry(12.6, 0.9, 0.12);
+          rail.translate(tx, by + 0.55, -10.65);
+          balconyGeos.push(rail);
+        });
+      } else if (style === 'bands') {
+        const parapet = new THREE.BoxGeometry(16.8, 1.0, 12.8);
+        parapet.translate(tx, 33.5, -18);
+        finGeos.push(parapet);
+        [-4, 4].forEach((px) => {
+          const tank = new THREE.CylinderGeometry(1.2, 1.2, 1.8, 8);
+          tank.translate(tx + px, 34.4, -20);
+          finGeos.push(tank);
+        });
+      } else {
+        const canopy = new THREE.BoxGeometry(9.2, 0.35, 5.2);
+        canopy.translate(tx, 3.35, -9.4);
+        balconyGeos.push(canopy);
+      }
 
       const core = new THREE.Mesh(new THREE.BoxGeometry(3, 33, 3), concreteMat);
       core.position.set(tx + 5.8, 16.5, -10.6);
@@ -13346,6 +13399,21 @@ export class LandmarkModels {
       const stair = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.24, 6), whiteMat);
       stair.position.set(tx - 6.4, 0.9, -8.6);
       group.add(stair);
+    });
+
+    const facadeDetails = [
+      [finGeos, concreteMat, 'rusunawa-sunter-fins'],
+      [balconyGeos, whiteMat, 'rusunawa-sunter-balconies'],
+      [pairWindowGeos, windowMat, 'rusunawa-sunter-pair-windows']
+    ];
+    facadeDetails.forEach(([geos, mat, name]) => {
+      if (geos.length === 0) return;
+      const merged = BufferGeometryUtils.mergeGeometries(geos, false);
+      if (!merged) return;
+      const mesh = new THREE.Mesh(merged, mat);
+      mesh.name = name;
+      mesh.castShadow = true;
+      group.add(mesh);
     });
 
     [-52, -20, 12, 44].forEach((tx) => {
@@ -13416,6 +13484,27 @@ export class LandmarkModels {
     const hBar = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.08, 0.9), redMat);
     hBar.position.set(-10, 35.65, -20);
     group.add(hBar);
+
+    // Dua belas lampu perimeter helipad menyala malam lewat tagNightWindow,
+    // tanpa PointLight dan hanya satu draw call gabungan.
+    const helipadLightGeos = [];
+    const helipadLightMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.4 }),
+      0.72,
+      0xfff4d6
+    );
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * Math.PI * 2;
+      const lamp = new THREE.CylinderGeometry(0.22, 0.26, 0.16, 6);
+      lamp.translate(-10 + Math.cos(angle) * 6.9, 35.62, -20 + Math.sin(angle) * 6.9);
+      helipadLightGeos.push(lamp);
+    }
+    const helipadLights = new THREE.Mesh(
+      BufferGeometryUtils.mergeGeometries(helipadLightGeos, false),
+      helipadLightMat
+    );
+    helipadLights.name = 'rsud-koja-helipad-lights';
+    group.add(helipadLights);
 
     const ward = new THREE.Mesh(new THREE.BoxGeometry(44, 12, 22), wingMat);
     ward.position.set(34, 6.3, -4);

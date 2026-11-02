@@ -1,6 +1,17 @@
 import * as THREE from 'three';
 import { JAKARTA_LANDMARKS } from '../config/landmarks.js';
 
+const LABEL_DECLUTTER_PADDING = 5;
+
+function labelRectsOverlap(a, b, padding) {
+  return (
+    a.left - padding < b.right &&
+    a.right + padding > b.left &&
+    a.top - padding < b.bottom &&
+    a.bottom + padding > b.top
+  );
+}
+
 export class UIManager {
   constructor({ onSelectPreset, onTimeChange, onResetNorth, transitLabels = [] }) {
     this.onSelectPreset = onSelectPreset;
@@ -275,6 +286,7 @@ export class UIManager {
 
     JAKARTA_LANDMARKS.forEach((landmark, index) => {
       const num = String(index + 1).padStart(2, '0');
+      const labelText = landmark.shortName || landmark.name;
       const el = document.createElement('button');
       el.type = 'button';
       el.className =
@@ -283,7 +295,7 @@ export class UIManager {
       el.innerHTML = `
         <div class="label-pill px-2 py-0.5 rounded-[5px] bg-white/95 border border-[#EAEAEA] flex items-center gap-1.5 transition-all">
           <span class="label-num font-mono text-[9px] font-semibold text-[#787774] transition-colors">${num}</span>
-          <span class="label-text text-[10px] font-sans font-medium text-[#111111] whitespace-nowrap tracking-tight transition-colors">${landmark.shortName || landmark.name}</span>
+          <span class="label-text text-[10px] font-sans font-medium text-[#111111] whitespace-nowrap tracking-tight transition-colors">${labelText}</span>
         </div>
         <div class="w-px h-2.5 bg-[#111111]/40"></div>
       `;
@@ -298,6 +310,7 @@ export class UIManager {
       this.labelElements.push({
         landmark,
         element: el,
+        labelWidth: 30 + labelText.length * 6,
         worldPos: new THREE.Vector3(
           landmark.position[0],
           landmark.labelHeight || 28,
@@ -398,6 +411,7 @@ export class UIManager {
     const heightHalf = window.innerHeight / 2;
     camera.getWorldDirection(this.forwardVec);
 
+    const labelCandidates = [];
     for (let i = 0; i < this.labelElements.length; i++) {
       const item = this.labelElements[i];
 
@@ -419,32 +433,58 @@ export class UIManager {
         continue;
       }
 
-      const x = this.tempVec.x * widthHalf + widthHalf;
-      const y = -(this.tempVec.y * heightHalf) + heightHalf;
+      labelCandidates.push({
+        item,
+        x: this.tempVec.x * widthHalf + widthHalf,
+        y: -(this.tempVec.y * heightHalf) + heightHalf,
+        dist: camera.position.distanceTo(item.worldPos)
+      });
+    }
+
+    // Compact LOD badges crowd at far zooms (Ancol/JIS/Koja/Priok cluster).
+    // Place nearest pins first, then hide only far compact badges that collide.
+    labelCandidates.sort((a, b) => a.dist - b.dist);
+    const placedLabelRects = [];
+
+    for (let i = 0; i < labelCandidates.length; i++) {
+      const { item, x, y, dist } = labelCandidates[i];
 
       // 3. Smooth distance fading & Smart LOD
-      const dist = camera.position.distanceTo(item.worldPos);
       if (dist > 1050 || dist < 14) {
         item.element.style.opacity = '0';
         item.element.style.pointerEvents = 'none';
-      } else {
-        const isCompact = dist > 360;
-        item.element.classList.toggle('is-compact', isCompact);
-
-        // Sorting by depth so closer pins stay on top
-        item.element.style.zIndex = Math.round(1500 - dist);
-
-        let alpha = 1.0;
-        if (dist > 800) {
-          alpha = Math.max(0, (1050 - dist) / 250);
-        }
-
-        const scale = isCompact ? Math.max(0.76, 1.0 - (dist - 360) * 0.00035) : 1.0;
-
-        item.element.style.opacity = alpha.toFixed(2);
-        item.element.style.pointerEvents = 'auto';
-        item.element.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -100%) scale(${scale.toFixed(2)})`;
+        continue;
       }
+
+      const isCompact = dist > 360;
+      const rectWidth = isCompact ? 28 : item.labelWidth;
+      const rect = { left: x - rectWidth / 2, right: x + rectWidth / 2, top: y - 24, bottom: y };
+
+      if (
+        isCompact &&
+        placedLabelRects.some((placed) => labelRectsOverlap(placed, rect, LABEL_DECLUTTER_PADDING))
+      ) {
+        item.element.style.opacity = '0';
+        item.element.style.pointerEvents = 'none';
+        continue;
+      }
+      placedLabelRects.push(rect);
+
+      item.element.classList.toggle('is-compact', isCompact);
+
+      // Sorting by depth so closer pins stay on top
+      item.element.style.zIndex = Math.round(1500 - dist);
+
+      let alpha = 1.0;
+      if (dist > 800) {
+        alpha = Math.max(0, (1050 - dist) / 250);
+      }
+
+      const scale = isCompact ? Math.max(0.76, 1.0 - (dist - 360) * 0.00035) : 1.0;
+
+      item.element.style.opacity = alpha.toFixed(2);
+      item.element.style.pointerEvents = 'auto';
+      item.element.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -100%) scale(${scale.toFixed(2)})`;
     }
 
     // Secondary transit pins: closer range, no pointer events, collapse to badges.

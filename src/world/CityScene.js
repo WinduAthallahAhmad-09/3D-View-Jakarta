@@ -9358,8 +9358,21 @@ export class CityScene {
     });
 
     // Air OSM duduk 0,06 di atas kubus air bangun-tangan (0,04) agar tidak z-fight.
+    let waterwayCaps = 0;
     VOID_J_OSM.waterways.forEach((waterway) => {
       const points = waterway.points;
+      if (points.length < 2) return;
+
+      // Cakram penutup di kedua ujung way agar mulut waterway bulat,
+      // bukan persegi mengikuti titik akhir polyline OSM.
+      [points[0], points[points.length - 1]].forEach(([cx, cz]) => {
+        const cap = new THREE.CircleGeometry(waterway.width * 0.5, 10);
+        cap.rotateX(-Math.PI / 2);
+        cap.translate(cx, 0.1005, cz);
+        waterGeos.push(cap);
+        waterwayCaps++;
+      });
+
       for (let i = 0; i < points.length - 1; i++) {
         const [x1, z1] = points[i];
         const [x2, z2] = points[i + 1];
@@ -9545,6 +9558,7 @@ export class CityScene {
       roadPoints: VOID_J_OSM.roads.reduce((sum, road) => sum + road.points.length, 0),
       waterways: VOID_J_OSM.waterways.length,
       waterPoints: VOID_J_OSM.waterways.reduce((sum, waterway) => sum + waterway.points.length, 0),
+      waterwayCaps,
       waterBodies: VOID_J_OSM.waterBodies.length,
       bridges: crossings.length,
       lamps: lampCount,
@@ -10096,6 +10110,18 @@ export class CityScene {
       { x: prCenterX + 8, z: prCenterZ - 12, scale: 1.02 }
     ].forEach((tree) => treePositions.push(tree));
 
+    // Delapan lampu taman rendah di tepi plaza. Kepala lampu memakai mesh papan
+    // yang sudah menyala malam, jadi tidak ada draw call maupun PointLight baru.
+    const bollardCount = 8;
+    const bollardInsetX = VOID_J_PR_PLOT.w * 0.5 - 1.6;
+    const bollardInsetZ = VOID_J_PR_PLOT.d * 0.5 - 1.4;
+    for (let i = 0; i < bollardCount; i++) {
+      const bx = prCenterX + (i < bollardCount / 2 ? -bollardInsetX : bollardInsetX);
+      const bz = prCenterZ + ((i % 4) / 3 - 0.5) * 2 * bollardInsetZ;
+      makeBox(0.18, 1.3, 0.18, bx, 0.85, bz, 0, steelGeos);
+      makeBox(0.34, 0.22, 0.34, bx, 1.55, bz, 0, signGeos);
+    }
+
     // =========================================================================
     // 2. ENAM FEEDER HALTE DI GERBANG ANCHOR
     // Sisi peron dipilih agar menghadap tapak anchor dan bebas dari massa
@@ -10248,6 +10274,7 @@ export class CityScene {
       parkingBays: bayCount,
       halte: halteSpecs.map((spec) => spec.name),
       trees: treePositions.length,
+      gardenLights: bollardCount,
       drawCalls: 5
     };
   }

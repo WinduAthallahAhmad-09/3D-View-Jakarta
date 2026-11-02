@@ -2479,8 +2479,8 @@ assert.ok(
 );
 assert.strictEqual(
   (landmarkModelsContent.match(/LandmarkModels\.tagNightWindow\(/g) || []).length,
-  43,
-  'Expected 43 tagged night materials across the Void C/D/E/F/G/H/I/J anchors, Mall Kelapa Gading and Danau Rawa Buaya'
+  44,
+  'Expected 44 tagged night materials across the Void C/D/E/F/G/H/I/J anchors, Mall Kelapa Gading, Danau Rawa Buaya and the RSUD Koja helipad'
 );
 assert.ok(
   landmarkModelsContent.includes('createUniversitasMercuBuana') &&
@@ -7075,7 +7075,113 @@ for (let i = 0; i < voidJHalteCenters.length; i++) {
   }
 }
 
-console.log(`✅ All 126 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 95: P2 visual Void J — fasad rusunawa, lampu helipad, ujung waterway,
+// lampu taman P&R, dan declutter label Tanjung Priok
+const voidJOsmBody = sliceCityBuilder('  buildVoidJNorthJakarta() {');
+const rusunawaBody = sliceLandmarkBuilder('static createRusunawaSunter() {');
+assert.ok(!rusunawaBody.includes('new THREE.PointLight'), 'Rusunawa Sunter must not add PointLights');
+assert.ok(rusunawaBody.includes('const facadeStyles'), 'Rusunawa Sunter must declare per-tower facade styles');
+assert.ok(
+  (rusunawaBody.match(/facadeStyles = \[/g) || []).length === 1 &&
+    rusunawaBody.includes("'fins'") &&
+    rusunawaBody.includes("'bands'") &&
+    rusunawaBody.includes("'pairs'"),
+  'Rusunawa Sunter must differentiate all three towers'
+);
+assert.ok(rusunawaBody.includes("'rusunawa-sunter-fins'"), 'Rusunawa Sunter missing the western fin mesh');
+assert.ok(
+  rusunawaBody.includes("'rusunawa-sunter-balconies'"),
+  'Rusunawa Sunter missing the western balcony mesh'
+);
+assert.ok(
+  rusunawaBody.includes("'rusunawa-sunter-pair-windows'"),
+  'Rusunawa Sunter missing the eastern paired-window mesh'
+);
+assert.ok(
+  rusunawaBody.includes("tower.name = 'rusunawa-sunter-tower'"),
+  'Rusunawa Sunter must keep the middle-tower audit marker'
+);
+assert.ok(
+  rusunawaBody.includes('BufferGeometryUtils.mergeGeometries'),
+  'Rusunawa facade details must merge to limit draw calls'
+);
+
+const rsudKojaBody = sliceLandmarkBuilder('static createRSUDKoja() {');
+assert.ok(!rsudKojaBody.includes('new THREE.PointLight'), 'RSUD Koja must not add PointLights');
+assert.ok(
+  rsudKojaBody.includes("'rsud-koja-helipad-lights'"),
+  'RSUD Koja missing the helipad perimeter light mesh'
+);
+assert.ok(
+  rsudKojaBody.includes('for (let i = 0; i < 12; i++)'),
+  'RSUD Koja helipad must carry twelve perimeter lights'
+);
+assert.ok(
+  rsudKojaBody.includes('Math.cos(angle) * 6.9') && rsudKojaBody.includes('Math.sin(angle) * 6.9'),
+  'RSUD Koja helipad lights must sit on the pad rim'
+);
+assert.ok(
+  rsudKojaBody.includes('tagNightWindow') && rsudKojaBody.includes('0.72'),
+  'RSUD Koja helipad lights must glow at night without new PointLights'
+);
+
+assert.ok(
+  citySceneContent.includes('let waterwayCaps = 0;'),
+  'Void J waterway builder must count rounded caps'
+);
+assert.ok(
+  voidJOsmBody.includes('new THREE.CircleGeometry'),
+  'Void J waterway ends must use a rounded cap instead of a squared box'
+);
+assert.ok(voidJOsmBody.includes('waterwayCaps++'), 'Void J waterway cap counter never increments');
+assert.ok(
+  voidJOsmBody.includes('waterwayCaps'),
+  'Void J OSM stats must report the rounded waterway caps'
+);
+assert.ok(
+  voidJOsmBody.includes("mergeAndAdd(waterGeos, waterMat, 'voidj-water'"),
+  'Void J caps must merge into the existing water mesh'
+);
+
+assert.ok(
+  voidJTransitBody.includes('const bollardCount = 8;'),
+  'Void J P&R must carry eight garden lights'
+);
+assert.ok(
+  voidJTransitBody.includes('gardenLights: bollardCount'),
+  'Void J transit stats missing the garden light count'
+);
+assert.ok(
+  voidJTransitBody.includes('makeBox(0.34, 0.22, 0.34'),
+  'Void J P&R garden light heads must merge into the night sign mesh'
+);
+assert.ok(
+  voidJTransitBody.includes('makeBox(0.18, 1.3, 0.18'),
+  'Void J P&R garden light posts must merge into the steel mesh'
+);
+assert.ok(
+  !voidJTransitBody.includes('new THREE.PointLight'),
+  'Void J P&R garden lights must not add PointLights'
+);
+
+assert.ok(
+  uiManagerContent.includes('LABEL_DECLUTTER_PADDING'),
+  'UIManager must declare the compact-label declutter padding'
+);
+assert.ok(
+  uiManagerContent.includes('labelRectsOverlap'),
+  'UIManager missing the compact-label overlap test'
+);
+assert.ok(
+  uiManagerContent.includes('labelCandidates.sort'),
+  'UIManager must declutter compact labels nearest-first'
+);
+assert.ok(
+  uiManagerContent.includes('placedLabelRects'),
+  'UIManager must track placed compact labels before hiding overlaps'
+);
+
+console.log(`✅ All 126 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
