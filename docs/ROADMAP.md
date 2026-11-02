@@ -466,6 +466,20 @@ Audit 2026-11-02 menemukan jaringan tiap void dikurasi terpisah dengan klip dan 
 - **Verifikasi runtime** (Chrome headless 156 SwiftShader, viewport 1280×800, DPR 1): `npm test` **47.279 assertion**; 0 error konsol; **131 label landmark** + **59 pin transit** = **190 pin DOM**; `nightMaterials` **102**, **13 `PointLight`**; 0 error halaman. Screenshot `seam-s1.png`, `seam-s2.png`, `seam-s3h.png`, dan `seam-s3b.png`.
 - **Sisa:** seam vertikal S3b hanya menyambung stub yang berjarak ≤70 unit; jalan yang lebih jauh tetap bergantung pada jaringan tiap dataset. Seam antar-void baru (Void L/M) akan memakai helper yang sama.
 
+## Catatan Void L
+
+Audit 2026-11-02 menemukan kekosongan **x 960–1.800 / z 560–960** (≈20 km²) di Cipinang Melayu–Pondok Kelapa: jaringan OSM dan urban fabric Void F berhenti di `z=560`, sehingga koridor Jakarta Timur ini masih berupa pelat kosong. Tahap 1 mengisi klaster dengan enam anchor berjarak ≥70 unit, memakai pola tapak mandiri yang sama seperti Void E–K.
+
+- **Kotak klip** `VOID_L_CLIP_BOX` `{minX: 960, maxX: 1.800, minZ: 560, maxZ: 960}` disiapkan untuk dataset OSM Tahap 2; enam tapak `VOID_L_ANCHOR_SITES` hanya memask elemen Tahap 2, sedangkan jalan melintas utuh di bawah pelat tapak.
+- **Universitas Borobudur** (#132, 1.052,7/694,9): tapak 106×86, gedung utama 58×20×22 (`univ-borobudur-main`), sayap, pita kaca gabungan (`univ-borobudur-glass`), atap, plaza, gerbang, papan nama, parkir, dan empat pohon.
+- **RS Harum Sisma Medika** (#133, 1.220,4/754,1): tapak 88×64, podium 50×8×24, menara 30×44×20 (`rs-harum-tower`), pita kaca (`rs-harum-glass`), atap + helipad, kanopi IGD berkolom, papan nama, parkir, dan empat pohon.
+- **Puskesmas Duren Sawit** (#134, 1.241,5/668,2): tapak 84×60, massa utama 46×7×24 (`puskesmas-duren-sawit-main`), aneks, kaca gabungan (`puskesmas-duren-sawit-glass`), atap, kanopi, papan nama, parkir, dan empat pohon.
+- **Pasar Tradisional Kodam** (#135, 1.316,8/816,0): tapak 86×60, balai pasar 46×8×22 (`pasar-kodam-hall`), lantai atas, kaca (`pasar-kodam-glass`), atap panel + ridge, papan nama, kios beratap gabungan (`pasar-kodam-kiosks`), parkir, dan empat pohon.
+- **Kantor Kelurahan Pondok Kelapa** (#136, 1.576,3/633,3): tapak 82×54, kantor 40×10×20 (`kantor-pondok-kelapa-main`), pita kaca (`kantor-pondok-kelapa-glass`), atap, kanopi, plaza, tiang bendera, papan nama, parkir, dan empat pohon.
+- **Nuansa Pondok Kelapa** (#137, 1.662,5/608,7): tapak 96×74, tiga blok gabungan (`nuansa-pondok-kelapa-block`), lima ruko gabungan (`nuansa-pondok-kelapa-shophouses`), pita kaca (`nuansa-pondok-kelapa-glass`), gerbang, parkir, dan empat pohon.
+- **Verifikasi runtime Tahap 1** (Chrome headless 156 SwiftShader, viewport 1280×800, DPR 1): `npm test` **49.094 assertion**; 0 error konsol; **137 label landmark** + **59 pin transit** = **196 pin DOM**; tiga counter "137"; **138 tombol tour**; keenam marker ditemukan tepat satu kali; geometri enam grup **139 mesh / 3.204 triangle** (**+139 draw call / +3.204 triangle**); `nightMaterials` **113** (102 + 11 material kaca `#ffc46b` @ 0,62), **13 `PointLight`**; klik keenam tombol tour membuka drawer berjudul tepat. Delapan screenshot `voidl1-day-00-overview.png`, `voidl1-day-01-universitas-borobudur.png` … `voidl1-day-06-nuansa-pondok-kelapa.png`, dan `voidl1-night-00-overview.png`.
+- **Sisa Void L:** Tahap 2–4 belum dibangun — dataset OSM (jalan, waterway, air, PJU, pohon), seam F–L di `z=560`, infill urban fabric, dan transit kawasan. Belum ada pengukuran FPS perangkat nyata.
+
 ## Catatan Material Malam Void C, D, E
 
 Inisiatif ini (selesai 2026-10-29) menutup P2 berulang Tahap 1–4 Void C/D/E: anchor, infill, dan transit kawasan sebelumnya tidak terdaftar di `nightMaterials`, sehingga pandangan malam hanya siluet gelap ditambah pool PJU. Desain yang disetujui: satu helper registrasi, jendela infill per kawasan, papan nama transit menyala, dan penandaan material kaca anchor — seluruhnya **tanpa `PointLight` baru**.

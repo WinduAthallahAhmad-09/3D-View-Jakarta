@@ -257,6 +257,19 @@ const VOID_K_ANCHOR_SITES = [
   [1990, 2066, -95, -43]    // Pasar Ujung Menteng
 ];
 
+// Kotak klip Void L (Cipinang Melayu–Pondok Kelapa) untuk jaringan OSM tahap 2.
+const VOID_L_CLIP_BOX = { minX: 960, maxX: 1800, minZ: 560, maxZ: 960 };
+
+// Tapak enam anchor Void L; jalan OSM tetap digambar utuh di bawah pelat tapak.
+const VOID_L_ANCHOR_SITES = [
+  [1000, 1106, 652, 738],   // Universitas Borobudur
+  [1176, 1264, 722, 786],   // RS Harum Sisma Medika
+  [1200, 1284, 638, 698],   // Puskesmas Duren Sawit
+  [1274, 1360, 786, 846],   // Pasar Tradisional Kodam
+  [1534, 1616, 606, 660],   // Kantor Kelurahan Pondok Kelapa
+  [1616, 1712, 572, 646]    // Nuansa Pondok Kelapa
+];
+
 // Strip seam di tepi timur clip Void F. Infill K berhenti sebelum x=2012 agar
 // deret ruko dua tahap tidak saling menimpa di sekitar x=1995.
 const VOID_K_LEGACY_INFILL_RECTS = [
@@ -8218,6 +8231,12 @@ export class CityScene {
 
   isInsideVoidKAnchorSite(x, z) {
     return VOID_K_ANCHOR_SITES.some(
+      ([x1, x2, z1, z2]) => x >= x1 - 2 && x <= x2 + 2 && z >= z1 - 2 && z <= z2 + 2
+    );
+  }
+
+  isInsideVoidLAnchorSite(x, z) {
+    return VOID_L_ANCHOR_SITES.some(
       ([x1, x2, z1, z2]) => x >= x1 - 2 && x <= x2 + 2 && z >= z1 - 2 && z <= z2 + 2
     );
   }
@@ -16928,7 +16947,13 @@ export class CityScene {
       "wisma-atlet-kemayoran": () => LandmarkModels.createWismaAtletKemayoran(),
       "pasar-cakung": () => LandmarkModels.createPasarCakung(),
       "rusun-pinus-elok": () => LandmarkModels.createRusunPinusElok(),
-      "pasar-ujung-menteng": () => LandmarkModels.createPasarUjungMenteng()
+      "pasar-ujung-menteng": () => LandmarkModels.createPasarUjungMenteng(),
+      "universitas-borobudur": () => LandmarkModels.createUniversitasBorobudur(),
+      "rs-harum-sisma-medika": () => LandmarkModels.createRSHarumSismaMedika(),
+      "puskesmas-duren-sawit": () => LandmarkModels.createPuskesmasDurenSawit(),
+      "pasar-tradisional-kodam": () => LandmarkModels.createPasarTradisionalKodam(),
+      "kantor-pondok-kelapa": () => LandmarkModels.createKantorKelurahanPondokKelapa(),
+      "nuansa-pondok-kelapa": () => LandmarkModels.createNuansaPondokKelapa()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {

@@ -1,5 +1,5 @@
 /**
- * Geospatial configuration for 123 Jakarta landmarks across all city regions.
+ * Geospatial configuration for 137 Jakarta landmarks across all city regions.
  * Scene coordinates use a uniform metric projection centered at Bundaran Hotel Indonesia
  * (-6.194957°, 106.823048° -> [0, 0, 0]):
  *   X = (lng - 106.823048) * 14100.0   (~7.81 meters per scene unit)
@@ -2951,6 +2951,141 @@ export const JAKARTA_LANDMARKS = [
       "Pasar Ujung Menteng berada di Jl. Bekasi Raya, Ujung Menteng, Cakung.",
       "Pasar ini melayani warga Ujung Menteng dan permukiman perbatasan Jakarta–Bekasi.",
       "Lokasinya berdekatan dengan Electronic City Ujung Menteng dan SPBU di koridor Bekasi Raya."
+    ]
+  },
+  // =====================================================
+  // ZONA 15: CIPINANG MELAYU & PONDOK KELAPA (JAKARTA TIMUR)
+  // =====================================================
+  {
+    id: "universitas-borobudur",
+    name: "Universitas Borobudur",
+    shortName: "Universitas Borobudur",
+    category: "Pendidikan Tinggi",
+    tagline: "Kampus swasta di koridor Cipinang Muara–Klender",
+    height: "20 meter (Gedung Akademik Utama)",
+    year: "Tidak tercatat",
+    architect: "Yayasan Pendidikan Borobudur",
+    location: "Jl. Raya Cipinang Muara, Klender, Duren Sawit, Jakarta Timur",
+    coordinates: { lat: -6.2439649, lng: 106.8977073 },
+    position: [1052.7, 0, 694.9],
+    labelHeight: 46,
+    cameraPosition: [1052.7, 110, 814.9],
+    cameraTarget: [1052.7, 24, 694.9],
+    description: "Kampus Universitas Borobudur di koridor Cipinang Muara–Klender. Menampilkan gedung akademik utama berpita kaca, sayap kuliah, gerbang kampus, plaza masuk, area parkir, papan nama, serta deretan pohon peneduh di dalam tapak.",
+    facts: [
+      "Universitas Borobudur adalah kampus swasta di Jakarta Timur yang melayani warga Cipinang Melayu, Klender, dan Duren Sawit.",
+      "Kampusnya berada di koridor Jalan Raya Cipinang Muara yang menghubungkan Klender dengan kawasan Cipinang.",
+      "Gedung akademik utama menghadap plaza masuk dengan gerbang dan area parkir di sisi selatan tapak."
+    ]
+  },
+  {
+    id: "rs-harum-sisma-medika",
+    name: "RS Harum Sisma Medika",
+    shortName: "RS Harum Sisma Medika",
+    category: "Kesehatan & Rumah Sakit",
+    tagline: "Rumah sakit swasta di koridor Tarum Barat, Cipinang Melayu",
+    height: "52 meter (Menara Rawat Inap)",
+    year: "Tidak tercatat",
+    architect: "Pengelola RS Harum Sisma Medika",
+    location: "Jl. Tarum Barat, Cipinang Melayu, Makasar, Jakarta Timur",
+    coordinates: { lat: -6.2481403, lng: 106.9096007 },
+    position: [1220.4, 0, 754.1],
+    labelHeight: 54,
+    cameraPosition: [1220.4, 96, 874.1],
+    cameraTarget: [1220.4, 28, 754.1],
+    description: "Rumah sakit swasta di Jl. Tarum Barat, Cipinang Melayu. Menampilkan menara rawat inap berpita jendela, podium layanan, kanopi instalasi gawat darurat, helipad atap, papan nama, area parkir, serta pohon peneduh di dalam tapak.",
+    facts: [
+      "RS Harum Sisma Medika melayani warga Cipinang Melayu, Makasar, dan Duren Sawit di Jakarta Timur.",
+      "Rumah sakit ini berada di koridor Jalan Tarum Barat yang terhubung ke Jalan I Gusti Ngurah Rai.",
+      "Podium layanan menghadap kanopi IGD, sementara menara rawat inap berdiri di belakangnya dengan helipad atap."
+    ]
+  },
+  {
+    id: "puskesmas-duren-sawit",
+    name: "Puskesmas Kecamatan Duren Sawit",
+    shortName: "Puskesmas Duren Sawit",
+    category: "Kesehatan Masyarakat",
+    tagline: "Puskesmas kecamatan di jantung Duren Sawit",
+    height: "7 meter (Gedung Layanan Dua Lantai)",
+    year: "Tidak tercatat",
+    architect: "Dinas Kesehatan DKI Jakarta",
+    location: "Kecamatan Duren Sawit, Jakarta Timur",
+    coordinates: { lat: -6.2420771, lng: 106.9111001 },
+    position: [1241.5, 0, 668.2],
+    labelHeight: 32,
+    cameraPosition: [1241.5, 74, 778.2],
+    cameraTarget: [1241.5, 14, 668.2],
+    description: "Puskesmas kecamatan yang melayani layanan kesehatan primer warga Duren Sawit. Menampilkan gedung layanan dua lantai berpita kaca, sayap pemeriksaan, kanopi pendaftaran, papan nama, area parkir, serta pohon peneduh di dalam tapak.",
+    facts: [
+      "Puskesmas Kecamatan Duren Sawit menyediakan layanan kesehatan primer tingkat kecamatan.",
+      "Lokasinya berada di kawasan permukiman Duren Sawit yang padat dan dekat dengan koridor Cipinang Melayu.",
+      "Gedung layanan menghadap kanopi pendaftaran dengan area parkir di sisi timur tapak."
+    ]
+  },
+  {
+    id: "pasar-tradisional-kodam",
+    name: "Pasar Tradisional Kodam",
+    shortName: "Pasar Kodam",
+    category: "Pasar Tradisional & Ekonomi Rakyat",
+    tagline: "Pasar lingkungan di kawasan Kodam, Duren Sawit",
+    height: "11 meter (Balai Pasar Dua Lantai)",
+    year: "Tidak tercatat",
+    architect: "Perumda Pasar Jaya",
+    location: "Kawasan Kodam, Duren Sawit, Jakarta Timur",
+    coordinates: { lat: -6.2525, lng: 106.916441 },
+    position: [1316.8, 0, 816.0],
+    labelHeight: 42,
+    cameraPosition: [1316.8, 82, 936.0],
+    cameraTarget: [1316.8, 16, 816.0],
+    description: "Pasar lingkungan di kawasan Kodam yang melayani warga Pondok Kelapa dan Duren Sawit. Menampilkan balai pasar dua lantai beratap pelana, deret kios sembako, papan nama, area parkir, serta pohon peneduh di dalam tapak.",
+    facts: [
+      "Pasar Tradisional Kodam menjadi pasar lingkungan bagi permukiman di kawasan Kodam, Duren Sawit.",
+      "Pasar ini berada di antara koridor Pondok Kelapa dan permukiman padat Duren Sawit.",
+      "Balai pasar dua lantai dikelilingi deret kios dan area parkir di sisi timur tapak."
+    ]
+  },
+  {
+    id: "kantor-pondok-kelapa",
+    name: "Kantor Kelurahan Pondok Kelapa",
+    shortName: "Kantor Pondok Kelapa",
+    category: "Pemerintahan & Pelayanan Publik",
+    tagline: "Pelayanan administrasi kelurahan Pondok Kelapa",
+    height: "10 meter (Gedung Layanan)",
+    year: "Tidak tercatat",
+    architect: "Pemerintah Provinsi DKI Jakarta",
+    location: "Pondok Kelapa, Duren Sawit, Jakarta Timur",
+    coordinates: { lat: -6.2396152, lng: 106.9348446 },
+    position: [1576.3, 0, 633.3],
+    labelHeight: 34,
+    cameraPosition: [1576.3, 78, 743.3],
+    cameraTarget: [1576.3, 16, 633.3],
+    description: "Kantor kelurahan yang melayani administrasi kependudukan warga Pondok Kelapa. Menampilkan gedung layanan berpita kaca, kanopi pendaftaran, plaza upacara dengan tiang bendera, papan nama, area parkir, serta pohon peneduh di dalam tapak.",
+    facts: [
+      "Kantor Kelurahan Pondok Kelapa melayani administrasi kependudukan dan perizinan warga tingkat kelurahan.",
+      "Lokasinya berada di kawasan pemerintahan Pondok Kelapa, Duren Sawit, Jakarta Timur.",
+      "Plaza upacara dengan tiang bendera berada di depan gedung layanan yang menghadap kanopi pendaftaran."
+    ]
+  },
+  {
+    id: "nuansa-pondok-kelapa",
+    name: "Nuansa Pondok Kelapa",
+    shortName: "Nuansa Pondok Kelapa",
+    category: "Hunian & Permukiman",
+    tagline: "Perumahan dan pertokoan di Pondok Kelapa",
+    height: "15 meter (Blok Hunian)",
+    year: "Tidak tercatat",
+    architect: "Pengembang Kawasan Nuansa",
+    location: "Pondok Kelapa, Duren Sawit, Jakarta Timur",
+    coordinates: { lat: -6.2378808, lng: 106.9409555 },
+    position: [1662.5, 0, 608.7],
+    labelHeight: 48,
+    cameraPosition: [1662.5, 100, 718.7],
+    cameraTarget: [1662.5, 24, 608.7],
+    description: "Perumahan dan pertokoan Nuansa Pondok Kelapa di sisi timur kelurahan. Menampilkan tiga blok hunian berpita jendela, deret ruko, gerbang kawasan, area parkir, serta pohon peneduh di dalam tapak.",
+    facts: [
+      "Nuansa Pondok Kelapa merupakan kawasan hunian dan pertokoan di Pondok Kelapa, Duren Sawit.",
+      "Kawasan ini berada di sisi timur kelurahan, dekat dengan koridor Jalan Raya Pondok Kelapa.",
+      "Tiga blok hunian berjajar di belakang deret ruko yang menghadap gerbang kawasan."
     ]
   }
 ];
