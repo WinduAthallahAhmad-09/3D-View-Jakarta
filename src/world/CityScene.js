@@ -416,6 +416,7 @@ export class CityScene {
     this.voidITransitLabels = [];
     this.voidJTransitLabels = [];
     this.voidKTransitLabels = [];
+    this.voidLTransitLabels = [];
     this.pjuLampTransforms = [];
     this.mergedPjuLampTransforms = [];
     this.pjuLightPool = [];
@@ -476,6 +477,7 @@ export class CityScene {
     this.buildVoidKTransit();
     this.buildVoidL();
     this.buildVoidLInfill();
+    this.buildVoidLTransit();
     this.buildVoidBInfillAndIndustry();
     this.buildVoidBTransit();
     this.buildEastJakartaInfrastructure();
@@ -8304,6 +8306,263 @@ export class CityScene {
       corridors: shophouseRoads.size,
       nightWindows,
       drawCalls: 6
+    };
+  }
+
+  /**
+   * Void L Tahap 4: transit kawasan Cipinang Melayu–Pondok Kelapa.
+   *
+   * 1. Park-and-Ride Cipinang Melayu pada lahan 30x18 yang sudah dipesan infill.
+   * 2. Enam feeder halte: tiga gerbang anchor dan tiga simpul kawasan.
+   * 3. Lima draw call, papan menyala malam, tanpa PointLight baru.
+   */
+  buildVoidLTransit() {
+    const concreteGeos = [];
+    const steelGeos = [];
+    const signGeos = [];
+    const treePositions = [];
+    const halteLabels = [];
+
+    const makeBox = (w, h, d, x, y, z, rotY = 0, target = concreteGeos) => {
+      const geo = new THREE.BoxGeometry(w, h, d);
+      if (rotY !== 0) geo.rotateY(rotY);
+      geo.translate(x, y, z);
+      target.push(geo);
+    };
+
+    const addMerged = (geos, material, name, castShadow = false) => {
+      if (geos.length === 0) return;
+      const merged = BufferGeometryUtils.mergeGeometries(geos, false);
+      if (!merged) return;
+      const mesh = new THREE.Mesh(merged, material);
+      mesh.name = name;
+      mesh.castShadow = castShadow;
+      mesh.receiveShadow = true;
+      this.proceduralGroup.add(mesh);
+    };
+
+    // =========================================================================
+    // 1. PARK AND RIDE CIPINANG MELAYU
+    // Lahan sudah direservasi infill lewat VOID_L_PR_PLOT; driveway menyentuh
+    // tepi barat Jalan Haji Naman.
+    // =========================================================================
+    const prCenterX = VOID_L_PR_PLOT.x;
+    const prCenterZ = VOID_L_PR_PLOT.z;
+    makeBox(VOID_L_PR_PLOT.w, 0.35, VOID_L_PR_PLOT.d, prCenterX, 0.175, prCenterZ);
+
+    makeBox(
+      VOID_L_PR_DRIVEWAY.w + 1,
+      0.32,
+      VOID_L_PR_DRIVEWAY.d,
+      VOID_L_PR_DRIVEWAY.x + 0.5,
+      0.16,
+      VOID_L_PR_DRIVEWAY.z
+    );
+
+    const bayCount = 8;
+    const bayWidth = 2.6;
+    const bayStartX = prCenterX - (bayCount * bayWidth) / 2;
+    const bayCenterZ = prCenterZ - 4;
+    const bayDepth = 4.4;
+    for (let i = 0; i <= bayCount; i++) {
+      const bx = bayStartX + i * bayWidth;
+      makeBox(0.14, 0.05, bayDepth, bx, 0.37, bayCenterZ, 0, signGeos);
+    }
+    makeBox(bayCount * bayWidth, 0.05, 0.14, prCenterX, 0.37, bayCenterZ - bayDepth / 2, 0, signGeos);
+    makeBox(bayCount * bayWidth, 0.05, 0.14, prCenterX, 0.37, bayCenterZ + bayDepth / 2, 0, signGeos);
+
+    [prCenterX - 9, prCenterX + 9].forEach((sx) => {
+      const sz = prCenterZ + 3.5;
+      const halfW = 4.5;
+      const halfD = 1.6;
+      makeBox(2 * halfW, 0.3, 2.2, sx, 3.15, sz, 0, steelGeos);
+      makeBox(2 * halfW, 0.55, 0.16, sx, 3.0, sz - 1.1, 0, signGeos);
+      [-1, 1].forEach((dirX) => {
+        [-1, 1].forEach((dirZ) => {
+          makeBox(0.25, 2.85, 0.25, sx + dirX * (halfW - 0.4), 1.775, sz + dirZ * (halfD - 0.5), 0, steelGeos);
+        });
+        makeBox(0.18, 2.3, 1.1, sx + dirX * (halfW - 0.3), 1.6, sz - halfD + 0.55, 0, steelGeos);
+      });
+      makeBox(0.8, 0.45, 3.8, sx, 0.58, sz, 0, concreteGeos);
+      makeBox(0.14, 2.3, 0.14, sx + halfW - 0.9, 1.5, sz - halfD + 0.3, 0, steelGeos);
+      makeBox(0.12, 1.0, 2.4, sx + halfW - 0.9, 2.35, sz - halfD + 0.3, 0, signGeos);
+    });
+
+    makeBox(0.3, 3.75, 0.3, prCenterX + 12, 1.875, prCenterZ, 0, steelGeos);
+    makeBox(4.4, 1.6, 0.24, prCenterX + 12, 3.55, prCenterZ, 0, signGeos);
+
+    // Enam pohon di dalam batas plaza agar tidak menembus massa infill di luar.
+    [
+      { x: prCenterX - 11.5, z: prCenterZ - 8, scale: 0.92 },
+      { x: prCenterX, z: prCenterZ - 8, scale: 0.98 },
+      { x: prCenterX + 11.5, z: prCenterZ - 8, scale: 1.0 },
+      { x: prCenterX - 11.5, z: prCenterZ + 8, scale: 0.9 },
+      { x: prCenterX, z: prCenterZ + 8, scale: 1.02 },
+      { x: prCenterX + 11.5, z: prCenterZ + 8, scale: 0.94 }
+    ].forEach((tree) => treePositions.push(tree));
+
+    const bollardCount = 8;
+    const bollardInsetX = VOID_L_PR_PLOT.w * 0.5 - 1.6;
+    const bollardInsetZ = VOID_L_PR_PLOT.d * 0.5 - 1.4;
+    for (let i = 0; i < bollardCount; i++) {
+      const bx = prCenterX + (i < bollardCount / 2 ? -bollardInsetX : bollardInsetX);
+      const bz = prCenterZ + ((i % 4) / 3 - 0.5) * 2 * bollardInsetZ;
+      makeBox(0.18, 1.3, 0.18, bx, 0.85, bz, 0, steelGeos);
+      makeBox(0.34, 0.22, 0.34, bx, 1.55, bz, 0, signGeos);
+    }
+
+    // =========================================================================
+    // 2. ENAM FEEDER HALTE
+    // Tiga di gerbang anchor, tiga di simpul kawasan. Titik sudah diaudit agar
+    // peron tidak menembus tapak anchor, waterway, atau badan air.
+    // =========================================================================
+    const halteSpecs = [
+      { name: 'Halte Universitas Borobudur', shortName: 'Universitas Borobudur', road: 'Jalan Inspeksi Tarum Barat', near: [1110.6, 713.4], side: 1 },
+      { name: 'Halte RS Harum Sisma Medika', shortName: 'RS Harum', road: 'Jalan Inspeksi Tarum Barat', near: [1177.3, 737.1], side: 1 },
+      { name: 'Halte Puskesmas Duren Sawit', shortName: 'Puskesmas Duren Sawit', road: 'Jalan Haji Dogol', near: [1228.3, 698.1], side: -1 },
+      { name: 'Halte Jati Waringin', shortName: 'Jati Waringin', road: 'Jalan Jati Waringin', near: [1215.1, 819.7], side: -1 },
+      { name: 'Halte Radin Inten II', shortName: 'Radin Inten II', road: 'Jalan Radin Inten II', near: [1387.8, 647.4], side: -1 },
+      { name: 'Halte Pondok Kelapa Timur', shortName: 'Pondok Kelapa Timur', road: 'Jalan Pondok Kelapa Timur', near: [1595.1, 680.2], side: -1 }
+    ];
+
+    const roadNetwork = VOID_L_OSM.roads;
+    const findRoadPoint = (roadName, near) => {
+      let best = null;
+      roadNetwork.forEach((road) => {
+        if (road.name !== roadName) return;
+        for (let i = 0; i < road.points.length - 1; i++) {
+          const a = road.points[i];
+          const b = road.points[i + 1];
+          const dx = b[0] - a[0];
+          const dz = b[1] - a[1];
+          const len2 = dx * dx + dz * dz;
+          let t = len2 ? ((near[0] - a[0]) * dx + (near[1] - a[1]) * dz) / len2 : 0;
+          t = Math.max(0, Math.min(1, t));
+          const x = a[0] + dx * t;
+          const z = a[1] + dz * t;
+          const d = Math.hypot(near[0] - x, near[1] - z);
+          if (!best || d < best.d) {
+            best = { x, z, d, angle: Math.atan2(dx, dz), width: road.width };
+          }
+        }
+      });
+      return best;
+    };
+
+    halteSpecs.forEach((spec) => {
+      const road = findRoadPoint(spec.road, spec.near);
+      if (!road) return;
+      const nx = Math.cos(road.angle);
+      const nz = -Math.sin(road.angle);
+      const offset = road.width * 0.5 - 0.2;
+      const hx = road.x + nx * offset * spec.side;
+      const hz = road.z + nz * offset * spec.side;
+
+      makeBox(2.6, 0.7, 12, hx, 0.35, hz, road.angle);
+      const cosA = Math.cos(road.angle);
+      const sinA = Math.sin(road.angle);
+      [-5.2, 5.2].forEach((lz) => {
+        [-1.0, 1.0].forEach((lx) => {
+          const px = hx + lx * cosA + lz * sinA;
+          const pz = hz - lx * sinA + lz * cosA;
+          makeBox(0.16, 2.7, 0.16, px, 1.85, pz, 0, steelGeos);
+        });
+      });
+      makeBox(2.8, 0.22, 12.6, hx, 3.2, hz, road.angle);
+
+      makeBox(0.7, 0.45, 3.6, hx - nx * 0.35, 0.925, hz - nz * 0.35, road.angle);
+      const postX = hx + 4.8 * sinA;
+      const postZ = hz + 4.8 * cosA;
+      makeBox(0.14, 2.5, 0.14, postX, 1.6, postZ, 0, steelGeos);
+      makeBox(0.12, 1.0, 2.4, postX, 2.35, postZ, road.angle, signGeos);
+
+      halteLabels.push({
+        name: spec.name,
+        shortName: spec.shortName,
+        kind: 'halte',
+        position: [hx, 6.4, hz]
+      });
+    });
+
+    // =========================================================================
+    // 3. MATERIAL GABUNGAN DAN INSTANCED POHON
+    // =========================================================================
+    addMerged(
+      concreteGeos,
+      new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.72 }),
+      'voidl-transit-concrete',
+      true
+    );
+    addMerged(
+      steelGeos,
+      new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.42, metalness: 0.55 }),
+      'voidl-transit-steel',
+      true
+    );
+    addMerged(
+      signGeos,
+      this.registerNightMaterial(
+        new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.45 }),
+        { emissive: 0xfff4d6, nightIntensity: 0.55 }
+      ),
+      'voidl-transit-sign',
+      false
+    );
+
+    if (treePositions.length > 0) {
+      const dummy = new THREE.Object3D();
+      const trunkGeo = new THREE.CylinderGeometry(0.28, 0.4, 3.6, 5);
+      const foliageGeo = new THREE.ConeGeometry(2.4, 5.6, 6);
+      const trunkMesh = new THREE.InstancedMesh(
+        trunkGeo,
+        new THREE.MeshStandardMaterial({ color: 0x3e2723, roughness: 0.9 }),
+        treePositions.length
+      );
+      const foliageMesh = new THREE.InstancedMesh(
+        foliageGeo,
+        new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.85 }),
+        treePositions.length
+      );
+      trunkMesh.name = 'voidl-transit-tree-trunks';
+      foliageMesh.name = 'voidl-transit-tree-foliage';
+
+      treePositions.forEach((tree, idx) => {
+        dummy.position.set(tree.x, 1.8 * tree.scale, tree.z);
+        dummy.scale.set(tree.scale, tree.scale, tree.scale);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        trunkMesh.setMatrixAt(idx, dummy.matrix);
+
+        dummy.position.set(tree.x, 6.0 * tree.scale, tree.z);
+        dummy.updateMatrix();
+        foliageMesh.setMatrixAt(idx, dummy.matrix);
+      });
+
+      trunkMesh.castShadow = true;
+      trunkMesh.receiveShadow = true;
+      foliageMesh.castShadow = true;
+      foliageMesh.receiveShadow = true;
+      this.proceduralGroup.add(trunkMesh);
+      this.proceduralGroup.add(foliageMesh);
+    }
+
+    this.voidLTransitLabels = [
+      {
+        name: 'Park and Ride Cipinang Melayu',
+        shortName: 'P&R Cipinang Melayu',
+        kind: 'park',
+        position: [prCenterX, 7.6, prCenterZ]
+      },
+      ...halteLabels
+    ];
+
+    this.voidLTransitStats = {
+      parkAndRide: 'Park and Ride Cipinang Melayu',
+      parkingBays: bayCount,
+      halte: halteSpecs.map((spec) => spec.name),
+      trees: treePositions.length,
+      gardenLights: bollardCount,
+      drawCalls: 5
     };
   }
 
