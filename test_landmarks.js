@@ -2893,15 +2893,15 @@ assert.ok(
 );
 assert.ok(!rawaWaterMethod.includes('PointLight'), 'Danau Rawa Buaya water must not add PointLights');
 
-// Check 62: PJU gabungan Void B/C/D/E/F/G/H/I/J memberi makan pool 12 PointLight
+// Check 62: PJU gabungan Void B/C/D/E/F/G/H/I/J/K memberi makan pool 12 PointLight
 assert.ok(
   citySceneContent.includes('this.mergedPjuLampTransforms = [];'),
   'CityScene.js must keep merged PJU lamp heads in a dedicated transform array'
 );
 assert.strictEqual(
   (citySceneContent.match(/this\.recordMergedPjuLamp\(/g) || []).length,
-  9,
-  'Each merged PJU builder (Void B/C/D/E/F/G/H/I/J) must record its lamp heads exactly once'
+  10,
+  'Each merged PJU builder (Void B/C/D/E/F/G/H/I/J/K) must record its lamp heads exactly once'
 );
 const mergedLampHelperStart = citySceneContent.indexOf('recordMergedPjuLamp(x, z, angle, side) {');
 assert.ok(mergedLampHelperStart > 0, 'CityScene.js missing the recordMergedPjuLamp helper');
@@ -7301,7 +7301,117 @@ voidKAnchors.forEach(({ id }) => {
   });
 });
 
-console.log(`✅ All 131 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 98: Void K Tahap 2 — jaringan OSM Cakung–Ujung Menteng–Pulo Gebang
+const voidKPath = './src/data/void_k_osm.js';
+assert.ok(fs.existsSync(voidKPath), 'Void K Tahap 2 must ship src/data/void_k_osm.js');
+const { VOID_K_OSM } = await import('./src/data/void_k_osm.js');
+
+assert.ok(VOID_K_OSM.meta.source.includes('OpenStreetMap'), 'Void K OSM dataset missing OSM attribution');
+assert.ok(VOID_K_OSM.meta.license.includes('ODbL'), 'Void K OSM dataset missing ODbL license');
+assert.strictEqual(VOID_K_OSM.meta.retrieved, '2026-11-02', 'Void K dataset retrieval date changed');
+assert.ok(VOID_K_OSM.meta.api.includes('overpass.openstreetmap.fr'), 'Void K dataset must record the Overpass mirror');
+assert.ok(VOID_K_OSM.meta.api.includes('2026-08-10'), 'Void K dataset must record the OSM base snapshot');
+assert.strictEqual(VOID_K_OSM.meta.projection, 'projectGpsToScene', 'Void K dataset must use the unscaled GPS projection');
+assert.deepStrictEqual(
+  VOID_K_OSM.meta.projectionConstants,
+  { originLng: 106.823048, originLat: -6.194957, scaleX: 14100, scaleZ: 14180 },
+  'Void K projection constants must match the scene projection'
+);
+assert.deepStrictEqual(
+  VOID_K_OSM.meta.bbox,
+  { south: -6.2345, west: 106.9174, north: -6.1618, east: 106.9752 },
+  'Void K dataset bbox must cover Cakung, Penggilingan, and Ujung Menteng'
+);
+assert.deepStrictEqual(
+  VOID_K_OSM.meta.clipBoxes,
+  [
+    { name: 'barat', minX: 1330, maxX: 1995, minZ: -470, maxZ: -150 },
+    { name: 'timur', minX: 1995, maxX: 2145, minZ: -470, maxZ: 560 }
+  ],
+  'Void K clip boxes must form the L-shaped gap between Void E and Void F'
+);
+assert.strictEqual(VOID_K_OSM.meta.simplification, 2, 'Void K simplification must stay at Douglas–Peucker 2.0');
+assert.ok(VOID_K_OSM.roads.length >= 350 && VOID_K_OSM.roads.length <= 420, `Void K roads expected 350-420, got ${VOID_K_OSM.roads.length}`);
+const voidKRoadPoints = VOID_K_OSM.roads.reduce((sum, road) => sum + road.points.length, 0);
+assert.ok(voidKRoadPoints >= 900 && voidKRoadPoints <= 3200, `Void K road points expected 900-3200 after Douglas–Peucker 2.0, got ${voidKRoadPoints}`);
+const voidKNames = new Set(VOID_K_OSM.roads.map((road) => road.name));
+assert.ok(voidKNames.size >= 150, `Void K dataset expected at least 150 unique road names, got ${voidKNames.size}`);
+['Jalan Bekasi Raya', 'Jalan Sultan Agung', 'Jalan I Gusti Ngurah Rai', 'Jalan Jakarta Garden City Boulevard', 'Jalan Tipar Cakung', 'Jalan Cakung Cilincing Barat'].forEach((name) => {
+  assert.ok(voidKNames.has(name), `Void K dataset missing key corridor ${name}`);
+});
+const voidKWidths = { trunk: 16, primary: 18, secondary: 14, tertiary: 11, residential: 10, unclassified: 10 };
+VOID_K_OSM.roads.forEach((road) => {
+  assert.strictEqual(road.width, voidKWidths[road.type], `Void K road ${road.name} has unexpected width for ${road.type}`);
+  road.points.forEach(([x, z]) => {
+    const inside = VOID_K_OSM.meta.clipBoxes.some((box) => x >= box.minX - 0.5 && x <= box.maxX + 0.5 && z >= box.minZ - 0.5 && z <= box.maxZ + 0.5);
+    assert.ok(inside, `Void K road ${road.name} has point ${x},${z} outside both clip boxes`);
+  });
+});
+assert.ok(VOID_K_OSM.waterways.length >= 10 && VOID_K_OSM.waterways.length <= 25, `Void K waterways expected 10-25, got ${VOID_K_OSM.waterways.length}`);
+const voidKWaterNames = new Set(VOID_K_OSM.waterways.map((waterway) => waterway.name));
+assert.ok(voidKWaterNames.has('Cakung'), 'Void K dataset missing Kali Cakung');
+assert.ok(voidKWaterNames.has('Rawa Malang'), 'Void K dataset missing Kali Rawa Malang');
+assert.ok(!voidKWaterNames.has('Kanal Banjir Timur'), 'Void K must not duplicate the procedural Kanal Banjir Timur');
+VOID_K_OSM.waterways.forEach((waterway) => {
+  assert.ok(['river', 'canal', 'stream'].includes(waterway.kind), `Void K waterway ${waterway.name} has unexpected kind ${waterway.kind}`);
+  assert.ok(waterway.width >= 10, `Void K waterway ${waterway.name} is too narrow`);
+});
+assert.ok(VOID_K_OSM.waterBodies.length >= 2 && VOID_K_OSM.waterBodies.length <= 10, `Void K water bodies expected 2-10, got ${VOID_K_OSM.waterBodies.length}`);
+VOID_K_OSM.waterBodies.forEach((body) => {
+  const first = body.points[0];
+  const last = body.points[body.points.length - 1];
+  assert.ok(first[0] === last[0] && first[1] === last[1], `Void K water body ${body.name} ring must be closed`);
+  let area = 0;
+  for (let i = 0; i < body.points.length - 1; i++) {
+    area += body.points[i][0] * body.points[i + 1][1] - body.points[i + 1][0] * body.points[i][1];
+  }
+  assert.ok(area > 0, `Void K water body ${body.name} must wind counter-clockwise`);
+});
+
+const voidKRoadsNearAnchors = [...VOID_K_OSM.roads, ...VOID_F_OSM.roads];
+const voidKAnchorDistances = [
+  ['pasar-cakung', 1571.2, -168.0, 10],
+  ['rusun-pinus-elok', 1639.4, 54.0, 60],
+  ['pasar-ujung-menteng', 2028.2, -68.7, 10]
+];
+voidKAnchorDistances.forEach(([id, ax, az, limit]) => {
+  let best = Infinity;
+  // Rusun Pinus Elok sits inside Void F's clip box, so its access street comes from that dataset.
+  voidKRoadsNearAnchors.forEach((road) => {
+    for (let i = 0; i < road.points.length - 1; i++) {
+      const [x1, z1] = road.points[i];
+      const [x2, z2] = road.points[i + 1];
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len2 = dx * dx + dz * dz;
+      let t = len2 ? ((ax - x1) * dx + (az - z1) * dz) / len2 : 0;
+      t = Math.max(0, Math.min(1, t));
+      best = Math.min(best, Math.hypot(ax - (x1 + t * dx), az - (z1 + t * dz)));
+    }
+  });
+  assert.ok(best <= limit, `Void K anchor ${id} is ${best.toFixed(1)} units from the nearest OSM road (limit ${limit})`);
+});
+
+assert.ok(citySceneContent.includes("import { VOID_K_OSM } from '../data/void_k_osm.js';"), 'CityScene must import the Void K dataset');
+const voidKBuilder = sliceCityBuilder('buildVoidK() {');
+['voidk-roads', 'voidk-sidewalks', 'voidk-waterways', 'voidk-water-bodies', 'voidk-bridges', 'voidk-pju-poles', 'voidk-pju-bulbs', 'voidk-tree-trunks', 'voidk-tree-foliage'].forEach((meshName) => {
+  assert.ok(voidKBuilder.includes(`'${meshName}'`), `Void K builder missing mesh ${meshName}`);
+});
+assert.ok(voidKBuilder.includes('registerNightMaterial'), 'Void K water materials must register for night emissive');
+assert.ok(voidKBuilder.includes('WATER_NIGHT_EMISSIVE'), 'Void K water must use the shared night emissive colour');
+assert.ok(voidKBuilder.includes('recordMergedPjuLamp'), 'Void K PJU lamps must join the merged PointLight candidate pool');
+assert.ok(voidKBuilder.includes('segmentIntersection'), 'Void K must build automatic bridges from road-waterway crossings');
+assert.ok(voidKBuilder.includes('drawCalls: 9'), 'Void K stats must report nine draw calls');
+assert.ok(!voidKBuilder.includes('new THREE.PointLight'), 'Void K must not add PointLights');
+assert.ok(citySceneContent.includes('isNearVoidKRoad('), 'CityScene must expose isNearVoidKRoad for Void K infill');
+assert.ok(citySceneContent.includes('isInsideVoidKAnchorSite('), 'CityScene must expose isInsideVoidKAnchorSite for Void K infill');
+assert.ok(citySceneContent.includes('isInsideVoidKWaterBody('), 'CityScene must expose isInsideVoidKWaterBody for Void K infill');
+assert.ok(citySceneContent.includes('const VOID_K_ANCHOR_SITES = ['), 'CityScene must protect the three Void K anchor sites');
+const voidKCallIndex = citySceneContent.indexOf('this.buildVoidK();');
+assert.ok(voidKCallIndex > citySceneContent.indexOf('this.buildVoidJTransit();'), 'buildVoidK must run after Void J transit');
+assert.ok(voidKCallIndex < citySceneContent.indexOf('this.buildVoidBInfillAndIndustry();'), 'buildVoidK must run before the legacy Jakarta infill');
+
+console.log(`✅ All 131 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
