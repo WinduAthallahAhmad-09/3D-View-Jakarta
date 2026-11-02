@@ -8030,7 +8030,93 @@ assert.ok(voidLBuilder.includes('seamWaterways: seamWaterConnectors.length'), 'V
 assert.ok(voidLBuilder.includes('registerNightMaterial'), 'Void L water material must register for the night preset');
 assert.ok(!voidLBuilder.includes('new THREE.PointLight'), 'buildVoidL must not add PointLights');
 
-console.log(`✅ All 137 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3, Void L Tahap 1, Void L Tahap 2 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 104: Void L Tahap 3 — infill urban fabric Cipinang Melayu–Pondok Kelapa
+assert.ok(
+  citySceneContent.includes('const VOID_L_PR_PLOT = { x: 1660, z: 700, w: 30, d: 18 };'),
+  'CityScene.js missing the Void L Park-and-Ride plot'
+);
+assert.ok(
+  citySceneContent.includes('const VOID_L_PR_DRIVEWAY = { x: 1677, z: 700, w: 6, d: 6 };'),
+  'CityScene.js missing the Void L Park-and-Ride driveway'
+);
+
+const voidLInfillCall = citySceneContent.indexOf('this.buildVoidLInfill();');
+assert.ok(voidLInfillCall > voidLCall, 'buildVoidLInfill() must run after buildVoidL()');
+assert.ok(voidLBInfillCall > voidLInfillCall, 'buildVoidLInfill() must run before the legacy Void B infill pass');
+
+const voidLInfillBuilder = sliceCityBuilder('buildVoidLInfill() {');
+[
+  'voidl-infill-houses',
+  'voidl-infill-shophouses',
+  'voidl-infill-house-roofs',
+  'voidl-infill-warehouses',
+  'voidl-infill-warehouse-roofs',
+  'voidl-night-windows'
+].forEach((meshName) => {
+  assert.ok(voidLInfillBuilder.includes(`'${meshName}'`), `buildVoidLInfill must create the ${meshName} mesh`);
+});
+
+[
+  'Jalan Laksamana Malahayati',
+  'Jalan Raya Kalimalang',
+  'Jalan Jati Waringin',
+  'Jalan Radin Inten II',
+  'Jalan Jati Utama Raya',
+  'Jalan Swadaya Raya',
+  'Jalan Pondok Kelapa Timur',
+  'Jalan Bintara Jaya',
+  'Jalan Taman Duren Sawit'
+].forEach((name) => {
+  assert.ok(voidLInfillBuilder.includes(`'${name}'`), `Void L infill missing shophouse corridor ${name}`);
+});
+
+const voidLZoneMatch = voidLInfillBuilder.match(/const residentialZones = \[([\s\S]*?)\n    \];/);
+assert.ok(voidLZoneMatch, 'buildVoidLInfill must declare residentialZones');
+assert.strictEqual(
+  (voidLZoneMatch[1].match(/\{ minX:/g) || []).length,
+  12,
+  'Void L infill must define 12 residential zones'
+);
+assert.ok(
+  voidLZoneMatch[1].includes('{ minX: 970, maxX: 1120, minZ: 820, maxZ: 955, step: 13 }'),
+  'Void L infill zone R1 Cipinang Melayu selatan drifted'
+);
+assert.ok(
+  voidLZoneMatch[1].includes('{ minX: 1180, maxX: 1360, minZ: 560, maxZ: 640, step: 13 }'),
+  'Void L infill zone R10 Cipinang Melayu timur drifted'
+);
+
+const voidLWarehouseMatch = voidLInfillBuilder.match(/const warehouseZones = \[([\s\S]*?)\n    \];/);
+assert.ok(voidLWarehouseMatch, 'buildVoidLInfill must declare warehouseZones');
+assert.strictEqual(
+  (voidLWarehouseMatch[1].match(/\{ minX:/g) || []).length,
+  1,
+  'Void L infill must define one warehouse cluster'
+);
+assert.ok(
+  voidLWarehouseMatch[1].includes('{ minX: 970, maxX: 1060, minZ: 780, maxZ: 820, stepX: 28, stepZ: 26 }'),
+  'Void L warehouse cluster W1 Cipinang Melayu barat drifted'
+);
+
+assert.ok(voidLInfillBuilder.includes('isNearVoidLWater('), 'Void L infill must mask waterways');
+assert.ok(voidLInfillBuilder.includes('VOID_L_OSM.waterBodies'), 'Void L infill must mask water body polygons');
+assert.ok(voidLInfillBuilder.includes('this.isInsideVoidLAnchorSite('), 'Void L infill must mask the six anchor sites');
+assert.ok(
+  voidLInfillBuilder.includes('VOID_L_PR_PLOT') && voidLInfillBuilder.includes('VOID_L_PR_DRIVEWAY'),
+  'Void L infill must reserve the Park-and-Ride plot and driveway'
+);
+assert.ok(
+  voidLInfillBuilder.includes('z - radius < SEAM_FL.value + 12'),
+  'Void L infill must keep a 12-unit buffer from the F-L seam'
+);
+assert.ok(voidLInfillBuilder.includes('isRoofOccupied(') && voidLInfillBuilder.includes('putRoof('), 'Void L infill must share OBB roof occupancy');
+assert.ok(voidLInfillBuilder.includes('INFILL_ROOF_EAVE'), 'Void L infill must use the shared roof eave');
+assert.ok(voidLInfillBuilder.includes('addInfillNightWindows('), 'Void L infill must add night windows');
+assert.ok(voidLInfillBuilder.includes('voidLInfillStats'), 'buildVoidLInfill must expose voidLInfillStats');
+assert.ok(voidLInfillBuilder.includes('drawCalls: 6'), 'Void L infill stats must report six draw calls');
+assert.ok(!voidLInfillBuilder.includes('new THREE.PointLight'), 'buildVoidLInfill must not add PointLights');
+
+console.log(`✅ All 137 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3, Void L Tahap 1, Void L Tahap 2, Void L Tahap 3 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
