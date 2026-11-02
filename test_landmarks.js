@@ -7500,7 +7500,246 @@ assert.ok(
   'CityScene.js missing the Void K P&R driveway reservation'
 );
 
-console.log(`✅ All 131 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 100: Void K Tahap 4 — Park-and-Ride Ujung Menteng + feeder halte Cakung
+const voidKTransitMethod = sliceCityBuilder('  buildVoidKTransit() {');
+const voidKTransitCallIndex = citySceneContent.indexOf('this.buildVoidKTransit();');
+assert.ok(voidKTransitCallIndex > 0, 'CityScene.js does not call buildVoidKTransit');
+assert.ok(
+  voidKTransitCallIndex > citySceneContent.indexOf('this.buildVoidKInfill();'),
+  'buildVoidKTransit must run after buildVoidKInfill'
+);
+assert.ok(
+  voidKTransitCallIndex < citySceneContent.indexOf('this.buildVoidBInfillAndIndustry();'),
+  'buildVoidKTransit must run before the legacy Jakarta infill'
+);
+assert.ok(
+  citySceneContent.includes('this.voidKTransitLabels = [];'),
+  'CityScene constructor must initialise the Void K transit label list'
+);
+
+assert.ok(!voidKTransitMethod.includes('new THREE.PointLight'), 'Void K transit must not add PointLights');
+assert.ok(voidKTransitMethod.includes('VOID_K_OSM'), 'Void K transit must anchor halte to the K road network');
+assert.ok(voidKTransitMethod.includes('VOID_F_OSM'), 'Void K transit must include the Void F road that serves Rusun Pinus Elok');
+assert.ok(voidKTransitMethod.includes('findRoadPoint'), 'Void K transit missing the road anchor helper');
+assert.ok(voidKTransitMethod.includes('const halteLabels = [];'), 'Void K transit must collect halte labels');
+assert.ok(voidKTransitMethod.includes('halteLabels.push({'), 'Void K transit must emit one label per halte');
+assert.ok(
+  voidKTransitMethod.includes('position: [hx, 6.4, hz]'),
+  'Void K halte labels must float above the canopy'
+);
+assert.ok(
+  voidKTransitMethod.includes('shortName: spec.shortName,'),
+  'Void K halte labels must forward the short name'
+);
+assert.ok(voidKTransitMethod.includes("kind: 'halte'"), 'Void K halte labels must carry the halte kind');
+assert.ok(
+  voidKTransitMethod.includes('this.voidKTransitLabels = ['),
+  'Void K transit must publish its label anchors'
+);
+
+assert.ok(voidKTransitMethod.includes('VOID_K_PR_PLOT'), 'Void K transit must read the shared P&R plot');
+assert.ok(
+  voidKTransitMethod.includes('const prCenterX = VOID_K_PR_PLOT.x;'),
+  'Void K P&R centre must come from the shared plot'
+);
+assert.ok(
+  voidKTransitMethod.includes('VOID_K_PR_DRIVEWAY.w') && voidKTransitMethod.includes('VOID_K_PR_DRIVEWAY.d'),
+  'Void K P&R driveway must use the shared access strip so infill and transit stay aligned'
+);
+assert.ok(
+  voidKTransitMethod.includes("name: 'Park and Ride Ujung Menteng'"),
+  'Void K P&R label missing the full name'
+);
+assert.ok(
+  voidKTransitMethod.includes("shortName: 'P&R Ujung Menteng'"),
+  'Void K P&R label missing the short name'
+);
+assert.ok(voidKTransitMethod.includes("kind: 'park'"), 'Void K P&R label must use the P badge');
+assert.ok(
+  voidKTransitMethod.includes('position: [prCenterX, 7.6, prCenterZ]'),
+  'Void K P&R label must clear the shelter roof'
+);
+assert.ok(voidKTransitMethod.includes('const bayCount = 8;'), 'Void K P&R must keep eight parking bays');
+assert.ok(voidKTransitMethod.includes('parkingBays: bayCount'), 'Void K transit stats missing the bay count');
+assert.ok(voidKTransitMethod.includes('trees: treePositions.length'), 'Void K transit stats missing the tree count');
+assert.ok(
+  voidKTransitMethod.includes('gardenLights: bollardCount'),
+  'Void K transit stats missing the garden light count'
+);
+
+const voidKTransitHalteSpecs = [
+  ['Halte Pasar Cakung', 'Pasar Cakung', 'Jalan Tipar Cakung', [1580.924, -206.31], 1, [1575.633, -206.007], [1571.2, -168.0]],
+  ['Halte Rusun Pinus Elok', 'Rusun Pinus Elok', 'Jalan Komarudin Lama', [1693.004, 52.013], 1, [1698.268, 51.403], [1639.4, 54.0]],
+  ['Halte Pasar Ujung Menteng', 'Pasar Ujung Menteng', 'Jalan Satria', [2042.781, -107.414], 1, [2038.128, -108.593], [2028.2, -68.7]],
+  ['Halte Penggilingan', 'Penggilingan', 'Jalan Jakarta Garden City', [1851.488, -248.956], 1, [1847.133, -251.978], [1850, -250]],
+  ['Halte Cakung Tengah', 'Cakung Tengah', 'Jalan Kayu Tinggi', [1780.46, -288.382], 1, [1785.413, -286.495], [1750, -300]],
+  ['Halte Pulo Gebang', 'Pulo Gebang', 'Jalan Menteng Kencana', [2044.718, -266.467], -1, [2040.324, -264.535], [2050, -300]]
+];
+
+voidKTransitHalteSpecs.forEach(([name, shortName, road, near, side]) => {
+  assert.ok(voidKTransitMethod.includes(`name: '${name}'`), `Void K transit missing ${name}`);
+  assert.ok(
+    voidKTransitMethod.includes(`shortName: '${shortName}'`),
+    `Void K halte label missing the ${shortName} short name`
+  );
+  assert.ok(voidKTransitMethod.includes(`road: '${road}'`), `Void K halte missing the ${road} anchor`);
+  assert.ok(
+    voidKTransitMethod.includes(`near: [${near[0]}, ${near[1]}], side: ${side}`),
+    `Void K halte ${shortName} drifted from its audited shoulder point`
+  );
+});
+
+[
+  'voidk-transit-concrete',
+  'voidk-transit-steel',
+  'voidk-transit-sign',
+  'voidk-transit-tree-trunks',
+  'voidk-transit-tree-foliage'
+].forEach((name) => {
+  assert.ok(voidKTransitMethod.includes(name), `Void K transit missing the ${name} mesh`);
+});
+
+assert.ok(voidKTransitMethod.includes('registerNightMaterial'), 'Void K transit sign must register for night');
+assert.ok(voidKTransitMethod.includes('emissive: 0xfff4d6'), 'Void K transit sign night emissive drifted');
+assert.ok(voidKTransitMethod.includes('nightIntensity: 0.55'), 'Void K transit sign night intensity drifted');
+assert.ok(voidKTransitMethod.includes('voidKTransitStats'), 'Void K transit must expose runtime stats');
+assert.ok(voidKTransitMethod.includes('drawCalls: 5'), 'Void K transit should add five draw calls');
+assert.ok(
+  mainJsContent.includes('...this.city.voidKTransitLabels'),
+  'main.js must forward the Void K transit labels to UIManager'
+);
+
+const voidKTransitFindRoadPoint = (roadName, near) => {
+  let best = null;
+  [...VOID_K_OSM.roads, ...VOID_F_OSM.roads].forEach((road) => {
+    if (road.name !== roadName) return;
+    for (let i = 0; i < road.points.length - 1; i++) {
+      const a = road.points[i];
+      const b = road.points[i + 1];
+      const dx = b[0] - a[0];
+      const dz = b[1] - a[1];
+      const len2 = dx * dx + dz * dz;
+      let t = len2 ? ((near[0] - a[0]) * dx + (near[1] - a[1]) * dz) / len2 : 0;
+      t = Math.max(0, Math.min(1, t));
+      const x = a[0] + dx * t;
+      const z = a[1] + dz * t;
+      const d = Math.hypot(near[0] - x, near[1] - z);
+      if (!best || d < best.d) best = { x, z, d, angle: Math.atan2(dx, dz), width: road.width };
+    }
+  });
+  return best;
+};
+
+const voidKWaterEdge = (x, z) => {
+  let best = Infinity;
+  VOID_K_OSM.waterways.forEach((waterway) => {
+    for (let i = 0; i < waterway.points.length - 1; i++) {
+      best = Math.min(
+        best,
+        distanceToSegment([x, z], waterway.points[i], waterway.points[i + 1]) - waterway.width * 0.5
+      );
+    }
+  });
+  return best;
+};
+const voidKBodyAt = (x, z) =>
+  VOID_K_OSM.waterBodies.some((body) => {
+    const pts = body.points;
+    let inside = false;
+    for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+      const xi = pts[i][0];
+      const zi = pts[i][1];
+      const xj = pts[j][0];
+      const zj = pts[j][1];
+      if ((zi > z) !== (zj > z) && x < ((xj - xi) * (z - zi)) / (zj - zi) + xi) inside = !inside;
+    }
+    return inside;
+  });
+const voidKRectClear = (rect, x, z) =>
+  Math.hypot(Math.max(rect[0] - x, 0, x - rect[1]), Math.max(rect[2] - z, 0, z - rect[3]));
+const voidKAnchorRects = [
+  [1529, 1613, -197, -139],
+  [1583, 1695, 13, 95],
+  [1990, 2066, -95, -43]
+];
+const voidKRoadEdge = (x, z) => {
+  let best = Infinity;
+  [...VOID_K_OSM.roads, ...VOID_F_OSM.roads].forEach((road) => {
+    for (let i = 0; i < road.points.length - 1; i++) {
+      best = Math.min(best, distanceToSegment([x, z], road.points[i], road.points[i + 1]) - road.width * 0.5);
+    }
+  });
+  return best;
+};
+
+const voidKHalteCenters = voidKTransitHalteSpecs.map(([name, shortName, road, near, side, expected, anchor]) => {
+  const snapped = voidKTransitFindRoadPoint(road, near);
+  assert.ok(snapped, `Void K halte ${shortName} lost its ${road} anchor`);
+  assert.ok(snapped.d <= 0.05, `Void K halte ${shortName} near point must sit on ${road}`);
+  const nx = Math.cos(snapped.angle);
+  const nz = -Math.sin(snapped.angle);
+  const ux = Math.sin(snapped.angle);
+  const uz = Math.cos(snapped.angle);
+  const offset = snapped.width * 0.5 - 0.2;
+  const hx = snapped.x + nx * offset * side;
+  const hz = snapped.z + nz * offset * side;
+
+  assert.ok(
+    Math.abs(hx - expected[0]) <= 0.05 && Math.abs(hz - expected[1]) <= 0.05,
+    `Void K halte ${shortName} drifted to ${hx.toFixed(3)}/${hz.toFixed(3)}`
+  );
+
+  let minSite = Infinity;
+  let minWater = Infinity;
+  [-6, 0, 6].forEach((lz) => {
+    [-1.3, 0, 1.3].forEach((lx) => {
+      const cx = hx + lx * nx + lz * ux;
+      const cz = hz + lx * nz + lz * uz;
+      voidKAnchorRects.forEach((rect) => {
+        minSite = Math.min(minSite, voidKRectClear(rect, cx, cz));
+      });
+      minWater = Math.min(minWater, voidKWaterEdge(cx, cz));
+      assert.ok(!voidKBodyAt(cx, cz), `Void K halte ${shortName} peron must stay out of water bodies`);
+    });
+  });
+
+  assert.ok(minSite >= 1, `Void K halte ${shortName} peron must clear the anchor sites (min ${minSite.toFixed(2)})`);
+  assert.ok(minWater >= 0, `Void K halte ${shortName} peron must stay off the waterways (min ${minWater.toFixed(2)})`);
+  assert.ok(
+    Math.hypot(hx - anchor[0], hz - anchor[1]) <= 80,
+    `Void K halte ${shortName} drifted too far from its anchor`
+  );
+  return { name, hx, hz };
+});
+
+const voidKPrRect = [2035, 2065, -169, -151];
+const voidKDriveRect = [2047, 2053, -151, -145];
+assert.ok(
+  voidKPrRect[0] < voidKDriveRect[1] &&
+    voidKPrRect[1] > voidKDriveRect[0] &&
+    voidKPrRect[2] < voidKDriveRect[3] &&
+    voidKPrRect[3] >= voidKDriveRect[2],
+  'Void K P&R driveway must meet the plaza edge'
+);
+[[voidKPrRect[0], voidKPrRect[2]], [voidKPrRect[1], voidKPrRect[2]], [voidKPrRect[0], voidKPrRect[3]], [voidKPrRect[1], voidKPrRect[3]]]
+  .forEach(([cx, cz]) => {
+    assert.ok(voidKRoadEdge(cx, cz) >= 0, `Void K P&R plot corner ${cx}/${cz} overlaps the roadway`);
+    assert.ok(voidKWaterEdge(cx, cz) >= 0, `Void K P&R plot corner ${cx}/${cz} overlaps a waterway`);
+    assert.ok(!voidKBodyAt(cx, cz), `Void K P&R plot corner ${cx}/${cz} sits in a water body`);
+  });
+let voidKDrivewayRoadEdge = Infinity;
+[[voidKDriveRect[0], voidKDriveRect[2]], [voidKDriveRect[1], voidKDriveRect[2]], [voidKDriveRect[0], voidKDriveRect[3]], [voidKDriveRect[1], voidKDriveRect[3]]]
+  .forEach(([cx, cz]) => {
+    voidKDrivewayRoadEdge = Math.min(voidKDrivewayRoadEdge, voidKRoadEdge(cx, cz));
+  });
+assert.ok(
+  voidKDrivewayRoadEdge <= 0.5 && voidKDrivewayRoadEdge >= -3,
+  `Void K P&R driveway must end on a road edge (gap ${voidKDrivewayRoadEdge.toFixed(2)})`
+);
+assert.ok(voidKWaterEdge(2050, -148) >= 0, 'Void K P&R driveway must stay off the waterways');
+assert.ok(!voidKBodyAt(2050, -148), 'Void K P&R driveway must not sit in a water body');
+
+console.log(`✅ All 131 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
