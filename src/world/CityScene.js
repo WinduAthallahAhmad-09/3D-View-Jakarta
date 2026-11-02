@@ -63,6 +63,71 @@ const distanceToCikarangRail = (x, z) => {
   return best;
 };
 
+const nearestPointOnFeatures = (features, x, z) => {
+  let best = { d: Infinity, x, z, width: 6, name: null };
+  for (const feature of features) {
+    const points = feature.points;
+    for (let i = 0; i < points.length - 1; i++) {
+      const [ax, az] = points[i];
+      const [bx, bz] = points[i + 1];
+      const dx = bx - ax;
+      const dz = bz - az;
+      const length2 = dx * dx + dz * dz;
+      let t = length2 === 0 ? 0 : ((x - ax) * dx + (z - az) * dz) / length2;
+      t = Math.max(0, Math.min(1, t));
+      const px = ax + dx * t;
+      const pz = az + dz * t;
+      const d = Math.hypot(x - px, z - pz);
+      if (d < best.d) best = { d, x: px, z: pz, width: feature.width || 6, name: feature.name || null };
+    }
+  }
+  return best;
+};
+
+const isOnSeamLine = (x, z, seam) =>
+  Math.abs((seam.axis === 'x' ? x : z) - seam.value) <= SEAM_STITCH_BAND &&
+  (seam.axis === 'x' ? z : x) >= seam.min &&
+  (seam.axis === 'x' ? z : x) <= seam.max;
+
+const collectSeamConnectors = (sideA, sideB, seam, maxGap, skipNames = []) => {
+  const connectors = [];
+  const seen = new Set();
+  const visit = (features, neighbours) => {
+    for (const feature of features) {
+      if (skipNames.includes(feature.name)) continue;
+      for (const endpoint of [feature.points[0], feature.points[feature.points.length - 1]]) {
+        if (!isOnSeamLine(endpoint[0], endpoint[1], seam)) continue;
+        let joined = false;
+        for (const other of features) {
+          if (other === feature) continue;
+          if (nearestPointOnFeatures([other], endpoint[0], endpoint[1]).d <= SEAM_SELF_JOIN_EPS) {
+            joined = true;
+            break;
+          }
+        }
+        if (joined) continue;
+        const near = nearestPointOnFeatures(neighbours, endpoint[0], endpoint[1]);
+        if (near.d < SEAM_STITCH_MIN || near.d > maxGap) continue;
+        const key = [[endpoint[0], endpoint[1]], [near.x, near.z]]
+          .map(([px, pz]) => `${Math.round(px * 2)},${Math.round(pz * 2)}`)
+          .sort()
+          .join('|');
+        if (seen.has(key)) continue;
+        seen.add(key);
+        connectors.push({
+          from: [endpoint[0], endpoint[1]],
+          to: [near.x, near.z],
+          width: Math.max(6, Math.min(feature.width || 8, near.width || 8)),
+          name: feature.name || null
+        });
+      }
+    }
+  };
+  visit(sideA, sideB);
+  visit(sideB, sideA);
+  return connectors;
+};
+
 // Kanal Banjir Timur tetap prosedural; koridor dipakai bersama oleh dek
 // jembatan Tahap 2 dan mask infill Tahap 3. Lima titik terakhir melanjutkan
 // kanal ke kepala badan air OSM Void E di (2088.6, -478.4).
@@ -202,6 +267,20 @@ const VOID_K_LEGACY_INFILL_RECTS = [
 // Raya di utara dan tetap berjarak dari Jalan Menteng Niaga di barat daya.
 const VOID_K_PR_PLOT = { x: 2050, z: -160, w: 30, d: 18 };
 const VOID_K_PR_DRIVEWAY = { x: 2050, z: -148, w: 6, d: 6 };
+
+// Jahitan tepi dataset: dataset dikurasi terpisah, jadi jalan/air sering
+// berhenti beberapa puluh unit di dalam garis seam. Endpoint yang benar-benar
+// buntu (tidak tersambung way lain di dataset yang sama) disambung ke geometri
+// tetangga supaya tidak tampil sebagai jalan/pulau air buntu di batas void.
+const SEAM_STITCH_BAND = 14;
+const SEAM_STITCH_MIN = 8;
+const SEAM_SELF_JOIN_EPS = 4;
+const SEAM_ROAD_STITCH_MAX = 70;
+const SEAM_WATER_STITCH_MAX = 80;
+const SEAM_EJ = { axis: 'x', value: 1330, min: -1105, max: -615 };
+const SEAM_EK = { axis: 'z', value: -470, min: 1330, max: 2145 };
+const SEAM_KF_HORIZONTAL = { axis: 'z', value: -150, min: 1330, max: 1995 };
+const SEAM_KF_VERTICAL = { axis: 'x', value: 1995, min: -150, max: 560 };
 
 // Jahit ujung utara rel Senen-Kemayoran bangun-tangan (255, -670) ke ujung
 // selatan dataset KRL Tanjung Priuk-Kemayoran (222,6, -615,2).
@@ -7113,6 +7192,15 @@ export class CityScene {
       addRoadPolyline(road.points, road.width, road.width >= 10);
     });
 
+    const seamRoadConnectors = [
+      ...collectSeamConnectors(VOID_E_OSM.roads, VOID_K_OSM.roads, SEAM_EK, SEAM_ROAD_STITCH_MAX),
+      ...collectSeamConnectors(VOID_K_OSM.roads, VOID_F_OSM.roads, SEAM_KF_HORIZONTAL, SEAM_ROAD_STITCH_MAX),
+      ...collectSeamConnectors(VOID_F_OSM.roads, VOID_K_OSM.roads, SEAM_KF_VERTICAL, SEAM_ROAD_STITCH_MAX)
+    ].filter((connector) => !insideAnchorSite(connector.from[0], connector.from[1]));
+    seamRoadConnectors.forEach((connector) => {
+      addRoadPolyline([connector.from, connector.to], connector.width, connector.width >= 10);
+    });
+
     VOID_K_OSM.waterways.forEach((waterway) => {
       const points = waterway.points;
       for (let i = 0; i < points.length - 1; i++) {
@@ -7125,6 +7213,20 @@ export class CityScene {
           makeBox(waterway.width, 0.08, len + 0.6, (x1 + x2) * 0.5, 0.04, (z1 + z2) * 0.5, angle)
         );
       }
+    });
+
+    const seamWaterConnectors = [
+      ...collectSeamConnectors(VOID_K_OSM.waterways, VOID_E_OSM.waterways, SEAM_EK, SEAM_WATER_STITCH_MAX),
+      ...collectSeamConnectors(VOID_K_OSM.waterways, VOID_F_OSM.waterways, SEAM_KF_HORIZONTAL, SEAM_WATER_STITCH_MAX),
+      ...collectSeamConnectors(VOID_F_OSM.waterways, VOID_K_OSM.waterways, SEAM_KF_VERTICAL, SEAM_WATER_STITCH_MAX)
+    ];
+    seamWaterConnectors.forEach((connector) => {
+      const [x1, z1] = connector.from;
+      const [x2, z2] = connector.to;
+      const length = Math.hypot(x2 - x1, z2 - z1);
+      waterGeos.push(
+        makeBox(connector.width, 0.08, length + 0.6, (x1 + x2) * 0.5, 0.04, (z1 + z2) * 0.5, Math.atan2(x2 - x1, z2 - z1))
+      );
     });
 
     VOID_K_OSM.waterBodies.forEach((body) => {
@@ -7298,6 +7400,8 @@ export class CityScene {
       lamps: lampCount,
       trees: treePositions.length,
       connectors: 0,
+      seamRoads: seamRoadConnectors.length,
+      seamWaterways: seamWaterConnectors.length,
       drawCalls: 9
     };
   }
@@ -10465,6 +10569,11 @@ export class CityScene {
       addRoadPolyline(road.points, road.width, road.width >= 10);
     });
 
+    const seamRoadConnectors = collectSeamConnectors(VOID_E_OSM.roads, VOID_J_OSM.roads, SEAM_EJ, SEAM_ROAD_STITCH_MAX);
+    seamRoadConnectors.forEach((connector) => {
+      addRoadPolyline([connector.from, connector.to], connector.width, connector.width >= 10);
+    });
+
     // Air OSM duduk 0,06 di atas kubus air bangun-tangan (0,04) agar tidak z-fight.
     let waterwayCaps = 0;
     VOID_J_OSM.waterways.forEach((waterway) => {
@@ -10674,6 +10783,8 @@ export class CityScene {
       railways: VOID_J_OSM.railways.length,
       railPoints: VOID_J_OSM.railways.reduce((sum, rail) => sum + rail.points.length, 0),
       connectors: 1,
+      seamRoads: seamRoadConnectors.length,
+      seamWaterways: 0,
       drawCalls: 13
     };
   }

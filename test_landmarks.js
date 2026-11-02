@@ -7739,7 +7739,69 @@ assert.ok(
 assert.ok(voidKWaterEdge(2050, -148) >= 0, 'Void K P&R driveway must stay off the waterways');
 assert.ok(!voidKBodyAt(2050, -148), 'Void K P&R driveway must not sit in a water body');
 
-console.log(`✅ All 131 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 101: Jahitan antar-void S1–S3 — sambung jalan/air yang berhenti di garis seam
+[
+  "const SEAM_EJ = { axis: 'x', value: 1330, min: -1105, max: -615 };",
+  "const SEAM_EK = { axis: 'z', value: -470, min: 1330, max: 2145 };",
+  "const SEAM_KF_HORIZONTAL = { axis: 'z', value: -150, min: 1330, max: 1995 };",
+  "const SEAM_KF_VERTICAL = { axis: 'x', value: 1995, min: -150, max: 560 };"
+].forEach((definition) => {
+  assert.ok(citySceneContent.includes(definition), `CityScene.js missing seam definition: ${definition}`);
+});
+assert.ok(
+  citySceneContent.includes('const nearestPointOnFeatures = (features, x, z) =>'),
+  'CityScene.js missing the seam nearest-point helper'
+);
+assert.ok(
+  citySceneContent.includes('const collectSeamConnectors = (sideA, sideB, seam, maxGap, skipNames = []) =>'),
+  'CityScene.js missing the seam connector helper'
+);
+assert.ok(
+  citySceneContent.includes('SEAM_SELF_JOIN_EPS') &&
+    citySceneContent.includes('nearestPointOnFeatures([other], endpoint[0], endpoint[1])'),
+  'Seam stitching must skip endpoints that already join another way in the same dataset'
+);
+assert.ok(
+  citySceneContent.includes('SEAM_ROAD_STITCH_MAX') && citySceneContent.includes('SEAM_WATER_STITCH_MAX'),
+  'Seam stitching must keep separate road and waterway gap limits'
+);
+
+const seamJBuilder = sliceCityBuilder('  buildVoidJNorthJakarta() {');
+assert.ok(
+  seamJBuilder.includes(
+    'collectSeamConnectors(VOID_E_OSM.roads, VOID_J_OSM.roads, SEAM_EJ, SEAM_ROAD_STITCH_MAX)'
+  ),
+  'Void J builder must stitch the S1 E–J seam'
+);
+assert.ok(seamJBuilder.includes('const seamRoadConnectors'), 'Void J builder must collect seam road connectors');
+assert.ok(
+  seamJBuilder.includes('seamRoads: seamRoadConnectors.length'),
+  'Void J stats must record the seam road connector count'
+);
+
+const seamKBuilder = sliceCityBuilder('  buildVoidK() {');
+[
+  'collectSeamConnectors(VOID_E_OSM.roads, VOID_K_OSM.roads, SEAM_EK, SEAM_ROAD_STITCH_MAX)',
+  'collectSeamConnectors(VOID_K_OSM.roads, VOID_F_OSM.roads, SEAM_KF_HORIZONTAL, SEAM_ROAD_STITCH_MAX)',
+  'collectSeamConnectors(VOID_F_OSM.roads, VOID_K_OSM.roads, SEAM_KF_VERTICAL, SEAM_ROAD_STITCH_MAX)',
+  'collectSeamConnectors(VOID_K_OSM.waterways, VOID_E_OSM.waterways, SEAM_EK, SEAM_WATER_STITCH_MAX)',
+  'collectSeamConnectors(VOID_K_OSM.waterways, VOID_F_OSM.waterways, SEAM_KF_HORIZONTAL, SEAM_WATER_STITCH_MAX)',
+  'collectSeamConnectors(VOID_F_OSM.waterways, VOID_K_OSM.waterways, SEAM_KF_VERTICAL, SEAM_WATER_STITCH_MAX)'
+].forEach((call) => {
+  assert.ok(seamKBuilder.includes(call), `Void K builder missing seam stitch: ${call}`);
+});
+assert.ok(
+  seamKBuilder.includes('const seamRoadConnectors') && seamKBuilder.includes('const seamWaterConnectors'),
+  'Void K builder must collect both road and waterway seam connectors'
+);
+assert.ok(
+  seamKBuilder.includes('seamRoads: seamRoadConnectors.length') &&
+    seamKBuilder.includes('seamWaterways: seamWaterConnectors.length'),
+  'Void K stats must record both seam connector counts'
+);
+assert.ok(!seamKBuilder.includes('new THREE.PointLight'), 'Seam stitching must not add PointLights');
+
+console.log(`✅ All 131 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
