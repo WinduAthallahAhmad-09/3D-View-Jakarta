@@ -6784,7 +6784,298 @@ assert.strictEqual(
 assert.ok(citySceneContent.includes('const VOID_J_PR_PLOT'), 'CityScene.js missing the Void J P&R plot reservation');
 assert.ok(citySceneContent.includes('const VOID_J_PR_DRIVEWAY'), 'CityScene.js missing the Void J P&R driveway reservation');
 
-console.log(`✅ All 126 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 94: Void J Tahap 4 — Park-and-Ride Ancol dan enam feeder halte
+assert.ok(citySceneContent.includes('buildVoidJTransit()'), 'CityScene.js missing buildVoidJTransit');
+
+const voidJTransitCall = citySceneContent.indexOf('this.buildVoidJTransit();');
+assert.ok(voidJTransitCall > 0, 'CityScene.js does not call buildVoidJTransit');
+assert.ok(
+  voidJTransitCall > citySceneContent.indexOf('this.buildVoidJInfill();'),
+  'buildVoidJTransit must run after buildVoidJInfill so the P&R plot is reserved'
+);
+assert.ok(
+  voidJTransitCall < citySceneContent.indexOf('this.buildVoidBInfillAndIndustry();'),
+  'buildVoidJTransit must run before buildVoidBInfillAndIndustry'
+);
+assert.ok(
+  citySceneContent.includes('this.voidJTransitLabels = [];'),
+  'CityScene constructor must initialise the Void J transit label list'
+);
+
+const voidJPrPlotObject = citySceneContent.match(/const VOID_J_PR_PLOT = \{([^}]*)\};/);
+assert.ok(voidJPrPlotObject, 'Void J P&R plot must use the shared {x,z,w,d} shape');
+assert.ok(
+  voidJPrPlotObject[1].includes('x: 299') &&
+    voidJPrPlotObject[1].includes('z: -911') &&
+    voidJPrPlotObject[1].includes('w: 30') &&
+    voidJPrPlotObject[1].includes('d: 18'),
+  'Void J P&R plot drifted from the audited Pademangan parcel'
+);
+const voidJPrDrivewayObject = citySceneContent.match(/const VOID_J_PR_DRIVEWAY = \{([^}]*)\};/);
+assert.ok(voidJPrDrivewayObject, 'Void J P&R driveway must use the shared {x,z,w,d} shape');
+assert.ok(
+  voidJPrDrivewayObject[1].includes('x: 309') &&
+    voidJPrDrivewayObject[1].includes('z: -903') &&
+    voidJPrDrivewayObject[1].includes('w: 6') &&
+    voidJPrDrivewayObject[1].includes('d: 6'),
+  'Void J P&R driveway drifted from the audited Jalan Pademangan VI apron'
+);
+
+const voidJTransitBody = sliceCityBuilder('  buildVoidJTransit() {');
+assert.ok(!voidJTransitBody.includes('new THREE.PointLight'), 'Void J transit must not add PointLights');
+assert.ok(voidJTransitBody.includes('VOID_J_OSM'), 'Void J transit must anchor halte to the OSM road network');
+assert.ok(voidJTransitBody.includes('findRoadPoint'), 'Void J transit missing the road anchor helper');
+assert.ok(voidJTransitBody.includes('const halteLabels = [];'), 'Void J transit must collect halte labels');
+assert.ok(voidJTransitBody.includes('halteLabels.push({'), 'Void J transit must emit one label per halte');
+assert.ok(
+  voidJTransitBody.includes('position: [hx, 6.4, hz]'),
+  'Void J halte labels must float above the canopy'
+);
+assert.ok(
+  voidJTransitBody.includes('shortName: spec.shortName,'),
+  'Void J halte labels must forward the short name'
+);
+assert.ok(voidJTransitBody.includes("kind: 'halte'"), 'Void J halte labels must carry the halte kind');
+assert.ok(
+  voidJTransitBody.includes('this.voidJTransitLabels = ['),
+  'Void J transit must publish its label anchors'
+);
+
+assert.ok(voidJTransitBody.includes('VOID_J_PR_PLOT'), 'Void J transit must read the shared P&R plot');
+assert.ok(
+  voidJTransitBody.includes('const prCenterX = VOID_J_PR_PLOT.x;'),
+  'Void J P&R centre must come from the shared plot'
+);
+assert.ok(
+  voidJTransitBody.includes('VOID_J_PR_DRIVEWAY.w') && voidJTransitBody.includes('VOID_J_PR_DRIVEWAY.d'),
+  'Void J P&R driveway must use the shared access strip so infill and transit stay aligned'
+);
+assert.ok(
+  voidJTransitBody.includes("name: 'Park and Ride Ancol'"),
+  'Void J P&R label missing the full name'
+);
+assert.ok(voidJTransitBody.includes("shortName: 'P&R Ancol'"), 'Void J P&R label missing the short name');
+assert.ok(voidJTransitBody.includes("kind: 'park'"), 'Void J P&R label must use the P badge');
+assert.ok(
+  voidJTransitBody.includes('position: [prCenterX, 7.6, prCenterZ]'),
+  'Void J P&R label must clear the shelter roof'
+);
+assert.ok(voidJTransitBody.includes('const bayCount = 8;'), 'Void J P&R must keep eight parking bays');
+assert.ok(voidJTransitBody.includes('parkingBays: bayCount'), 'Void J transit stats missing the bay count');
+assert.ok(voidJTransitBody.includes('trees: treePositions.length'), 'Void J transit stats missing the tree count');
+
+const voidJHalteSpecs = [
+  ['Halte Stasiun Ancol', 'Stasiun Ancol', 'Jalan Budi Mulya Utara Raya', [230.7, -894.0], 1, [235.9, -894.9], [211, -951]],
+  ['Halte Taman Impian Jaya Ancol', 'Taman Impian Jaya Ancol', 'Pantai Indah', [160.3, -1021.0], 1, [155.0, -1020.2], [147, -999]],
+  ['Halte JIS', 'JIS', 'Jalan Sunter Permai Raya', [530.0, -925.4], 1, [526.0, -921.9], [528, -995]],
+  ['Halte Rusunawa Sunter Jaya', 'Rusunawa Sunter Jaya', 'Jalan Sunter Karya', [651.3, -752.1], -1, [646.6, -751.1], [648, -751]],
+  ['Halte RSUD Koja', 'RSUD Koja', 'Jalan Alur Laut', [1073.7, -942.0], 1, [1079.0, -942.0], [1094, -942]],
+  ['Halte Pademangan', 'Pademangan', 'Jalan Pademangan VI', [305.0, -888.2], 1, [300.4, -891.0], [299, -911]]
+];
+
+voidJHalteSpecs.forEach(([name, shortName, road, near, side]) => {
+  assert.ok(voidJTransitBody.includes(`name: '${name}'`), `Void J transit missing ${name}`);
+  assert.ok(voidJTransitBody.includes(`shortName: '${shortName}'`), `Void J halte label missing the ${shortName} short name`);
+  assert.ok(voidJTransitBody.includes(`road: '${road}'`), `Void J halte missing the ${road} anchor`);
+  assert.ok(
+    voidJTransitBody.includes(`near: [${near[0]}, ${near[1]}], side: ${side}`),
+    `Void J halte ${shortName} drifted from its audited shoulder point`
+  );
+});
+
+[
+  'voidj-transit-concrete',
+  'voidj-transit-steel',
+  'voidj-transit-sign',
+  'voidj-transit-tree-trunks',
+  'voidj-transit-tree-foliage'
+].forEach((name) => {
+  assert.ok(voidJTransitBody.includes(name), `Void J transit missing the ${name} mesh`);
+});
+
+assert.ok(voidJTransitBody.includes('registerNightMaterial'), 'Void J transit sign must register for night');
+assert.ok(voidJTransitBody.includes('emissive: 0xfff4d6'), 'Void J transit sign night emissive drifted');
+assert.ok(voidJTransitBody.includes('nightIntensity: 0.55'), 'Void J transit sign night intensity drifted');
+assert.ok(voidJTransitBody.includes('voidJTransitStats'), 'Void J transit must expose runtime stats');
+assert.ok(voidJTransitBody.includes('drawCalls: 5'), 'Void J transit should add five draw calls');
+assert.ok(
+  mainJsContent.includes('...this.city.voidJTransitLabels'),
+  'main.js must forward the Void J transit labels to UIManager'
+);
+
+const voidJFindRoadPoint = (roadName, near) => {
+  let best = null;
+  VOID_J_OSM.roads.forEach((road) => {
+    if (road.name !== roadName) return;
+    for (let i = 0; i < road.points.length - 1; i++) {
+      const a = road.points[i];
+      const b = road.points[i + 1];
+      const dx = b[0] - a[0];
+      const dz = b[1] - a[1];
+      const len2 = dx * dx + dz * dz;
+      let t = len2 ? ((near[0] - a[0]) * dx + (near[1] - a[1]) * dz) / len2 : 0;
+      t = Math.max(0, Math.min(1, t));
+      const x = a[0] + dx * t;
+      const z = a[1] + dz * t;
+      const d = Math.hypot(near[0] - x, near[1] - z);
+      if (!best || d < best.d) best = { x, z, d, angle: Math.atan2(dx, dz), width: road.width };
+    }
+  });
+  return best;
+};
+
+const voidJWaterEdge = (x, z) => {
+  let best = Infinity;
+  VOID_J_OSM.waterways.forEach((waterway) => {
+    for (let i = 0; i < waterway.points.length - 1; i++) {
+      best = Math.min(
+        best,
+        distanceToSegment([x, z], waterway.points[i], waterway.points[i + 1]) - waterway.width * 0.5
+      );
+    }
+  });
+  return best;
+};
+const voidJBodyAt = (x, z) =>
+  VOID_J_OSM.waterBodies.some((body) => {
+    const pts = body.points;
+    let inside = false;
+    for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+      const xi = pts[i][0];
+      const zi = pts[i][1];
+      const xj = pts[j][0];
+      const zj = pts[j][1];
+      if ((zi > z) !== (zj > z) && x < ((xj - xi) * (z - zi)) / (zj - zi) + xi) inside = !inside;
+    }
+    return inside;
+  });
+const voidJRectClear = (rect, x, z) =>
+  Math.hypot(Math.max(rect[0] - x, 0, x - rect[1]), Math.max(rect[2] - z, 0, z - rect[3]));
+const voidJMasks = [
+  [150, 272, -985, -905],
+  [586, 710, -797, -705],
+  [1018, 1170, -1001, -883],
+  [440, 616, -1055, -935],
+  [80, 215, -1080, -930],
+  [248, 372, -750, -638],
+  [491, 519, -866, -638],
+  [641, 669, -866, -638],
+  [781, 809, -866, -638],
+  [1098, 1302, -775, -612]
+];
+const voidJLandmarkMasses = [
+  [155, 267, -978, -924],
+  [101, 137, -1010, -988],
+  [458, 598, -1050, -940],
+  [610, 686, -775, -763],
+  [1069, 1099, -973, -951],
+  [1037, 1067, -951, -933]
+];
+
+const voidJPrRect = [299 - 15, 299 + 15, -911 - 9, -911 + 9];
+const voidJDriveRect = [309 - 3, 309 + 3, -903 - 3, -903 + 3];
+voidJMasks.forEach((mask) => {
+  assert.ok(
+    !(voidJPrRect[0] < mask[1] && voidJPrRect[1] > mask[0] && voidJPrRect[2] < mask[3] && voidJPrRect[3] > mask[2]),
+    `Void J P&R plot intersects the reserved mask [${mask}]`
+  );
+});
+assert.ok(
+  voidJPrRect[0] < voidJDriveRect[1] &&
+    voidJPrRect[1] > voidJDriveRect[0] &&
+    voidJPrRect[2] < voidJDriveRect[3] &&
+    voidJPrRect[3] > voidJDriveRect[2],
+  'Void J P&R driveway must meet the plaza edge'
+);
+[[voidJPrRect[0], voidJPrRect[2]], [voidJPrRect[1], voidJPrRect[2]], [voidJPrRect[0], voidJPrRect[3]], [voidJPrRect[1], voidJPrRect[3]]]
+  .forEach(([cx, cz]) => {
+    let roadEdge = Infinity;
+    VOID_J_OSM.roads.forEach((road) => {
+      for (let i = 0; i < road.points.length - 1; i++) {
+        roadEdge = Math.min(roadEdge, distanceToSegment([cx, cz], road.points[i], road.points[i + 1]) - road.width * 0.5);
+      }
+    });
+    assert.ok(roadEdge >= 0, `Void J P&R plot corner ${cx}/${cz} overlaps the roadway (${roadEdge.toFixed(2)})`);
+    assert.ok(voidJWaterEdge(cx, cz) >= 0, `Void J P&R plot corner ${cx}/${cz} overlaps a waterway`);
+    assert.ok(!voidJBodyAt(cx, cz), `Void J P&R plot corner ${cx}/${cz} sits in a water body`);
+  });
+let voidJDrivewayRoadEdge = Infinity;
+[[voidJDriveRect[0], voidJDriveRect[2]], [voidJDriveRect[1], voidJDriveRect[2]], [voidJDriveRect[0], voidJDriveRect[3]], [voidJDriveRect[1], voidJDriveRect[3]]]
+  .forEach(([cx, cz]) => {
+    VOID_J_OSM.roads.forEach((road) => {
+      for (let i = 0; i < road.points.length - 1; i++) {
+        voidJDrivewayRoadEdge = Math.min(
+          voidJDrivewayRoadEdge,
+          distanceToSegment([cx, cz], road.points[i], road.points[i + 1]) - road.width * 0.5
+        );
+      }
+    });
+  });
+assert.ok(
+  voidJDrivewayRoadEdge <= 0.5 && voidJDrivewayRoadEdge >= -0.5,
+  `Void J P&R driveway must end on a road edge (gap ${voidJDrivewayRoadEdge.toFixed(2)})`
+);
+assert.ok(voidJWaterEdge(309, -903) >= 0, 'Void J P&R driveway must stay off the waterways');
+assert.ok(!voidJBodyAt(309, -903), 'Void J P&R driveway must not sit in a water body');
+
+const voidJHalteCenters = voidJHalteSpecs.map(([name, shortName, road, near, side, expected, anchor]) => {
+  const snapped = voidJFindRoadPoint(road, near);
+  assert.ok(snapped, `Void J halte ${shortName} lost its ${road} anchor`);
+  assert.ok(snapped.d <= 1, `Void J halte ${shortName} near point must sit on ${road}`);
+  const nx = Math.cos(snapped.angle);
+  const nz = -Math.sin(snapped.angle);
+  const ux = Math.sin(snapped.angle);
+  const uz = Math.cos(snapped.angle);
+  const offset = snapped.width * 0.5 - 0.2;
+  const hx = snapped.x + nx * offset * side;
+  const hz = snapped.z + nz * offset * side;
+
+  assert.ok(
+    Math.abs(hx - expected[0]) <= 0.15 && Math.abs(hz - expected[1]) <= 0.15,
+    `Void J halte ${shortName} drifted to ${hx.toFixed(1)}/${hz.toFixed(1)}`
+  );
+
+  let minMass = Infinity;
+  let minWater = Infinity;
+  [-6, 0, 6].forEach((lz) => {
+    [-1.3, 0, 1.3].forEach((lx) => {
+      const cx = hx + lx * nx + lz * ux;
+      const cz = hz + lx * nz + lz * uz;
+      voidJLandmarkMasses.forEach((mass) => {
+        minMass = Math.min(minMass, voidJRectClear(mass, cx, cz));
+      });
+      minWater = Math.min(minWater, voidJWaterEdge(cx, cz));
+      assert.ok(!voidJBodyAt(cx, cz), `Void J halte ${shortName} peron must stay out of water bodies`);
+    });
+  });
+
+  assert.ok(minMass >= 1, `Void J halte ${shortName} peron must clear the anchor masses (min ${minMass.toFixed(2)})`);
+  assert.ok(minWater >= 0, `Void J halte ${shortName} peron must stay off the waterways (min ${minWater.toFixed(2)})`);
+  assert.ok(
+    Math.hypot(hx - anchor[0], hz - anchor[1]) <= 80,
+    `Void J halte ${shortName} drifted too far from its anchor`
+  );
+  assert.ok(
+    hx >= VOID_J_OSM.meta.clipBox.minX &&
+      hx <= VOID_J_OSM.meta.clipBox.maxX &&
+      hz >= VOID_J_OSM.meta.clipBox.minZ &&
+      hz <= VOID_J_OSM.meta.clipBox.maxZ,
+    `Void J halte ${shortName} fell outside the OSM clip box`
+  );
+  return [hx, hz];
+});
+
+for (let i = 0; i < voidJHalteCenters.length; i++) {
+  for (let j = i + 1; j < voidJHalteCenters.length; j++) {
+    const gap = Math.hypot(
+      voidJHalteCenters[i][0] - voidJHalteCenters[j][0],
+      voidJHalteCenters[i][1] - voidJHalteCenters[j][1]
+    );
+    assert.ok(gap >= 25, `Void J transit haltes ${i} and ${j} are only ${gap.toFixed(1)} units apart`);
+  }
+}
+
+console.log(`✅ All 126 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
