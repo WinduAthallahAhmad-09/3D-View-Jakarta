@@ -175,11 +175,13 @@ const VOID_I_ANCHOR_SITES = [
   [-400, -344, 856, 916]      // Stasiun MRT Haji Nawi
 ];
 
-// Tapak tiga anchor Void J; jalan dan rel tetap digambar utuh di bawah pelat tapak.
+// Tapak lima anchor Void J; jalan dan rel tetap digambar utuh di bawah pelat tapak.
 const VOID_J_ANCHOR_SITES = [
-  [150, 272, -985, -905],   // Stasiun Ancol x=211 z=-951
-  [586, 710, -797, -705],   // Rusunawa Sunter x=648 z=-751
-  [1018, 1170, -1001, -883] // RSUD Koja x=1094 z=-942
+  [150, 272, -985, -905],    // Stasiun Ancol x=211 z=-951
+  [586, 710, -797, -705],    // Rusunawa Sunter x=648 z=-751
+  [1018, 1170, -1001, -883], // RSUD Koja x=1094 z=-942
+  [200, 284, -879, -823],    // Pasar Pademangan Barat x=242,2 z=-851,2
+  [470, 590, -612, -540]     // Wisma Atlet Kemayoran x=520,7 z=-608,4, di utara kali
 ];
 
 // Jahit ujung utara rel Senen-Kemayoran bangun-tangan (255, -670) ke ujung
@@ -15704,7 +15706,9 @@ export class CityScene {
       "stasiun-mrt-haji-nawi": () => LandmarkModels.createStasiunMrtHajiNawi(),
       "stasiun-ancol": () => LandmarkModels.createStasiunAncol(),
       "rusunawa-sunter": () => LandmarkModels.createRusunawaSunter(),
-      "rsud-koja": () => LandmarkModels.createRSUDKoja()
+      "rsud-koja": () => LandmarkModels.createRSUDKoja(),
+      "pasar-pademangan": () => LandmarkModels.createPasarPademangan(),
+      "wisma-atlet-kemayoran": () => LandmarkModels.createWismaAtletKemayoran()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {

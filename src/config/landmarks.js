@@ -2839,6 +2839,50 @@ export const JAKARTA_LANDMARKS = [
       "Lokasinya di Jl. Deli, Koja, dekat kawasan industri dan pelabuhan Tanjung Priok.",
       "Fasilitasnya mencakup gawat darurat 24 jam, rawat inap, dan helipad untuk evakuasi udara."
     ]
+  },
+  {
+    id: "pasar-pademangan",
+    name: "Pasar Pademangan Barat",
+    shortName: "Pasar Pademangan",
+    category: "Pasar Tradisional & Ekonomi Rakyat",
+    tagline: "Pasar lingkungan 441 unit di Jl. Waspada Raya",
+    height: "12 meter (Balai Pasar Dua Lantai)",
+    year: "Tidak tercatat",
+    architect: "Perumda Pasar Jaya",
+    location: "Jl. Waspada Raya No. 1, Pademangan Barat, Pademangan, Jakarta Utara",
+    coordinates: { lat: -6.1349241, lng: 106.8402269 },
+    position: [242.2, 0, -851.2],
+    labelHeight: 42,
+    cameraPosition: [242.2, 84, -742.0],
+    cameraTarget: [242.2, 8, -851.2],
+    description: "Pasar tradisional 441 unit di Pademangan Barat yang melayani kebutuhan harian warga. Menampilkan balai pasar dua lantai beratap pelana, deret kios sayur dan sembako, ruko tepi jalan, area bongkar muat, parkir, serta pohon peneduh di dalam tapak.",
+    facts: [
+      "Pasar Pademangan Barat tercatat memiliki 441 unit usaha yang menjual buah, sayur, sembako, serta ikan dan daging.",
+      "Pasar ini dikelola Perumda Pasar Jaya dan berlokasi di Jl. Waspada Raya, Pademangan Barat, Jakarta Utara.",
+      "Sebagai pasar lingkungan, pasar ini menjadi simpul ekonomi harian warga kampung Pademangan dan pekerja kawasan Ancol."
+    ]
+  },
+  {
+    id: "wisma-atlet-kemayoran",
+    name: "Wisma Atlet Kemayoran",
+    shortName: "Wisma Atlet",
+    category: "Hunian Vertikal & Permukiman",
+    tagline: "Sepuluh menara hunian bekas wisma atlet Asian Games 2018",
+    height: "±70 meter (Sepuluh Menara Hunian)",
+    year: "2018",
+    architect: "Kementerian Pekerjaan Umum dan Perumahan Rakyat",
+    location: "Kawasan Kemayoran, Jakarta Pusat",
+    coordinates: { lat: -6.1520546, lng: 106.8599766 },
+    position: [520.7, 0, -608.4],
+    labelHeight: 86,
+    cameraPosition: [520.7, 126, -440.0],
+    cameraTarget: [520.7, 42, -608.4],
+    description: "Kompleks rumah susun sepuluh menara yang dibangun untuk Asian Games 2018 di atas lahan bekas Bandara Kemayoran. Menampilkan menara hunian berjendela pita, podium dan plaza bersama, area parkir, taman, serta jalur pejalan kaki di tepi Kali Kemayoran.",
+    facts: [
+      "Wisma Atlet Kemayoran dibangun pemerintah untuk menyambut Asian Games 2018 dan terdiri dari sepuluh menara di Blok C-2 serta D-10.",
+      "Tujuh menara di Blok D-10 menyediakan 5.494 unit hunian dan menampung sekitar 16.482 atlet serta ofisial selama Asian Games 2018.",
+      "Pada 2020–2021 kompleks ini difungsikan sebagai Rumah Sakit Darurat COVID-19 sebelum dikembalikan sebagai hunian."
+    ]
   }
 ];
 

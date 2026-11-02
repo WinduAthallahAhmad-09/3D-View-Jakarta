@@ -13585,6 +13585,287 @@ export class LandmarkModels {
 
     return group;
   }
+
+  /**
+   * 127. Pasar Pademangan Barat
+   * Balai pasar dua lantai, los kios, ruko tepi jalan, dan parkir.
+   */
+  static createPasarPademangan() {
+    const group = new THREE.Group();
+
+    const siteMat = new THREE.MeshStandardMaterial({ color: 0xd6d3d1, roughness: 0.92 });
+    const hallMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.8 });
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.7, side: THREE.DoubleSide });
+    const kioskMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.75 });
+    const rukoMat = new THREE.MeshStandardMaterial({ color: 0xe7e5e4, roughness: 0.75 });
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.45, metalness: 0.5 });
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xfafaf9, roughness: 0.5 });
+    const asphaltMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
+    const leafMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.9 });
+    const glassMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0xbae6fd, roughness: 0.2, metalness: 0.25, transparent: true, opacity: 0.8 })
+    );
+    const signMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.5 }),
+      0.5,
+      0xffd166
+    );
+
+    const site = new THREE.Mesh(new THREE.BoxGeometry(84, 0.3, 56), siteMat);
+    site.position.y = 0.15;
+    site.receiveShadow = true;
+    group.add(site);
+
+    const hall = new THREE.Mesh(new THREE.BoxGeometry(46, 8, 20), hallMat);
+    hall.name = 'pasar-pademangan-hall';
+    hall.position.set(0, 4.3, -14);
+    hall.castShadow = true;
+    hall.receiveShadow = true;
+    group.add(hall);
+
+    const upperFloor = new THREE.Mesh(new THREE.BoxGeometry(42, 3.6, 16), hallMat);
+    upperFloor.position.set(0, 9.6, -14);
+    upperFloor.castShadow = true;
+    group.add(upperFloor);
+
+    const glassGeos = [];
+    const frontGlass = new THREE.BoxGeometry(38, 1.6, 0.4);
+    frontGlass.translate(0, 7.2, -3.8);
+    glassGeos.push(frontGlass);
+    [-20, 20].forEach((gx) => {
+      const sideGlass = new THREE.BoxGeometry(0.4, 1.6, 18);
+      sideGlass.translate(gx, 7.2, -14);
+      glassGeos.push(sideGlass);
+    });
+    const entranceGlass = new THREE.BoxGeometry(14, 3.6, 0.4);
+    entranceGlass.translate(0, 2.1, -3.8);
+    glassGeos.push(entranceGlass);
+    const hallGlass = new THREE.Mesh(BufferGeometryUtils.mergeGeometries(glassGeos, false), glassMat);
+    hallGlass.name = 'pasar-pademangan-glass';
+    group.add(hallGlass);
+
+    [[-5.2, 0.26], [5.2, -0.26]].forEach(([rz, tilt]) => {
+      const panel = new THREE.Mesh(new THREE.BoxGeometry(50, 0.4, 12.5), roofMat);
+      panel.position.set(0, 12.4, -14 + rz);
+      panel.rotation.x = tilt;
+      panel.castShadow = true;
+      group.add(panel);
+    });
+
+    const ridge = new THREE.Mesh(new THREE.BoxGeometry(50, 0.4, 0.8), roofMat);
+    ridge.position.set(0, 13.4, -14);
+    group.add(ridge);
+
+    const nameBoard = new THREE.Mesh(new THREE.BoxGeometry(20, 3, 0.5), signMat);
+    nameBoard.position.set(0, 10.2, -3.4);
+    group.add(nameBoard);
+
+    const nameText = new THREE.Mesh(new THREE.BoxGeometry(15, 1.1, 0.16), whiteMat);
+    nameText.position.set(0, 10.2, -3.1);
+    group.add(nameText);
+
+    const forecourtCanopy = new THREE.Mesh(new THREE.BoxGeometry(44, 0.3, 10), roofMat);
+    forecourtCanopy.position.set(0, 4.8, 2);
+    forecourtCanopy.castShadow = true;
+    group.add(forecourtCanopy);
+
+    [-20, 20].forEach((cx) => {
+      [0, 6].forEach((cz) => {
+        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.26, 4.5, 8), steelMat);
+        col.position.set(cx, 2.55, cz);
+        group.add(col);
+      });
+    });
+
+    const kioskGeos = [];
+    const kioskRoofGeos = [];
+    [-27, -9, 9, 27].forEach((kx) => {
+      [10.5, 17.5].forEach((kz) => {
+        const body = new THREE.BoxGeometry(9, 3, 5);
+        body.translate(kx, 1.8, kz);
+        kioskGeos.push(body);
+        const roof = new THREE.BoxGeometry(9.6, 0.3, 5.6);
+        roof.translate(kx, 3.45, kz);
+        kioskRoofGeos.push(roof);
+      });
+    });
+    const kiosks = new THREE.Mesh(
+      BufferGeometryUtils.mergeGeometries(kioskGeos, false),
+      kioskMat
+    );
+    kiosks.name = 'pasar-pademangan-kiosks';
+    kiosks.castShadow = true;
+    group.add(kiosks);
+
+    const kioskRoofs = new THREE.Mesh(
+      BufferGeometryUtils.mergeGeometries(kioskRoofGeos, false),
+      roofMat
+    );
+    group.add(kioskRoofs);
+
+    [-16, -6, 4].forEach((rz) => {
+      const ruko = new THREE.Mesh(new THREE.BoxGeometry(11, 6.4, 8), rukoMat);
+      ruko.position.set(-33, 3.4, rz);
+      ruko.castShadow = true;
+      group.add(ruko);
+
+      const band = new THREE.Mesh(new THREE.BoxGeometry(11.4, 1.1, 8.4), glassMat);
+      band.position.set(-33, 4.6, rz);
+      group.add(band);
+
+      const awning = new THREE.Mesh(new THREE.BoxGeometry(11.6, 0.25, 2.2), roofMat);
+      awning.position.set(-33, 3.1, rz + 5.1);
+      group.add(awning);
+    });
+
+    const parking = new THREE.Mesh(new THREE.BoxGeometry(12, 0.08, 20), asphaltMat);
+    parking.position.set(33, 0.38, -10);
+    group.add(parking);
+
+    for (let i = 0; i < 5; i++) {
+      const line = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.04, 16), whiteMat);
+      line.position.set(33 - 5 + i * 2.5, 0.44, -10);
+      group.add(line);
+    }
+
+    [-30, -15, 0, 15, 30].forEach((tx) => {
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.36, 3.4, 6), trunkMat);
+      trunk.position.set(tx, 1.9, 24.5);
+      group.add(trunk);
+
+      const crown = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 1.4, 3.8, 8), leafMat);
+      crown.position.set(tx, 4.9, 24.5);
+      crown.castShadow = true;
+      group.add(crown);
+    });
+
+    return group;
+  }
+
+  /**
+   * 128. Wisma Atlet Kemayoran
+   * Sepuluh menara hunian dua baris, podium utara, plaza, dan parkir.
+   */
+  static createWismaAtletKemayoran() {
+    const group = new THREE.Group();
+
+    const siteMat = new THREE.MeshStandardMaterial({ color: 0xd6d3d1, roughness: 0.92 });
+    const plazaMat = new THREE.MeshStandardMaterial({ color: 0xe7e5e4, roughness: 0.8 });
+    const towerMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.6 });
+    const podiumMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.65 });
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x57534e, roughness: 0.75 });
+    const accentMat = new THREE.MeshStandardMaterial({ color: 0x0369a1, roughness: 0.55 });
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xfafaf9, roughness: 0.5 });
+    const asphaltMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
+    const leafMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.9 });
+    const windowMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0x1e3a5f, roughness: 0.35, metalness: 0.2 })
+    );
+    const lobbyGlassMat = LandmarkModels.tagNightWindow(
+      new THREE.MeshStandardMaterial({ color: 0x7dd3fc, roughness: 0.2, metalness: 0.3, transparent: true, opacity: 0.85 })
+    );
+
+    const site = new THREE.Mesh(new THREE.BoxGeometry(120, 0.3, 72), siteMat);
+    site.position.y = 0.15;
+    site.receiveShadow = true;
+    group.add(site);
+
+    const podium = new THREE.Mesh(new THREE.BoxGeometry(106, 7, 24), podiumMat);
+    podium.name = 'wisma-atlet-podium';
+    podium.position.set(0, 3.5, -20);
+    podium.castShadow = true;
+    podium.receiveShadow = true;
+    group.add(podium);
+
+    const podiumGlass = new THREE.Mesh(new THREE.BoxGeometry(106.4, 1.6, 24.4), lobbyGlassMat);
+    podiumGlass.position.set(0, 4.6, -20);
+    group.add(podiumGlass);
+
+    const podiumBand = new THREE.Mesh(new THREE.BoxGeometry(106.6, 0.5, 24.6), accentMat);
+    podiumBand.position.set(0, 7.1, -20);
+    group.add(podiumBand);
+
+    const plaza = new THREE.Mesh(new THREE.BoxGeometry(96, 0.12, 18), plazaMat);
+    plaza.position.set(0, 0.4, -3);
+    group.add(plaza);
+
+    const windowGeos = [];
+    const roofGeos = [];
+    const towerCount = 10;
+
+    for (let t = 0; t < towerCount; t++) {
+      const col = t % 5;
+      const row = Math.floor(t / 5);
+      const tx = -40 + col * 20;
+      const tz = row === 0 ? -20 : 14;
+      const towerHeight = 58 + ((col + row) % 3) * 4;
+      const baseY = row === 0 ? 7 : 0;
+
+      const tower = new THREE.Mesh(new THREE.BoxGeometry(12, towerHeight, 12), towerMat);
+      if (t === 4) tower.name = 'wisma-atlet-tower';
+      tower.position.set(tx, baseY + towerHeight / 2, tz);
+      tower.castShadow = true;
+      tower.receiveShadow = true;
+      group.add(tower);
+
+      [0.28, 0.5, 0.72].forEach((ratio) => {
+        const band = new THREE.BoxGeometry(12.4, 1.1, 12.4);
+        band.translate(tx, baseY + towerHeight * ratio, tz);
+        windowGeos.push(band);
+      });
+
+      const cap = new THREE.BoxGeometry(12.8, 0.7, 12.8);
+      cap.translate(tx, baseY + towerHeight + 0.35, tz);
+      roofGeos.push(cap);
+    }
+
+    const towerWindows = new THREE.Mesh(
+      BufferGeometryUtils.mergeGeometries(windowGeos, false),
+      windowMat
+    );
+    towerWindows.name = 'wisma-atlet-windows';
+    group.add(towerWindows);
+
+    const towerRoofs = new THREE.Mesh(
+      BufferGeometryUtils.mergeGeometries(roofGeos, false),
+      roofMat
+    );
+    towerRoofs.name = 'wisma-atlet-roofs';
+    group.add(towerRoofs);
+
+    const parking = new THREE.Mesh(new THREE.BoxGeometry(78, 0.1, 8), asphaltMat);
+    parking.position.set(0, 0.38, 26);
+    group.add(parking);
+
+    for (let i = 0; i < 9; i++) {
+      const line = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.04, 7), whiteMat);
+      line.position.set(-36 + i * 9, 0.44, 26);
+      group.add(line);
+    }
+
+    const nameBoard = new THREE.Mesh(new THREE.BoxGeometry(28, 2.4, 0.6), whiteMat);
+    nameBoard.position.set(0, 2.1, 33);
+    group.add(nameBoard);
+
+    const nameStripe = new THREE.Mesh(new THREE.BoxGeometry(28, 0.5, 0.7), accentMat);
+    nameStripe.position.set(0, 1.2, 33);
+    group.add(nameStripe);
+
+    [-50, -30, -10, 10, 30, 50].forEach((tx) => {
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.38, 3.6, 6), trunkMat);
+      trunk.position.set(tx, 2.0, 33);
+      group.add(trunk);
+
+      const crown = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 1.5, 4.2, 8), leafMat);
+      crown.position.set(tx, 5.2, 33);
+      crown.castShadow = true;
+      group.add(crown);
+    });
+
+    return group;
+  }
 }
 
 

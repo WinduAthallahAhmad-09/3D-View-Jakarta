@@ -22,8 +22,8 @@ let assertionCount = 0;
 
 console.log('Running test_landmarks.js verification...');
 
-// Check 1: Exactly 126 landmarks
-assert.strictEqual(JAKARTA_LANDMARKS.length, 126, `Expected 126 landmarks, got ${JAKARTA_LANDMARKS.length}`);
+// Check 1: Exactly 128 landmarks
+assert.strictEqual(JAKARTA_LANDMARKS.length, 128, `Expected 128 landmarks, got ${JAKARTA_LANDMARKS.length}`);
 
 // Check 2: Unique IDs and valid properties
 const seenIds = new Set();
@@ -2479,8 +2479,8 @@ assert.ok(
 );
 assert.strictEqual(
   (landmarkModelsContent.match(/LandmarkModels\.tagNightWindow\(/g) || []).length,
-  44,
-  'Expected 44 tagged night materials across the Void C/D/E/F/G/H/I/J anchors, Mall Kelapa Gading, Danau Rawa Buaya and the RSUD Koja helipad'
+  48,
+  'Expected 48 tagged night materials across the Void C/D/E/F/G/H/I/J anchors, Mall Kelapa Gading, Danau Rawa Buaya and the RSUD Koja helipad'
 );
 assert.ok(
   landmarkModelsContent.includes('createUniversitasMercuBuana') &&
@@ -3027,9 +3027,9 @@ voidFAnchors.forEach(({ id }, index) => {
   );
 });
 assert.strictEqual(
-  (indexHtmlContent.match(/data-landmark-count>126</g) || []).length,
+  (indexHtmlContent.match(/data-landmark-count>128</g) || []).length,
   3,
-  'All three landmark counters must read 126'
+  'All three landmark counters must read 128'
 );
 
 const citySceneModuleScope = citySceneContent.slice(0, citySceneContent.indexOf('export class CityScene'));
@@ -6352,13 +6352,15 @@ assert.ok(
 const voidJAnchors = [
   { id: 'stasiun-ancol', builder: 'createStasiunAncol', position: [211.0, 0, -951.0], marker: 'stasiun-ancol-platform' },
   { id: 'rusunawa-sunter', builder: 'createRusunawaSunter', position: [648.0, 0, -751.0], marker: 'rusunawa-sunter-tower' },
-  { id: 'rsud-koja', builder: 'createRSUDKoja', position: [1094.0, 0, -942.0], marker: 'rsud-koja-emergency' }
+  { id: 'rsud-koja', builder: 'createRSUDKoja', position: [1094.0, 0, -942.0], marker: 'rsud-koja-emergency' },
+  { id: 'pasar-pademangan', builder: 'createPasarPademangan', position: [242.2, 0, -851.2], marker: 'pasar-pademangan-hall' },
+  { id: 'wisma-atlet-kemayoran', builder: 'createWismaAtletKemayoran', position: [520.7, 0, -608.4], marker: 'wisma-atlet-tower' }
 ];
 
 assert.deepStrictEqual(
   JAKARTA_LANDMARKS.slice(123).map((l) => l.id),
   voidJAnchors.map((a) => a.id),
-  'Void J anchors must follow Stasiun MRT Haji Nawi as landmarks #124-#126'
+  'Void J anchors must follow Stasiun MRT Haji Nawi as landmarks #124-#128'
 );
 
 voidJAnchors.forEach(({ id, builder, position, marker }, index) => {
@@ -6400,9 +6402,9 @@ voidJAnchors.forEach(({ id, builder, position, marker }, index) => {
 });
 
 assert.strictEqual(
-  (indexHtmlContent.match(/data-landmark-count>126</g) || []).length,
+  (indexHtmlContent.match(/data-landmark-count>128</g) || []).length,
   3,
-  'All three landmark counters must read 126 after Void J Tahap 1'
+  'All three landmark counters must read 128 after Void J Tahap 5'
 );
 
 // Check 92: Void J Tahap 2 — dataset OSM & builder jaringan Sunter-Ancol-Koja
@@ -7181,7 +7183,64 @@ assert.ok(
   'UIManager must track placed compact labels before hiding overlaps'
 );
 
-console.log(`✅ All 126 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 96: P2 Void J Tahap 5 — Pasar Pademangan Barat dan Wisma Atlet
+// Kemayoran mengisi dua kantong permukiman yang masih kosong.
+assert.ok(
+  citySceneContent.includes('[200, 284, -879, -823]'),
+  'VOID_J_ANCHOR_SITES missing the Pasar Pademangan protection mask'
+);
+assert.ok(
+  citySceneContent.includes('[470, 590, -612, -540]'),
+  'VOID_J_ANCHOR_SITES missing the Wisma Atlet mask north of the Kemayoran river'
+);
+
+const pasarPademanganBody = sliceLandmarkBuilder('static createPasarPademangan() {');
+assert.ok(
+  pasarPademanganBody.includes("'pasar-pademangan-hall'"),
+  'Pasar Pademangan must expose the market-hall audit marker'
+);
+assert.ok(
+  pasarPademanganBody.includes('BufferGeometryUtils.mergeGeometries'),
+  'Pasar Pademangan kiosk and sign details must merge to limit draw calls'
+);
+assert.ok(
+  !pasarPademanganBody.includes('new THREE.PointLight'),
+  'Pasar Pademangan must not add PointLights'
+);
+
+const wismaAtletBody = sliceLandmarkBuilder('static createWismaAtletKemayoran() {');
+assert.ok(
+  wismaAtletBody.includes("'wisma-atlet-tower'"),
+  'Wisma Atlet must expose the tower audit marker'
+);
+assert.ok(
+  wismaAtletBody.includes('const towerCount = 10;'),
+  'Wisma Atlet must model all ten residential towers'
+);
+assert.ok(
+  wismaAtletBody.includes('BufferGeometryUtils.mergeGeometries'),
+  'Wisma Atlet window bands must merge to limit draw calls'
+);
+assert.ok(
+  !wismaAtletBody.includes('new THREE.PointLight'),
+  'Wisma Atlet must not add PointLights'
+);
+
+['pasar-pademangan', 'wisma-atlet-kemayoran'].forEach((id) => {
+  const lm = JAKARTA_LANDMARKS.find((l) => l.id === id);
+  JAKARTA_LANDMARKS.forEach((other) => {
+    if (other.id === id) return;
+    const distance = Math.hypot(lm.position[0] - other.position[0], lm.position[2] - other.position[2]);
+    assert.ok(distance >= 70, `Anchor ${id} is only ${distance.toFixed(1)} units from ${other.id}`);
+  });
+});
+
+assert.ok(
+  JAKARTA_LANDMARKS.find((l) => l.id === 'pasar-pademangan').description.includes('441'),
+  'Pasar Pademangan description must record the 441-unit market size'
+);
+
+console.log(`✅ All 128 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
