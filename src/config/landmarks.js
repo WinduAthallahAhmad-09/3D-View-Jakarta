@@ -3087,6 +3087,141 @@ export const JAKARTA_LANDMARKS = [
       "Kawasan ini berada di sisi timur kelurahan, dekat dengan koridor Jalan Raya Pondok Kelapa.",
       "Tiga blok hunian berjajar di belakang deret ruko yang menghadap gerbang kawasan."
     ]
+  },
+  // =====================================================
+  // ZONA 14: VOID M — JATIWARINGIN, PONDOK GEDE & JATIMAKMUR
+  // =====================================================
+  {
+    id: "universitas-krisnadwipayana",
+    name: "Universitas Krisnadwipayana",
+    shortName: "Unkris Jatiwaringin",
+    category: "Kampus Universitas",
+    tagline: "Kampus Tua Jatiwaringin, Gerbang Pendidikan Perbatasan Jakarta–Bekasi",
+    height: "22 meter (Gedung Rektorat)",
+    year: "1952",
+    architect: "Yayasan Pendidikan Krisnadwipayana",
+    location: "Jl. Raya Jatiwaringin, Jaticempaka, Pondok Gede, Bekasi",
+    coordinates: { lat: -6.2633722, lng: 106.9074161 },
+    position: [1189.6, 0, 970.1],
+    labelHeight: 42,
+    cameraPosition: [1189.6, 62, 1046],
+    cameraTarget: [1189.6, 14, 970.1],
+    description: "Kampus Universitas Krisnadwipayana di Jatiwaringin, tepat di sisi timur perbatasan Jakarta–Bekasi. Menampilkan gedung rektorat bertingkat, sayap kelas berpita kaca, plaza upacara, gerbang kampus, lapangan parkir, serta pepohonan peneduh di sepanjang koridor Jalan Jatiwaringin.",
+    facts: [
+      "Universitas Krisnadwipayana berdiri pada 1 April 1952 dan termasuk perguruan tinggi swasta tertua di Indonesia.",
+      "Kampus utamanya berada di Jatiwaringin, Pondok Gede, Kota Bekasi, tepat di tepi perbatasan dengan Jakarta Timur.",
+      "Nama Krisnadwipayana diambil dari nama Resi Kresna Dwipayana dalam epos Mahabharata."
+    ]
+  },
+  {
+    id: "terminal-pinang-ranti",
+    name: "Terminal Pinang Ranti",
+    shortName: "Terminal Pinang Ranti",
+    category: "Terminal Bus Tipe B",
+    tagline: "Terminus Koridor 9, Simpul Angkutan Timur Jakarta",
+    height: "12 meter (Hall & Kanopi Dermaga)",
+    year: "1994 (Revitalisasi 2015)",
+    architect: "Pemerintah Provinsi DKI Jakarta",
+    location: "Jl. Raya Bogor KM 18, Pinang Ranti, Makasar, Jakarta Timur",
+    coordinates: { lat: -6.2912931, lng: 106.8858797 },
+    position: [885.9, 0, 1366.0],
+    labelHeight: 34,
+    cameraPosition: [885.9, 52, 1442],
+    cameraTarget: [885.9, 8, 1366.0],
+    description: "Terminal tipe B di Pinang Ranti yang menjadi ujung timur koridor TransJakarta 9. Menampilkan hall tunggu memanjang, deretan dermaga bus berkanopi, lajur bus kota dan angkutan pengumpan, area parkir, musala, serta deret ruko dan permukiman padat di tepi Jalan Raya Bogor.",
+    facts: [
+      "Terminal Pinang Ranti adalah terminal tipe B di Makasar, Jakarta Timur, yang melayani angkutan dalam kota dan antarkota.",
+      "Terminal ini direvitalisasi pada 2014–2015 dengan luas lahan sekitar 6.065 meter persegi.",
+      "Pinang Ranti menjadi terminus Koridor 9 TransJakarta yang menghubungkan timur Jakarta dengan Pluit di utara."
+    ]
+  },
+  {
+    id: "pasar-gardu",
+    name: "Pasar Gardu Lubang Buaya",
+    shortName: "Pasar Gardu",
+    category: "Pasar Tradisional",
+    tagline: "Pasar Harian Lubang Buaya di Tepi Koridor Pondok Gede",
+    height: "8 meter (Hall Pasar)",
+    year: "Tidak tercatat",
+    architect: "Pemerintah Kota Administrasi Jakarta Timur",
+    location: "Jl. Gardu, Lubang Buaya, Cipayung, Jakarta Timur",
+    coordinates: { lat: -6.2899767, lng: 106.8931620 },
+    position: [988.6, 0, 1347.4],
+    labelHeight: 32,
+    cameraPosition: [988.6, 46, 1420],
+    cameraTarget: [988.6, 8, 1347.4],
+    description: "Pasar lingkungan di Jalan Gardu, Lubang Buaya, yang melayani kebutuhan harian warga Cipayung dan Pondok Gede. Menampilkan dua hall pasar beratap, deret kios dan los dagangan, area bongkar muat, parkir motor, serta pohon peneduh di sepanjang jalan pasar.",
+    facts: [
+      "Pasar Gardu berada di Jalan Gardu, Lubang Buaya, Cipayung, Jakarta Timur.",
+      "Pasar ini melayani kebutuhan harian warga Lubang Buaya dan permukiman di sekitarnya.",
+      "Lokasinya berada dekat koridor Jalan Raya Pondok Gede yang menghubungkan Jakarta Timur dengan Kota Bekasi."
+    ]
+  },
+  {
+    id: "kantor-kecamatan-pondokgede",
+    name: "Kantor Kecamatan Pondok Gede",
+    shortName: "Kecamatan Pondok Gede",
+    category: "Kantor Pemerintahan",
+    tagline: "Pusat Layanan Administrasi Kecamatan Pondokgede, Kota Bekasi",
+    height: "14 meter (Gedung Layanan)",
+    year: "Tidak tercatat",
+    architect: "Pemerintah Kota Bekasi",
+    location: "Jl. Raya Jatiwaringin, Jaticempaka, Pondok Gede, Bekasi",
+    coordinates: { lat: -6.2811286, lng: 106.9134251 },
+    position: [1274.3, 0, 1221.9],
+    labelHeight: 32,
+    cameraPosition: [1274.3, 50, 1300],
+    cameraTarget: [1274.3, 10, 1221.9],
+    description: "Kantor Kecamatan Pondokgede di koridor Jatiwaringin, Kota Bekasi. Menampilkan gedung layanan dua lantai berpita kaca, aula pertemuan, kanopi loket pelayanan, plaza upacara dengan tiang bendera, area parkir, serta pepohonan peneduh di halaman kantor.",
+    facts: [
+      "Kantor Kecamatan Pondokgede melayani administrasi kependudukan dan perizinan warga Kecamatan Pondokgede, Kota Bekasi.",
+      "Kecamatan Pondokgede berada langsung di sisi timur perbatasan Jakarta Timur, sepanjang koridor Jatiwaringin.",
+      "Gedung kecamatan menjadi pusat koordinasi kelurahan-kelurahan di wilayah Pondok Gede."
+    ]
+  },
+  {
+    id: "puskesmas-jati-makmur",
+    name: "UPTD Puskesmas Jati Makmur",
+    shortName: "Puskesmas Jati Makmur",
+    category: "Fasilitas Kesehatan",
+    tagline: "Layanan Primer Warga Jatimakmur, Pondok Gede",
+    height: "12 meter (Gedung Puskesmas)",
+    year: "Tidak tercatat",
+    architect: "Pemerintah Kota Bekasi",
+    location: "Jl. Jati Makmur Raya, Jatimakmur, Pondok Gede, Bekasi",
+    coordinates: { lat: -6.2752272, lng: 106.9253066 },
+    position: [1441.8, 0, 1138.2],
+    labelHeight: 30,
+    cameraPosition: [1461.8, 48, 1210],
+    cameraTarget: [1461.8, 8, 1138.2],
+    description: "Puskesmas Jati Makmur di Kelurahan Jatimakmur, Pondok Gede. Menampilkan gedung layanan dua lantai, kanopi ambulans, ruang tunggu beratap, papan nama puskesmas, area parkir, serta taman kecil dan pohon peneduh di halaman.",
+    facts: [
+      "UPTD Puskesmas Jati Makmur berada di Kelurahan Jatimakmur, Kecamatan Pondokgede, Kota Bekasi.",
+      "Puskesmas ini menyediakan layanan kesehatan primer bagi warga Jatimakmur dan sekitarnya.",
+      "Lokasinya berada di koridor Jalan Jati Makmur Raya, tidak jauh dari perbatasan Jakarta Timur."
+    ]
+  },
+  {
+    id: "kantor-kelurahan-jatimakmur",
+    name: "Kantor Kelurahan Jatimakmur",
+    shortName: "Kelurahan Jatimakmur",
+    category: "Kantor Pemerintahan",
+    tagline: "Layanan Warga Jatimakmur, Pondok Gede",
+    height: "10 meter (Gedung Kelurahan)",
+    year: "Tidak tercatat",
+    architect: "Pemerintah Kota Bekasi",
+    location: "Jl. Jati Makmur Raya, Jatimakmur, Pondok Gede, Bekasi",
+    coordinates: { lat: -6.2807780, lng: 106.9309687 },
+    position: [1521.7, 0, 1216.9],
+    labelHeight: 30,
+    cameraPosition: [1521.7, 46, 1290],
+    cameraTarget: [1521.7, 8, 1216.9],
+    description: "Kantor Kelurahan Jatimakmur di Pondok Gede dengan massa bangunan berbentuk L. Menampilkan gedung layanan berlantai satu berpita kaca, kanopi loket, plaza kecil, papan nama kelurahan, area parkir, serta deret pohon peneduh di halaman.",
+    facts: [
+      "Kantor Kelurahan Jatimakmur melayani administrasi kependudukan warga Kelurahan Jatimakmur, Kecamatan Pondokgede.",
+      "Kelurahan Jatimakmur merupakan salah satu kelurahan di Kota Bekasi yang berbatasan langsung dengan Jakarta Timur.",
+      "Kantor kelurahan berada di koridor Jalan Jati Makmur Raya, dekat dengan Puskesmas Jati Makmur."
+    ]
   }
 ];
 

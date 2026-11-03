@@ -22,8 +22,8 @@ let assertionCount = 0;
 
 console.log('Running test_landmarks.js verification...');
 
-// Check 1: Exactly 137 landmarks
-assert.strictEqual(JAKARTA_LANDMARKS.length, 137, `Expected 137 landmarks, got ${JAKARTA_LANDMARKS.length}`);
+// Check 1: Exactly 143 landmarks
+assert.strictEqual(JAKARTA_LANDMARKS.length, 143, `Expected 143 landmarks, got ${JAKARTA_LANDMARKS.length}`);
 
 // Check 2: Unique IDs and valid properties
 const seenIds = new Set();
@@ -2479,8 +2479,8 @@ assert.ok(
 );
 assert.strictEqual(
   (landmarkModelsContent.match(/LandmarkModels\.tagNightWindow\(/g) || []).length,
-  65,
-  'Expected 65 tagged night materials across the Void C/D/E/F/G/H/I/J/K/L anchors, Mall Kelapa Gading, Danau Rawa Buaya and the RSUD Koja helipad'
+  77,
+  'Expected 77 tagged night materials across the Void C/D/E/F/G/H/I/J/K/L/M anchors, Mall Kelapa Gading, Danau Rawa Buaya and the RSUD Koja helipad'
 );
 assert.ok(
   landmarkModelsContent.includes('createUniversitasMercuBuana') &&
@@ -7812,7 +7812,7 @@ const voidLAnchors = [
 ];
 
 assert.deepStrictEqual(
-  JAKARTA_LANDMARKS.slice(131).map((l) => l.id),
+  JAKARTA_LANDMARKS.slice(131, 137).map((l) => l.id),
   voidLAnchors.map((a) => a.id),
   'Void L anchors must follow Pasar Ujung Menteng as landmarks #132-#137'
 );
@@ -8182,7 +8182,105 @@ assert.ok(voidLTransitBuilder.includes('voidLTransitStats'), 'buildVoidLTransit 
 assert.ok(voidLTransitBuilder.includes('drawCalls: 5'), 'Void L transit stats must report five draw calls');
 assert.ok(!voidLTransitBuilder.includes('new THREE.PointLight'), 'buildVoidLTransit must not add PointLights');
 
-console.log(`✅ All 137 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3, Void L Tahap 1, Void L Tahap 2, Void L Tahap 3, Void L Tahap 4 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 106: Void M Tahap 1 — enam anchor Jatiwaringin–Pondok Gede
+const voidMAnchors = [
+  { id: 'universitas-krisnadwipayana', builder: 'createUniversitasKrisnadwipayana', position: [1189.6, 0, 970.1], marker: 'unkris-main' },
+  { id: 'terminal-pinang-ranti', builder: 'createTerminalPinangRanti', position: [885.9, 0, 1366.0], marker: 'terminal-pinang-ranti-hall' },
+  { id: 'pasar-gardu', builder: 'createPasarGardu', position: [988.6, 0, 1347.4], marker: 'pasar-gardu-hall' },
+  { id: 'kantor-kecamatan-pondokgede', builder: 'createKantorKecamatanPondokGede', position: [1274.3, 0, 1221.9], marker: 'kecamatan-pondokgede-main' },
+  { id: 'puskesmas-jati-makmur', builder: 'createPuskesmasJatiMakmur', position: [1441.8, 0, 1138.2], marker: 'puskesmas-jati-makmur-main' },
+  { id: 'kantor-kelurahan-jatimakmur', builder: 'createKantorKelurahanJatimakmur', position: [1521.7, 0, 1216.9], marker: 'kelurahan-jatimakmur-main' }
+];
+
+assert.deepStrictEqual(
+  JAKARTA_LANDMARKS.slice(137).map((l) => l.id),
+  voidMAnchors.map((a) => a.id),
+  'Void M anchors must follow Nuansa Pondok Kelapa as landmarks #138-#143'
+);
+
+voidMAnchors.forEach(({ id, builder, position, marker }, index) => {
+  const lm = JAKARTA_LANDMARKS.find((l) => l.id === id);
+  assert.ok(lm, `Void M landmark ${id} not found in JAKARTA_LANDMARKS`);
+  assert.deepStrictEqual(lm.position, position, `Void M landmark ${id} position changed without updating the layout`);
+  if (id === 'terminal-pinang-ranti') {
+    assert.ok(lm.position[0] < 960, 'Terminal Pinang Ranti must stay west of the Void M clip to clear the Halim runway');
+  } else {
+    assert.ok(lm.position[0] >= 960 && lm.position[0] <= 1800, `Landmark ${id} X position ${lm.position[0]} outside Void M range [960, 1800]`);
+  }
+  assert.ok(lm.position[2] >= 960 && lm.position[2] <= 1375, `Landmark ${id} Z position ${lm.position[2]} outside Void M range [960, 1375]`);
+  assert.ok(lm.facts && lm.facts.length >= 3, `Landmark ${id} must have at least 3 educational facts`);
+  assert.ok(lm.labelHeight >= 30, `Landmark ${id} labelHeight ${lm.labelHeight} is too low for a Void M anchor`);
+  assert.ok(lm.cameraPosition[1] > 30, `Landmark ${id} camera must be elevated above street level`);
+  assert.ok(lm.cameraTarget[1] < lm.cameraPosition[1], `Landmark ${id} camera must look downward at the anchor`);
+
+  const projected = projectGpsToScene(lm.coordinates.lat, lm.coordinates.lng);
+  assert.ok(
+    Math.abs(projected[0] - lm.position[0]) <= 12 && Math.abs(projected[1] - lm.position[2]) <= 12,
+    `Landmark ${id} coordinates must project within 12 units of its scene position`
+  );
+
+  assert.ok(
+    citySceneContent.includes(`"${id}": () => LandmarkModels.${builder}()`),
+    `CityScene must dispatch ${id} to ${builder}`
+  );
+  assert.ok(landmarkModelsContent.includes(`static ${builder}()`), `LandmarkModels missing ${builder}`);
+
+  const factoryStart = landmarkModelsContent.indexOf(`static ${builder}()`);
+  const factoryEnd = landmarkModelsContent.indexOf('static create', factoryStart + 10);
+  const factory = landmarkModelsContent.slice(factoryStart, factoryEnd === -1 ? undefined : factoryEnd);
+  assert.ok(factory.includes(`'${marker}'`), `${builder} must expose the ${marker} mesh for clicking and labels`);
+  assert.ok(factory.includes('BufferGeometryUtils.mergeGeometries'), `${builder} must merge detail geometry`);
+  assert.ok(factory.includes('LandmarkModels.tagNightWindow('), `${builder} must tag a glass material for night windows`);
+  assert.ok(!factory.includes('new THREE.PointLight'), `${builder} must not add PointLights`);
+
+  assert.ok(indexHtmlContent.includes(`data-tour-id="${id}"`), `index.html missing Void M tour button for "${id}"`);
+  const labelIndex = 138 + index;
+  assert.ok(
+    new RegExp(`data-tour-id="${id}"[\\s\\S]{0,400}?>${labelIndex}</span>`).test(indexHtmlContent),
+    `Tour button for "${id}" must carry index ${labelIndex}`
+  );
+});
+
+voidMAnchors.forEach(({ id }) => {
+  const lm = JAKARTA_LANDMARKS.find((l) => l.id === id);
+  JAKARTA_LANDMARKS.forEach((other) => {
+    if (other.id === id) return;
+    const distance = Math.hypot(lm.position[0] - other.position[0], lm.position[2] - other.position[2]);
+    assert.ok(distance >= 70, `Anchor ${id} is only ${distance.toFixed(1)} units from ${other.id}`);
+  });
+});
+
+assert.ok(
+  citySceneContent.includes('const VOID_M_CLIP_BOX = { minX: 960, maxX: 1800, minZ: 960, maxZ: 1375 };'),
+  'CityScene.js missing the Void M clip box for the OSM stage'
+);
+assert.ok(
+  citySceneContent.includes('const VOID_M_ANCHOR_SITES = ['),
+  'CityScene must protect the six Void M anchor sites'
+);
+const voidMSitesMatch = citySceneContent.match(/const VOID_M_ANCHOR_SITES = \[([\s\S]*?)\n\];/);
+assert.ok(voidMSitesMatch, 'CityScene.js missing the Void M anchor site rectangles');
+assert.strictEqual(
+  (voidMSitesMatch[1].match(/\[/g) || []).length,
+  6,
+  'Void M must protect exactly six anchor sites'
+);
+[
+  '[1150, 1230, 936, 1004]',
+  '[850, 920, 1332, 1374]',
+  '[952, 1026, 1318, 1372]',
+  '[1236, 1314, 1190, 1254]',
+  '[1404, 1480, 1108, 1168]',
+  '[1482, 1562, 1184, 1250]'
+].forEach((rect) => {
+  assert.ok(voidMSitesMatch[1].includes(rect), `Void M anchor site rect drifted: ${rect}`);
+});
+assert.ok(
+  citySceneContent.includes('isInsideVoidMAnchorSite('),
+  'CityScene must expose isInsideVoidMAnchorSite for Void M infill'
+);
+
+console.log(`✅ All 143 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3, Void L Tahap 1, Void L Tahap 2, Void L Tahap 3, Void L Tahap 4, Void M Tahap 1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

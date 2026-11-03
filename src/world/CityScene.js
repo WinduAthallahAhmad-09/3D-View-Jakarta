@@ -277,6 +277,20 @@ const VOID_L_ANCHOR_SITES = [
 const VOID_L_PR_PLOT = { x: 1660, z: 700, w: 30, d: 18 };
 const VOID_L_PR_DRIVEWAY = { x: 1677, z: 700, w: 6, d: 6 };
 
+// Kotak klip Void M (Jatiwaringin–Pondok Gede) untuk jaringan OSM tahap 2.
+// minX 960 menjaga landasan Bandara Halim (tepi timur ±948) tetap di luar klip.
+const VOID_M_CLIP_BOX = { minX: 960, maxX: 1800, minZ: 960, maxZ: 1375 };
+
+// Tapak enam anchor Void M; jalan OSM tetap digambar utuh di bawah pelat tapak.
+const VOID_M_ANCHOR_SITES = [
+  [1150, 1230, 936, 1004],   // Universitas Krisnadwipayana
+  [850, 920, 1332, 1374],    // Terminal Pinang Ranti
+  [952, 1026, 1318, 1372],   // Pasar Gardu Lubang Buaya
+  [1236, 1314, 1190, 1254],  // Kantor Kecamatan Pondok Gede
+  [1404, 1480, 1108, 1168],  // Puskesmas Jati Makmur
+  [1482, 1562, 1184, 1250]   // Kantor Kelurahan Jatimakmur
+];
+
 // Strip seam di tepi timur clip Void F. Infill K berhenti sebelum x=2012 agar
 // deret ruko dua tahap tidak saling menimpa di sekitar x=1995.
 const VOID_K_LEGACY_INFILL_RECTS = [
@@ -9412,6 +9426,12 @@ export class CityScene {
     );
   }
 
+  isInsideVoidMAnchorSite(x, z) {
+    return VOID_M_ANCHOR_SITES.some(
+      ([x1, x2, z1, z2]) => x >= x1 - 2 && x <= x2 + 2 && z >= z1 - 2 && z <= z2 + 2
+    );
+  }
+
   isInsideVoidKWaterBody(x, z, margin = 0) {
     return VOID_K_OSM.waterBodies.some((body) => {
       let inside = false;
@@ -18124,7 +18144,13 @@ export class CityScene {
       "puskesmas-duren-sawit": () => LandmarkModels.createPuskesmasDurenSawit(),
       "pasar-tradisional-kodam": () => LandmarkModels.createPasarTradisionalKodam(),
       "kantor-pondok-kelapa": () => LandmarkModels.createKantorKelurahanPondokKelapa(),
-      "nuansa-pondok-kelapa": () => LandmarkModels.createNuansaPondokKelapa()
+      "nuansa-pondok-kelapa": () => LandmarkModels.createNuansaPondokKelapa(),
+      "universitas-krisnadwipayana": () => LandmarkModels.createUniversitasKrisnadwipayana(),
+      "terminal-pinang-ranti": () => LandmarkModels.createTerminalPinangRanti(),
+      "pasar-gardu": () => LandmarkModels.createPasarGardu(),
+      "kantor-kecamatan-pondokgede": () => LandmarkModels.createKantorKecamatanPondokGede(),
+      "puskesmas-jati-makmur": () => LandmarkModels.createPuskesmasJatiMakmur(),
+      "kantor-kelurahan-jatimakmur": () => LandmarkModels.createKantorKelurahanJatimakmur()
     };
 
     JAKARTA_LANDMARKS.forEach((item) => {
