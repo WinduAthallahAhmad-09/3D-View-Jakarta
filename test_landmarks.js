@@ -8510,11 +8510,11 @@ assert.ok(voidMTerminalTouchesRoad <= 4, `Terminal access link must touch an OSM
 
 // Check 108: Void M Tahap 3 — infill urban fabric Jatiwaringin–Pondok Gede
 assert.ok(
-  citySceneContent.includes('const VOID_M_PR_PLOT = { x: 1058, z: 1274, w: 30, d: 18 };'),
+  citySceneContent.includes('const VOID_M_PR_PLOT = { x: 1046, z: 1264, w: 30, d: 18 };'),
   'CityScene.js missing the Void M Park-and-Ride plot'
 );
 assert.ok(
-  citySceneContent.includes('const VOID_M_PR_DRIVEWAY = { x: 1078, z: 1280, w: 12, d: 6 };'),
+  citySceneContent.includes('const VOID_M_PR_DRIVEWAY = { x: 1063, z: 1275, w: 12, d: 6 };'),
   'CityScene.js missing the Void M Park-and-Ride driveway'
 );
 
@@ -8602,7 +8602,83 @@ assert.ok(voidMInfillBuilder.includes('voidMInfillStats'), 'buildVoidMInfill mus
 assert.ok(voidMInfillBuilder.includes('drawCalls: 6'), 'Void M infill stats must report six draw calls');
 assert.ok(!voidMInfillBuilder.includes('new THREE.PointLight'), 'buildVoidMInfill must not add PointLights');
 
-console.log(`✅ All 143 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3, Void L Tahap 1, Void L Tahap 2, Void L Tahap 3, Void L Tahap 4, Void M Tahap 1, Void M Tahap 2, Void M Tahap 3 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 109: Void M Tahap 4 — Park-and-Ride Pinang Ranti dan enam feeder halte
+const voidMTransitCall = citySceneContent.indexOf('this.buildVoidMTransit();');
+assert.ok(voidMTransitCall > voidMInfillCall, 'buildVoidMTransit() must run after buildVoidMInfill()');
+assert.ok(voidMLegacyCall > voidMTransitCall, 'buildVoidMTransit() must run before the legacy Void B infill pass');
+assert.ok(citySceneContent.includes('this.voidMTransitLabels = [];'), 'CityScene.js missing the Void M transit label registry');
+assert.ok(mainJsContent.includes('...this.city.voidMTransitLabels'), 'main.js must pass Void M transit labels to UIManager');
+
+const voidMTransitBuilder = sliceCityBuilder('buildVoidMTransit() {');
+[
+  'voidm-transit-concrete',
+  'voidm-transit-steel',
+  'voidm-transit-sign',
+  'voidm-transit-tree-trunks',
+  'voidm-transit-tree-foliage'
+].forEach((meshName) => {
+  assert.ok(voidMTransitBuilder.includes(`'${meshName}'`), `buildVoidMTransit must create the ${meshName} mesh`);
+});
+
+assert.ok(
+  voidMTransitBuilder.includes('VOID_M_PR_PLOT') && voidMTransitBuilder.includes('VOID_M_PR_DRIVEWAY'),
+  'buildVoidMTransit must build on the reserved Park-and-Ride plot and driveway'
+);
+assert.ok(voidMTransitBuilder.includes('const bayCount = 8;'), 'Void M Park-and-Ride must provide eight parking bays');
+assert.ok(voidMTransitBuilder.includes('const bollardCount = 8;'), 'Void M Park-and-Ride must provide eight bollards');
+assert.ok(
+  voidMTransitBuilder.includes("parkAndRide: 'Park and Ride Pinang Ranti'"),
+  'Void M transit must name the Pinang Ranti Park-and-Ride'
+);
+
+[
+  'Halte Universitas Krisnadwipayana',
+  'Halte Terminal Pinang Ranti',
+  'Halte Pasar Gardu',
+  'Halte Kecamatan Pondok Gede',
+  'Halte Puskesmas Jati Makmur',
+  'Halte Kelurahan Jatimakmur'
+].forEach((name) => {
+  assert.ok(voidMTransitBuilder.includes(`'${name}'`), `Void M transit missing feeder ${name}`);
+});
+
+[
+  'Jalan Jati Waringin',
+  'Jalan Bacang',
+  'Jalan Raya Jati Makmur',
+  'Jalan Pulau Tanabala'
+].forEach((name) => {
+  assert.ok(voidMTransitBuilder.includes(`'${name}'`), `Void M transit missing corridor ${name}`);
+});
+assert.ok(
+  voidMTransitBuilder.includes('link: VOID_M_TERMINAL_LINK'),
+  'Void M transit must anchor the terminal halte on the Tahap 2 access link'
+);
+
+[
+  'near: [1245, 971], side: -1',
+  'near: [1043, 1332], side: -1',
+  'near: [1330, 1278], side: -1',
+  'near: [1485, 1142], side: -1',
+  'near: [1510, 1255], side: 1'
+].forEach((spec) => {
+  assert.ok(voidMTransitBuilder.includes(spec), `Void M halte anchor drifted: ${spec}`);
+});
+assert.ok(
+  voidMTransitBuilder.includes('t: 0.6, side: -1'),
+  'Void M terminal halte must stay on the access-link midpoint'
+);
+
+assert.ok(
+  voidMTransitBuilder.includes('emissive: 0xfff4d6') && voidMTransitBuilder.includes('nightIntensity: 0.55'),
+  'Void M transit signage must register its night glow'
+);
+assert.ok(voidMTransitBuilder.includes("kind: 'park'"), 'Void M transit labels must mark the Park-and-Ride pin');
+assert.ok(voidMTransitBuilder.includes('voidMTransitStats'), 'buildVoidMTransit must expose voidMTransitStats');
+assert.ok(voidMTransitBuilder.includes('drawCalls: 5'), 'Void M transit stats must report five draw calls');
+assert.ok(!voidMTransitBuilder.includes('new THREE.PointLight'), 'buildVoidMTransit must not add PointLights');
+
+console.log(`✅ All 143 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3, Void L Tahap 1, Void L Tahap 2, Void L Tahap 3, Void L Tahap 4, Void M Tahap 1, Void M Tahap 2, Void M Tahap 3, Void M Tahap 4 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

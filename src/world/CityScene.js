@@ -300,10 +300,11 @@ const VOID_M_TERMINAL_LINK = [
 ];
 
 // Lahan Park-and-Ride Pinang Ranti untuk Void M Tahap 4. Plot duduk di
-// kantong antara badan air Kalibaru dan Jalan Pondok Gede, dengan driveway
-// pendek ke tepi koridor agar deret ruko Tahap 3 tidak menutup akses.
-const VOID_M_PR_PLOT = { x: 1058, z: 1274, w: 30, d: 18 };
-const VOID_M_PR_DRIVEWAY = { x: 1078, z: 1280, w: 12, d: 6 };
+// kantong antara Jalan Gatotkaca Dirgantara II dan Jalan Pondok Gede, dengan
+// driveway pendek ke Jalan Gatotkaca Dirgantara II agar deret ruko Tahap 3
+// tidak menutup akses.
+const VOID_M_PR_PLOT = { x: 1046, z: 1264, w: 30, d: 18 };
+const VOID_M_PR_DRIVEWAY = { x: 1063, z: 1275, w: 12, d: 6 };
 
 // Strip seam di tepi timur clip Void F. Infill K berhenti sebelum x=2012 agar
 // deret ruko dua tahap tidak saling menimpa di sekitar x=1995.
@@ -447,6 +448,7 @@ export class CityScene {
     this.voidJTransitLabels = [];
     this.voidKTransitLabels = [];
     this.voidLTransitLabels = [];
+    this.voidMTransitLabels = [];
     this.pjuLampTransforms = [];
     this.mergedPjuLampTransforms = [];
     this.pjuLightPool = [];
@@ -510,6 +512,7 @@ export class CityScene {
     this.buildVoidLTransit();
     this.buildVoidM();
     this.buildVoidMInfill();
+    this.buildVoidMTransit();
     this.buildVoidBInfillAndIndustry();
     this.buildVoidBTransit();
     this.buildEastJakartaInfrastructure();
@@ -8831,6 +8834,284 @@ export class CityScene {
       corridors: shophouseRoads.size,
       nightWindows,
       drawCalls: 6
+    };
+  }
+
+  /**
+   * Void M Tahap 4 — transit Jatiwaringin–Pondok Gede.
+   *
+   * 1. Park-and-Ride Pinang Ranti pada lahan 30x18 yang sudah dipesan infill;
+   *    driveway menyentuh Jalan Gatotkaca Dirgantara II.
+   * 2. Enam feeder halte: tiga gerbang anchor, satu di akses Terminal Pinang
+   *    Ranti, dan dua simpul kawasan. Titik diaudit agar peron tidak menembus
+   *    tapak anchor, waterway, atau badan air.
+   * 3. Lima draw call, papan menyala malam, tanpa PointLight baru.
+   */
+  buildVoidMTransit() {
+    const concreteGeos = [];
+    const steelGeos = [];
+    const signGeos = [];
+    const treePositions = [];
+    const halteLabels = [];
+
+    const makeBox = (w, h, d, x, y, z, rotY = 0, target = concreteGeos) => {
+      const geo = new THREE.BoxGeometry(w, h, d);
+      if (rotY !== 0) geo.rotateY(rotY);
+      geo.translate(x, y, z);
+      target.push(geo);
+    };
+
+    const addMerged = (geos, material, name, castShadow = false) => {
+      if (geos.length === 0) return;
+      const merged = BufferGeometryUtils.mergeGeometries(geos, false);
+      if (!merged) return;
+      const mesh = new THREE.Mesh(merged, material);
+      mesh.name = name;
+      mesh.castShadow = castShadow;
+      mesh.receiveShadow = true;
+      this.proceduralGroup.add(mesh);
+    };
+
+    // =========================================================================
+    // 1. PARK AND RIDE PINANG RANTI
+    // Lahan sudah direservasi infill lewat VOID_M_PR_PLOT; driveway menyentuh
+    // Jalan Gatotkaca Dirgantara II di sisi timur laut.
+    // =========================================================================
+    const prCenterX = VOID_M_PR_PLOT.x;
+    const prCenterZ = VOID_M_PR_PLOT.z;
+    makeBox(VOID_M_PR_PLOT.w, 0.35, VOID_M_PR_PLOT.d, prCenterX, 0.175, prCenterZ);
+
+    makeBox(
+      VOID_M_PR_DRIVEWAY.w + 0.5,
+      0.32,
+      VOID_M_PR_DRIVEWAY.d,
+      VOID_M_PR_DRIVEWAY.x,
+      0.16,
+      VOID_M_PR_DRIVEWAY.z
+    );
+
+    const bayCount = 8;
+    const bayWidth = 2.6;
+    const bayStartX = prCenterX - (bayCount * bayWidth) / 2;
+    const bayCenterZ = prCenterZ - 4;
+    const bayDepth = 4.4;
+    for (let i = 0; i <= bayCount; i++) {
+      const bx = bayStartX + i * bayWidth;
+      makeBox(0.14, 0.05, bayDepth, bx, 0.37, bayCenterZ, 0, signGeos);
+    }
+    makeBox(bayCount * bayWidth, 0.05, 0.14, prCenterX, 0.37, bayCenterZ - bayDepth / 2, 0, signGeos);
+    makeBox(bayCount * bayWidth, 0.05, 0.14, prCenterX, 0.37, bayCenterZ + bayDepth / 2, 0, signGeos);
+
+    [prCenterX - 9, prCenterX + 9].forEach((sx) => {
+      const sz = prCenterZ + 3.5;
+      const halfW = 4.5;
+      const halfD = 1.6;
+      makeBox(2 * halfW, 0.3, 2.2, sx, 3.15, sz, 0, steelGeos);
+      makeBox(2 * halfW, 0.55, 0.16, sx, 3.0, sz - 1.1, 0, signGeos);
+      [-1, 1].forEach((dirX) => {
+        [-1, 1].forEach((dirZ) => {
+          makeBox(0.25, 2.85, 0.25, sx + dirX * (halfW - 0.4), 1.775, sz + dirZ * (halfD - 0.5), 0, steelGeos);
+        });
+        makeBox(0.18, 2.3, 1.1, sx + dirX * (halfW - 0.3), 1.6, sz - halfD + 0.55, 0, steelGeos);
+      });
+      makeBox(0.8, 0.45, 3.8, sx, 0.58, sz, 0, concreteGeos);
+      makeBox(0.14, 2.3, 0.14, sx + halfW - 0.9, 1.5, sz - halfD + 0.3, 0, steelGeos);
+      makeBox(0.12, 1.0, 2.4, sx + halfW - 0.9, 2.35, sz - halfD + 0.3, 0, signGeos);
+    });
+
+    makeBox(0.3, 3.75, 0.3, prCenterX + 12, 1.875, prCenterZ, 0, steelGeos);
+    makeBox(4.4, 1.6, 0.24, prCenterX + 12, 3.55, prCenterZ, 0, signGeos);
+
+    // Enam pohon di dalam batas plaza agar tidak menembus massa infill di luar.
+    [
+      { x: prCenterX - 11.5, z: prCenterZ - 8, scale: 0.92 },
+      { x: prCenterX, z: prCenterZ - 8, scale: 0.98 },
+      { x: prCenterX + 11.5, z: prCenterZ - 8, scale: 1.0 },
+      { x: prCenterX - 11.5, z: prCenterZ + 8, scale: 0.9 },
+      { x: prCenterX, z: prCenterZ + 8, scale: 1.02 },
+      { x: prCenterX + 11.5, z: prCenterZ + 8, scale: 0.94 }
+    ].forEach((tree) => treePositions.push(tree));
+
+    const bollardCount = 8;
+    const bollardInsetX = VOID_M_PR_PLOT.w * 0.5 - 1.6;
+    const bollardInsetZ = VOID_M_PR_PLOT.d * 0.5 - 1.4;
+    for (let i = 0; i < bollardCount; i++) {
+      const bx = prCenterX + (i < bollardCount / 2 ? -bollardInsetX : bollardInsetX);
+      const bz = prCenterZ + ((i % 4) / 3 - 0.5) * 2 * bollardInsetZ;
+      makeBox(0.18, 1.3, 0.18, bx, 0.85, bz, 0, steelGeos);
+      makeBox(0.34, 0.22, 0.34, bx, 1.55, bz, 0, signGeos);
+    }
+
+    // =========================================================================
+    // 2. ENAM FEEDER HALTE
+    // Terminal Pinang Ranti memakai akses Tahap 2 karena Jalan Pondok Gede di
+    // depan terminal berada di dalam tapak Pasar Gardu. Lima halte lain
+    // menempel koridor OSM di luar seluruh tapak anchor.
+    // =========================================================================
+    const halteSpecs = [
+      { name: 'Halte Universitas Krisnadwipayana', shortName: 'Universitas Krisnadwipayana', road: 'Jalan Jati Waringin', near: [1245, 971], side: -1 },
+      { name: 'Halte Terminal Pinang Ranti', shortName: 'Terminal Pinang Ranti', link: VOID_M_TERMINAL_LINK, t: 0.6, side: -1 },
+      { name: 'Halte Pasar Gardu', shortName: 'Pasar Gardu', road: 'Jalan Bacang', near: [1043, 1332], side: -1 },
+      { name: 'Halte Kecamatan Pondok Gede', shortName: 'Kecamatan Pondok Gede', road: 'Jalan Raya Jati Makmur', near: [1330, 1278], side: -1 },
+      { name: 'Halte Puskesmas Jati Makmur', shortName: 'Puskesmas Jati Makmur', road: 'Jalan Pulau Tanabala', near: [1485, 1142], side: -1 },
+      { name: 'Halte Kelurahan Jatimakmur', shortName: 'Kelurahan Jatimakmur', road: 'Jalan Raya Jati Makmur', near: [1510, 1255], side: 1 }
+    ];
+
+    const roadNetwork = VOID_M_OSM.roads;
+    const findRoadPoint = (roadName, near) => {
+      let best = null;
+      roadNetwork.forEach((road) => {
+        if (road.name !== roadName) return;
+        for (let i = 0; i < road.points.length - 1; i++) {
+          const a = road.points[i];
+          const b = road.points[i + 1];
+          const dx = b[0] - a[0];
+          const dz = b[1] - a[1];
+          const len2 = dx * dx + dz * dz;
+          let t = len2 ? ((near[0] - a[0]) * dx + (near[1] - a[1]) * dz) / len2 : 0;
+          t = Math.max(0, Math.min(1, t));
+          const x = a[0] + dx * t;
+          const z = a[1] + dz * t;
+          const d = Math.hypot(near[0] - x, near[1] - z);
+          if (!best || d < best.d) {
+            best = { x, z, d, angle: Math.atan2(dx, dz), width: road.width };
+          }
+        }
+      });
+      return best;
+    };
+
+    halteSpecs.forEach((spec) => {
+      let hx;
+      let hz;
+      let angle;
+      if (spec.link) {
+        const [start, end] = spec.link;
+        const dx = end[0] - start[0];
+        const dz = end[1] - start[1];
+        angle = Math.atan2(dx, dz);
+        const cx = start[0] + dx * spec.t;
+        const cz = start[1] + dz * spec.t;
+        const nx = Math.cos(angle);
+        const nz = -Math.sin(angle);
+        hx = cx + nx * 6 * spec.side;
+        hz = cz + nz * 6 * spec.side;
+      } else {
+        const road = findRoadPoint(spec.road, spec.near);
+        if (!road) return;
+        angle = road.angle;
+        const nx = Math.cos(angle);
+        const nz = -Math.sin(angle);
+        const offset = road.width * 0.5 - 0.2;
+        hx = road.x + nx * offset * spec.side;
+        hz = road.z + nz * offset * spec.side;
+      }
+
+      makeBox(2.6, 0.7, 12, hx, 0.35, hz, angle);
+      const cosA = Math.cos(angle);
+      const sinA = Math.sin(angle);
+      [-5.2, 5.2].forEach((lz) => {
+        [-1.0, 1.0].forEach((lx) => {
+          const px = hx + lx * cosA + lz * sinA;
+          const pz = hz - lx * sinA + lz * cosA;
+          makeBox(0.16, 2.7, 0.16, px, 1.85, pz, 0, steelGeos);
+        });
+      });
+      makeBox(2.8, 0.22, 12.6, hx, 3.2, hz, angle);
+
+      makeBox(0.7, 0.45, 3.6, hx - Math.cos(angle) * 0.35, 0.925, hz + Math.sin(angle) * 0.35, angle);
+      const postX = hx + 4.8 * sinA;
+      const postZ = hz + 4.8 * cosA;
+      makeBox(0.14, 2.5, 0.14, postX, 1.6, postZ, 0, steelGeos);
+      makeBox(0.12, 1.0, 2.4, postX, 2.35, postZ, angle, signGeos);
+
+      halteLabels.push({
+        name: spec.name,
+        shortName: spec.shortName,
+        kind: 'halte',
+        position: [hx, 6.4, hz]
+      });
+    });
+
+    // =========================================================================
+    // 3. MATERIAL GABUNGAN DAN INSTANCED POHON
+    // =========================================================================
+    addMerged(
+      concreteGeos,
+      new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.72 }),
+      'voidm-transit-concrete',
+      true
+    );
+    addMerged(
+      steelGeos,
+      new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.42, metalness: 0.55 }),
+      'voidm-transit-steel',
+      true
+    );
+    addMerged(
+      signGeos,
+      this.registerNightMaterial(
+        new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.45 }),
+        { emissive: 0xfff4d6, nightIntensity: 0.55 }
+      ),
+      'voidm-transit-sign',
+      false
+    );
+
+    if (treePositions.length > 0) {
+      const dummy = new THREE.Object3D();
+      const trunkGeo = new THREE.CylinderGeometry(0.28, 0.4, 3.6, 5);
+      const foliageGeo = new THREE.ConeGeometry(2.4, 5.6, 6);
+      const trunkMesh = new THREE.InstancedMesh(
+        trunkGeo,
+        new THREE.MeshStandardMaterial({ color: 0x3e2723, roughness: 0.9 }),
+        treePositions.length
+      );
+      const foliageMesh = new THREE.InstancedMesh(
+        foliageGeo,
+        new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.85 }),
+        treePositions.length
+      );
+      trunkMesh.name = 'voidm-transit-tree-trunks';
+      foliageMesh.name = 'voidm-transit-tree-foliage';
+
+      treePositions.forEach((tree, idx) => {
+        dummy.position.set(tree.x, 1.8 * tree.scale, tree.z);
+        dummy.scale.set(tree.scale, tree.scale, tree.scale);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        trunkMesh.setMatrixAt(idx, dummy.matrix);
+
+        dummy.position.set(tree.x, 6.0 * tree.scale, tree.z);
+        dummy.updateMatrix();
+        foliageMesh.setMatrixAt(idx, dummy.matrix);
+      });
+
+      trunkMesh.castShadow = true;
+      trunkMesh.receiveShadow = true;
+      foliageMesh.castShadow = true;
+      foliageMesh.receiveShadow = true;
+      this.proceduralGroup.add(trunkMesh);
+      this.proceduralGroup.add(foliageMesh);
+    }
+
+    this.voidMTransitLabels = [
+      {
+        name: 'Park and Ride Pinang Ranti',
+        shortName: 'P&R Pinang Ranti',
+        kind: 'park',
+        position: [prCenterX, 7.6, prCenterZ]
+      },
+      ...halteLabels
+    ];
+
+    this.voidMTransitStats = {
+      parkAndRide: 'Park and Ride Pinang Ranti',
+      parkingBays: bayCount,
+      halte: halteSpecs.map((spec) => spec.name),
+      trees: treePositions.length,
+      gardenLights: bollardCount,
+      drawCalls: 5
     };
   }
 
