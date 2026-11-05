@@ -91,7 +91,8 @@ export const JAKARTA_LANDMARKS = [
     description: "Gereja Katolik bergaya Neo-Gotik Eropa dengan tiga menara besi tempa putih yang berhadapan langsung dengan Masjid Istiqlal di persimpangan Jl. Katedral dan Jl. Pos.",
     facts: [
       "Memiliki tiga menara ikonik: Menara Daud, Menara Gading (masing-masing 60m), dan Menara Angelus Dei di tengah.",
-      "Terhubung dengan Masjid Istiqlal melalui Terowongan Silaturahmi bawah tanah."
+      "Terhubung dengan Masjid Istiqlal melalui Terowongan Silaturahmi bawah tanah.",
+      "Gereja diresmikan pada 1901 menggantikan katedral lama yang menara-menaranya runtuh akibat sambaran petir pada 1890."
     ]
   },
   {
@@ -113,7 +114,8 @@ export const JAKARTA_LANDMARKS = [
     description: "Taman bersejarah di sebelah tenggara Katedral dan Istiqlal yang pada masa kolonial dikenal sebagai Waterlooplein. Di tengahnya berdiri Monumen Pembebasan Irian Barat berupa patung manusia memutus rantai belenggu di atas menara kembar dengan kolam air mengapitnya.",
     facts: [
       "Sumbu taman Lapangan Banteng mengikuti tata kota bersejarah Weltevreden.",
-      "Dikelilingi oleh Gedung Kementerian Keuangan (Istana Daendels), Kantor Pos Filateli, dan Hotel Borobudur."
+      "Dikelilingi oleh Gedung Kementerian Keuangan (Istana Daendels), Kantor Pos Filateli, dan Hotel Borobudur.",
+      "Monumen Pembebasan Irian Barat diresmikan pada 1963 dan dipahat oleh Edhi Sunarso."
     ]
   },
   {
@@ -134,7 +136,8 @@ export const JAKARTA_LANDMARKS = [
     description: "Monumen peringatan setinggi 132 meter di jantung Lapangan Medan Merdeka seluas 80 hektare yang membentang di sebelah timur poros Jl. M.H. Thamrin – Jl. Medan Merdeka Barat. Memiliki empat jalur diagonal X-Paths, Taman Rusa di tenggara, dan Kolam Air Mancur Menari di sisi barat.",
     facts: [
       "Lidah api di puncak obelisk dilapisi emas murni seberat 50 kilogram.",
-      "Berada di sebelah timur poros lurus Jl. M.H. Thamrin – Jl. Medan Merdeka Barat (X = 0)."
+      "Berada di sebelah timur poros lurus Jl. M.H. Thamrin – Jl. Medan Merdeka Barat (X = 0).",
+      "Rancangan Monas melibatkan arsitek Frederich Silaban dan R.M. Soedarsono, dengan pembangunan dimulai pada 17 Agustus 1961."
     ]
   },
   {
@@ -156,7 +159,8 @@ export const JAKARTA_LANDMARKS = [
     description: "Stasiun kereta api utama Jakarta Pusat yang berdiri di atas jalur rel layang (elevated railway viaduct) sepanjang sisi timur Taman Monas. Jalur rel layang ini membentang dari Juanda melewati Gambir, Gondangdia, dan Cikini menuju Manggarai.",
     facts: [
       "Ciri khas arsitekturnya adalah atap limasan hijau zamrud memanjang di atas struktur beton layang.",
-      "Melayani kereta api eksekutif jarak jauh ke Bandung, Yogyakarta, Semarang, Solo, Surabaya, dan Malang."
+      "Melayani kereta api eksekutif jarak jauh ke Bandung, Yogyakarta, Semarang, Solo, Surabaya, dan Malang.",
+      "Stasiun Gambir kini melayani kereta antarkota kelas eksekutif, sementara layanan commuter dilayani Stasiun Juanda dan Gondangdia."
     ]
   },
 
@@ -181,7 +185,8 @@ export const JAKARTA_LANDMARKS = [
     description: "Titik nol koridor Jalan M.H. Thamrin tepat di sudut barat daya Lapangan Medan Merdeka (Monas). Di bundaran ini terdapat air mancur Patung Kuda Arjuna Wijaya yang menjadi titik temu lurus Jl. M.H. Thamrin dengan Jl. Medan Merdeka Barat.",
     facts: [
       "Delapan patung kuda melambangkan delapan filosofi kepemimpinan Hasta Brata.",
-      "Kompleks kantor pusat Bank Indonesia berdiri megah di sudut barat daya persimpangan ini."
+      "Kompleks kantor pusat Bank Indonesia berdiri megah di sudut barat daya persimpangan ini.",
+      "Patung Arjuna Wijaya dipahat oleh Nyoman Nuarta dan diresmikan pada 1987 sebagai bagian dari penataan kawasan Thamrin."
     ]
   },
   {
@@ -202,7 +207,8 @@ export const JAKARTA_LANDMARKS = [
     description: "Simpul persimpangan bersejarah di ujung timur Jalan Kebon Sirih tempat bertemunya Jalan Menteng Raya, Jalan Prapatan, dan Jalan Kwitang (Senen). Patung perunggu seorang ibu yang melepas putranya berjuang ini menjadi gerbang utara menuju kawasan Menteng dan Cikini.",
     facts: [
       "Nama resminya adalah Patung Pahlawan, hadiah persahabatan pemerintah Uni Soviet pada tahun 1963.",
-      "Terletak tepat di sebelah timur jalur rel layang antara Stasiun Gambir dan Stasiun Gondangdia."
+      "Terletak tepat di sebelah timur jalur rel layang antara Stasiun Gambir dan Stasiun Gondangdia.",
+      "Patung Pahlawan dibuat oleh pematung Soviet Matvey Manizer dan Ossip Manizer, lalu diresmikan pada 1963."
     ]
   },
   {
@@ -223,7 +229,8 @@ export const JAKARTA_LANDMARKS = [
     description: "Berdiri di sudut tenggara persimpangan lampu merah Jl. M.H. Thamrin dan Jl. K.H. Wahid Hasyim. Sarinah adalah gedung pencakar langit dan pusat perbelanjaan modern pertama di Indonesia yang kini memiliki amphitheater budaya dan relief bersejarah.",
     facts: [
       "Persimpangan Sarinah mempertemukan poros Utara-Selatan Thamrin dengan poros Barat-Timur Jl. Wahid Hasyim (Tanah Abang - Sabang - Gondangdia).",
-      "Memiliki eskalator pertama di Indonesia saat diresmikan pada tahun 1966."
+      "Memiliki eskalator pertama di Indonesia saat diresmikan pada tahun 1966.",
+      "Gedung Sarinah diresmikan pada 1966 dan menjadi pusat perbelanjaan modern pertama di Indonesia."
     ]
   },
   {
@@ -244,7 +251,8 @@ export const JAKARTA_LANDMARKS = [
     description: "Jantung ruang publik Jakarta tempat berakhirnya Jl. M.H. Thamrin dan dimulainya Jl. Jenderal Sudirman. Dari bundaran ini, Jl. Imam Bonjol dan Jl. Sutan Syahrir memancar secara diagonal ke arah tenggara menuju kawasan Menteng dan Taman Suropati.",
     facts: [
       "Patung Selamat Datang menghadap ke utara menyambut tamu negara dari arah Monas.",
-      "Dikelilingi oleh Hotel Indonesia Kempinski, Menara BCA, Grand Indonesia, The Plaza, dan Mandarin Oriental."
+      "Dikelilingi oleh Hotel Indonesia Kempinski, Menara BCA, Grand Indonesia, The Plaza, dan Mandarin Oriental.",
+      "Patung Selamat Datang karya Edhi Sunarso dipasang pada 1962 untuk menyambut tamu Asian Games IV."
     ]
   },
   {
@@ -264,7 +272,9 @@ export const JAKARTA_LANDMARKS = [
     cameraTarget: [-34, 65, 26],
     description: "Kompleks terpadu Grand Indonesia di sudut barat daya Bundaran HI yang mengintegrasikan gedung cagar budaya Hotel Indonesia Kempinski (1962), mal West & East Mall, Kempinski Private Residences, dan Menara BCA setinggi 230 meter.",
     facts: [
-      "Di belakang kompleks Grand Indonesia mengalir kanal Kali Cideng dan kawasan Kebon Kacang menuju Thamrin City."
+      "Di belakang kompleks Grand Indonesia mengalir kanal Kali Cideng dan kawasan Kebon Kacang menuju Thamrin City.",
+      "Menara BCA setinggi 230 meter dengan 56 lantai selesai dibangun pada 2008 sebagai bagian superblok Grand Indonesia.",
+      "Hotel Indonesia Kempinski yang menjadi cagar budaya dibuka pada 1962 sebagai hotel bintang lima pertama di Jakarta."
     ]
   },
   {
@@ -285,7 +295,8 @@ export const JAKARTA_LANDMARKS = [
     description: "Kompleks superblok Thamrin Nine di sisi barat Jl. M.H. Thamrin antara Bundaran HI dan Dukuh Atas. Autograph Tower setinggi 382,9 meter adalah gedung tertinggi di Indonesia, berdampingan dengan Luminary Tower (304m) dan mal Agora.",
     facts: [
       "Gedung tertinggi pertama di Indonesia yang melampaui kategori 'Supertall' (>300 meter).",
-      "Berdampingan dengan kawasan Kebon Melati dan Waduk Melati di sisi barat daya."
+      "Berdampingan dengan kawasan Kebon Melati dan Waduk Melati di sisi barat daya.",
+      "Autograph Tower memiliki 75 lantai dan selesai pada 2022 sebagai bagian superblok Thamrin Nine di sisi barat Thamrin."
     ]
   },
 
@@ -310,7 +321,8 @@ export const JAKARTA_LANDMARKS = [
     description: "Jantung kawasan Garden City Menteng (Nieuw Gondangdia) yang menjadi titik simpul pertemuan boulevard diagonal Jl. Imam Bonjol (dari Bundaran HI), Jl. Pangeran Diponegoro (menuju Cikini/Salemba), dan Jl. Teuku Umar. Di sisi utaranya berdiri Gedung Bappenas.",
     facts: [
       "Dirancang pada tahun 1920 sebagai pusat kota taman kolonial pertama di Hindia Belanda.",
-      "Dihiasi enam monumen patung karya seniman negara-negara pendiri ASEAN."
+      "Dihiasi enam monumen patung karya seniman negara-negara pendiri ASEAN.",
+      "Kawasan Menteng dirancang P.A.J. Moojen dan F.J. Kubatz sebagai kota taman pertama di Hindia Belanda pada awal abad ke-20."
     ]
   },
   {
@@ -331,7 +343,8 @@ export const JAKARTA_LANDMARKS = [
     description: "Simpul transit utama tempat koridor Jl. M.H. Thamrin – Jl. Jenderal Sudirman melintasi jembatan Kanal Banjir Barat dan jalur KRL Commuter Line di Stasiun Sudirman / BNI City.",
     facts: [
       "Titik pertemuan 5 moda transportasi: MRT Jakarta, KRL Commuter Line (Stasiun Sudirman), KA Bandara (Stasiun BNI City), LRT Jabodebek, dan TransJakarta.",
-      "Menghubungkan ruang pejalan kaki Terowongan Kendal dengan JPM Dukuh Atas di atas Kanal Banjir Barat."
+      "Menghubungkan ruang pejalan kaki Terowongan Kendal dengan JPM Dukuh Atas di atas Kanal Banjir Barat.",
+      "Stasiun BNI City melayani KA Bandara Soekarno-Hatta, sedangkan Stasiun Sudirman melayani KRL Commuter Line lintas Bogor."
     ]
   },
 
@@ -356,7 +369,9 @@ export const JAKARTA_LANDMARKS = [
     cameraTarget: [-37, 75, 125],
     description: "Menara perkantoran setinggi 262 meter dengan puncak melengkung menyerupai mata pena atau layar phinisi. Berdiri tepat di sisi barat daya Kanal Banjir Barat dan Stasiun BNI City pada koridor Jalan Jenderal Sudirman.",
     facts: [
-      "Pernah memegang rekor gedung tertinggi di Indonesia selama hampir 20 tahun (1996–2015)."
+      "Pernah memegang rekor gedung tertinggi di Indonesia selama hampir 20 tahun (1996–2015).",
+      "Nama Wisma 46 diambil dari jumlah lantainya, yakni 46 lantai, dengan tinggi total 262 meter.",
+      "Menara ini dirancang Zeidler Roberts Partnership bersama DP Architects dan diresmikan pada 1996."
     ]
   },
   {
@@ -377,7 +392,9 @@ export const JAKARTA_LANDMARKS = [
     cameraTarget: [-60, 11, 272],
     description: "Jembatan Penyeberangan Orang (JPO) dan Sepeda (JPS) berbentuk haluan kapal Phinisi berwarna oranye terakota yang melintang tegak lurus di atas koridor Jalan Jenderal Sudirman di sebelah utara Flyover Karet.",
     facts: [
-      "Dilengkapi anjungan pandang terbuka untuk menikmati panorama garis langit Sudirman."
+      "Dilengkapi anjungan pandang terbuka untuk menikmati panorama garis langit Sudirman.",
+      "JPO Phinisi diresmikan pada 2022 dengan desain haluan kapal Phinisi karya arsitek Firman Ichsan.",
+      "Jembatan ini melayani pejalan kaki dan pesepeda yang menyeberang Jl. Jenderal Sudirman di kawasan Karet."
     ]
   },
   {
@@ -398,7 +415,9 @@ export const JAKARTA_LANDMARKS = [
     cameraTarget: [-68, 62, 311],
     description: "Kompleks menara kembar bergaya Neo-Klasik dengan atap kubah berlapis kaca emas yang berdiri di sisi timur Jalan Jenderal Sudirman tepat di selatan simpang jalan layang Jl. Prof. Dr. Satrio (Casablanca – Karet).",
     facts: [
-      "Berada di sebelah selatan JPO Phinisi dan Flyover Karet yang menghubungkan Tanah Abang dengan Kuningan/Casablanca."
+      "Berada di sebelah selatan JPO Phinisi dan Flyover Karet yang menghubungkan Tanah Abang dengan Kuningan/Casablanca.",
+      "Kompleks menara kembar Sampoerna Strategic Square setinggi 158 meter dirancang biro HOK dan selesai pada 1997.",
+      "Kubah kaca keemasan kedua menara menjadi penanda visual dari Simpang Semanggi dan Flyover Karet."
     ]
   },
   {
@@ -420,7 +439,8 @@ export const JAKARTA_LANDMARKS = [
     description: "Jembatan daun semanggi legendaris yang dirancang Ir. Sutami pada 1962 dan diperkuat dengan dua jalan layang melingkar (Simpang Susun Semanggi) pada 2017. Mempertemukan koridor diagonal Jl. Jenderal Sudirman dengan Jl. Gatot Subroto / Tol Dalam Kota secara tegak lurus.",
     facts: [
       "Titik pertemuan dua poros raksasa: Jl. Jenderal Sudirman dan Jl. Gatot Subroto.",
-      "Bentang melingkar Simpang Susun Semanggi dibangun menggunakan box girder pracetak tanpa tiang di tengah jalur tol."
+      "Bentang melingkar Simpang Susun Semanggi dibangun menggunakan box girder pracetak tanpa tiang di tengah jalur tol.",
+      "Jembatan daun semanggi pertama dibangun untuk Asian Games IV 1962 dan menjadi ikon rekayasa jalan Jakarta."
     ]
   },
   {
@@ -441,7 +461,9 @@ export const JAKARTA_LANDMARKS = [
     cameraTarget: [-323, 24, 218],
     description: "Kompleks Parlemen Republik Indonesia di sisi barat daya koridor Jl. Gatot Subroto (barat laut Simpang Semanggi). Gedung Nusantara memiliki atap kubah parabolik hijau terbelah dua yang melambangkan kepakan sayap burung Garuda.",
     facts: [
-      "Dirancang oleh Soejoedi Wirjoatmodjo pada tahun 1965 atas mandat Presiden Soekarno."
+      "Dirancang oleh Soejoedi Wirjoatmodjo pada tahun 1965 atas mandat Presiden Soekarno.",
+      "Kompleks parlemen terdiri dari Gedung Nusantara, Gedung Nusantara II, dan gedung sekretariat yang mengapit lapangan besar.",
+      "Bentuk kubahnya membuat kompleks ini populer disebut Gedung Kura-Kura oleh warga Jakarta."
     ]
   },
   {
@@ -462,7 +484,8 @@ export const JAKARTA_LANDMARKS = [
     description: "Kawasan pusat bisnis dan kedutaan besar di sisi timur Segitiga Emas Jakarta. Koridor Jl. H.R. Rasuna Said merupakan kelanjutan lurus ke selatan dari Jl. HOS Cokroaminoto (Menteng) dan terhubung ke Semanggi melalui Jl. Gatot Subroto dan Jl. Prof. Dr. Satrio.",
     facts: [
       "Membentuk sudut timur 'Segitiga Emas Jakarta' bersama koridor Sudirman-Thamrin dan Gatot Subroto.",
-      "Rumah bagi Gama Tower (285,5m) dan Bakrie Tower yang berfasad geometris terpilin."
+      "Rumah bagi Gama Tower (285,5m) dan Bakrie Tower yang berfasad geometris terpilin.",
+      "Kawasan Mega Kuningan dikembangkan sejak 1990-an sebagai perluasan Segitiga Emas dan kini menampung banyak kedutaan besar."
     ]
   },
   {
@@ -483,7 +506,9 @@ export const JAKARTA_LANDMARKS = [
     cameraTarget: [-198, 110, 433],
     description: "Distrik bisnis super-modern seluas 45 hektare di kuadran tenggara Simpang Semanggi (sisi timur Jl. Jenderal Sudirman). Merupakan pusat keuangan pasar modal Indonesia tempat berdirinya Gedung Bursa Efek Indonesia (IDX), Treasury Tower, District 8, dan Pacific Place.",
     facts: [
-      "Treasury Tower di kompleks District 8 mencapai tinggi 279,5 meter."
+      "Treasury Tower di kompleks District 8 mencapai tinggi 279,5 meter.",
+      "Kawasan SCBD dikembangkan PT Danayasa Arthatama sejak 1990-an di lahan seluas sekitar 45 hektare.",
+      "Gedung Bursa Efek Indonesia berupa menara kembar yang dihubungkan jembatan kaca di kawasan SCBD."
     ]
   },
   {
@@ -503,7 +528,9 @@ export const JAKARTA_LANDMARKS = [
     cameraTarget: [-298, 14, 335],
     description: "Kompleks olahraga terbesar di Indonesia di kuadran barat daya Simpang Semanggi (seberang SCBD). Mencakup Stadion Utama GBK beratap temu gelang raksasa, Istora Senayan, dan Hutan Kota GBK.",
     facts: [
-      "Dibangun untuk Asian Games IV tahun 1962 dan direvitalisasi untuk Asian Games 2018."
+      "Dibangun untuk Asian Games IV tahun 1962 dan direvitalisasi untuk Asian Games 2018.",
+      "Stadion Utama GBK dirancang Frederich Silaban dan pada awalnya mampu menampung sekitar 100.000 penonton.",
+      "Atap temu gelang raksasa GBK berbentuk cincin baja tanpa kolom di tengah sehingga tribun tetap terbuka."
     ]
   },
   {
@@ -523,7 +550,9 @@ export const JAKARTA_LANDMARKS = [
     cameraTarget: [-316, 12, 478],
     description: "Bundaran air mancur di ujung selatan koridor diagonal Jalan Jenderal Sudirman sebelum memasuki Jalan Sisingamangaraja (Kebayoran Baru / Blok M). Di tengahnya berdiri Patung Pemuda Membangun yang dikelilingi Plaza Senayan, Senayan City, dan Ratu Plaza.",
     facts: [
-      "Menandai ujung selatan poros Medan Merdeka – Thamrin – Sudirman."
+      "Menandai ujung selatan poros Medan Merdeka – Thamrin – Sudirman.",
+      "Patung Pemuda Membangun di Bundaran Senayan diresmikan pada 1972 dan digagas oleh Munir Pamuncak.",
+      "Bundaran Senayan menjadi gerbang selatan koridor Sudirman menuju kawasan Kebayoran Baru dan Blok M."
     ]
   },
   // =====================================================
@@ -2273,7 +2302,7 @@ export const JAKARTA_LANDMARKS = [
     description: "Stasiun komuter di antara Klender dan Klender Baru yang melayani perjalanan warga Duren Sawit menuju pusat Jakarta. Menampilkan peron pulau dengan kanopi tosca, empat jalur KRL, bangunan stasiun berjendela lebar, jembatan penyeberangan, halte feeder Simpang Buaran, parkir motor, serta ruko dan permukiman padat di sisi jalan.",
     facts: [
       "Bangunan baru Stasiun Buaran dibuka pada 9 November 2018.",
-      "Stasiun ini memiliki empat jalur dan satu peron pulau yang melayani KRL Commuter Line lintas Cikarang.",
+      "Stasiun Buaran melayani perjalanan warga Duren Sawit menuju pusat Jakarta di antara Stasiun Klender dan Klender Baru.",
       "Buaran berada pada koridor dwiganda Jatinegara–Cakung yang menjadi jalur utama warga Duren Sawit menuju Jakarta pusat."
     ]
   },
@@ -2296,7 +2325,7 @@ export const JAKARTA_LANDMARKS = [
     description: "Stasiun komuter di perbatasan Duren Sawit dan Cakung yang menjadi pintu masuk koridor KRL Cikarang dari arah timur. Menampilkan peron pulau beratap kanopi putih-biru, empat jalur, bangunan stasiun dua lantai, jembatan penyeberangan, deret parkir, serta kampung dan gudang kecil di sepanjang jalur.",
     facts: [
       "Bangunan baru Stasiun Klender Baru mulai beroperasi pada Desember 2018.",
-      "Stasiun ini memiliki empat jalur dan satu peron pulau yang melayani KRL Commuter Line lintas Cikarang.",
+      "Stasiun Klender Baru menjadi gerbang timur koridor KRL Cikarang di perbatasan Duren Sawit dan Cakung.",
       "Klender Baru berada dekat perbatasan Duren Sawit dengan Cakung, di antara Stasiun Buaran dan jalur menuju Cakung."
     ]
   },
