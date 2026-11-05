@@ -41,7 +41,8 @@ export const VOID_M_OSM = {
     "waterwayCount": 27,
     "waterPointCount": 178,
     "waterBodyCount": 10,
-    "note": "Jaringan jalan Jatiwaringin-Pondok Gede dan tata air Kali Sunter-Buaran-Kali Cakung pada klip x 960-1800 / z 960-1375. Kurasi: seluruh way arteri bernama dan 120 nama koridor permukiman terpanjang; jalan tanpa nama, footway, service, dan jalan layang dikecualikan. Way tol Japek serta duplikat koridor prosedural Halim-Monumen (>=60% panjang berjarak <12 unit) dibuang. Badan air bernama atau luas proyeksi minimal 80 unit persegi dipertahankan. Terminal Pinang Ranti di barat klip dilayani konektor akses Tahap 2."
+    "bridgeCount": 6,
+    "note": "Jaringan jalan Jatiwaringin-Pondok Gede dan tata air Kali Sunter-Buaran-Kali Cakung pada klip x 960-1800 / z 960-1375. Kurasi: seluruh way arteri bernama dan 120 nama koridor permukiman terpanjang; jalan tanpa nama, footway, service, dan jalan layang dikecualikan. Way tol Japek serta duplikat koridor prosedural Halim-Monumen (>=60% panjang berjarak <12 unit) dibuang. Badan air bernama atau luas proyeksi minimal 80 unit persegi dipertahankan. Terminal Pinang Ranti di barat klip dilayani konektor akses Tahap 2. Enam way jembatan pendek yang terbuang kurasi dipulihkan di bridges."
   },
   "roads": [
     {
@@ -4617,6 +4618,104 @@ export const VOID_M_OSM = {
         [
           1697.6,
           1221
+        ]
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "name": "Jalan Jati Utama Raya",
+      "type": "tertiary",
+      "width": 11,
+      "waterWidth": 5,
+      "points": [
+        [
+          1710,
+          978.1
+        ],
+        [
+          1707.5,
+          977
+        ]
+      ]
+    },
+    {
+      "name": "Jalan Raya Jatibening",
+      "type": "secondary",
+      "width": 10,
+      "waterWidth": 5,
+      "points": [
+        [
+          1679.2,
+          1036.1
+        ],
+        [
+          1680.1,
+          1036.3
+        ]
+      ]
+    },
+    {
+      "name": "Jalan Lubang Buaya Raya",
+      "type": "secondary",
+      "width": 14,
+      "waterWidth": 5,
+      "points": [
+        [
+          1156.2,
+          1295.9
+        ],
+        [
+          1155.6,
+          1294.7
+        ]
+      ]
+    },
+    {
+      "name": "Jalan Palan Palan",
+      "type": "residential",
+      "width": 10,
+      "waterWidth": 5,
+      "points": [
+        [
+          1624.1,
+          1144.1
+        ],
+        [
+          1623.3,
+          1143.7
+        ]
+      ]
+    },
+    {
+      "name": "Jembatan H.Safril",
+      "type": "residential",
+      "width": 10,
+      "waterWidth": 5,
+      "points": [
+        [
+          1613.3,
+          1198.5
+        ],
+        [
+          1614.3,
+          1200
+        ]
+      ]
+    },
+    {
+      "name": "Jalan Jatiroto",
+      "type": "residential",
+      "width": 10,
+      "waterWidth": 14,
+      "points": [
+        [
+          1401.1,
+          996.6
+        ],
+        [
+          1400.2,
+          996.7
         ]
       ]
     }

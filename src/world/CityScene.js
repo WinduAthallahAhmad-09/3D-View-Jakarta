@@ -7775,6 +7775,40 @@ export class CityScene {
       bridgeConnectors++;
     }
 
+    const snapBridgeEndpoint = (point) => {
+      let snapped = point;
+      let bestDistance = 6;
+      VOID_L_OSM.roads.forEach((road) => {
+        [road.points[0], road.points[road.points.length - 1]].forEach((endpoint) => {
+          const distance = Math.hypot(endpoint[0] - point[0], endpoint[1] - point[1]);
+          if (distance < bestDistance) {
+            bestDistance = distance;
+            snapped = endpoint;
+          }
+        });
+      });
+      return snapped;
+    };
+
+    VOID_L_OSM.bridges.forEach((bridge) => {
+      const start = snapBridgeEndpoint(bridge.points[0]);
+      const end = snapBridgeEndpoint(bridge.points[bridge.points.length - 1]);
+      const path = [start, ...bridge.points.slice(1, -1), end].filter((point, index, all) => (
+        index === 0 || point[0] !== all[index - 1][0] || point[1] !== all[index - 1][1]
+      ));
+      addRoadPolyline(path, bridge.width, bridge.width >= 10);
+      const midX = (start[0] + end[0]) * 0.5;
+      const midZ = (start[1] + end[1]) * 0.5;
+      if (crossings.some((c) => Math.hypot(c.x - midX, c.z - midZ) < 12)) return;
+      crossings.push({
+        x: midX,
+        z: midZ,
+        angle: Math.atan2(end[0] - start[0], end[1] - start[1]),
+        width: bridge.width,
+        waterWidth: bridge.waterWidth
+      });
+    });
+
     crossings.forEach((bridge) => {
       const deckWidth = bridge.width + 12;
       const deckLength = Math.max(24, bridge.waterWidth + 12);
@@ -7899,6 +7933,7 @@ export class CityScene {
       waterPoints: VOID_L_OSM.waterways.reduce((sum, waterway) => sum + waterway.points.length, 0),
       waterBodies: VOID_L_OSM.waterBodies.length,
       bridges: crossings.length,
+      curatedBridges: VOID_L_OSM.bridges.length,
       lamps: lampCount,
       trees: treePositions.length,
       connectors: bridgeConnectors,
@@ -8234,6 +8269,40 @@ export class CityScene {
       bridgeConnectors++;
     }
 
+    const snapBridgeEndpoint = (point) => {
+      let snapped = point;
+      let bestDistance = 6;
+      VOID_M_OSM.roads.forEach((road) => {
+        [road.points[0], road.points[road.points.length - 1]].forEach((endpoint) => {
+          const distance = Math.hypot(endpoint[0] - point[0], endpoint[1] - point[1]);
+          if (distance < bestDistance) {
+            bestDistance = distance;
+            snapped = endpoint;
+          }
+        });
+      });
+      return snapped;
+    };
+
+    VOID_M_OSM.bridges.forEach((bridge) => {
+      const start = snapBridgeEndpoint(bridge.points[0]);
+      const end = snapBridgeEndpoint(bridge.points[bridge.points.length - 1]);
+      const path = [start, ...bridge.points.slice(1, -1), end].filter((point, index, all) => (
+        index === 0 || point[0] !== all[index - 1][0] || point[1] !== all[index - 1][1]
+      ));
+      addRoadPolyline(path, bridge.width, bridge.width >= 10);
+      const midX = (start[0] + end[0]) * 0.5;
+      const midZ = (start[1] + end[1]) * 0.5;
+      if (crossings.some((c) => Math.hypot(c.x - midX, c.z - midZ) < 12)) return;
+      crossings.push({
+        x: midX,
+        z: midZ,
+        angle: Math.atan2(end[0] - start[0], end[1] - start[1]),
+        width: bridge.width,
+        waterWidth: bridge.waterWidth
+      });
+    });
+
     crossings.forEach((bridge) => {
       const deckWidth = bridge.width + 12;
       const deckLength = Math.max(24, bridge.waterWidth + 12);
@@ -8361,6 +8430,7 @@ export class CityScene {
       waterPoints: VOID_M_OSM.waterways.reduce((sum, waterway) => sum + waterway.points.length, 0),
       waterBodies: VOID_M_OSM.waterBodies.length,
       bridges: crossings.length,
+      curatedBridges: VOID_M_OSM.bridges.length,
       lamps: lampCount,
       trees: treePositions.length,
       connectors: bridgeConnectors,

@@ -8678,6 +8678,107 @@ assert.ok(voidMTransitBuilder.includes('voidMTransitStats'), 'buildVoidMTransit 
 assert.ok(voidMTransitBuilder.includes('drawCalls: 5'), 'Void M transit stats must report five draw calls');
 assert.ok(!voidMTransitBuilder.includes('new THREE.PointLight'), 'buildVoidMTransit must not add PointLights');
 
+// Check 110: Void L/M curated bridges — way jembatan OSM yang terbuang kurasi
+const curatedBridgeExpectations = [
+  {
+    zone: 'Void L',
+    dataset: VOID_L_OSM,
+    builder: voidLBuilder,
+    datasetToken: 'VOID_L_OSM',
+    entries: [
+      { name: 'Jembatan Buaran Kemang Raya', type: 'tertiary', width: 11, waterWidth: 10, points: [[1396.3, 913.2], [1395.3, 913.1]] },
+      { name: 'Jalan Raya Pondok Kelapa', type: 'tertiary', width: 11, waterWidth: 5, points: [[1569.9, 639.7], [1569.8, 642.3]] }
+    ]
+  },
+  {
+    zone: 'Void M',
+    dataset: VOID_M_OSM,
+    builder: voidMBuilder,
+    datasetToken: 'VOID_M_OSM',
+    entries: [
+      { name: 'Jalan Jati Utama Raya', type: 'tertiary', width: 11, waterWidth: 5, points: [[1710, 978.1], [1707.5, 977]] },
+      { name: 'Jalan Raya Jatibening', type: 'secondary', width: 10, waterWidth: 5, points: [[1679.2, 1036.1], [1680.1, 1036.3]] },
+      { name: 'Jalan Lubang Buaya Raya', type: 'secondary', width: 14, waterWidth: 5, points: [[1156.2, 1295.9], [1155.6, 1294.7]] },
+      { name: 'Jalan Palan Palan', type: 'residential', width: 10, waterWidth: 5, points: [[1624.1, 1144.1], [1623.3, 1143.7]] },
+      { name: 'Jembatan H.Safril', type: 'residential', width: 10, waterWidth: 5, points: [[1613.3, 1198.5], [1614.3, 1200]] },
+      { name: 'Jalan Jatiroto', type: 'residential', width: 10, waterWidth: 14, points: [[1401.1, 996.6], [1400.2, 996.7]] }
+    ]
+  }
+];
+
+const segmentsCross = (a, b, c, d) => {
+  const rx = b[0] - a[0];
+  const rz = b[1] - a[1];
+  const sx = d[0] - c[0];
+  const sz = d[1] - c[1];
+  const den = rx * sz - rz * sx;
+  if (Math.abs(den) < 1e-9) return false;
+  const t = ((c[0] - a[0]) * sz - (c[1] - a[1]) * sx) / den;
+  const u = ((c[0] - a[0]) * rz - (c[1] - a[1]) * rx) / den;
+  return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+};
+
+for (const { zone, dataset, builder, datasetToken, entries } of curatedBridgeExpectations) {
+  assert.ok(Array.isArray(dataset.bridges), `${zone} dataset must declare a bridges array`);
+  assert.strictEqual(dataset.bridges.length, entries.length, `${zone} curated bridge count drifted`);
+  assert.strictEqual(
+    dataset.meta.bridgeCount,
+    dataset.bridges.length,
+    `${zone} meta bridgeCount must match the curated bridges array`
+  );
+
+  dataset.bridges.forEach((bridge, index) => {
+    const expected = entries[index];
+    assert.strictEqual(bridge.name, expected.name, `${zone} bridge #${index} name drifted`);
+    assert.strictEqual(bridge.type, expected.type, `${zone} ${bridge.name} type drifted`);
+    assert.strictEqual(bridge.width, expected.width, `${zone} ${bridge.name} width drifted`);
+    assert.strictEqual(bridge.waterWidth, expected.waterWidth, `${zone} ${bridge.name} waterWidth drifted`);
+    assert.deepStrictEqual(bridge.points, expected.points, `${zone} ${bridge.name} geometry drifted`);
+
+    const span = Math.hypot(
+      bridge.points[bridge.points.length - 1][0] - bridge.points[0][0],
+      bridge.points[bridge.points.length - 1][1] - bridge.points[0][1]
+    );
+    assert.ok(span >= 0.5 && span <= 6, `${zone} ${bridge.name} curated span ${span.toFixed(1)} outside 0.5-6 units`);
+
+    const crossesWater = dataset.waterways.some((waterway) => {
+      for (let i = 0; i < waterway.points.length - 1; i++) {
+        if (segmentsCross(bridge.points[0], bridge.points[bridge.points.length - 1], waterway.points[i], waterway.points[i + 1])) {
+          return true;
+        }
+      }
+      return false;
+    });
+    assert.ok(crossesWater, `${zone} ${bridge.name} no longer crosses a curated waterway`);
+
+    const endpointDistance = (point) => {
+      let best = Infinity;
+      dataset.roads.forEach((road) => {
+        [road.points[0], road.points[road.points.length - 1]].forEach((endpoint) => {
+          best = Math.min(best, Math.hypot(endpoint[0] - point[0], endpoint[1] - point[1]));
+        });
+      });
+      return best;
+    };
+    assert.ok(
+      endpointDistance(bridge.points[0]) <= 4 && endpointDistance(bridge.points[bridge.points.length - 1]) <= 4,
+      `${zone} ${bridge.name} endpoints must stay within 4 units of dataset road endpoints for snapping`
+    );
+  });
+
+  assert.ok(
+    builder.includes(`${datasetToken}.bridges.forEach((bridge) => {`),
+    `${zone} builder must render the curated bridges`
+  );
+  assert.ok(builder.includes('const snapBridgeEndpoint = (point) => {'), `${zone} builder must snap bridge endpoints to dataset roads`);
+  assert.ok(builder.includes('bridge.waterWidth'), `${zone} deck must use the curated water width`);
+  assert.ok(
+    builder.includes(`curatedBridges: ${datasetToken}.bridges.length`),
+    `${zone} OSM stats must record the curated bridge count`
+  );
+  assert.ok(!builder.includes('new THREE.PointLight'), `${zone} curated bridges must not add PointLights`);
+}
+
 console.log(`✅ All 143 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3, Void L Tahap 1, Void L Tahap 2, Void L Tahap 3, Void L Tahap 4, Void M Tahap 1, Void M Tahap 2, Void M Tahap 3, Void M Tahap 4 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 

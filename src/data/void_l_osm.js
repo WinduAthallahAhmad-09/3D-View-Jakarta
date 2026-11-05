@@ -39,7 +39,8 @@ export const VOID_L_OSM = {
     "waterwayCount": 22,
     "waterPointCount": 160,
     "waterBodyCount": 6,
-    "note": "Jaringan jalan Cipinang Melayu-Pondok Kelapa-Kalimalang dan tata air Buaran-Sunter-Kali Malang pada klip x 960-1800 / z 560-960. Kurasi: seluruh way arteri bernama dan 100 koridor permukiman terpanjang; jalan tanpa nama, footway, service, dan jalan layang dikecualikan. Kanal Banjir Timur berada di barat klip sehingga tetap prosedural."
+    "bridgeCount": 2,
+    "note": "Jaringan jalan Cipinang Melayu-Pondok Kelapa-Kalimalang dan tata air Buaran-Sunter-Kali Malang pada klip x 960-1800 / z 560-960. Kurasi: seluruh way arteri bernama dan 100 koridor permukiman terpanjang; jalan tanpa nama, footway, service, dan jalan layang dikecualikan. Kanal Banjir Timur berada di barat klip sehingga tetap prosedural. Dua way jembatan pendek yang terbuang kurasi dipulihkan di bridges."
   },
   "roads": [
     {
@@ -5070,6 +5071,40 @@ export const VOID_L_OSM = {
         [
           1310.7,
           730.1
+        ]
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "name": "Jembatan Buaran Kemang Raya",
+      "type": "tertiary",
+      "width": 11,
+      "waterWidth": 10,
+      "points": [
+        [
+          1396.3,
+          913.2
+        ],
+        [
+          1395.3,
+          913.1
+        ]
+      ]
+    },
+    {
+      "name": "Jalan Raya Pondok Kelapa",
+      "type": "tertiary",
+      "width": 11,
+      "waterWidth": 5,
+      "points": [
+        [
+          1569.9,
+          639.7
+        ],
+        [
+          1569.8,
+          642.3
         ]
       ]
     }
