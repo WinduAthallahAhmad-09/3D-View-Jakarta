@@ -9011,7 +9011,148 @@ assert.ok(
   'CityScene.js must not contain the old flat bridge slab'
 );
 
-console.log(`✅ All 143 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3, Void L Tahap 1, Void L Tahap 2, Void L Tahap 3, Void L Tahap 4, Void M Tahap 1, Void M Tahap 2, Void M Tahap 3, Void M Tahap 4, P5 Kosmetik Kanopi Halte, P6 Fakta Anchor Inti, P7 Kosmetik Dek Jembatan COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 114: P8 kosmetik kanopi stasiun & terminal — kanopi pelana bersama.
+const ridgeCanopyHelper = sliceLandmarkBuilder('static createRidgeCanopyMesh({');
+assert.ok(
+  ridgeCanopyHelper.includes('const rise = Math.min(1.6, width * 0.09);'),
+  'createRidgeCanopyMesh must cap the ridge rise for wide terminal canopies'
+);
+assert.ok(
+  ridgeCanopyHelper.includes('const pitch = Math.atan(rise / (width * 0.5));'),
+  'createRidgeCanopyMesh must derive the pitch from the half span'
+);
+assert.ok(
+  ridgeCanopyHelper.includes('const panelWidth = (width * 0.5) / Math.cos(pitch) + 0.06;'),
+  'createRidgeCanopyMesh panels must meet at the ridge with a small overlap'
+);
+assert.ok(
+  ridgeCanopyHelper.includes('const thickness = 0.18;'),
+  'createRidgeCanopyMesh roof panels must stay thin'
+);
+assert.ok(
+  ridgeCanopyHelper.includes('const fasciaHeight = 0.28;'),
+  'createRidgeCanopyMesh must expose an eave fascia'
+);
+assert.ok(
+  ridgeCanopyHelper.includes('rise * 0.5'),
+  'createRidgeCanopyMesh panels must sit halfway up the ridge'
+);
+assert.ok(
+  ridgeCanopyHelper.includes('side * -pitch'),
+  'createRidgeCanopyMesh must mirror both panels into a gable'
+);
+assert.ok(
+  ridgeCanopyHelper.includes('0.12, fasciaHeight, length + 0.16'),
+  'createRidgeCanopyMesh must add fascia beams on both eaves'
+);
+assert.ok(
+  ridgeCanopyHelper.includes('ridgeWidth, 0.22, length + 0.16'),
+  'createRidgeCanopyMesh must cap the ridge'
+);
+assert.ok(
+  ridgeCanopyHelper.includes("if (axis === 'x') merged.rotateY(Math.PI / 2);"),
+  'createRidgeCanopyMesh must rotate the ridge for terminal X-axis canopies'
+);
+assert.ok(
+  ridgeCanopyHelper.includes('mergeGeometries(geos, false)'),
+  'createRidgeCanopyMesh must merge panels, ridge, and fascia into one geometry'
+);
+assert.strictEqual(
+  (ridgeCanopyHelper.match(/new THREE\.Mesh\(/g) || []).length,
+  1,
+  'createRidgeCanopyMesh must emit exactly one mesh per canopy'
+);
+assert.ok(
+  ridgeCanopyHelper.includes('mesh.castShadow = true;'),
+  'createRidgeCanopyMesh must cast shadows'
+);
+assert.ok(
+  !ridgeCanopyHelper.includes('new THREE.PointLight'),
+  'createRidgeCanopyMesh must not add PointLights'
+);
+
+const p8CanopyBuilders = [
+  {
+    token: 'static createStasiunBuaran() {',
+    calls: 1,
+    oldGeometry: 'new THREE.BoxGeometry(12.6, 0.3, 3)'
+  },
+  {
+    token: 'static createTerminalPuloGebang() {',
+    calls: 2,
+    oldGeometry: 'new THREE.BoxGeometry(70, 0.4, 9)'
+  },
+  {
+    token: 'static createTerminalKampungRambutan() {',
+    calls: 2,
+    oldGeometry: 'new THREE.BoxGeometry(72, 0.4, 9)'
+  },
+  {
+    token: 'static createStasiunLrtCiracas() {',
+    calls: 1,
+    oldGeometry: 'new THREE.BoxGeometry(4.6, 0.4, 22)'
+  },
+  {
+    token: 'static createStasiunPasarMinggu() {',
+    calls: 1,
+    oldGeometry: 'new THREE.BoxGeometry(5.4, 0.35, 32)'
+  },
+  {
+    token: 'static createStasiunLentengAgung() {',
+    calls: 1,
+    oldGeometry: 'new THREE.BoxGeometry(5.2, 0.35, 28)'
+  },
+  {
+    token: 'static createStasiunJurangmangu() {',
+    calls: 1,
+    oldGeometry: 'new THREE.BoxGeometry(5.4, 0.35, 32)'
+  },
+  {
+    token: 'static createStasiunAncol() {',
+    calls: 1,
+    oldGeometry: 'new THREE.BoxGeometry(27, 0.6, 50)'
+  },
+  {
+    token: 'static createTerminalPinangRanti() {',
+    calls: 1,
+    oldGeometry: 'new THREE.BoxGeometry(64, 0.4, 22)'
+  }
+];
+p8CanopyBuilders.forEach(({ token, calls, oldGeometry }) => {
+  const builder = sliceLandmarkBuilder(token);
+  assert.strictEqual(
+    (builder.match(/LandmarkModels\.createRidgeCanopyMesh\(\{/g) || []).length,
+    calls,
+    `${token} must build ${calls} ridge canopy call(s)`
+  );
+  assert.ok(
+    !builder.includes(oldGeometry),
+    `${token} must no longer build the flat canopy slab ${oldGeometry}`
+  );
+  assert.ok(
+    !builder.includes('new THREE.PointLight'),
+    `${token} must not add PointLights while rebuilding the canopy`
+  );
+});
+assert.ok(
+  sliceLandmarkBuilder('static createTerminalPuloGebang() {').includes("'terminal-pulo-gebang-canopy'"),
+  'Terminal Pulo Gebang must keep the named canopy runtime marker'
+);
+assert.ok(
+  !sliceLandmarkBuilder('static createStasiunAncol() {').includes('canopyRidge'),
+  'Stasiun Ancol must replace the flat ridge plate with the gable ridge'
+);
+assert.strictEqual(
+  (landmarkModelsContent.match(/LandmarkModels\.createRidgeCanopyMesh\(\{/g) || []).length,
+  11,
+  'Nine station and terminal builders must share the ridge canopy helper'
+);
+assert.ok(
+  !landmarkModelsContent.includes('new THREE.BoxGeometry(27, 0.6, 50)'),
+  'LandmarkModels.js must not keep the flat Ancol platform canopy'
+);
+
+console.log(`✅ All 143 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3, Void L Tahap 1, Void L Tahap 2, Void L Tahap 3, Void L Tahap 4, Void M Tahap 1, Void M Tahap 2, Void M Tahap 3, Void M Tahap 4, P5 Kosmetik Kanopi Halte, P6 Fakta Anchor Inti, P7 Kosmetik Dek Jembatan, P8 Kosmetik Kanopi Stasiun-Terminal COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

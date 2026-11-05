@@ -22,6 +22,48 @@ export class LandmarkModels {
   }
 
   /**
+   * Kanopi pelana bersama untuk stasiun & terminal: dua panel miring, ridge,
+   * dan fasia eave digabung jadi satu mesh. `y` adalah underside eave,
+   * `axis: 'x'` memutar ridgeline agar memanjang sumbu X.
+   */
+  static createRidgeCanopyMesh({
+    width,
+    length,
+    y,
+    x = 0,
+    z = 0,
+    axis = 'z',
+    material,
+    name = ''
+  }) {
+    const rise = Math.min(1.6, width * 0.09);
+    const pitch = Math.atan(rise / (width * 0.5));
+    const panelWidth = (width * 0.5) / Math.cos(pitch) + 0.06;
+    const thickness = 0.18;
+    const ridgeWidth = Math.min(1.2, width * 0.05);
+    const fasciaHeight = 0.28;
+    const geos = [];
+    const push = (w, h, d, lx, ly, lz, rotZ = 0) => {
+      const geometry = new THREE.BoxGeometry(w, h, d);
+      if (rotZ !== 0) geometry.rotateZ(rotZ);
+      geometry.translate(lx, ly, lz);
+      geos.push(geometry);
+    };
+    [-1, 1].forEach((side) => {
+      push(panelWidth, thickness, length, side * width * 0.25, rise * 0.5, 0, side * -pitch);
+      push(0.12, fasciaHeight, length + 0.16, side * (width * 0.5 - 0.06), fasciaHeight * 0.5, 0);
+    });
+    push(ridgeWidth, 0.22, length + 0.16, 0, rise + 0.11, 0);
+    const merged = BufferGeometryUtils.mergeGeometries(geos, false);
+    if (axis === 'x') merged.rotateY(Math.PI / 2);
+    const mesh = new THREE.Mesh(merged, material);
+    mesh.name = name;
+    mesh.position.set(x, y, z);
+    mesh.castShadow = true;
+    return mesh;
+  }
+
+  /**
    * 1. Istana Merdeka & Istana Negara
    * Neo-Palladian white palace with Corinthian colonnade, grand stairs, and Merah Putih flagpole.
    */
@@ -10291,8 +10333,15 @@ export class LandmarkModels {
     haltPlatform.receiveShadow = true;
     group.add(haltPlatform);
 
-    const haltCanopy = new THREE.Mesh(new THREE.BoxGeometry(12.6, 0.3, 3), tealRoofMat);
-    haltCanopy.position.set(26, 3.4, -24);
+    const haltCanopy = LandmarkModels.createRidgeCanopyMesh({
+      width: 3,
+      length: 12.6,
+      x: 26,
+      y: 3.4,
+      z: -24,
+      axis: 'x',
+      material: tealRoofMat
+    });
     group.add(haltCanopy);
 
     [-3.6, 3.6].forEach((hx) => {
@@ -10513,9 +10562,15 @@ export class LandmarkModels {
     hallSignText.position.set(0, 14.5, 4.75);
     group.add(hallSignText);
 
-    const entranceCanopy = new THREE.Mesh(new THREE.BoxGeometry(40, 0.5, 12), roofMat);
-    entranceCanopy.position.set(0, 10.4, 12);
-    entranceCanopy.castShadow = true;
+    const entranceCanopy = LandmarkModels.createRidgeCanopyMesh({
+      width: 12,
+      length: 40,
+      x: 0,
+      y: 10.15,
+      z: 12,
+      axis: 'x',
+      material: roofMat
+    });
     group.add(entranceCanopy);
 
     [-14, 0, 14].forEach((px) => {
@@ -10525,10 +10580,15 @@ export class LandmarkModels {
     });
 
     [24, 38, 52].forEach((laneZ, laneIndex) => {
-      const canopy = new THREE.Mesh(new THREE.BoxGeometry(70, 0.4, 9), roofMat);
+      const canopy = LandmarkModels.createRidgeCanopyMesh({
+        width: 9,
+        length: 70,
+        y: 6,
+        z: laneZ,
+        axis: 'x',
+        material: roofMat
+      });
       if (laneIndex === 1) canopy.name = 'terminal-pulo-gebang-canopy';
-      canopy.position.set(0, 6.2, laneZ);
-      canopy.castShadow = true;
       group.add(canopy);
 
       [-32, 0, 32].forEach((px) => {
@@ -10953,9 +11013,15 @@ export class LandmarkModels {
     hallSignText.position.set(-44, 13, 0.75);
     group.add(hallSignText);
 
-    const entranceCanopy = new THREE.Mesh(new THREE.BoxGeometry(44, 0.5, 12), roofMat);
-    entranceCanopy.position.set(-44, 10, 10);
-    entranceCanopy.castShadow = true;
+    const entranceCanopy = LandmarkModels.createRidgeCanopyMesh({
+      width: 12,
+      length: 44,
+      x: -44,
+      y: 9.75,
+      z: 10,
+      axis: 'x',
+      material: roofMat
+    });
     group.add(entranceCanopy);
 
     [-60, -44, -28].forEach((px) => {
@@ -10965,9 +11031,15 @@ export class LandmarkModels {
     });
 
     [24, 36, 48].forEach((laneZ) => {
-      const canopy = new THREE.Mesh(new THREE.BoxGeometry(72, 0.4, 9), roofMat);
-      canopy.position.set(-34, 6.4, laneZ);
-      canopy.castShadow = true;
+      const canopy = LandmarkModels.createRidgeCanopyMesh({
+        width: 9,
+        length: 72,
+        x: -34,
+        y: 6.2,
+        z: laneZ,
+        axis: 'x',
+        material: roofMat
+      });
       group.add(canopy);
 
       [-64, -34, -4].forEach((px) => {
@@ -11223,9 +11295,13 @@ export class LandmarkModels {
       platform.receiveShadow = true;
       group.add(platform);
 
-      const canopy = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.4, 22), roofMat);
-      canopy.position.set(px, 20.4, 0);
-      canopy.castShadow = true;
+      const canopy = LandmarkModels.createRidgeCanopyMesh({
+        width: 4.6,
+        length: 22,
+        x: px,
+        y: 20.2,
+        material: roofMat
+      });
       group.add(canopy);
 
       [-9, 0, 9].forEach((cz) => {
@@ -11744,9 +11820,13 @@ export class LandmarkModels {
       platform.receiveShadow = true;
       group.add(platform);
 
-      const canopy = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.35, 32), roofMat);
-      canopy.position.set(px, 5.6, 0);
-      canopy.castShadow = true;
+      const canopy = LandmarkModels.createRidgeCanopyMesh({
+        width: 5.4,
+        length: 32,
+        x: px,
+        y: 5.425,
+        material: roofMat
+      });
       group.add(canopy);
 
       [-13, -4.5, 4.5, 13].forEach((cz) => {
@@ -12085,9 +12165,13 @@ export class LandmarkModels {
       platform.receiveShadow = true;
       group.add(platform);
 
-      const canopy = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.35, 28), roofMat);
-      canopy.position.set(px, 5.4, 0);
-      canopy.castShadow = true;
+      const canopy = LandmarkModels.createRidgeCanopyMesh({
+        width: 5.2,
+        length: 28,
+        x: px,
+        y: 5.225,
+        material: roofMat
+      });
       group.add(canopy);
 
       [-11, -3.5, 3.5, 11].forEach((cz) => {
@@ -12614,9 +12698,13 @@ export class LandmarkModels {
       platform.receiveShadow = true;
       group.add(platform);
 
-      const canopy = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.35, 32), roofMat);
-      canopy.position.set(px, 5.6, 0);
-      canopy.castShadow = true;
+      const canopy = LandmarkModels.createRidgeCanopyMesh({
+        width: 5.4,
+        length: 32,
+        x: px,
+        y: 5.425,
+        material: roofMat
+      });
       group.add(canopy);
 
       [-13, -4.5, 4.5, 13].forEach((cz) => {
@@ -13214,14 +13302,13 @@ export class LandmarkModels {
       });
     });
 
-    const canopy = new THREE.Mesh(new THREE.BoxGeometry(27, 0.6, 50), roofMat);
-    canopy.position.set(0, 6.4, 0);
-    canopy.castShadow = true;
+    const canopy = LandmarkModels.createRidgeCanopyMesh({
+      width: 27,
+      length: 50,
+      y: 6.1,
+      material: roofMat
+    });
     group.add(canopy);
-
-    const canopyRidge = new THREE.Mesh(new THREE.BoxGeometry(5, 0.5, 50), whiteMat);
-    canopyRidge.position.set(0, 6.9, 0);
-    group.add(canopyRidge);
 
     const hall = new THREE.Mesh(new THREE.BoxGeometry(16, 5.2, 10), concreteMat);
     hall.position.set(0, 2.9, 32);
@@ -15069,9 +15156,14 @@ export class LandmarkModels {
     glass.name = 'terminal-pinang-ranti-glass';
     group.add(glass);
 
-    const canopy = new THREE.Mesh(new THREE.BoxGeometry(64, 0.4, 22), accentMat);
-    canopy.position.set(0, 7.6, 2);
-    canopy.castShadow = true;
+    const canopy = LandmarkModels.createRidgeCanopyMesh({
+      width: 22,
+      length: 64,
+      y: 7.4,
+      z: 2,
+      axis: 'x',
+      material: accentMat
+    });
     group.add(canopy);
 
     const pierGeos = [];
