@@ -8808,7 +8808,67 @@ for (const { zone, dataset, builder, datasetToken, entries } of curatedBridgeExp
   assert.ok(!builder.includes('new THREE.PointLight'), `${zone} curated bridges must not add PointLights`);
 }
 
-console.log(`✅ All 143 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3, Void L Tahap 1, Void L Tahap 2, Void L Tahap 3, Void L Tahap 4, Void M Tahap 1, Void M Tahap 2, Void M Tahap 3, Void M Tahap 4 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 111: P5 kosmetik slab — kanopi gable dan trim peron 11 builder transit
+const halteCanopyHelper = sliceCityBuilder('addHalteCanopy(concreteGeos, steelGeos, hx, hz, angle, platformTop = 0.7) {');
+assert.ok(halteCanopyHelper.includes('const roofTilt = 0.16;'), 'addHalteCanopy must define the shallow gable tilt');
+assert.ok(halteCanopyHelper.includes('geometry.rotateZ(rotZ)'), 'addHalteCanopy panels must tilt around local Z');
+assert.ok(halteCanopyHelper.includes('geometry.rotateY(angle)'), 'addHalteCanopy must align the kit to the road angle');
+assert.ok(halteCanopyHelper.includes('1.55, 0.1, 12.6'), 'addHalteCanopy must build two sloped roof panels');
+assert.ok(halteCanopyHelper.includes('side * -roofTilt'), 'addHalteCanopy panels must mirror into a gable');
+assert.ok(halteCanopyHelper.includes('0.1, 0.24, 12.7'), 'addHalteCanopy must add eave fascia beams');
+assert.ok(halteCanopyHelper.includes('0.16, 0.12, 12.7'), 'addHalteCanopy must add a ridge beam');
+assert.ok(halteCanopyHelper.includes('platformTop + 0.05'), 'addHalteCanopy must trim the platform edge');
+assert.ok(!halteCanopyHelper.includes('new THREE.PointLight'), 'addHalteCanopy must not add PointLights');
+assert.ok(
+  !halteCanopyHelper.includes('addMerged(') && !halteCanopyHelper.includes('new THREE.Mesh'),
+  'addHalteCanopy must reuse the merged transit meshes without new draw calls'
+);
+
+const p5TransitBuilders = [
+  'buildVoidCTransit() {',
+  'buildVoidDTransit() {',
+  'buildVoidETransit() {',
+  'buildVoidFTransit() {',
+  'buildVoidGTransit() {',
+  'buildVoidHTransit() {',
+  'buildVoidITransit() {',
+  'buildVoidJTransit() {',
+  'buildVoidKTransit() {',
+  'buildVoidLTransit() {',
+  'buildVoidMTransit() {'
+];
+p5TransitBuilders.forEach((token) => {
+  const builder = sliceCityBuilder(token);
+  assert.ok(
+    builder.includes('this.addHalteCanopy(concreteGeos, steelGeos, hx, hz,'),
+    `${token} must use the shared halte canopy kit`
+  );
+  assert.strictEqual(
+    (builder.match(/this\.addHalteCanopy\(/g) || []).length,
+    1,
+    `${token} must call addHalteCanopy exactly once`
+  );
+  assert.ok(
+    !builder.includes('makeBox(2.8, 0.22, 12.6'),
+    `${token} must no longer build the flat slab canopy`
+  );
+});
+const voidCTransitBody = sliceCityBuilder('buildVoidCTransit() {');
+assert.ok(
+  voidCTransitBody.includes('this.addHalteCanopy(concreteGeos, steelGeos, hx, hz, road.angle, 0.5);'),
+  'Void C halte canopy must trim the 0.5-high platform'
+);
+assert.strictEqual(
+  (citySceneContent.match(/this\.addHalteCanopy\(concreteGeos, steelGeos, hx, hz,/g) || []).length,
+  11,
+  'All eleven Void transit builders must share the halte canopy kit'
+);
+assert.ok(
+  !citySceneContent.includes('makeBox(2.8, 0.22, 12.6'),
+  'The flat 2.8 x 0.22 x 12.6 canopy slab must be removed everywhere'
+);
+
+console.log(`✅ All 143 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3, Void L Tahap 1, Void L Tahap 2, Void L Tahap 3, Void L Tahap 4, Void M Tahap 1, Void M Tahap 2, Void M Tahap 3, Void M Tahap 4, P5 Kosmetik Kanopi Halte COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

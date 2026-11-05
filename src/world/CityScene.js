@@ -5849,6 +5849,34 @@ export class CityScene {
   }
 
   /**
+   * Kit kanopi halte bersama: atap gable dangkal, ridge, fascia eave, dan
+   * trim tepi peron. Geometri hanya masuk ke array gabungan pemanggil supaya
+   * jumlah draw call tetap. Dipakai 11 builder transit Void C-M.
+   */
+  addHalteCanopy(concreteGeos, steelGeos, hx, hz, angle, platformTop = 0.7) {
+    const pushBox = (target, w, h, d, lx, ly, lz, rotZ = 0) => {
+      const geometry = new THREE.BoxGeometry(w, h, d);
+      if (rotZ !== 0) geometry.rotateZ(rotZ);
+      geometry.translate(lx, ly, lz);
+      geometry.rotateY(angle);
+      geometry.translate(hx, 0, hz);
+      target.push(geometry);
+    };
+
+    // Dua panel miring bertemu ridge; siluet tidak lagi terbaca pelat datar.
+    const roofTilt = 0.16;
+    [-1, 1].forEach((side) => {
+      pushBox(concreteGeos, 1.55, 0.1, 12.6, side * 0.74, 3.44, 0, side * -roofTilt);
+      pushBox(steelGeos, 0.1, 0.24, 12.7, side * 1.48, 3.26, 0);
+      pushBox(steelGeos, 0.1, 0.1, 11.8, side * 1.24, platformTop + 0.05, 0);
+    });
+    pushBox(steelGeos, 0.16, 0.12, 12.7, 0, 3.53, 0);
+    [-1, 1].forEach((end) => {
+      pushBox(steelGeos, 2.6, 0.1, 0.1, 0, platformTop + 0.05, end * 5.95);
+    });
+  }
+
+  /**
    * Void C Tahap 4: transit kawasan Meruya-Kembangan.
    *
    * 1. Park and Ride Kembangan di forecourt utara Stasiun Kembangan:
@@ -5984,7 +6012,7 @@ export class CityScene {
       const hx = road.x + nx * offset * spec.side;
       const hz = road.z + nz * offset * spec.side;
 
-      // Peron 12 m x 2,6 m sejajar jalan, kanopi baja di empat kolom.
+      // Peron 12 m x 2,6 m sejajar jalan, kanopi gable di empat kolom.
       makeBox(2.6, 0.5, 12, hx, 0.25, hz, road.angle);
       [-5.2, 5.2].forEach((lz) => {
         [-1.0, 1.0].forEach((lx) => {
@@ -5993,7 +6021,7 @@ export class CityScene {
           makeBox(0.16, 2.7, 0.16, px, 1.85, pz, 0, steelGeos);
         });
       });
-      makeBox(2.8, 0.22, 12.6, hx, 3.2, hz, road.angle);
+      this.addHalteCanopy(concreteGeos, steelGeos, hx, hz, road.angle, 0.5);
 
       // Bangku beton dan papan rute di ujung peron.
       makeBox(0.7, 0.45, 3.6, hx - nx * 0.35, 0.725, hz - nz * 0.35, road.angle);
@@ -6002,7 +6030,7 @@ export class CityScene {
       makeBox(0.14, 2.5, 0.14, postX, 1.6, postZ, 0, steelGeos);
       makeBox(0.12, 1.0, 2.4, postX, 2.35, postZ, road.angle, signGeos);
 
-      // Anchor label DOM mengambang 3,1 unit di atas kanopi (puncak y 3,31).
+      // Anchor label DOM mengambang 3,1 unit di atas kanopi (puncak y 3,61).
       halteLabels.push({
         name: spec.name,
         shortName: spec.shortName,
@@ -9087,7 +9115,7 @@ export class CityScene {
           makeBox(0.16, 2.7, 0.16, px, 1.85, pz, 0, steelGeos);
         });
       });
-      makeBox(2.8, 0.22, 12.6, hx, 3.2, hz, angle);
+      this.addHalteCanopy(concreteGeos, steelGeos, hx, hz, angle);
 
       makeBox(0.7, 0.45, 3.6, hx - Math.cos(angle) * 0.35, 0.925, hz + Math.sin(angle) * 0.35, angle);
       const postX = hx + 4.8 * sinA;
@@ -9780,7 +9808,7 @@ export class CityScene {
           makeBox(0.16, 2.7, 0.16, px, 1.85, pz, 0, steelGeos);
         });
       });
-      makeBox(2.8, 0.22, 12.6, hx, 3.2, hz, road.angle);
+      this.addHalteCanopy(concreteGeos, steelGeos, hx, hz, road.angle);
 
       makeBox(0.7, 0.45, 3.6, hx - nx * 0.35, 0.925, hz - nz * 0.35, road.angle);
       const postX = hx + 4.8 * sinA;
@@ -10037,7 +10065,7 @@ export class CityScene {
           makeBox(0.16, 2.7, 0.16, px, 1.85, pz, 0, steelGeos);
         });
       });
-      makeBox(2.8, 0.22, 12.6, hx, 3.2, hz, road.angle);
+      this.addHalteCanopy(concreteGeos, steelGeos, hx, hz, road.angle);
 
       makeBox(0.7, 0.45, 3.6, hx - nx * 0.35, 0.925, hz - nz * 0.35, road.angle);
       const postX = hx + 4.8 * sinA;
@@ -12055,7 +12083,7 @@ export class CityScene {
       const hx = road.x + nx * offset * spec.side;
       const hz = road.z + nz * offset * spec.side;
 
-      // Peron 12 m x 2,6 m sejajar jalan, kanopi baja di empat kolom.
+      // Peron 12 m x 2,6 m sejajar jalan, kanopi gable di empat kolom.
       makeBox(2.6, 0.7, 12, hx, 0.35, hz, road.angle);
       const cosA = Math.cos(road.angle);
       const sinA = Math.sin(road.angle);
@@ -12066,7 +12094,7 @@ export class CityScene {
           makeBox(0.16, 2.7, 0.16, px, 1.85, pz, 0, steelGeos);
         });
       });
-      makeBox(2.8, 0.22, 12.6, hx, 3.2, hz, road.angle);
+      this.addHalteCanopy(concreteGeos, steelGeos, hx, hz, road.angle);
 
       // Bangku beton dan papan rute di ujung peron.
       makeBox(0.7, 0.45, 3.6, hx - nx * 0.35, 0.925, hz - nz * 0.35, road.angle);
@@ -12075,7 +12103,7 @@ export class CityScene {
       makeBox(0.14, 2.5, 0.14, postX, 1.6, postZ, 0, steelGeos);
       makeBox(0.12, 1.0, 2.4, postX, 2.35, postZ, road.angle, signGeos);
 
-      // Anchor label DOM mengambang 3,1 unit di atas kanopi (puncak y 3,31).
+      // Anchor label DOM mengambang 3,1 unit di atas kanopi (puncak y 3,61).
       halteLabels.push({
         name: spec.name,
         shortName: spec.shortName,
@@ -13895,7 +13923,7 @@ export class CityScene {
       const hx = road.x + nx * offset * spec.side;
       const hz = road.z + nz * offset * spec.side;
 
-      // Peron 12 m x 2,6 m sejajar jalan, kanopi baja di empat kolom.
+      // Peron 12 m x 2,6 m sejajar jalan, kanopi gable di empat kolom.
       makeBox(2.6, 0.7, 12, hx, 0.35, hz, road.angle);
       const cosA = Math.cos(road.angle);
       const sinA = Math.sin(road.angle);
@@ -13906,7 +13934,7 @@ export class CityScene {
           makeBox(0.16, 2.7, 0.16, px, 1.85, pz, 0, steelGeos);
         });
       });
-      makeBox(2.8, 0.22, 12.6, hx, 3.2, hz, road.angle);
+      this.addHalteCanopy(concreteGeos, steelGeos, hx, hz, road.angle);
 
       // Bangku beton dan papan rute di ujung peron.
       makeBox(0.7, 0.45, 3.6, hx - nx * 0.35, 0.925, hz - nz * 0.35, road.angle);
@@ -13915,7 +13943,7 @@ export class CityScene {
       makeBox(0.14, 2.5, 0.14, postX, 1.6, postZ, 0, steelGeos);
       makeBox(0.12, 1.0, 2.4, postX, 2.35, postZ, road.angle, signGeos);
 
-      // Label DOM mengambang 3,1 unit di atas kanopi (puncak y 3,31).
+      // Label DOM mengambang 3,1 unit di atas kanopi (puncak y 3,61).
       halteLabels.push({
         name: spec.name,
         shortName: spec.shortName,
@@ -14528,7 +14556,7 @@ export class CityScene {
       const hx = road.x + nx * offset * spec.side;
       const hz = road.z + nz * offset * spec.side;
 
-      // Peron 12 m x 2,6 m sejajar jalan, kanopi baja di empat kolom.
+      // Peron 12 m x 2,6 m sejajar jalan, kanopi gable di empat kolom.
       makeBox(2.6, 0.7, 12, hx, 0.35, hz, road.angle);
       const cosA = Math.cos(road.angle);
       const sinA = Math.sin(road.angle);
@@ -14539,7 +14567,7 @@ export class CityScene {
           makeBox(0.16, 2.7, 0.16, px, 1.85, pz, 0, steelGeos);
         });
       });
-      makeBox(2.8, 0.22, 12.6, hx, 3.2, hz, road.angle);
+      this.addHalteCanopy(concreteGeos, steelGeos, hx, hz, road.angle);
 
       // Dinding kaca di sisi darat, bangku beton, dan papan rute di ujung peron.
       makeBox(0.08, 1.9, 10.8, hx + nx * 1.15 * spec.side, 1.85, hz + nz * 1.15 * spec.side, road.angle, glassGeos);
@@ -16040,7 +16068,7 @@ export class CityScene {
       const hx = road.x + nx * offset * spec.side;
       const hz = road.z + nz * offset * spec.side;
 
-      // Peron 12 m x 2,6 m sejajar jalan, kanopi baja di empat kolom.
+      // Peron 12 m x 2,6 m sejajar jalan, kanopi gable di empat kolom.
       makeBox(2.6, 0.7, 12, hx, 0.35, hz, road.angle);
       const cosA = Math.cos(road.angle);
       const sinA = Math.sin(road.angle);
@@ -16051,7 +16079,7 @@ export class CityScene {
           makeBox(0.16, 2.7, 0.16, px, 1.85, pz, 0, steelGeos);
         });
       });
-      makeBox(2.8, 0.22, 12.6, hx, 3.2, hz, road.angle);
+      this.addHalteCanopy(concreteGeos, steelGeos, hx, hz, road.angle);
 
       // Bangku beton dan papan rute di ujung peron.
       makeBox(0.7, 0.45, 3.6, hx - nx * 0.35, 0.925, hz - nz * 0.35, road.angle);
@@ -16060,7 +16088,7 @@ export class CityScene {
       makeBox(0.14, 2.5, 0.14, postX, 1.6, postZ, 0, steelGeos);
       makeBox(0.12, 1.0, 2.4, postX, 2.35, postZ, road.angle, signGeos);
 
-      // Anchor label DOM mengambang 3,1 unit di atas kanopi (puncak y 3,31).
+      // Anchor label DOM mengambang 3,1 unit di atas kanopi (puncak y 3,61).
       halteLabels.push({
         name: spec.name,
         shortName: spec.shortName,
@@ -16294,7 +16322,7 @@ export class CityScene {
       const hx = road.x + nx * offset * spec.side;
       const hz = road.z + nz * offset * spec.side;
 
-      // Peron 12 m x 2,6 m sejajar jalan, kanopi baja di empat kolom.
+      // Peron 12 m x 2,6 m sejajar jalan, kanopi gable di empat kolom.
       // Trotoar OSM setinggi 0,4 jadi peron dinaikkan agar terbaca sebagai
       // platform, bukan tenggelam di dalam trotoar.
       makeBox(2.6, 0.7, 12, hx, 0.35, hz, road.angle);
@@ -16307,7 +16335,7 @@ export class CityScene {
           makeBox(0.16, 2.7, 0.16, px, 1.85, pz, 0, steelGeos);
         });
       });
-      makeBox(2.8, 0.22, 12.6, hx, 3.2, hz, road.angle);
+      this.addHalteCanopy(concreteGeos, steelGeos, hx, hz, road.angle);
 
       // Bangku beton dan papan rute di ujung peron.
       makeBox(0.7, 0.45, 3.6, hx - nx * 0.35, 0.925, hz - nz * 0.35, road.angle);
@@ -16316,7 +16344,7 @@ export class CityScene {
       makeBox(0.14, 2.5, 0.14, postX, 1.6, postZ, 0, steelGeos);
       makeBox(0.12, 1.0, 2.4, postX, 2.35, postZ, road.angle, signGeos);
 
-      // Anchor label DOM mengambang 3,1 unit di atas kanopi (puncak y 3,31).
+      // Anchor label DOM mengambang 3,1 unit di atas kanopi (puncak y 3,61).
       halteLabels.push({
         name: spec.name,
         shortName: spec.shortName,
@@ -17491,7 +17519,7 @@ export class CityScene {
       const hx = road.x + nx * offset * spec.side;
       const hz = road.z + nz * offset * spec.side;
 
-      // Peron 12 m x 2,6 m sejajar jalan, kanopi baja di empat kolom.
+      // Peron 12 m x 2,6 m sejajar jalan, kanopi gable di empat kolom.
       // Trotoar OSM setinggi 0,4 jadi peron dinaikkan agar terbaca sebagai
       // platform, bukan tenggelam di dalam trotoar.
       makeBox(2.6, 0.7, 12, hx, 0.35, hz, road.angle);
@@ -17504,7 +17532,7 @@ export class CityScene {
           makeBox(0.16, 2.7, 0.16, px, 1.85, pz, 0, steelGeos);
         });
       });
-      makeBox(2.8, 0.22, 12.6, hx, 3.2, hz, road.angle);
+      this.addHalteCanopy(concreteGeos, steelGeos, hx, hz, road.angle);
 
       // Bangku beton dan papan rute di ujung peron.
       makeBox(0.7, 0.45, 3.6, hx - nx * 0.35, 0.925, hz - nz * 0.35, road.angle);
@@ -17513,7 +17541,7 @@ export class CityScene {
       makeBox(0.14, 2.5, 0.14, postX, 1.6, postZ, 0, steelGeos);
       makeBox(0.12, 1.0, 2.4, postX, 2.35, postZ, road.angle, signGeos);
 
-      // Anchor label DOM mengambang 3,1 unit di atas kanopi (puncak y 3,31).
+      // Anchor label DOM mengambang 3,1 unit di atas kanopi (puncak y 3,61).
       halteLabels.push({
         name: spec.name,
         shortName: spec.shortName,
@@ -17754,7 +17782,7 @@ export class CityScene {
       const hx = road.x + nx * offset * spec.side;
       const hz = road.z + nz * offset * spec.side;
 
-      // Peron 12 m x 2,6 m sejajar jalan, kanopi baja di empat kolom.
+      // Peron 12 m x 2,6 m sejajar jalan, kanopi gable di empat kolom.
       // Trotoar OSM setinggi 0,4 jadi peron dinaikkan agar terbaca sebagai
       // platform, bukan tenggelam di dalam trotoar.
       makeBox(2.6, 0.7, 12, hx, 0.35, hz, road.angle);
@@ -17767,7 +17795,7 @@ export class CityScene {
           makeBox(0.16, 2.7, 0.16, px, 1.85, pz, 0, steelGeos);
         });
       });
-      makeBox(2.8, 0.22, 12.6, hx, 3.2, hz, road.angle);
+      this.addHalteCanopy(concreteGeos, steelGeos, hx, hz, road.angle);
 
       // Bangku beton dan papan rute di ujung peron.
       makeBox(0.7, 0.45, 3.6, hx - nx * 0.35, 0.925, hz - nz * 0.35, road.angle);
@@ -17776,7 +17804,7 @@ export class CityScene {
       makeBox(0.14, 2.5, 0.14, postX, 1.6, postZ, 0, steelGeos);
       makeBox(0.12, 1.0, 2.4, postX, 2.35, postZ, road.angle, signGeos);
 
-      // Anchor label DOM mengambang 3,1 unit di atas kanopi (puncak y 3,31).
+      // Anchor label DOM mengambang 3,1 unit di atas kanopi (puncak y 3,61).
       halteLabels.push({
         name: spec.name,
         shortName: spec.shortName,
