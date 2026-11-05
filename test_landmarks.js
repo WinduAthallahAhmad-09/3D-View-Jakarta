@@ -3848,17 +3848,18 @@ voidGAnchors.forEach(({ id }) => {
   }
 });
 
-assert.strictEqual(VOID_G_OSM.waterways.length, 19, `Void G waterway count changed: ${VOID_G_OSM.waterways.length}`);
+assert.strictEqual(VOID_G_OSM.waterways.length, 21, `Void G waterway count changed: ${VOID_G_OSM.waterways.length}`);
 assert.strictEqual(VOID_G_OSM.meta.waterwayCount, VOID_G_OSM.waterways.length, 'Void G waterwayCount mismatch');
 const allVoidGWaterPoints = VOID_G_OSM.waterways.flatMap((waterway) => waterway.points);
-assert.strictEqual(allVoidGWaterPoints.length, 287, `Void G waterway point count changed: ${allVoidGWaterPoints.length}`);
+assert.strictEqual(allVoidGWaterPoints.length, 613, `Void G waterway point count changed: ${allVoidGWaterPoints.length}`);
 assert.strictEqual(VOID_G_OSM.meta.waterPointCount, allVoidGWaterPoints.length, 'Void G waterPointCount mismatch');
 const voidGWaterWidths = {
   'Ci Liwung': 16,
   'Kali Baru': 10,
   Kalibaru: 9,
   'Kali Cipinang': 9,
-  'Kali Cijantung': 5
+  'Kali Cijantung': 5,
+  '': 10
 };
 VOID_G_OSM.waterways.forEach((waterway) => {
   assert.ok(['river', 'stream'].includes(waterway.kind), `Unexpected Void G waterway kind ${waterway.kind}`);
@@ -3874,6 +3875,34 @@ VOID_G_OSM.waterways.forEach((waterway) => {
   });
 });
 const voidGWaterNames = new Set(VOID_G_OSM.waterways.map((waterway) => waterway.name));
+const voidGRiverContinuations = VOID_G_OSM.waterways.filter(
+  (waterway) => waterway.name === '' && waterway.kind === 'river'
+);
+assert.strictEqual(voidGRiverContinuations.length, 2, 'Void G must carry two unnamed river continuations from the M seam');
+const voidGMSeamX = [1250.9, 1242.6, 1234.4];
+voidGRiverContinuations.forEach((waterway) => {
+  assert.ok(
+    waterway.points.some(([x, z]) => Math.abs(z - 1375) < 0.05 && voidGMSeamX.some((seamX) => Math.abs(x - seamX) < 0.2)),
+    `Void G river continuation must touch the M seam, got ${JSON.stringify(waterway.points[0])}`
+  );
+});
+const voidGMainContinuation = voidGRiverContinuations.find((waterway) => waterway.points.length === 319);
+assert.ok(voidGMainContinuation, 'Void G main river continuation must keep all 319 OSM points');
+assert.strictEqual(voidGMainContinuation.width, 10, 'Void G river continuation width drifted');
+assert.deepStrictEqual(voidGMainContinuation.points[0], [1354.9, 1965.1], 'Main river continuation must start at the OSM way terminus');
+assert.deepStrictEqual(
+  voidGMainContinuation.points[voidGMainContinuation.points.length - 1],
+  [1250.9, 1375],
+  'Main river continuation must meet the M seam at x 1250.9'
+);
+const voidGMeanderContinuation = voidGRiverContinuations.find((waterway) => waterway.points.length === 7);
+assert.ok(voidGMeanderContinuation, 'Void G meander continuation must keep all 7 OSM points');
+assert.deepStrictEqual(voidGMeanderContinuation.points[0], [1242.6, 1375], 'Meander continuation must meet the seam at x 1242.6');
+assert.deepStrictEqual(
+  voidGMeanderContinuation.points[voidGMeanderContinuation.points.length - 1],
+  [1234.4, 1375],
+  'Meander continuation must return to the seam at x 1234.4'
+);
 ['Ci Liwung', 'Kali Baru', 'Kalibaru', 'Kali Cipinang', 'Kali Cijantung'].forEach((name) => {
   assert.ok(voidGWaterNames.has(name), `Void G OSM dataset missing ${name} waterway`);
 });
