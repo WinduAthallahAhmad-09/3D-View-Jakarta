@@ -8926,7 +8926,92 @@ CORE_FACT_ANCHOR_IDS.forEach((id) => {
   assert.ok(lm.facts.length >= 3, `Core anchor ${id} must expose at least 3 facts in its drawer`);
 });
 
-console.log(`✅ All 143 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3, Void L Tahap 1, Void L Tahap 2, Void L Tahap 3, Void L Tahap 4, Void M Tahap 1, Void M Tahap 2, Void M Tahap 3, Void M Tahap 4, P5 Kosmetik Kanopi Halte, P6 Fakta Anchor Inti COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 113: P7 kosmetik dek jembatan — helper bersama, dek sempit, profil berlapis.
+const bridgeDeckHelper = sliceCityBuilder('addBridgeDeck(bridgeGeos, roadGeos, bridge) {');
+assert.ok(
+  bridgeDeckHelper.includes('const deckWidth = bridge.width + 6;'),
+  'addBridgeDeck must narrow the deck to carriageway plus 3 units each side'
+);
+assert.ok(
+  bridgeDeckHelper.includes('const deckLength = Math.max(24, (bridge.waterWidth || 0) + 12);'),
+  'addBridgeDeck must derive the span from the waterway width'
+);
+assert.ok(
+  bridgeDeckHelper.includes('push(bridgeGeos, deckWidth, 0.42, deckLength, bridge.x, 0.49, bridge.z);'),
+  'addBridgeDeck must draw the structural slab below the road cap'
+);
+assert.ok(
+  bridgeDeckHelper.includes('push(roadGeos, deckWidth - 4.8, 0.08, deckLength + 0.4, bridge.x, 0.74, bridge.z);'),
+  'addBridgeDeck must cap the slab with a dark asphalt strip'
+);
+assert.ok(
+  bridgeDeckHelper.includes('0.36, 0.6, deckLength'),
+  'addBridgeDeck must add protruding fascia girders along both edges'
+);
+assert.ok(
+  bridgeDeckHelper.includes('0.3, 0.24, deckLength'),
+  'addBridgeDeck must add curbs above the slab'
+);
+assert.ok(
+  bridgeDeckHelper.includes('0.14, 0.8, deckLength'),
+  'addBridgeDeck must add thin railings along both edges'
+);
+assert.ok(
+  bridgeDeckHelper.includes('0.22, 0.1, deckLength'),
+  'addBridgeDeck must add a rail cap that reads at far zoom'
+);
+assert.ok(
+  !bridgeDeckHelper.includes('new THREE.PointLight'),
+  'addBridgeDeck must not add PointLights'
+);
+assert.ok(
+  !bridgeDeckHelper.includes('addMerged(') && !bridgeDeckHelper.includes('new THREE.Mesh'),
+  'addBridgeDeck must reuse the merged road and bridge meshes without new draw calls'
+);
+assert.strictEqual(
+  (citySceneContent.match(/this\.addBridgeDeck\(bridgeGeos, roadGeos, bridge\);/g) || []).length,
+  12,
+  'All twelve Void B-M bridge builders must call the shared deck helper'
+);
+const p7BridgeBuilders = [
+  'buildVoidBDaanMogot() {',
+  'buildVoidCMeruya() {',
+  'buildVoidDPenjaringan() {',
+  'buildVoidECilincing() {',
+  'buildVoidFCakung() {',
+  'buildVoidGPasarRebo() {',
+  'buildVoidHPasarMinggu() {',
+  'buildVoidIBintaro() {',
+  'buildVoidJNorthJakarta() {',
+  'buildVoidK() {',
+  'buildVoidL() {',
+  'buildVoidM() {'
+];
+p7BridgeBuilders.forEach((token) => {
+  const builder = sliceCityBuilder(token);
+  assert.ok(
+    builder.includes('this.addBridgeDeck(bridgeGeos, roadGeos, bridge);'),
+    `${token} must use the shared bridge deck helper`
+  );
+  assert.ok(
+    !builder.includes('bridge.width + 12'),
+    `${token} must no longer widen the deck by six units per side`
+  );
+  assert.ok(
+    !builder.includes('makeBox(deckWidth, 0.7,'),
+    `${token} must no longer build the flat 0.7-thick slab`
+  );
+});
+assert.ok(
+  !citySceneContent.includes('bridge.width + 12'),
+  'CityScene.js must not contain the old deckWidth formula'
+);
+assert.ok(
+  !citySceneContent.includes('makeBox(deckWidth, 0.7,'),
+  'CityScene.js must not contain the old flat bridge slab'
+);
+
+console.log(`✅ All 143 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3, Void L Tahap 1, Void L Tahap 2, Void L Tahap 3, Void L Tahap 4, Void M Tahap 1, Void M Tahap 2, Void M Tahap 3, Void M Tahap 4, P5 Kosmetik Kanopi Halte, P6 Fakta Anchor Inti, P7 Kosmetik Dek Jembatan COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

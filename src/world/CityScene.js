@@ -4918,13 +4918,7 @@ export class CityScene {
     });
 
     crossings.forEach((bridge) => {
-      const deckWidth = bridge.width + 12;
-      bridgeGeos.push(makeBox(deckWidth, 0.7, 24, bridge.x, 0.35, bridge.z, bridge.angle));
-      [-1, 1].forEach((dir) => {
-        const px = Math.cos(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        const pz = -Math.sin(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        bridgeGeos.push(makeBox(0.6, 0.8, 24, bridge.x + px, 0.85, bridge.z + pz, bridge.angle));
-      });
+      this.addBridgeDeck(bridgeGeos, roadGeos, bridge);
     });
 
     if (!this.pjuBulbMat) {
@@ -5208,13 +5202,7 @@ export class CityScene {
     });
 
     crossings.forEach((bridge) => {
-      const deckWidth = bridge.width + 12;
-      bridgeGeos.push(makeBox(deckWidth, 0.7, 24, bridge.x, 0.35, bridge.z, bridge.angle));
-      [-1, 1].forEach((dir) => {
-        const px = Math.cos(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        const pz = -Math.sin(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        bridgeGeos.push(makeBox(0.6, 0.8, 24, bridge.x + px, 0.85, bridge.z + pz, bridge.angle));
-      });
+      this.addBridgeDeck(bridgeGeos, roadGeos, bridge);
     });
 
     if (!this.pjuBulbMat) {
@@ -5877,6 +5865,32 @@ export class CityScene {
   }
 
   /**
+   * Dek jembatan bersama: slab sempit, pita aspal, fascia girder, curb, dan
+   * railing. Geometri hanya masuk ke array gabungan pemanggil supaya jumlah
+   * draw call tetap. Dipakai 12 builder jalan OSM Void B-M.
+   */
+  addBridgeDeck(bridgeGeos, roadGeos, bridge) {
+    const deckWidth = bridge.width + 6;
+    const deckLength = Math.max(24, (bridge.waterWidth || 0) + 12);
+    const push = (target, w, h, d, lx, ly, lz) => {
+      const geometry = new THREE.BoxGeometry(w, h, d);
+      if (bridge.angle !== 0) geometry.rotateY(bridge.angle);
+      geometry.translate(lx, ly, lz);
+      target.push(geometry);
+    };
+    push(bridgeGeos, deckWidth, 0.42, deckLength, bridge.x, 0.49, bridge.z);
+    push(roadGeos, deckWidth - 4.8, 0.08, deckLength + 0.4, bridge.x, 0.74, bridge.z);
+    [-1, 1].forEach((dir) => {
+      const px = Math.cos(bridge.angle) * (deckWidth * 0.5 - 0.18) * dir;
+      const pz = -Math.sin(bridge.angle) * (deckWidth * 0.5 - 0.18) * dir;
+      push(bridgeGeos, 0.36, 0.6, deckLength, bridge.x + px, 0.42, bridge.z + pz);
+      push(bridgeGeos, 0.3, 0.24, deckLength, bridge.x + px, 0.82, bridge.z + pz);
+      push(bridgeGeos, 0.14, 0.8, deckLength, bridge.x + px, 1.34, bridge.z + pz);
+      push(bridgeGeos, 0.22, 0.1, deckLength, bridge.x + px, 1.79, bridge.z + pz);
+    });
+  }
+
+  /**
    * Void C Tahap 4: transit kawasan Meruya-Kembangan.
    *
    * 1. Park and Ride Kembangan di forecourt utara Stasiun Kembangan:
@@ -6327,13 +6341,7 @@ export class CityScene {
     });
 
     crossings.forEach((bridge) => {
-      const deckWidth = bridge.width + 12;
-      bridgeGeos.push(makeBox(deckWidth, 0.7, 24, bridge.x, 0.35, bridge.z, bridge.angle));
-      [-1, 1].forEach((dir) => {
-        const px = Math.cos(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        const pz = -Math.sin(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        bridgeGeos.push(makeBox(0.6, 0.8, 24, bridge.x + px, 0.85, bridge.z + pz, bridge.angle));
-      });
+      this.addBridgeDeck(bridgeGeos, roadGeos, bridge);
     });
 
     if (!this.pjuBulbMat) {
@@ -6684,14 +6692,7 @@ export class CityScene {
     });
 
     crossings.forEach((bridge) => {
-      const deckWidth = bridge.width + 12;
-      const deckLength = Math.max(24, bridge.waterWidth + 12);
-      bridgeGeos.push(makeBox(deckWidth, 0.7, deckLength, bridge.x, 0.35, bridge.z, bridge.angle));
-      [-1, 1].forEach((dir) => {
-        const px = Math.cos(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        const pz = -Math.sin(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        bridgeGeos.push(makeBox(0.6, 0.8, deckLength, bridge.x + px, 0.85, bridge.z + pz, bridge.angle));
-      });
+      this.addBridgeDeck(bridgeGeos, roadGeos, bridge);
     });
 
     if (!this.pjuBulbMat) {
@@ -7010,14 +7011,7 @@ export class CityScene {
     });
 
     crossings.forEach((bridge) => {
-      const deckWidth = bridge.width + 12;
-      const deckLength = Math.max(24, bridge.waterWidth + 12);
-      bridgeGeos.push(makeBox(deckWidth, 0.7, deckLength, bridge.x, 0.35, bridge.z, bridge.angle));
-      [-1, 1].forEach((dir) => {
-        const px = Math.cos(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        const pz = -Math.sin(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        bridgeGeos.push(makeBox(0.6, 0.8, deckLength, bridge.x + px, 0.85, bridge.z + pz, bridge.angle));
-      });
+      this.addBridgeDeck(bridgeGeos, roadGeos, bridge);
     });
 
     if (!this.pjuBulbMat) {
@@ -7361,14 +7355,7 @@ export class CityScene {
     });
 
     crossings.forEach((bridge) => {
-      const deckWidth = bridge.width + 12;
-      const deckLength = Math.max(24, bridge.waterWidth + 12);
-      bridgeGeos.push(makeBox(deckWidth, 0.7, deckLength, bridge.x, 0.35, bridge.z, bridge.angle));
-      [-1, 1].forEach((dir) => {
-        const px = Math.cos(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        const pz = -Math.sin(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        bridgeGeos.push(makeBox(0.6, 0.8, deckLength, bridge.x + px, 0.85, bridge.z + pz, bridge.angle));
-      });
+      this.addBridgeDeck(bridgeGeos, roadGeos, bridge);
     });
 
     if (!this.pjuBulbMat) {
@@ -7838,14 +7825,7 @@ export class CityScene {
     });
 
     crossings.forEach((bridge) => {
-      const deckWidth = bridge.width + 12;
-      const deckLength = Math.max(24, bridge.waterWidth + 12);
-      bridgeGeos.push(makeBox(deckWidth, 0.7, deckLength, bridge.x, 0.35, bridge.z, bridge.angle));
-      [-1, 1].forEach((dir) => {
-        const px = Math.cos(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        const pz = -Math.sin(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        bridgeGeos.push(makeBox(0.6, 0.8, deckLength, bridge.x + px, 0.85, bridge.z + pz, bridge.angle));
-      });
+      this.addBridgeDeck(bridgeGeos, roadGeos, bridge);
     });
 
     if (!this.pjuBulbMat) {
@@ -8332,14 +8312,7 @@ export class CityScene {
     });
 
     crossings.forEach((bridge) => {
-      const deckWidth = bridge.width + 12;
-      const deckLength = Math.max(24, bridge.waterWidth + 12);
-      bridgeGeos.push(makeBox(deckWidth, 0.7, deckLength, bridge.x, 0.35, bridge.z, bridge.angle));
-      [-1, 1].forEach((dir) => {
-        const px = Math.cos(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        const pz = -Math.sin(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        bridgeGeos.push(makeBox(0.6, 0.8, deckLength, bridge.x + px, 0.85, bridge.z + pz, bridge.angle));
-      });
+      this.addBridgeDeck(bridgeGeos, roadGeos, bridge);
     });
 
     if (!this.pjuBulbMat) {
@@ -10978,14 +10951,7 @@ export class CityScene {
     });
 
     crossings.forEach((bridge) => {
-      const deckWidth = bridge.width + 12;
-      const deckLength = Math.max(24, bridge.waterWidth + 12);
-      bridgeGeos.push(makeBox(deckWidth, 0.7, deckLength, bridge.x, 0.35, bridge.z, bridge.angle));
-      [-1, 1].forEach((dir) => {
-        const px = Math.cos(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        const pz = -Math.sin(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        bridgeGeos.push(makeBox(0.6, 0.8, deckLength, bridge.x + px, 0.85, bridge.z + pz, bridge.angle));
-      });
+      this.addBridgeDeck(bridgeGeos, roadGeos, bridge);
     });
 
     if (!this.pjuBulbMat) {
@@ -11306,14 +11272,7 @@ export class CityScene {
     });
 
     crossings.forEach((bridge) => {
-      const deckWidth = bridge.width + 12;
-      const deckLength = Math.max(24, bridge.waterWidth + 12);
-      bridgeGeos.push(makeBox(deckWidth, 0.7, deckLength, bridge.x, 0.35, bridge.z, bridge.angle));
-      [-1, 1].forEach((dir) => {
-        const px = Math.cos(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        const pz = -Math.sin(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        bridgeGeos.push(makeBox(0.6, 0.8, deckLength, bridge.x + px, 0.85, bridge.z + pz, bridge.angle));
-      });
+      this.addBridgeDeck(bridgeGeos, roadGeos, bridge);
     });
 
     if (!this.pjuBulbMat) {
@@ -12716,14 +12675,7 @@ export class CityScene {
     });
 
     crossings.forEach((bridge) => {
-      const deckWidth = bridge.width + 12;
-      const deckLength = Math.max(24, bridge.waterWidth + 12);
-      bridgeGeos.push(makeBox(deckWidth, 0.7, deckLength, bridge.x, 0.35, bridge.z, bridge.angle));
-      [-1, 1].forEach((dir) => {
-        const px = Math.cos(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        const pz = -Math.sin(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        bridgeGeos.push(makeBox(0.6, 0.8, deckLength, bridge.x + px, 0.85, bridge.z + pz, bridge.angle));
-      });
+      this.addBridgeDeck(bridgeGeos, roadGeos, bridge);
     });
 
     if (!this.pjuBulbMat) {
@@ -13182,14 +13134,7 @@ export class CityScene {
     });
 
     crossings.forEach((bridge) => {
-      const deckWidth = bridge.width + 12;
-      const deckLength = Math.max(24, bridge.waterWidth + 12);
-      bridgeGeos.push(makeBox(deckWidth, 0.7, deckLength, bridge.x, 0.35, bridge.z, bridge.angle));
-      [-1, 1].forEach((dir) => {
-        const px = Math.cos(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        const pz = -Math.sin(bridge.angle) * (deckWidth * 0.5 - 0.4) * dir;
-        bridgeGeos.push(makeBox(0.6, 0.8, deckLength, bridge.x + px, 0.85, bridge.z + pz, bridge.angle));
-      });
+      this.addBridgeDeck(bridgeGeos, roadGeos, bridge);
     });
 
     if (!this.pjuBulbMat) {
