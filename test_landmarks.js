@@ -1,5 +1,6 @@
 import assert from 'node:assert';
 import fs from 'node:fs';
+import { runInNewContext } from 'node:vm';
 import { JAKARTA_LANDMARKS, projectGpsToScene } from './src/config/landmarks.js';
 import { VOID_B_OSM } from './src/data/void_b_osm.js';
 import { VOID_C_OSM } from './src/data/void_c_osm.js';
@@ -7798,7 +7799,7 @@ assert.ok(
 const seamJBuilder = sliceCityBuilder('  buildVoidJNorthJakarta() {');
 assert.ok(
   seamJBuilder.includes(
-    'collectSeamConnectors(VOID_E_OSM.roads, VOID_J_OSM.roads, SEAM_EJ, SEAM_ROAD_STITCH_MAX)'
+    'collectRoadSeamConnectors(VOID_E_OSM.roads, VOID_J_OSM.roads, SEAM_EJ, SEAM_ROAD_STITCH_MAX)'
   ),
   'Void J builder must stitch the S1 E–J seam'
 );
@@ -7810,9 +7811,9 @@ assert.ok(
 
 const seamKBuilder = sliceCityBuilder('  buildVoidK() {');
 [
-  'collectSeamConnectors(VOID_E_OSM.roads, VOID_K_OSM.roads, SEAM_EK, SEAM_ROAD_STITCH_MAX)',
-  'collectSeamConnectors(VOID_K_OSM.roads, VOID_F_OSM.roads, SEAM_KF_HORIZONTAL, SEAM_ROAD_STITCH_MAX)',
-  'collectSeamConnectors(VOID_F_OSM.roads, VOID_K_OSM.roads, SEAM_KF_VERTICAL, SEAM_ROAD_STITCH_MAX)',
+  'collectRoadSeamConnectors(VOID_E_OSM.roads, VOID_K_OSM.roads, SEAM_EK, SEAM_ROAD_STITCH_MAX)',
+  'collectRoadSeamConnectors(VOID_K_OSM.roads, VOID_F_OSM.roads, SEAM_KF_HORIZONTAL, SEAM_ROAD_STITCH_MAX)',
+  'collectRoadSeamConnectors(VOID_F_OSM.roads, VOID_K_OSM.roads, SEAM_KF_VERTICAL, SEAM_ROAD_STITCH_MAX)',
   'collectSeamConnectors(VOID_K_OSM.waterways, VOID_E_OSM.waterways, SEAM_EK, SEAM_WATER_STITCH_MAX)',
   'collectSeamConnectors(VOID_K_OSM.waterways, VOID_F_OSM.waterways, SEAM_KF_HORIZONTAL, SEAM_WATER_STITCH_MAX)',
   'collectSeamConnectors(VOID_F_OSM.waterways, VOID_K_OSM.waterways, SEAM_KF_VERTICAL, SEAM_WATER_STITCH_MAX)'
@@ -8045,7 +8046,7 @@ const voidLBuilder = sliceCityBuilder('buildVoidL() {');
   assert.ok(voidLBuilder.includes(`'${meshName}'`), `buildVoidL must create the ${meshName} mesh`);
 });
 assert.ok(
-  voidLBuilder.includes('collectSeamConnectors(VOID_F_OSM.roads, VOID_L_OSM.roads, SEAM_FL, SEAM_ROAD_STITCH_MAX)'),
+  voidLBuilder.includes('collectRoadSeamConnectors(VOID_F_OSM.roads, VOID_L_OSM.roads, SEAM_FL, SEAM_ROAD_STITCH_MAX)'),
   'buildVoidL must stitch F-L road endpoints'
 );
 assert.ok(
@@ -8482,7 +8483,7 @@ const voidMBuilder = sliceCityBuilder('buildVoidM() {');
   assert.ok(voidMBuilder.includes(`'${meshName}'`), `buildVoidM must create the ${meshName} mesh`);
 });
 assert.ok(
-  voidMBuilder.includes('collectSeamConnectors(VOID_L_OSM.roads, VOID_M_OSM.roads, SEAM_LM, SEAM_ROAD_STITCH_MAX)'),
+  voidMBuilder.includes('collectRoadSeamConnectors(VOID_L_OSM.roads, VOID_M_OSM.roads, SEAM_LM, SEAM_ROAD_STITCH_MAX)'),
   'buildVoidM must stitch L-M road endpoints'
 );
 assert.ok(
@@ -8490,7 +8491,7 @@ assert.ok(
   'buildVoidM must stitch L-M waterway endpoints'
 );
 assert.ok(
-  voidMBuilder.includes('collectSeamConnectors(VOID_M_OSM.roads, VOID_G_OSM.roads, SEAM_MG, SEAM_ROAD_STITCH_MAX)'),
+  voidMBuilder.includes('collectRoadSeamConnectors(VOID_M_OSM.roads, VOID_G_OSM.roads, SEAM_MG, SEAM_ROAD_STITCH_MAX)'),
   'buildVoidM must stitch M-G road endpoints'
 );
 assert.ok(
@@ -9152,7 +9153,136 @@ assert.ok(
   'LandmarkModels.js must not keep the flat Ancol platform canopy'
 );
 
-console.log(`✅ All 143 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3, Void L Tahap 1, Void L Tahap 2, Void L Tahap 3, Void L Tahap 4, Void M Tahap 1, Void M Tahap 2, Void M Tahap 3, Void M Tahap 4, P5 Kosmetik Kanopi Halte, P6 Fakta Anchor Inti, P7 Kosmetik Dek Jembatan, P8 Kosmetik Kanopi Stasiun-Terminal COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 115: Execute the production seam matcher, not a copy of its algorithm.
+// Reverting road consumers to nearest-only matching must fail the Raflesia fixture.
+{
+  const helperStart = citySceneContent.indexOf('const nearestPointOnFeatures =');
+  const helperEnd = citySceneContent.indexOf('// Kanal Banjir Timur tetap prosedural;');
+  const seamConstants = citySceneContent.match(/^const SEAM_\w+ = [^;]+;/gm).join('\n');
+  const roadMatcherName = citySceneContent.match(/(collect\w*SeamConnectors)\(VOID_L_OSM\.roads/)[1];
+  const seamApi = runInNewContext(`${seamConstants}\n${citySceneContent.slice(helperStart, helperEnd)}\n({
+    roads: ${roadMatcherName}, water: collectSeamConnectors,
+    seams: [SEAM_EJ, SEAM_EK, SEAM_KF_HORIZONTAL, SEAM_KF_VERTICAL, SEAM_FL, SEAM_LM, SEAM_MG]
+  })`);
+  const samePoint = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]) < 1e-6;
+  const linkKey = (a, b) => [a, b].map(p => p.map(v => Number(v.toFixed(6))).join(',')).sort().join('|');
+  const links = connectors => Array.from(connectors, c => linkKey(c.from, c.to)).sort();
+  const hasLink = (connectors, a, b) => connectors.some(c => linkKey(c.from, c.to) === linkKey(a, b));
+  const road = (points, name = null, width = 10) => ({ points, name, width, kind: 'primary' });
+  const seam = { axis: 'z', value: 0, min: -100, max: 100 };
+  const collect = (a, b, maxGap = 70) => seamApi.roads(a, b, seam, maxGap);
+  const lToM = seamApi.roads(VOID_L_OSM.roads, VOID_M_OSM.roads, seamApi.seams[5], 70);
+  const raflesia = [1782, 948.6];
+  assert.ok(hasLink(lToM, raflesia, [1775.7, 970.6]), 'P9 must retain aligned Raflesia–Kalimantan continuation');
+  assert.ok(!hasLink(lToM, raflesia, [1800, 961.3]), 'P9 must reject sideways Raflesia–Dokter Ratna shortcut');
+  assert.strictEqual(lToM.filter(c => samePoint(c.from, raflesia) || samePoint(c.to, raflesia)).length, 1,
+    'P9 must reserve Raflesia endpoint after selecting its aligned continuation');
+
+  // Nearer lateral neighbours must not beat aligned, differently named continuations.
+  const a = [road([[0, -50], [0, 0]], 'South')];
+  const b = [road([[0, 12], [0, 50]], 'North'), road([[10, 0], [10, 50]], 'Side')];
+  assert.deepStrictEqual(links(collect(a, b)), ['0,0|0,12'], 'P9 must prefer forward continuation over closer parallel road');
+  assert.deepStrictEqual(links(collect(
+    [...a, road([[10, -50], [10, 0]], 'South west')],
+    [b[0], road([[10, 12], [10, 50]], 'North west')]
+  )), ['0,0|0,12', '10,0|10,12'], 'P9 must preserve two independent carriageways');
+  assert.deepStrictEqual(links(collect(a, [road([[0, 0.6], [0, 50]]), b[1]])), [],
+    'P9 must reserve already-connected pairs below minimum gap without drawing lateral fans');
+  assert.deepStrictEqual(links(collect(a, [road([[-30, 0.6], [30, 0.6]]), b[0]])), [],
+    'P9 must not reuse a source already connected to a nearby T-junction');
+  assert.deepStrictEqual(links(collect(a, [road([[-30, 12], [30, 12]])])), ['0,0|0,12'],
+    'P9 must preserve forward T-junction projection onto a perpendicular road');
+  assert.deepStrictEqual(links(collect(a, [road([[-30, -12], [30, -12]])])), [],
+    'P9 must not stitch backwards into a road behind the source endpoint');
+
+  for (const [gap, expected] of [[7.9, []], [8, ['0,0|0,8']], [70, ['0,0|0,70']], [70.1, []]]) {
+    assert.deepStrictEqual(links(collect(a, [road([[0, gap], [0, gap + 50]])])), expected,
+      `P9 must retain the road gap boundary at ${gap}`);
+  }
+  assert.deepStrictEqual(links(collect([road([[0, -50], [0, -15]])], [road([[0, 20], [0, 50]])])), [],
+    'P9 must not stitch endpoints outside the seam band');
+  assert.deepStrictEqual(links(collect([...a, road([[-20, 0], [20, 0]])], [b[0]])), ['0,0|0,12'],
+    'P9 must still allow the opposite stub to meet an existing same-side junction');
+  assert.deepStrictEqual(links(collect(
+    [road([[-50, 0], [0, 0]]), road([[0, 0], [50, 0]])],
+    [road([[0, 0.6], [0, 50]]), road([[0, -12], [0, -50]])]
+  )), ['0,-12|0,0'], 'P9 existing junction must accept another arm beside an already-connected stub');
+  assert.deepStrictEqual(links(collect(
+    [road([[0, -50], [0, 0]]), road([[-20, 26], [20, 26]])],
+    [road([[0, 20], [0, 50]])]
+  )), [], 'P9 must reserve an out-of-band target already near the opposite network');
+  const vShape = [[-40, 10], [0, 30], [40, 10]];
+  const tProjection = links(collect([road([[0, -50], [0, 0]])], [road(vShape)]));
+  assert.deepStrictEqual(links(collect([road([[0, -50], [0, 0]])], [road([...vShape].reverse())])),
+    tProjection, 'P9 T-junction projection must not depend on polyline point order');
+  assert.deepStrictEqual(tProjection, ['-12,24|0,0'],
+    'P9 T-junction must deterministically pick one equally close projection');
+  assert.deepStrictEqual(links(collect(a, [road([[10, 10], [10, 50]])])), ['0,0|10,10'],
+    'P9 must accept an exact 45-degree continuation');
+  assert.deepStrictEqual(links(collect(a, [
+    road([[0, 30], [30, 30]], 'Crossed'), road([[0, 50], [0, 80]], 'Far')
+  ])), [], 'P9 must not cross an intermediate road to reach a farther endpoint');
+  assert.deepStrictEqual(links(collect([
+    road([[0, -50], [0, 0]], 'South'), road([[-30, 30], [30, 30]], 'Crossed source')
+  ], [road([[0, 50], [0, 80]], 'Far')])), [],
+  'P9 must not cross an intermediate road on the source side');
+  assert.deepStrictEqual(links(collect([], b)), [], 'P9 empty source side must be safe');
+  assert.deepStrictEqual(links(collect(a, [])), [], 'P9 empty target side must be safe');
+  assert.deepStrictEqual(links(collect([road([[0, 0], [0, 0]])], b)), [],
+    'P9 zero-length roads must not create NaN tangents or connectors');
+  assert.deepStrictEqual(links(collect([road([[0, -50], [0, 0], [0, 0]])], [b[0]])), ['0,0|0,12'],
+    'P9 must use the nearest non-zero endpoint segment for repeated points');
+
+  const kToF = seamApi.roads(VOID_K_OSM.roads, VOID_F_OSM.roads, seamApi.seams[2], 70);
+  assert.ok(hasLink(kToF, [1694.5, -150.7], [1695.3, -129.5]), 'P9 must preserve Cakung Cilincing Timur');
+  assert.ok(hasLink(kToF, [1686.1, -156.3], [1687.4, -129.5]), 'P9 must preserve Cakung Cilincing Barat');
+  const mToG = seamApi.roads(VOID_M_OSM.roads, VOID_G_OSM.roads, seamApi.seams[6], 70);
+  assert.ok(hasLink(mToG, [1107, 1375], [1105.2697297297298, 1385.9583783783785]),
+    'P9 must preserve SPG 7–Al Baidho I T-junction');
+  const eToK = seamApi.roads(VOID_E_OSM.roads, VOID_K_OSM.roads, seamApi.seams[1], 70);
+  assert.ok(!hasLink(eToK, [2093.5, -470], [2138.3, -470.6]), 'P9 must reject Inspeksi BKT lateral fan into a connected endpoint');
+  assert.ok(!hasLink(eToK, [2083.7, -470], [2138.3, -470.6]), 'P9 must reject the second Inspeksi BKT lateral fan');
+  const eToJ = seamApi.roads(VOID_E_OSM.roads, VOID_J_OSM.roads, seamApi.seams[0], 70);
+  assert.ok(hasLink(eToJ, [1329, -808.7], [1330.9, -835]), 'P9 must preserve Beringin III–Batu Tumbuh continuation');
+  assert.strictEqual(eToJ.filter(c => samePoint(c.from, [1329, -808.7]) || samePoint(c.to, [1329, -808.7])).length, 1,
+    'P9 must not add lateral Beringin III projection after finding continuation');
+
+  // Actual legacy water output is intentionally unchanged, including nearest-only behavior.
+  assert.deepStrictEqual(links(seamApi.water(a, b, seam, 80)), ['0,0|0,12', '0,0|10,0'],
+    'P9 must not apply road direction or endpoint ownership rules to waterways');
+  const datasets = [
+    [VOID_E_OSM, VOID_J_OSM], [VOID_E_OSM, VOID_K_OSM], [VOID_K_OSM, VOID_F_OSM],
+    [VOID_F_OSM, VOID_K_OSM], [VOID_F_OSM, VOID_L_OSM], [VOID_L_OSM, VOID_M_OSM], [VOID_M_OSM, VOID_G_OSM]
+  ];
+  const waterBaseline = [
+    ['1565.3,-470|1596.1,-527.2', '2044.1,-456.6|2088.6,-478.4'],
+    ['1492.7,-150|1498.1,-116.2'], ['1993.8,27.8|2023.626145,24.597807'], [], [], []
+  ];
+  datasets.slice(1).forEach(([left, right], index) => {
+    assert.deepStrictEqual(links(seamApi.water(left.waterways, right.waterways, seamApi.seams[index + 1], 80)),
+      waterBaseline[index], `P9 must preserve real water geometry on seam ${index + 1}`);
+  });
+  datasets.forEach(([left, right], index) => {
+    const boundary = seamApi.seams[index];
+    const result = seamApi.roads(left.roads, right.roads, boundary, 70);
+    const expected = links(result);
+    assert.deepStrictEqual(links(seamApi.roads(right.roads, left.roads, boundary, 70)), expected,
+      `P9 seam ${index} must not depend on side traversal order`);
+    assert.deepStrictEqual(links(seamApi.roads([...left.roads].reverse(), [...right.roads].reverse(), boundary, 70)), expected,
+      `P9 seam ${index} must not depend on road array order`);
+    const reversePoints = roads => roads.map(r => ({ ...r, points: [...r.points].reverse() }));
+    assert.deepStrictEqual(links(seamApi.roads(reversePoints(left.roads), reversePoints(right.roads), boundary, 70)), expected,
+      `P9 seam ${index} must not depend on polyline orientation`);
+    assert.strictEqual(new Set(expected).size, expected.length, `P9 seam ${index} must not emit duplicate connectors`);
+    result.forEach(c => {
+      const gap = Math.hypot(c.to[0] - c.from[0], c.to[1] - c.from[1]);
+      assert.ok(gap >= 8 && gap <= 70, `P9 seam ${index} connector must remain inside gap limits`);
+      assert.ok(Number.isFinite(c.width) && c.width >= 6, `P9 seam ${index} connector width must be valid`);
+    });
+  });
+}
+
+console.log(`✅ All 143 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3, Void L Tahap 1, Void L Tahap 2, Void L Tahap 3, Void L Tahap 4, Void M Tahap 1, Void M Tahap 2, Void M Tahap 3, Void M Tahap 4, P5 Kosmetik Kanopi Halte, P6 Fakta Anchor Inti, P7 Kosmetik Dek Jembatan, P8 Kosmetik Kanopi Stasiun-Terminal + P9 Jahitan Jalan Selaras COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

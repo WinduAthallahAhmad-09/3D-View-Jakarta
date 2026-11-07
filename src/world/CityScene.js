@@ -130,6 +130,184 @@ const collectSeamConnectors = (sideA, sideB, seam, maxGap, skipNames = []) => {
   return connectors;
 };
 
+// Proyeksi deterministik: pada jarak sama, pilih kandidat x/z terkecil supaya
+// geometri seam tidak bergantung urutan titik polyline.
+const nearestPointOnRoadFeature = (feature, x, z) => {
+  const points = feature.points;
+  let best = null;
+  for (let i = 0; i < points.length - 1; i++) {
+    const [ax, az] = points[i];
+    const [bx, bz] = points[i + 1];
+    const dx = bx - ax;
+    const dz = bz - az;
+    const length2 = dx * dx + dz * dz;
+    let t = length2 === 0 ? 0 : ((x - ax) * dx + (z - az) * dz) / length2;
+    t = Math.max(0, Math.min(1, t));
+    const px = ax + dx * t;
+    const pz = az + dz * t;
+    const d = Math.hypot(x - px, z - pz);
+    if (!best || d < best.d - 1e-9 ||
+      (Math.abs(d - best.d) <= 1e-9 && (px < best.x - 1e-9 ||
+        (Math.abs(px - best.x) <= 1e-9 && pz < best.z - 1e-9)))) {
+      best = { d, x: px, z: pz };
+    }
+  }
+  return best || { d: Infinity, x, z };
+};
+
+// Konektor tidak boleh melompati jalan lain di antara kedua ujung: pita trotoar
+// seam akan melintang di atas badan jalan yang sudah ada.
+const crossesIntermediateRoad = (from, to, features) => {
+  const dx = to[0] - from[0];
+  const dz = to[1] - from[1];
+  if (Math.hypot(dx, dz) < 1e-6) return false;
+  const clear = 1.5; // Ujung konektor memang menempel pada jalan; abaikan pertemuan di sana.
+  return features.some(feature => {
+    const points = feature.points;
+    for (let i = 0; i < points.length - 1; i++) {
+      const [ax, az] = points[i];
+      const [bx, bz] = points[i + 1];
+      const ex = bx - ax;
+      const ez = bz - az;
+      const den = dx * ez - dz * ex;
+      if (Math.abs(den) < 1e-9) continue;
+      const t = ((ax - from[0]) * ez - (az - from[1]) * ex) / den;
+      const u = ((ax - from[0]) * dz - (az - from[1]) * dx) / den;
+      if (t <= 1e-6 || t >= 1 - 1e-6 || u < -1e-9 || u > 1 + 1e-9) continue;
+      const px = from[0] + dx * t;
+      const pz = from[1] + dz * t;
+      if (Math.hypot(px - from[0], pz - from[1]) < clear) continue;
+      if (Math.hypot(px - to[0], pz - to[1]) < clear) continue;
+      return true;
+    }
+    return false;
+  });
+};
+
+// Jalan dipasangkan menurut kelanjutan tangen, bukan kedekatan lajur paralel.
+// Waterway tetap memakai collectSeamConnectors tanpa aturan arah/ownership ini.
+const collectRoadSeamConnectors = (sideA, sideB, seam, maxGap) => {
+  const minForwardDot = Math.SQRT1_2; // Maksimal belokan 45 derajat pada setiap ujung.
+  const angleEpsilon = 1e-9; // Batas 45 derajat inklusif; selisih pembulatan dot tidak menolak.
+  const pointKey = (p) => p.map(v => Math.round(v * 1e6)).join(',');
+  const linkKey = (a, b) => [pointKey(a), pointKey(b)].sort().join('|');
+  const distance = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+  const endpoints = (features, neighbours) => features.flatMap(feature => {
+    const points = feature.points;
+    if (points.length < 2) return [];
+    return [0, points.length - 1].flatMap(index => {
+      const point = points[index];
+      const step = index === 0 ? 1 : -1;
+      for (let i = index + step; i >= 0 && i < points.length; i += step) {
+        const length = distance(point, points[i]);
+        if (length < 1e-6) continue;
+        return [{ feature, point, features, neighbours,
+          dx: (point[0] - points[i][0]) / length,
+          dz: (point[1] - points[i][1]) / length }];
+      }
+      return [];
+    });
+  });
+  const left = endpoints(sideA, sideB);
+  const right = endpoints(sideB, sideA);
+  const all = [...left, ...right];
+  const byFeature = new Map();
+  all.forEach(end => {
+    if (!byFeature.has(end.feature)) byFeature.set(end.feature, []);
+    byFeature.get(end.feature).push(end);
+  });
+  const isJoined = (end) => {
+    if (end.joined === undefined) {
+      end.joined = end.features.some(other => other !== end.feature &&
+        nearestPointOnFeatures([other], ...end.point).d <= SEAM_SELF_JOIN_EPS);
+    }
+    return end.joined;
+  };
+  const active = new Set(all.filter(end => isOnSeamLine(...end.point, seam) && !isJoined(end)));
+  const used = new Set();
+  const connectors = [];
+  const seen = new Set();
+  const emit = (from, to, feature) => {
+    const key = linkKey(from.point, to);
+    if (seen.has(key)) return;
+    seen.add(key);
+    connectors.push({ from: from.point, to,
+      width: Math.max(6, Math.min(from.feature.width || 8, feature.width || 8)),
+      name: from.feature.name || null });
+  };
+  // Celah pendek berarti sudah terhubung, termasuk simpang-T. Reservasi dilakukan
+  // sebelum pasangan baru dicari supaya kunjungan balik tidak menarik stub lain.
+  // Semua endpoint diperiksa: ujung di luar band pun bisa sudah menempel ke
+  // jaringan seberang dan tidak boleh menerima sambungan kedua.
+  for (const end of all) {
+    const opposite = end.features === sideA ? right : left;
+    let connected = false;
+    for (const feature of end.neighbours) {
+      const near = nearestPointOnRoadFeature(feature, ...end.point);
+      if (near.d >= SEAM_STITCH_MIN) continue;
+      connected = true;
+      opposite.forEach(target => {
+        // Simpang bersama boleh menerima lengan lain; hanya ujung bebas dimiliki satu sambungan.
+        if (!isJoined(target) && distance(target.point, [near.x, near.z]) <= SEAM_SELF_JOIN_EPS) used.add(target);
+      });
+    }
+    if (connected && !isJoined(end)) used.add(end);
+  }
+  const rank = (a, b) => a.score - b.score || a.key.localeCompare(b.key);
+  const pairs = [];
+  for (const a of left) {
+    for (const b of right) {
+      if ((!active.has(a) && !active.has(b)) || used.has(a) || used.has(b)) continue;
+      const gap = distance(a.point, b.point);
+      if (gap < SEAM_STITCH_MIN || gap > maxGap || isJoined(a) || isJoined(b)) continue;
+      const dx = (b.point[0] - a.point[0]) / gap;
+      const dz = (b.point[1] - a.point[1]) / gap;
+      const forwardA = a.dx * dx + a.dz * dz;
+      const forwardB = -b.dx * dx - b.dz * dz;
+      if (forwardA < minForwardDot - angleEpsilon || forwardB < minForwardDot - angleEpsilon) continue;
+      if (crossesIntermediateRoad(a.point, b.point, sideA) ||
+        crossesIntermediateRoad(a.point, b.point, sideB)) continue;
+      pairs.push({ a, b, key: linkKey(a.point, b.point),
+        score: Math.round((gap + maxGap * (2 - forwardA - forwardB)) * 1e6) });
+    }
+  }
+  const candidates = pairs.map(({ a, b, score, key }) => {
+    const end = active.has(a) && (!active.has(b) || pointKey(a.point) < pointKey(b.point)) ? a : b;
+    const partner = end === a ? b : a;
+    return { end, partner, feature: partner.feature, to: partner.point,
+      targetEnds: byFeature.get(partner.feature), score, key };
+  });
+  // Interior jalan/simpang juga kandidat: jangan melompati simpang-T dekat demi
+  // ujung jalan yang lebih jauh. Tangen target 90 derajat tetap sah untuk simpang.
+  for (const end of active) {
+    if (used.has(end)) continue;
+    for (const feature of end.neighbours) {
+      const targetEnds = byFeature.get(feature);
+      if (!targetEnds) continue;
+      const near = nearestPointOnRoadFeature(feature, ...end.point);
+      if (near.d < SEAM_STITCH_MIN || near.d > maxGap) continue;
+      const to = [near.x, near.z];
+      const forward = (end.dx * (to[0] - end.point[0]) + end.dz * (to[1] - end.point[1])) / near.d;
+      if (forward < minForwardDot - angleEpsilon) continue;
+      if (crossesIntermediateRoad(end.point, to, sideA) ||
+        crossesIntermediateRoad(end.point, to, sideB)) continue;
+      const target = targetEnds.find(other => distance(other.point, to) < 1e-6);
+      if (target && !isJoined(target)) continue; // Ujung bebas ditangani fase pasangan.
+      candidates.push({ end, feature, to, targetEnds,
+        key: `${linkKey(end.point, to)}|${pointKey(end.point)}`,
+        score: Math.round((near.d + maxGap * (1 - forward)) * 1e6) });
+    }
+  }
+  // Kedua arah dan jenis kandidat berbagi urutan stabil serta reservasi ujung.
+  for (const { end, partner, feature, to, targetEnds } of candidates.sort(rank)) {
+    if (used.has(end) || targetEnds.some(target => used.has(target) && distance(target.point, to) <= SEAM_SELF_JOIN_EPS)) continue;
+    used.add(end);
+    if (partner) used.add(partner);
+    emit(end, to, feature);
+  }
+  return connectors;
+};
+
 // Kanal Banjir Timur tetap prosedural; koridor dipakai bersama oleh dek
 // jembatan Tahap 2 dan mask infill Tahap 3. Lima titik terakhir melanjutkan
 // kanal ke kepala badan air OSM Void E di (2088.6, -478.4).
@@ -7275,9 +7453,9 @@ export class CityScene {
     });
 
     const seamRoadConnectors = [
-      ...collectSeamConnectors(VOID_E_OSM.roads, VOID_K_OSM.roads, SEAM_EK, SEAM_ROAD_STITCH_MAX),
-      ...collectSeamConnectors(VOID_K_OSM.roads, VOID_F_OSM.roads, SEAM_KF_HORIZONTAL, SEAM_ROAD_STITCH_MAX),
-      ...collectSeamConnectors(VOID_F_OSM.roads, VOID_K_OSM.roads, SEAM_KF_VERTICAL, SEAM_ROAD_STITCH_MAX)
+      ...collectRoadSeamConnectors(VOID_E_OSM.roads, VOID_K_OSM.roads, SEAM_EK, SEAM_ROAD_STITCH_MAX),
+      ...collectRoadSeamConnectors(VOID_K_OSM.roads, VOID_F_OSM.roads, SEAM_KF_HORIZONTAL, SEAM_ROAD_STITCH_MAX),
+      ...collectRoadSeamConnectors(VOID_F_OSM.roads, VOID_K_OSM.roads, SEAM_KF_VERTICAL, SEAM_ROAD_STITCH_MAX)
     ].filter((connector) => !insideAnchorSite(connector.from[0], connector.from[1]));
     seamRoadConnectors.forEach((connector) => {
       addRoadPolyline([connector.from, connector.to], connector.width, connector.width >= 10);
@@ -7620,7 +7798,7 @@ export class CityScene {
       addRoadPolyline(road.points, road.width, road.width >= 10);
     });
 
-    const seamRoadConnectors = collectSeamConnectors(VOID_F_OSM.roads, VOID_L_OSM.roads, SEAM_FL, SEAM_ROAD_STITCH_MAX)
+    const seamRoadConnectors = collectRoadSeamConnectors(VOID_F_OSM.roads, VOID_L_OSM.roads, SEAM_FL, SEAM_ROAD_STITCH_MAX)
       .filter((connector) => !insideAnchorSite(connector.from[0], connector.from[1]));
     seamRoadConnectors.forEach((connector) => {
       addRoadPolyline([connector.from, connector.to], connector.width, connector.width >= 10);
@@ -8093,13 +8271,13 @@ export class CityScene {
 
     addRoadPolyline(VOID_M_TERMINAL_LINK, 12, true);
 
-    const seamRoadConnectors = collectSeamConnectors(VOID_L_OSM.roads, VOID_M_OSM.roads, SEAM_LM, SEAM_ROAD_STITCH_MAX)
+    const seamRoadConnectors = collectRoadSeamConnectors(VOID_L_OSM.roads, VOID_M_OSM.roads, SEAM_LM, SEAM_ROAD_STITCH_MAX)
       .filter((connector) => !insideAnchorSite(connector.from[0], connector.from[1]));
     seamRoadConnectors.forEach((connector) => {
       addRoadPolyline([connector.from, connector.to], connector.width, connector.width >= 10);
     });
 
-    const seamMgRoadConnectors = collectSeamConnectors(VOID_M_OSM.roads, VOID_G_OSM.roads, SEAM_MG, SEAM_ROAD_STITCH_MAX)
+    const seamMgRoadConnectors = collectRoadSeamConnectors(VOID_M_OSM.roads, VOID_G_OSM.roads, SEAM_MG, SEAM_ROAD_STITCH_MAX)
       .filter((connector) => !insideAnchorSite(connector.from[0], connector.from[1]));
     seamMgRoadConnectors.forEach((connector) => {
       addRoadPolyline([connector.from, connector.to], connector.width, connector.width >= 10);
@@ -13057,7 +13235,7 @@ export class CityScene {
       addRoadPolyline(road.points, road.width, road.width >= 10);
     });
 
-    const seamRoadConnectors = collectSeamConnectors(VOID_E_OSM.roads, VOID_J_OSM.roads, SEAM_EJ, SEAM_ROAD_STITCH_MAX);
+    const seamRoadConnectors = collectRoadSeamConnectors(VOID_E_OSM.roads, VOID_J_OSM.roads, SEAM_EJ, SEAM_ROAD_STITCH_MAX);
     seamRoadConnectors.forEach((connector) => {
       addRoadPolyline([connector.from, connector.to], connector.width, connector.width >= 10);
     });
