@@ -180,6 +180,11 @@ class JakartaApp {
         ...this.city.voidMTransitLabels
       ],
       onSelectPreset: (preset) => {
+        const presetFov = preset.fov ?? 48;
+        if (this.camera.fov !== presetFov) {
+          this.camera.fov = presetFov;
+          this.camera.updateProjectionMatrix();
+        }
         if (preset.cameraPosition && preset.cameraTarget) {
           this.cameraController.flyTo(
             preset.cameraPosition,

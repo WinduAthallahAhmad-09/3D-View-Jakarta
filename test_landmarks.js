@@ -4727,6 +4727,148 @@ assert.ok(
   dprPreset.cameraTarget[1] >= 20 && dprPreset.cameraTarget[1] <= 30,
   'DPR/MPR target height must stay between 20 and 30'
 );
+assert.deepStrictEqual(
+  dprPreset.cameraPosition,
+  [-335, 46, 318],
+  'DPR/MPR camera must sit on the eastern legal corridor above the GBK rim so Hotel Mulia leaves the frame'
+);
+assert.deepStrictEqual(
+  dprPreset.cameraTarget,
+  [-318.8, 30, 214],
+  'DPR/MPR target must shift east of the anchor without crossing the Palmerah footprint'
+);
+assert.strictEqual(
+  dprPreset.fov,
+  42,
+  'DPR/MPR preset needs a 42-degree vertical FOV to clear the left-frame OSM slab'
+);
+assert.ok(
+  mainJsContent.includes('const presetFov = preset.fov ?? 48;'),
+  'main.js must resolve an optional per-preset FOV with a global 48-degree fallback'
+);
+assert.ok(
+  mainJsContent.includes('this.camera.fov = presetFov;'),
+  'main.js must apply the resolved preset FOV to the camera'
+);
+assert.ok(
+  mainJsContent.includes('this.camera.updateProjectionMatrix();'),
+  'main.js must refresh the projection matrix after changing FOV'
+);
+
+// P10 composition invariant: Hotel Mulia Senayan must stay fully outside the
+// DPR/MPR frustum at the 16:9 desktop aspect, otherwise the left frame fills
+// with a featureless OSM slab again. Projecting only polygon vertices at y=0
+// and y=h misses vertical wall columns that cross the frame between those
+// endpoints, so each perimeter wall is intersected with the frustum across its
+// whole [0, h] height.
+const coreOsmBuildings = JSON.parse(fs.readFileSync('./src/data/jakarta_osm.json', 'utf8')).buildings;
+const muliaBuilding = coreOsmBuildings.find((b) => b.n === 'Hotel Mulia Senayan');
+assert.ok(muliaBuilding, 'Hotel Mulia Senayan missing from jakarta_osm buildings');
+const dprForwardRaw = [
+  dprPreset.cameraTarget[0] - dprPreset.cameraPosition[0],
+  dprPreset.cameraTarget[1] - dprPreset.cameraPosition[1],
+  dprPreset.cameraTarget[2] - dprPreset.cameraPosition[2]
+];
+const dprForwardLength = Math.hypot(...dprForwardRaw);
+const dprForward = dprForwardRaw.map((v) => v / dprForwardLength);
+const dprRightRaw = [
+  dprForward[1] * 0 - dprForward[2] * 1,
+  dprForward[2] * 0 - dprForward[0] * 0,
+  dprForward[0] * 1 - dprForward[1] * 0
+];
+const dprRightLength = Math.hypot(...dprRightRaw);
+const dprRight = dprRightRaw.map((v) => v / dprRightLength);
+const dprUp = [
+  dprRight[1] * dprForward[2] - dprRight[2] * dprForward[1],
+  dprRight[2] * dprForward[0] - dprRight[0] * dprForward[2],
+  dprRight[0] * dprForward[1] - dprRight[1] * dprForward[0]
+];
+const dprAspect = 16 / 9;
+const dprHalfTan = Math.tan((dprPreset.fov * Math.PI) / 180 / 2);
+const dprTanH = dprHalfTan * dprAspect;
+const dprColumnVisible = (x, z, height) => {
+  const relX = x - dprPreset.cameraPosition[0];
+  const baseY = -dprPreset.cameraPosition[1];
+  const relZ = z - dprPreset.cameraPosition[2];
+  const depth0 = relX * dprForward[0] + baseY * dprForward[1] + relZ * dprForward[2];
+  const forwardY = dprForward[1];
+  const lateral = relX * dprRight[0] + baseY * dprRight[1] + relZ * dprRight[2];
+  const up0 = relX * dprUp[0] + baseY * dprUp[1] + relZ * dprUp[2];
+  const upY = dprUp[1];
+  let lo = 0;
+  let hi = height;
+  let empty = false;
+  const tightenUpper = (coeff, rhs) => {
+    // coeff * y <= rhs
+    if (Math.abs(coeff) < 1e-12) {
+      if (0 > rhs) empty = true;
+      return;
+    }
+    const bound = rhs / coeff;
+    if (coeff > 0) hi = Math.min(hi, bound);
+    else lo = Math.max(lo, bound);
+  };
+  const tightenLower = (coeff, rhs) => {
+    // coeff * y >= rhs
+    if (Math.abs(coeff) < 1e-12) {
+      if (0 < rhs) empty = true;
+      return;
+    }
+    const bound = rhs / coeff;
+    if (coeff > 0) lo = Math.max(lo, bound);
+    else hi = Math.min(hi, bound);
+  };
+  // |lateral| <= depth * tanH
+  tightenUpper(-forwardY * dprTanH, depth0 * dprTanH - lateral);
+  tightenUpper(-forwardY * dprTanH, depth0 * dprTanH + lateral);
+  // |up| <= depth * tanV
+  tightenUpper(upY - dprHalfTan * forwardY, dprHalfTan * depth0 - up0);
+  tightenLower(upY + dprHalfTan * forwardY, -dprHalfTan * depth0 - up0);
+  // depth > 0
+  tightenLower(forwardY, -depth0);
+  return !empty && lo <= hi + 1e-9;
+};
+const muliaVisibleWalls = [];
+for (const [x, z] of muliaBuilding.p) {
+  if (dprColumnVisible(x, z, muliaBuilding.h)) {
+    muliaVisibleWalls.push([x, z]);
+  }
+}
+assert.deepStrictEqual(
+  muliaVisibleWalls,
+  [],
+  `Hotel Mulia Senayan wall columns must stay outside the DPR/MPR frustum: ${JSON.stringify(muliaVisibleWalls[0])}`
+);
+// The 68-unit crown must remain inside the frame after the slab is evicted.
+const dprRotation = dprPreset.rotationY || 0;
+const dprTowerTip = [
+  dprPreset.position[0] - 28 * Math.sin(dprRotation),
+  68,
+  dprPreset.position[2] - 28 * Math.cos(dprRotation)
+];
+const dprTowerTipRel = [
+  dprTowerTip[0] - dprPreset.cameraPosition[0],
+  dprTowerTip[1] - dprPreset.cameraPosition[1],
+  dprTowerTip[2] - dprPreset.cameraPosition[2]
+];
+const dprTowerTipDepth =
+  dprTowerTipRel[0] * dprForward[0] +
+  dprTowerTipRel[1] * dprForward[1] +
+  dprTowerTipRel[2] * dprForward[2];
+const dprTowerTipNdc = [
+  (dprTowerTipRel[0] * dprRight[0] +
+    dprTowerTipRel[1] * dprRight[1] +
+    dprTowerTipRel[2] * dprRight[2]) /
+    (dprTowerTipDepth * dprTanH),
+  (dprTowerTipRel[0] * dprUp[0] +
+    dprTowerTipRel[1] * dprUp[1] +
+    dprTowerTipRel[2] * dprUp[2]) /
+    (dprTowerTipDepth * dprHalfTan)
+];
+assert.ok(
+  dprTowerTipDepth > 0 && Math.max(Math.abs(dprTowerTipNdc[0]), Math.abs(dprTowerTipNdc[1])) <= 0.95,
+  `DPR/MPR tower crown must stay inside the frame with margin: ${JSON.stringify(dprTowerTipNdc)}`
+);
 
 // Check 76: Void H Tahap 1 — 6 anchor Pasar Minggu, Kalibata, Ragunan & Lenteng Agung
 const voidHAnchors = [
