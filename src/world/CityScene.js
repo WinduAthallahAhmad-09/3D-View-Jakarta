@@ -20021,28 +20021,34 @@ export class CityScene {
     ];
 
     const residentialZones = [
-      // Kalideres Utara: permukiman padat di utara koridor Daan Mogot.
-      { minX: -1500, maxX: -1350, minZ: -660, maxZ: -590, stepX: 16, stepZ: 16 },
-      // Kalideres Selatan: kampung di sisi selatan Daan Mogot.
-      { minX: -1490, maxX: -1370, minZ: -390, maxZ: -320, stepX: 16, stepZ: 16 },
-      // Rawa Buaya Barat / Duri Kosambi.
-      { minX: -1290, maxX: -1180, minZ: -380, maxZ: -300, stepX: 15, stepZ: 15 },
-      // Kembangan Utara: permukiman di selatan Kanal Mookervaart.
-      { minX: -1180, maxX: -1040, minZ: -360, maxZ: -295, stepX: 15, stepZ: 15 },
-      // Kembangan Baru / Cengkareng Timur.
-      { minX: -1060, maxX: -990, minZ: -370, maxZ: -300, stepX: 15, stepZ: 15 }
+      // Kalideres Utara & Pegadungan: permukiman padat di utara koridor Daan Mogot
+      { minX: -1520, maxX: -1320, minZ: -720, maxZ: -560, stepX: 7.2, stepZ: 7.2 },
+      // Kalideres Selatan & Semanan
+      { minX: -1520, maxX: -1320, minZ: -440, maxZ: -260, stepX: 7.2, stepZ: 7.2 },
+      // Rawa Buaya Barat / Duri Kosambi
+      { minX: -1320, maxX: -1150, minZ: -440, maxZ: -250, stepX: 7.0, stepZ: 7.0 },
+      // Kembangan Utara / Bojong Indah
+      { minX: -1150, maxX: -970, minZ: -440, maxZ: -250, stepX: 7.0, stepZ: 7.0 },
+      // Kembangan Baru / Cengkareng Timur
+      { minX: -1150, maxX: -960, minZ: -400, maxZ: -280, stepX: 7.0, stepZ: 7.0 },
+      // Cengkareng Barat / Flamboyan
+      { minX: -1280, maxX: -1120, minZ: -550, maxZ: -470, stepX: 7.0, stepZ: 7.0 },
+      // Taman Palem Lestari / Cengkareng Timur Utara
+      { minX: -1120, maxX: -960, minZ: -720, maxZ: -560, stepX: 7.2, stepZ: 7.2 },
+      // Citra Garden & Pegadungan Timur
+      { minX: -1320, maxX: -1180, minZ: -720, maxZ: -590, stepX: 7.2, stepZ: 7.2 }
     ];
 
     residentialZones.forEach((zone, zoneIndex) => {
       for (let x = zone.minX; x <= zone.maxX; x += zone.stepX) {
         for (let z = zone.minZ; z <= zone.maxZ; z += zone.stepZ) {
           const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233 + zoneIndex));
-          const w = 9 + hash * 3;
-          const d = 10 + (1 - hash) * 3;
-          const h = 6.5 + hash * 3.5;
+          const w = 5.6 + hash * 2.2;
+          const d = 6.2 + (1 - hash) * 2.2;
+          const h = 4.8 + hash * 2.4;
           const radius = Math.max(w, d) * 0.5;
-          const px = x + (hash - 0.5) * 2.4;
-          const pz = z + (((hash * 7.31) % 1) - 0.5) * 2.4;
+          const px = x + (hash - 0.5) * 1.8;
+          const pz = z + (((hash * 7.31) % 1) - 0.5) * 1.8;
           const roofW = w + INFILL_ROOF_EAVE * 2;
           const roofD = d + INFILL_ROOF_EAVE * 2;
           if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
@@ -20160,16 +20166,16 @@ export class CityScene {
     });
 
     const placeShophouseRow = (name, roadWidth, chain, ignoreWays) => {
-      visitChain(chain, 14, (bx, bz, angle) => {
+      visitChain(chain, 6.2, (bx, bz, angle) => {
         const nx = Math.cos(angle);
         const nz = -Math.sin(angle);
         [-1, 1].forEach((side) => {
           const hash = Math.abs(Math.sin(bx * 8.13 + bz * 4.71 + side * 3.7));
-          const w = 12 + (1 - hash) * 3; // kedalaman dari jalan
-          const d = 10.5 + hash * 2.5; // lebar fasad sepanjang jalan
-          const h = 9 + hash * 7;
-          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
-          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
+          const w = 7.5 + (1 - hash) * 2.0; // kedalaman dari jalan
+          const d = 5.2 + hash * 1.5; // lebar fasad sepanjang jalan
+          const h = 8.5 + hash * 4.0;
+          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 1.2) * side;
+          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 1.2) * side;
           const radius = Math.max(w, d) * 0.5;
           const roofW = w + INFILL_ROOF_EAVE * 2;
           if (isBlocked(px, pz, radius, ignoreWays) || isRoofOccupied(px, pz, roofW, d, angle)) return;
@@ -20223,17 +20229,17 @@ export class CityScene {
     ];
     const industrialZones = [
       // Klaster logistik utara CBC, dilayani Akses Logistik Cengkareng.
-      { minX: -1250, maxX: -1040, minZ: -690, maxZ: -610, stepX: 36, stepZ: 34 },
+      { minX: -1250, maxX: -1040, minZ: -690, maxZ: -610, stepX: 20, stepZ: 20 },
       // Industri Kalideres Barat, dilayani Akses Kawasan Industri Kalideres.
-      { minX: -1500, maxX: -1370, minZ: -570, maxZ: -490, stepX: 38, stepZ: 38 },
+      { minX: -1500, maxX: -1370, minZ: -570, maxZ: -490, stepX: 22, stepZ: 20 },
       // Gudang ringan di utara RSUD Cengkareng.
-      { minX: -1085, maxX: -985, minZ: -600, maxZ: -555, stepX: 34, stepZ: 30 },
+      { minX: -1085, maxX: -985, minZ: -600, maxZ: -555, stepX: 18, stepZ: 18 },
       // Pergudangan Kalideres Utara di barat laut CBC.
-      { minX: -1500, maxX: -1360, minZ: -690, maxZ: -630, stepX: 38, stepZ: 34 },
+      { minX: -1500, maxX: -1360, minZ: -690, maxZ: -630, stepX: 22, stepZ: 20 },
       // Blok industri antara Mall Daan Mogot dan CBC.
-      { minX: -1360, maxX: -1220, minZ: -620, maxZ: -560, stepX: 38, stepZ: 34 },
+      { minX: -1360, maxX: -1220, minZ: -620, maxZ: -560, stepX: 22, stepZ: 20 },
       // Ekspansi logistik timur, di utara RSUD Cengkareng.
-      { minX: -1000, maxX: -940, minZ: -660, maxZ: -600, stepX: 34, stepZ: 30 }
+      { minX: -1000, maxX: -940, minZ: -660, maxZ: -600, stepX: 18, stepZ: 18 }
     ];
 
     industrialZones.forEach((zone, zoneIndex) => {
