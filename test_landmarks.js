@@ -9935,7 +9935,115 @@ assert.ok(voidOBuilder.includes('drawCalls: 9'), 'Void O stats must report nine 
 assert.ok(voidOBuilder.includes('registerNightMaterial'), 'Void O water material must register for the night preset');
 assert.ok(!voidOBuilder.includes('new THREE.PointLight'), 'buildVoidOFabric must not add PointLights');
 
-console.log(`✅ All 143 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3, Void L Tahap 1, Void L Tahap 2, Void L Tahap 3, Void L Tahap 4, Void M Tahap 1, Void M Tahap 2, Void M Tahap 3, Void M Tahap 4, P5 Kosmetik Kanopi Halte, P6 Fakta Anchor Inti, P7 Kosmetik Dek Jembatan, P8 Kosmetik Kanopi Stasiun-Terminal + P9 Jahitan Jalan Selaras + Void N Tahap 1 + Void N Tahap 2 + Void O Tahap 1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 119: Void O Tahap 2 — infill urban fabric Depok utara (Margonda-Depok Lama).
+const voidOInfillCall = citySceneContent.indexOf('this.buildVoidOInfill();');
+assert.ok(voidOInfillCall > voidOCall, 'buildVoidOInfill() must run after buildVoidOFabric()');
+assert.ok(voidNLegacyCall > voidOInfillCall, 'buildVoidOInfill() must run before the legacy Void B infill pass');
+
+assert.ok(
+  citySceneContent.includes('const VOID_O_CAMPUS_RECT = [-32, 142, 2230, 2556];'),
+  'CityScene must declare the Kampus UI exclusion rectangle for band O'
+);
+
+const voidOInfillBuilder = sliceCityBuilder('buildVoidOInfill() {');
+[
+  'voido-infill-houses',
+  'voido-infill-shophouses',
+  'voido-infill-house-roofs',
+  'voido-infill-warehouses',
+  'voido-infill-warehouse-roofs',
+  'voido-night-windows'
+].forEach((meshName) => {
+  assert.ok(voidOInfillBuilder.includes(`'${meshName}'`), `buildVoidOInfill must create the ${meshName} mesh`);
+});
+
+[
+  'Jalan Raya Margonda',
+  'Jalan Tanah Baru',
+  'Jalan Kelapa Dua Raya',
+  'Jalan K. Haji Mohammed Usman',
+  'Jalan Kukusan Raya',
+  'Jalan Insinyur Haji Juanda',
+  'Jalan Srengseng Sawah',
+  'Jalan Nusantara Raya',
+  'Jalan Mohammed Yusuf',
+  'Jalan Arif Rahman Hakim'
+].forEach((name) => {
+  assert.ok(
+    voidOInfillBuilder.includes(`'${name}'`) || voidOInfillBuilder.includes(`"${name}"`),
+    `Void O infill missing shophouse corridor ${name}`
+  );
+});
+const voidOShophouseSet = voidOInfillBuilder.match(/const shophouseRoads = new Set\(\[([\s\S]*?)\n    \]\);/);
+assert.ok(voidOShophouseSet, 'buildVoidOInfill must declare shophouseRoads');
+assert.strictEqual(
+  (voidOShophouseSet[1].match(/'Jalan /g) || []).length + (voidOShophouseSet[1].match(/"Jalan /g) || []).length,
+  10,
+  'Void O infill must line exactly 10 shophouse corridors'
+);
+assert.ok(!voidOShophouseSet[1].includes('Tol'), 'Void O shophouse corridors must exclude toll roads');
+[...voidOShophouseSet[1].matchAll(/'([^']+)'|"([^"]+)"/g)].forEach((match) => {
+  const corridorName = match[1] || match[2];
+  assert.ok(
+    VOID_O_OSM.roads.some((road) => road.name === corridorName),
+    `Void O shophouse corridor ${corridorName} is absent from the O dataset`
+  );
+});
+
+const voidOWarehouseMatch = voidOInfillBuilder.match(/const warehouseZones = \[([\s\S]*?)\n    \];/);
+assert.ok(voidOWarehouseMatch, 'buildVoidOInfill must declare warehouseZones');
+assert.strictEqual(
+  (voidOWarehouseMatch[1].match(/\{ minX:/g) || []).length,
+  1,
+  'Void O infill must define one warehouse cluster'
+);
+assert.ok(
+  voidOWarehouseMatch[1].includes('{ minX: 292, maxX: 364, minZ: 2612, maxZ: 2708, stepX: 28, stepZ: 26 }'),
+  'Void O warehouse cluster W1 Depok Timur drifted'
+);
+assert.ok(
+  voidOInfillBuilder.includes('const w = 13 + hash * 4;') && voidOInfillBuilder.includes('const d = 15 + (1 - hash) * 4;'),
+  'Void O warehouses must use the light-warehouse footprint that fits the dense O fabric'
+);
+
+assert.ok(voidOInfillBuilder.includes('const residentialStep = 13;'), 'Void O infill must scan houses on a 13-unit grid');
+assert.ok(
+  voidOInfillBuilder.includes('for (let x = VOID_O_CLIP_BOX.minX + 6; x <= VOID_O_CLIP_BOX.maxX - 6; x += residentialStep)'),
+  'Void O house scan must span the full clip box west-east'
+);
+assert.ok(
+  voidOInfillBuilder.includes('for (let z = VOID_O_CLIP_BOX.minZ + 6; z <= VOID_O_CLIP_BOX.maxZ - 6; z += residentialStep)'),
+  'Void O house scan must span the full clip box north-south'
+);
+assert.ok(!voidOInfillBuilder.includes('residentialZones'), 'Void O infill scans the whole band instead of manual zones');
+
+assert.ok(voidOInfillBuilder.includes('isNearVoidOWater('), 'Void O infill must mask waterways');
+assert.ok(voidOInfillBuilder.includes('VOID_O_OSM.waterBodies'), 'Void O infill must mask water body polygons');
+assert.ok(voidOInfillBuilder.includes('VOID_O_CAMPUS_RECT'), 'Void O infill must mask the Kampus UI rectangle');
+assert.ok(
+  voidOInfillBuilder.includes('x - radius < VOID_O_CLIP_BOX.minX + 4'),
+  'Void O infill must keep a 4-unit margin from the open western clip edge'
+);
+assert.ok(
+  voidOInfillBuilder.includes('x + radius > VOID_O_CLIP_BOX.maxX - 12'),
+  'Void O infill must keep a 12-unit buffer from the Void G seam at x=380'
+);
+assert.ok(
+  voidOInfillBuilder.includes('z - radius < SEAM_O_H.value + 12'),
+  'Void O infill must keep a 12-unit buffer from the Void H seam at z=2230'
+);
+assert.ok(
+  voidOInfillBuilder.includes('z + radius > VOID_O_CLIP_BOX.maxZ - 4'),
+  'Void O infill must stay inside the southern clip edge'
+);
+assert.ok(voidOInfillBuilder.includes('isRoofOccupied(') && voidOInfillBuilder.includes('putRoof('), 'Void O infill must share OBB roof occupancy');
+assert.ok(voidOInfillBuilder.includes('INFILL_ROOF_EAVE'), 'Void O infill must use the shared roof eave');
+assert.ok(voidOInfillBuilder.includes('addInfillNightWindows('), 'Void O infill must add night windows');
+assert.ok(voidOInfillBuilder.includes('voidOInfillStats'), 'buildVoidOInfill must expose voidOInfillStats');
+assert.ok(voidOInfillBuilder.includes('drawCalls: 6'), 'Void O infill stats must report six draw calls');
+assert.ok(!voidOInfillBuilder.includes('new THREE.PointLight'), 'buildVoidOInfill must not add PointLights');
+
+console.log(`✅ All 143 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3, Void L Tahap 1, Void L Tahap 2, Void L Tahap 3, Void L Tahap 4, Void M Tahap 1, Void M Tahap 2, Void M Tahap 3, Void M Tahap 4, P5 Kosmetik Kanopi Halte, P6 Fakta Anchor Inti, P7 Kosmetik Dek Jembatan, P8 Kosmetik Kanopi Stasiun-Terminal + P9 Jahitan Jalan Selaras + Void N Tahap 1 + Void N Tahap 2 + Void O Tahap 1 + Void O Tahap 2 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
