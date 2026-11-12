@@ -498,6 +498,16 @@ const VOID_N_ANCHOR_SITES = [
   [470, 575, -615, -565]     // Wisma Atlet Kemayoran
 ];
 
+// Empat blok infill eastjakarta lama yang duduk di dalam band N (comm
+// Rawamangun, comm Jatinegara, comm Otista, res Cipinang). Rect sudah
+// dilebihkan setengah lebar bangunan agar rumah N2 tidak menimpa atap lama.
+const VOID_N_LEGACY_RECTS = [
+  [850, 1050, -130, 30],
+  [590, 730, 210, 370],
+  [610, 750, 530, 690],
+  [730, 890, 270, 490]
+];
+
 // Strip seam di tepi timur clip Void F. Infill K berhenti sebelum x=2012 agar
 // deret ruko dua tahap tidak saling menimpa di sekitar x=1995.
 const VOID_K_LEGACY_INFILL_RECTS = [
@@ -709,6 +719,7 @@ export class CityScene {
     this.buildVoidMInfill();
     this.buildVoidMTransit();
     this.buildVoidNFabric();
+    this.buildVoidNInfill();
     this.buildVoidBInfillAndIndustry();
     this.buildVoidBTransit();
     this.buildEastJakartaInfrastructure();
@@ -9091,6 +9102,454 @@ export class CityScene {
       seamFRoads: seamFRoadConnectors.length,
       seamFWaterways: seamFWaterConnectors.length,
       drawCalls: 9
+    };
+  }
+
+  /**
+   * Void N Tahap 2 — infill urban fabric Cempaka Putih–Rawasari–Pulomas–Jatinegara.
+   *
+   * 1. Ruko menyusur sebelas koridor OSM non-tol, kedua sisi jalan.
+   * 2. Gudang ringan di kantong Sunter utara, barat Yos Sudarso.
+   * 3. Rumah kampung dipindai seluruh band pada grid 13 unit; fabric N1 padat,
+   *    jadi mask jalan/air/legacy yang menyaring, bukan zona manual.
+   *
+   * Empat blok infill eastjakarta lama disisihkan agar tidak tertimpa.
+   */
+  buildVoidNInfill() {
+    const dummy = new THREE.Object3D();
+    const baseBoxGeo = new THREE.BoxGeometry(1, 1, 1);
+
+    const roofGeo = new THREE.BufferGeometry();
+    roofGeo.setAttribute(
+      'position',
+      new THREE.Float32BufferAttribute([
+        -0.5, 0, -0.5, 0.5, 0, -0.5, -0.5, 0, 0.5, 0.5, 0, 0.5,
+        0, 1, -0.5, 0, 1, 0.5
+      ], 3)
+    );
+    roofGeo.setIndex([
+      0, 2, 5, 0, 5, 4,
+      1, 4, 5, 1, 5, 3,
+      0, 4, 1,
+      2, 3, 5,
+      0, 1, 3, 0, 3, 2
+    ]);
+    roofGeo.computeVertexNormals();
+
+    const roadSegments = [];
+    VOID_N_OSM.roads.forEach((road) => {
+      for (let i = 0; i < road.points.length - 1; i++) {
+        roadSegments.push({
+          ax: road.points[i][0],
+          az: road.points[i][1],
+          bx: road.points[i + 1][0],
+          bz: road.points[i + 1][1],
+          halfWidth: road.width * 0.5,
+          way: road
+        });
+      }
+    });
+
+    const waterSegments = [];
+    VOID_N_OSM.waterways.forEach((waterway) => {
+      for (let i = 0; i < waterway.points.length - 1; i++) {
+        waterSegments.push({
+          ax: waterway.points[i][0],
+          az: waterway.points[i][1],
+          bx: waterway.points[i + 1][0],
+          bz: waterway.points[i + 1][1],
+          half: waterway.width * 0.5 + 4
+        });
+      }
+    });
+
+    const distanceToSegment = (x, z, s) => {
+      const dx = s.bx - s.ax;
+      const dz = s.bz - s.az;
+      const len2 = dx * dx + dz * dz;
+      let t = len2 ? ((x - s.ax) * dx + (z - s.az) * dz) / len2 : 0;
+      t = Math.max(0, Math.min(1, t));
+      return Math.hypot(x - (s.ax + t * dx), z - (s.az + t * dz));
+    };
+
+    const isNearVoidNWater = (x, z) => {
+      for (const s of waterSegments) {
+        if (distanceToSegment(x, z, s) < s.half + 2) return true;
+      }
+      return false;
+    };
+
+    const isInsideWaterBody = (x, z, margin) => VOID_N_OSM.waterBodies.some((body) => {
+      let inside = false;
+      const points = body.points;
+      for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+        const [xi, zi] = points[i];
+        const [xj, zj] = points[j];
+        const intersects = (zi > z) !== (zj > z) &&
+          x < ((xj - xi) * (z - zi)) / (zj - zi) + xi;
+        if (intersects) inside = !inside;
+      }
+      if (inside) return true;
+      if (margin <= 0) return false;
+      return points.some(([px, pz]) => Math.hypot(px - x, pz - z) <= margin);
+    });
+
+    const legacyRects = VOID_N_LEGACY_RECTS;
+    const insideRects = (rects, x, z, margin) => rects.some(
+      ([minX, maxX, minZ, maxZ]) => x > minX - margin && x < maxX + margin &&
+        z > minZ - margin && z < maxZ + margin
+    );
+    const landmarkGuards = [
+      'menara-saidah',
+      'stasiun-jatinegara',
+      'jakarta-international-velodrome',
+      'wisma-atlet-kemayoran'
+    ].map((id) => JAKARTA_LANDMARKS.find((l) => l.id === id).position);
+
+    // Ruko berdiri di tepi koridornya sendiri; segmen koridor lain tetap
+    // memblokir. Buffer 12 unit menjaga seam N-core (x=317), N-F (x=960),
+    // dan N-J (z=-615); tepi selatan z=560 tanpa seam cukup margin klip 4.
+    // Bangunan core OSM berhenti di x=317, jadi buffer seam sekaligus
+    // menutup jalan/rel core yang menjorok ke band.
+    const isBlocked = (x, z, radius, ignoreRoadNames) => {
+      for (const s of roadSegments) {
+        const pad = ignoreRoadNames && ignoreRoadNames.has(s.way.name)
+          ? s.halfWidth + radius - 2
+          : s.halfWidth + radius + 1;
+        if (distanceToSegment(x, z, s) < pad) return true;
+      }
+      if (isNearVoidNWater(x, z)) return true;
+      if (isInsideWaterBody(x, z, 6 + radius * 0.5)) return true;
+      if (this.isInsideVoidNAnchorSite(x, z)) return true;
+      if (insideRects(legacyRects, x, z, radius * 0.5)) return true;
+      for (const guard of landmarkGuards) {
+        if (Math.hypot(x - guard[0], z - guard[2]) < 30) return true;
+      }
+      if (x - radius < VOID_N_CLIP_BOX.minX + 12 || x + radius > VOID_N_CLIP_BOX.maxX - 12) return true;
+      if (z - radius < SEAM_N_J.value + 12) return true;
+      if (z + radius > VOID_N_CLIP_BOX.maxZ - 4) return true;
+      return false;
+    };
+
+    const placed = [];
+    const isRoofOccupied = (x, z, rw, rd, rotY) => {
+      const reach = Math.hypot(rw, rd) * 0.5;
+      for (let i = 0; i < placed.length; i++) {
+        const p = placed[i];
+        if (Math.hypot(p.x - x, p.z - z) >= p.radius + reach) continue;
+        if (roofRectsOverlap(p, { x, z, rw, rd, rotY }, INFILL_ROOF_TOLERANCE)) return true;
+      }
+      return false;
+    };
+    const putRoof = (x, z, rw, rd, rotY = 0) => {
+      placed.push({ x, z, rw, rd, rotY, radius: Math.hypot(rw, rd) * 0.5 });
+    };
+
+    const residentialItems = [];
+    const shophouseItems = [];
+    const roofItems = [];
+    const warehouseItems = [];
+    const warehouseRoofItems = [];
+
+    const residentialColors = [
+      new THREE.Color(0xf8fafc),
+      new THREE.Color(0xe7e5e4),
+      new THREE.Color(0xfef3c7),
+      new THREE.Color(0xbae6fd),
+      new THREE.Color(0xfed7aa),
+      new THREE.Color(0xa7f3d0)
+    ];
+    const roofColors = [
+      new THREE.Color(0xb45309),
+      new THREE.Color(0x9a3412),
+      new THREE.Color(0x991b1b),
+      new THREE.Color(0x78350f)
+    ];
+    const shophouseColors = [
+      new THREE.Color(0xf1f5f9),
+      new THREE.Color(0xe2e8f0),
+      new THREE.Color(0xfed7aa),
+      new THREE.Color(0xbae6fd),
+      new THREE.Color(0x0f766e),
+      new THREE.Color(0x1e293b),
+      new THREE.Color(0xd97706)
+    ];
+    const warehouseColors = [
+      new THREE.Color(0x64748b),
+      new THREE.Color(0x94a3b8),
+      new THREE.Color(0x475569),
+      new THREE.Color(0x0e7490),
+      new THREE.Color(0xb45309)
+    ];
+    const warehouseRoofColors = [
+      new THREE.Color(0x334155),
+      new THREE.Color(0x475569),
+      new THREE.Color(0x64748b),
+      new THREE.Color(0x94a3b8)
+    ];
+
+    const buildRoadChains = (ways) => {
+      const keyOf = (p) => `${Math.round(p[0])}:${Math.round(p[1])}`;
+      const pending = ways.map((road) => ({
+        points: road.points.map((p) => [p[0], p[1]]),
+        ways: new Set([road])
+      }));
+      const chains = [];
+      while (pending.length > 0) {
+        const chain = pending.pop();
+        let extended = true;
+        while (extended) {
+          extended = false;
+          const head = chain.points[0];
+          const tail = chain.points[chain.points.length - 1];
+          for (let i = 0; i < pending.length; i++) {
+            const way = pending[i].points;
+            if (keyOf(way[way.length - 1]) === keyOf(tail)) {
+              chain.points.push(...way.slice(0, -1).reverse());
+            } else if (keyOf(way[0]) === keyOf(tail)) {
+              chain.points.push(...way.slice(1));
+            } else if (keyOf(way[0]) === keyOf(head)) {
+              chain.points.unshift(...way.slice(1).reverse());
+            } else if (keyOf(way[way.length - 1]) === keyOf(head)) {
+              chain.points.unshift(...way.slice(0, -1));
+            } else {
+              continue;
+            }
+            pending[i].ways.forEach((road) => chain.ways.add(road));
+            pending.splice(i, 1);
+            extended = true;
+            break;
+          }
+        }
+        chains.push(chain);
+      }
+      return chains;
+    };
+
+    const visitChain = (chain, spacing, visit) => {
+      let offset = spacing * 0.5;
+      for (let i = 0; i < chain.length - 1; i++) {
+        const a = chain[i];
+        const b = chain[i + 1];
+        const dx = b[0] - a[0];
+        const dz = b[1] - a[1];
+        const len = Math.hypot(dx, dz);
+        if (len < 0.01) continue;
+        let cursor = offset;
+        while (cursor <= len) {
+          const t = cursor / len;
+          visit(a[0] + dx * t, a[1] + dz * t, Math.atan2(dx, dz));
+          cursor += spacing;
+        }
+        offset = cursor - len;
+      }
+    };
+
+    const shophouseRoads = new Set([
+      'Jalan Perintis Kemerdekaan',
+      'Jalan Benyamin Sueb',
+      'Jalan Percetakan Negara',
+      "Jalan K. Haji Abdul Syafi'ie",
+      'Jalan Salemba Raya',
+      'Jalan Angkasa Raya',
+      'Jalan Yos Sudarso',
+      'Jalan Jenderal Ahmad Yani',
+      'Jalan Dokter Saharjo',
+      'Jalan Pemuda',
+      'Jalan Pramuka'
+    ]);
+    const shophouseWaysByName = new Map();
+    VOID_N_OSM.roads.forEach((road) => {
+      if (!shophouseRoads.has(road.name)) return;
+      if (!shophouseWaysByName.has(road.name)) shophouseWaysByName.set(road.name, []);
+      shophouseWaysByName.get(road.name).push(road);
+    });
+
+    const placeShophouseRow = (roadWidth, chain, ignoreRoadNames) => {
+      visitChain(chain, 13, (bx, bz, angle) => {
+        const nx = Math.cos(angle);
+        const nz = -Math.sin(angle);
+        [-1, 1].forEach((side) => {
+          const hash = Math.abs(Math.sin(bx * 8.13 + bz * 4.71 + side * 3.7));
+          const w = 11 + (1 - hash) * 4;
+          const d = 10.5 + hash * 2.5;
+          const h = 9 + hash * 7;
+          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 3.2) * side;
+          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 3.2) * side;
+          const radius = Math.max(w, d) * 0.5;
+          const roofW = w + INFILL_ROOF_EAVE * 2;
+          if (isBlocked(px, pz, radius, ignoreRoadNames) || isRoofOccupied(px, pz, roofW, d, angle)) return;
+          putRoof(px, pz, roofW, d, angle);
+          shophouseItems.push({
+            x: px,
+            y: h * 0.5,
+            z: pz,
+            w,
+            h,
+            d,
+            rotY: angle,
+            color: shophouseColors[Math.floor(hash * shophouseColors.length) % shophouseColors.length]
+          });
+          const roofH = 1.8 + hash * 0.8;
+          roofItems.push({
+            x: px,
+            y: h,
+            z: pz,
+            w: roofW,
+            h: roofH,
+            d,
+            rotY: angle,
+            color: roofColors[Math.floor(hash * roofColors.length) % roofColors.length]
+          });
+        });
+      });
+    };
+
+    shophouseWaysByName.forEach((ways) => {
+      const roadWidth = Math.max(...ways.map((road) => road.width));
+      buildRoadChains(ways).forEach((chain) => placeShophouseRow(roadWidth, chain.points, shophouseRoads));
+    });
+
+    const warehouseZones = [
+      // W1 Rawasari: gudang ringan kawasan percetakan, kantong antara
+      // koridor Ahmad Yani dan Percetakan Negara.
+      { minX: 680, maxX: 820, minZ: -40, maxZ: 120, stepX: 28, stepZ: 26 }
+    ];
+    warehouseZones.forEach((zone, zoneIndex) => {
+      for (let x = zone.minX; x <= zone.maxX; x += zone.stepX) {
+        for (let z = zone.minZ; z <= zone.maxZ; z += zone.stepZ) {
+          const hash = Math.abs(Math.sin(x * 4.71 + z * 9.13 + zoneIndex));
+          const w = 13 + hash * 4;
+          const d = 15 + (1 - hash) * 4;
+          const h = 8 + hash * 4;
+          const radius = Math.max(w, d) * 0.5;
+          const px = x + (hash - 0.5) * 4;
+          const pz = z + (((hash * 5.7) % 1) - 0.5) * 4;
+          const roofW = w + 1.4;
+          const roofD = d + 1.4;
+          if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+          putRoof(px, pz, roofW, roofD);
+          warehouseItems.push({
+            x: px,
+            y: h * 0.5,
+            z: pz,
+            w,
+            h,
+            d,
+            color: warehouseColors[Math.floor(hash * warehouseColors.length) % warehouseColors.length]
+          });
+          const roofH = 1.6 + hash * 1.2;
+          warehouseRoofItems.push({
+            x: px,
+            y: h,
+            z: pz,
+            w: roofW,
+            h: roofH,
+            d: roofD,
+            color: warehouseRoofColors[Math.floor(hash * warehouseRoofColors.length) % warehouseRoofColors.length]
+          });
+        }
+      }
+    });
+
+    const residentialStep = 13;
+    for (let x = VOID_N_CLIP_BOX.minX + 6; x <= VOID_N_CLIP_BOX.maxX - 6; x += residentialStep) {
+      for (let z = VOID_N_CLIP_BOX.minZ + 6; z <= VOID_N_CLIP_BOX.maxZ - 6; z += residentialStep) {
+        const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233));
+        const w = 7 + hash * 2.5;
+        const d = 8 + (1 - hash) * 2.5;
+        const h = 6.5 + hash * 3.5;
+        const radius = Math.max(w, d) * 0.5;
+        const px = x + (hash - 0.5) * 2.4;
+        const pz = z + (((hash * 7.31) % 1) - 0.5) * 2.4;
+        const roofW = w + INFILL_ROOF_EAVE * 2;
+        const roofD = d + INFILL_ROOF_EAVE * 2;
+        if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+        putRoof(px, pz, roofW, roofD);
+        residentialItems.push({
+          x: px,
+          y: h * 0.5,
+          z: pz,
+          w,
+          h,
+          d,
+          color: residentialColors[Math.floor(hash * residentialColors.length) % residentialColors.length]
+        });
+        const roofH = 1.5 + hash * 0.9;
+        roofItems.push({
+          x: px,
+          y: h,
+          z: pz,
+          w: roofW,
+          h: roofH,
+          d: roofD,
+          color: roofColors[Math.floor(hash * roofColors.length) % roofColors.length]
+        });
+      }
+    }
+
+    const addInstanced = (geo, mat, items, name) => {
+      if (items.length === 0) return;
+      const mesh = new THREE.InstancedMesh(geo, mat, items.length);
+      mesh.name = name;
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      items.forEach((item, idx) => {
+        dummy.position.set(item.x, item.y, item.z);
+        dummy.scale.set(item.w, item.h, item.d);
+        dummy.rotation.set(0, item.rotY || 0, 0);
+        dummy.updateMatrix();
+        mesh.setMatrixAt(idx, dummy.matrix);
+        mesh.setColorAt(idx, item.color);
+      });
+      mesh.instanceMatrix.needsUpdate = true;
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+      this.proceduralGroup.add(mesh);
+    };
+
+    addInstanced(
+      baseBoxGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.78 }),
+      residentialItems,
+      'voidn-infill-houses'
+    );
+    addInstanced(
+      baseBoxGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6, metalness: 0.15 }),
+      shophouseItems,
+      'voidn-infill-shophouses'
+    );
+    addInstanced(
+      roofGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }),
+      roofItems,
+      'voidn-infill-house-roofs'
+    );
+    addInstanced(
+      baseBoxGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.65, metalness: 0.25 }),
+      warehouseItems,
+      'voidn-infill-warehouses'
+    );
+    addInstanced(
+      roofGeo,
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.65, metalness: 0.25 }),
+      warehouseRoofItems,
+      'voidn-infill-warehouse-roofs'
+    );
+
+    const nightWindows = this.addInfillNightWindows(
+      [...residentialItems, ...shophouseItems],
+      'voidn-night-windows'
+    );
+
+    this.voidNInfillStats = {
+      houses: residentialItems.length,
+      shophouses: shophouseItems.length,
+      warehouses: warehouseItems.length,
+      corridors: shophouseRoads.size,
+      nightWindows,
+      drawCalls: 6
     };
   }
 

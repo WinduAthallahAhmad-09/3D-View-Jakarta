@@ -9623,7 +9623,140 @@ assert.ok(voidNBuilder.includes('drawCalls: 9'), 'Void N stats must report nine 
 assert.ok(voidNBuilder.includes('registerNightMaterial'), 'Void N water material must register for the night preset');
 assert.ok(!voidNBuilder.includes('new THREE.PointLight'), 'buildVoidNFabric must not add PointLights');
 
-console.log(`✅ All 143 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3, Void L Tahap 1, Void L Tahap 2, Void L Tahap 3, Void L Tahap 4, Void M Tahap 1, Void M Tahap 2, Void M Tahap 3, Void M Tahap 4, P5 Kosmetik Kanopi Halte, P6 Fakta Anchor Inti, P7 Kosmetik Dek Jembatan, P8 Kosmetik Kanopi Stasiun-Terminal + P9 Jahitan Jalan Selaras + Void N Tahap 1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 117: Void N Tahap 2 — infill urban fabric Cempaka Putih-Rawasari-Pulomas-Jatinegara.
+const voidNInfillCall = citySceneContent.indexOf('this.buildVoidNInfill();');
+assert.ok(voidNInfillCall > voidNCall, 'buildVoidNInfill() must run after buildVoidNFabric()');
+assert.ok(voidNLegacyCall > voidNInfillCall, 'buildVoidNInfill() must run before the legacy Void B infill pass');
+
+assert.ok(
+  citySceneContent.includes('const VOID_N_LEGACY_RECTS = ['),
+  'CityScene must declare the legacy eastjakarta infill rectangles inside band N'
+);
+const voidNLegacyMatch = citySceneContent.match(/const VOID_N_LEGACY_RECTS = \[([\s\S]*?)\n\];/);
+assert.ok(voidNLegacyMatch, 'CityScene.js missing the Void N legacy rectangle list');
+const voidNLegacyRects = [...voidNLegacyMatch[1].matchAll(/\[(-?\d+), (-?\d+), (-?\d+), (-?\d+)\]/g)]
+  .map((match) => match.slice(1, 5).map(Number));
+assert.strictEqual(voidNLegacyRects.length, 4, 'Void N must mask exactly four legacy eastjakarta blocks');
+[
+  [850, 1050, -130, 30],
+  [590, 730, 210, 370],
+  [610, 750, 530, 690],
+  [730, 890, 270, 490]
+].forEach((rect) => {
+  assert.ok(
+    voidNLegacyRects.some((r) => r[0] === rect[0] && r[1] === rect[1] && r[2] === rect[2] && r[3] === rect[3]),
+    `Void N legacy rect ${rect.join(',')} drifted`
+  );
+});
+
+const voidNInfillBuilder = sliceCityBuilder('buildVoidNInfill() {');
+[
+  'voidn-infill-houses',
+  'voidn-infill-shophouses',
+  'voidn-infill-house-roofs',
+  'voidn-infill-warehouses',
+  'voidn-infill-warehouse-roofs',
+  'voidn-night-windows'
+].forEach((meshName) => {
+  assert.ok(voidNInfillBuilder.includes(`'${meshName}'`), `buildVoidNInfill must create the ${meshName} mesh`);
+});
+
+[
+  'Jalan Perintis Kemerdekaan',
+  'Jalan Benyamin Sueb',
+  'Jalan Percetakan Negara',
+  "Jalan K. Haji Abdul Syafi'ie",
+  'Jalan Salemba Raya',
+  'Jalan Angkasa Raya',
+  'Jalan Yos Sudarso',
+  'Jalan Jenderal Ahmad Yani',
+  'Jalan Dokter Saharjo',
+  'Jalan Pemuda',
+  'Jalan Pramuka'
+].forEach((name) => {
+  assert.ok(
+    voidNInfillBuilder.includes(`'${name}'`) || voidNInfillBuilder.includes(`"${name}"`),
+    `Void N infill missing shophouse corridor ${name}`
+  );
+});
+const voidNShophouseSet = voidNInfillBuilder.match(/const shophouseRoads = new Set\(\[([\s\S]*?)\n    \]\);/);
+assert.ok(voidNShophouseSet, 'buildVoidNInfill must declare shophouseRoads');
+assert.strictEqual(
+  (voidNShophouseSet[1].match(/'Jalan /g) || []).length + (voidNShophouseSet[1].match(/"Jalan /g) || []).length,
+  11,
+  'Void N infill must line exactly 11 shophouse corridors'
+);
+assert.ok(!voidNShophouseSet[1].includes('Tol'), 'Void N shophouse corridors must exclude toll roads');
+[...voidNShophouseSet[1].matchAll(/'([^']+)'|"([^"]+)"/g)].forEach((match) => {
+  const corridorName = match[1] || match[2];
+  assert.ok(
+    VOID_N_OSM.roads.some((road) => road.name === corridorName),
+    `Void N shophouse corridor ${corridorName} is absent from the N dataset`
+  );
+});
+
+const voidNWarehouseMatch = voidNInfillBuilder.match(/const warehouseZones = \[([\s\S]*?)\n    \];/);
+assert.ok(voidNWarehouseMatch, 'buildVoidNInfill must declare warehouseZones');
+assert.strictEqual(
+  (voidNWarehouseMatch[1].match(/\{ minX:/g) || []).length,
+  1,
+  'Void N infill must define one warehouse cluster'
+);
+assert.ok(
+  voidNWarehouseMatch[1].includes('{ minX: 680, maxX: 820, minZ: -40, maxZ: 120, stepX: 28, stepZ: 26 }'),
+  'Void N warehouse cluster W1 Rawasari drifted'
+);
+assert.ok(
+  voidNInfillBuilder.includes('const w = 13 + hash * 4;') && voidNInfillBuilder.includes('const d = 15 + (1 - hash) * 4;'),
+  'Void N warehouses must use the light-warehouse footprint that fits the dense N fabric'
+);
+
+assert.ok(voidNInfillBuilder.includes('const residentialStep = 13;'), 'Void N infill must scan houses on a 13-unit grid');
+assert.ok(
+  voidNInfillBuilder.includes('for (let x = VOID_N_CLIP_BOX.minX + 6; x <= VOID_N_CLIP_BOX.maxX - 6; x += residentialStep)'),
+  'Void N house scan must span the full clip box west-east'
+);
+assert.ok(
+  voidNInfillBuilder.includes('for (let z = VOID_N_CLIP_BOX.minZ + 6; z <= VOID_N_CLIP_BOX.maxZ - 6; z += residentialStep)'),
+  'Void N house scan must span the full clip box north-south'
+);
+assert.ok(!voidNInfillBuilder.includes('residentialZones'), 'Void N infill scans the whole band instead of manual zones');
+
+assert.ok(voidNInfillBuilder.includes('isNearVoidNWater('), 'Void N infill must mask waterways');
+assert.ok(voidNInfillBuilder.includes('VOID_N_OSM.waterBodies'), 'Void N infill must mask water body polygons');
+assert.ok(voidNInfillBuilder.includes('this.isInsideVoidNAnchorSite('), 'Void N infill must mask the four anchor sites');
+assert.ok(voidNInfillBuilder.includes('VOID_N_LEGACY_RECTS'), 'Void N infill must mask the legacy eastjakarta blocks');
+['menara-saidah', 'stasiun-jatinegara', 'jakarta-international-velodrome', 'wisma-atlet-kemayoran'].forEach((id) => {
+  assert.ok(voidNInfillBuilder.includes(`'${id}'`), `Void N infill must guard landmark ${id}`);
+});
+assert.ok(
+  voidNInfillBuilder.includes('Math.hypot(x - guard[0], z - guard[2]) < 30'),
+  'Void N infill must keep a 30-unit radius around the four landmarks'
+);
+assert.ok(
+  voidNInfillBuilder.includes('x - radius < VOID_N_CLIP_BOX.minX + 12'),
+  'Void N infill must keep a 12-unit buffer from the core seam at x=317'
+);
+assert.ok(
+  voidNInfillBuilder.includes('x + radius > VOID_N_CLIP_BOX.maxX - 12'),
+  'Void N infill must keep a 12-unit buffer from the Void F seam at x=960'
+);
+assert.ok(
+  voidNInfillBuilder.includes('z - radius < SEAM_N_J.value + 12'),
+  'Void N infill must keep a 12-unit buffer from the Void J seam at z=-615'
+);
+assert.ok(
+  voidNInfillBuilder.includes('z + radius > VOID_N_CLIP_BOX.maxZ - 4'),
+  'Void N infill must stay inside the southern clip edge'
+);
+assert.ok(voidNInfillBuilder.includes('isRoofOccupied(') && voidNInfillBuilder.includes('putRoof('), 'Void N infill must share OBB roof occupancy');
+assert.ok(voidNInfillBuilder.includes('INFILL_ROOF_EAVE'), 'Void N infill must use the shared roof eave');
+assert.ok(voidNInfillBuilder.includes('addInfillNightWindows('), 'Void N infill must add night windows');
+assert.ok(voidNInfillBuilder.includes('voidNInfillStats'), 'buildVoidNInfill must expose voidNInfillStats');
+assert.ok(voidNInfillBuilder.includes('drawCalls: 6'), 'Void N infill stats must report six draw calls');
+assert.ok(!voidNInfillBuilder.includes('new THREE.PointLight'), 'buildVoidNInfill must not add PointLights');
+
+console.log(`✅ All 143 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3, Void L Tahap 1, Void L Tahap 2, Void L Tahap 3, Void L Tahap 4, Void M Tahap 1, Void M Tahap 2, Void M Tahap 3, Void M Tahap 4, P5 Kosmetik Kanopi Halte, P6 Fakta Anchor Inti, P7 Kosmetik Dek Jembatan, P8 Kosmetik Kanopi Stasiun-Terminal + P9 Jahitan Jalan Selaras + Void N Tahap 1 + Void N Tahap 2 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 
