@@ -19133,16 +19133,16 @@ export class CityScene {
     });
 
     const placeShophouseRow = (roadWidth, chain, ignoreWays) => {
-      visitChain(chain, 13, (bx, bz, angle) => {
+      visitChain(chain, 6.2, (bx, bz, angle) => {
         const nx = Math.cos(angle);
         const nz = -Math.sin(angle);
         [-1, 1].forEach((side) => {
           const hash = Math.abs(Math.sin(bx * 8.13 + bz * 4.71 + side * 3.7));
-          const w = 11 + (1 - hash) * 4;
-          const d = 10.5 + hash * 2.5;
-          const h = 9 + hash * 7;
-          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
-          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
+          const w = 7.5 + (1 - hash) * 2.0;
+          const d = 5.2 + hash * 1.5;
+          const h = 8.5 + hash * 4.0;
+          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 1.2) * side;
+          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 1.2) * side;
           const radius = Math.max(w, d) * 0.5;
           const roofW = w + INFILL_ROOF_EAVE * 2;
           if (isBlocked(px, pz, radius, ignoreWays) || isRoofOccupied(px, pz, roofW, d, angle)) return;
@@ -19179,25 +19179,25 @@ export class CityScene {
 
     const warehouseZones = [
       // Pergudangan Kamal Cengkareng di antara Jl. Kapuk Cengkareng dan lingkar barat.
-      { minX: -1340, maxX: -1150, minZ: -1000, maxZ: -780, stepX: 28, stepZ: 24 },
-      { minX: -1340, maxX: -1150, minZ: -800, maxZ: -740, stepX: 28, stepZ: 24 },
+      { minX: -1340, maxX: -1150, minZ: -1000, maxZ: -780, stepX: 18, stepZ: 18 },
+      { minX: -1340, maxX: -1150, minZ: -800, maxZ: -740, stepX: 18, stepZ: 18 },
       // Pergudangan Kapuk di timur Cengkareng Drain.
-      { minX: -960, maxX: -860, minZ: -1000, maxZ: -850, stepX: 28, stepZ: 24 },
-      { minX: -1040, maxX: -900, minZ: -1060, maxZ: -1010, stepX: 28, stepZ: 24 },
-      { minX: -900, maxX: -820, minZ: -1060, maxZ: -1010, stepX: 26, stepZ: 22 },
+      { minX: -960, maxX: -860, minZ: -1000, maxZ: -850, stepX: 18, stepZ: 18 },
+      { minX: -1040, maxX: -900, minZ: -1060, maxZ: -1010, stepX: 18, stepZ: 18 },
+      { minX: -900, maxX: -820, minZ: -1060, maxZ: -1010, stepX: 18, stepZ: 18 },
       // Cold storage dan logistik Muara Baru di utara PPS Nizam Zachman.
-      { minX: -600, maxX: -400, minZ: -1195, maxZ: -1120, stepX: 28, stepZ: 24 }
+      { minX: -600, maxX: -400, minZ: -1195, maxZ: -1120, stepX: 18, stepZ: 18 }
     ];
     warehouseZones.forEach((zone, zoneIndex) => {
       for (let x = zone.minX; x <= zone.maxX; x += zone.stepX) {
         for (let z = zone.minZ; z <= zone.maxZ; z += zone.stepZ) {
           const hash = Math.abs(Math.sin(x * 4.71 + z * 9.13 + zoneIndex));
-          const w = 19 + hash * 5;
-          const d = 21 + (1 - hash) * 6;
-          const h = 8 + hash * 4;
+          const w = 15 + hash * 4;
+          const d = 16 + (1 - hash) * 5;
+          const h = 7.5 + hash * 3.5;
           const radius = Math.max(w, d) * 0.5;
-          const px = x + (hash - 0.5) * 4;
-          const pz = z + (((hash * 5.7) % 1) - 0.5) * 4;
+          const px = x + (hash - 0.5) * 2;
+          const pz = z + (((hash * 5.7) % 1) - 0.5) * 2;
           const roofW = w + 1.4;
           const roofD = d + 1.4;
           if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
@@ -19227,42 +19227,42 @@ export class CityScene {
 
     const residentialZones = [
       // Kampung Kamal Muara dan Muara Angke.
-      { minX: -1340, maxX: -1200, minZ: -1180, maxZ: -1040, step: 16 },
+      { minX: -1340, maxX: -1200, minZ: -1180, maxZ: -1040, step: 7.2 },
       // Townhouse Cordoba, Diamond Golf, dan Marina Indah PIK.
-      { minX: -1220, maxX: -1090, minZ: -1260, maxZ: -1130, step: 15 },
+      { minX: -1220, maxX: -1090, minZ: -1260, maxZ: -1130, step: 7.0 },
       // Kapuk Muara di selatan TWA Angke Kapuk.
-      { minX: -1050, maxX: -900, minZ: -1300, maxZ: -1150, step: 16 },
+      { minX: -1050, maxX: -900, minZ: -1300, maxZ: -1150, step: 7.2 },
       // Kapuk Utara dan Pantai Indah Selatan.
-      { minX: -1030, maxX: -760, minZ: -1060, maxZ: -800, step: 16 },
+      { minX: -1030, maxX: -760, minZ: -1060, maxZ: -800, step: 7.2 },
       // Kampung Teluk Gong dan Penjaringan utara.
-      { minX: -720, maxX: -430, minZ: -900, maxZ: -800, step: 15 },
+      { minX: -720, maxX: -430, minZ: -900, maxZ: -800, step: 7.0 },
       // Kamal Muara utara sampai tepi Cengkareng Drain.
-      { minX: -1340, maxX: -1210, minZ: -1040, maxZ: -950, step: 16 },
+      { minX: -1340, maxX: -1210, minZ: -1040, maxZ: -950, step: 7.2 },
       // Strip Kapuk Utara di selatan Jalan Kapuk Raya.
-      { minX: -1040, maxX: -760, minZ: -800, maxZ: -740, step: 16 },
+      { minX: -1040, maxX: -760, minZ: -800, maxZ: -740, step: 7.2 },
       // Celah Penjaringan antara Pluit dan Teluk Gong.
-      { minX: -760, maxX: -620, minZ: -880, maxZ: -800, step: 15 },
+      { minX: -760, maxX: -620, minZ: -880, maxZ: -800, step: 7.0 },
       // Konektor Kamal-PIK di barat PIK Avenue.
-      { minX: -1200, maxX: -1060, minZ: -1200, maxZ: -1140, step: 16 },
+      { minX: -1200, maxX: -1060, minZ: -1200, maxZ: -1140, step: 7.2 },
       // Penjaringan timur di sisi Jalan Pluit Raya.
-      { minX: -600, maxX: -380, minZ: -960, maxZ: -800, step: 15 },
+      { minX: -600, maxX: -380, minZ: -960, maxZ: -800, step: 7.0 },
       // Penjaringan utara mendekati batas clip.
-      { minX: -720, maxX: -600, minZ: -800, maxZ: -740, step: 15 },
+      { minX: -720, maxX: -600, minZ: -800, maxZ: -740, step: 7.0 },
       // Kapuk Utara timur di atas Jalan Kapuk Muara Raya.
-      { minX: -920, maxX: -780, minZ: -800, maxZ: -740, step: 16 },
+      { minX: -920, maxX: -780, minZ: -800, maxZ: -740, step: 7.2 },
       // Kamal Muara selatan, sisi barat Jalan Kapuk Muara Raya.
-      { minX: -1200, maxX: -1100, minZ: -1130, maxZ: -1060, step: 15 }
+      { minX: -1200, maxX: -1100, minZ: -1130, maxZ: -1060, step: 7.0 }
     ];
     residentialZones.forEach((zone, zoneIndex) => {
       for (let x = zone.minX; x <= zone.maxX; x += zone.step) {
         for (let z = zone.minZ; z <= zone.maxZ; z += zone.step) {
           const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233 + zoneIndex));
-          const w = 9 + hash * 3;
-          const d = 10 + (1 - hash) * 3;
-          const h = 6.5 + hash * 3.5;
+          const w = 5.6 + hash * 2.2;
+          const d = 6.2 + (1 - hash) * 2.2;
+          const h = 4.8 + hash * 2.4;
           const radius = Math.max(w, d) * 0.5;
-          const px = x + (hash - 0.5) * 2.4;
-          const pz = z + (((hash * 7.31) % 1) - 0.5) * 2.4;
+          const px = x + (hash - 0.5) * 1.8;
+          const pz = z + (((hash * 7.31) % 1) - 0.5) * 1.8;
           const roofW = w + INFILL_ROOF_EAVE * 2;
           const roofD = d + INFILL_ROOF_EAVE * 2;
           if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
