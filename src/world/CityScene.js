@@ -5857,16 +5857,16 @@ export class CityScene {
     });
 
     const placeShophouseRow = (roadWidth, chain, ignoreWays) => {
-      visitChain(chain, 13, (bx, bz, angle) => {
+      visitChain(chain, 6.2, (bx, bz, angle) => {
         const nx = Math.cos(angle);
         const nz = -Math.sin(angle);
         [-1, 1].forEach((side) => {
           const hash = Math.abs(Math.sin(bx * 8.13 + bz * 4.71 + side * 3.7));
-          const w = 11 + (1 - hash) * 4; // kedalaman dari jalan
-          const d = 10.5 + hash * 2.5; // lebar fasad sepanjang jalan
-          const h = 9 + hash * 7;
-          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
-          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
+          const w = 7.5 + (1 - hash) * 2.0; // kedalaman dari jalan
+          const d = 5.2 + hash * 1.5; // lebar fasad sepanjang jalan
+          const h = 8.5 + hash * 4.0;
+          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 1.2) * side;
+          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 1.2) * side;
           const radius = Math.max(w, d) * 0.5;
           const roofW = w + INFILL_ROOF_EAVE * 2;
           if (isBlocked(px, pz, radius, ignoreWays) || isRoofOccupied(px, pz, roofW, d, angle)) return;
@@ -5903,18 +5903,18 @@ export class CityScene {
 
     // Gudang ringan Bojong/Kembangan Selatan, dilayani Jl. Bojong Raya.
     const warehouseZones = [
-      { minX: -1360, maxX: -1180, minZ: -370, maxZ: -270, stepX: 32, stepZ: 28 }
+      { minX: -1360, maxX: -1180, minZ: -370, maxZ: -270, stepX: 20, stepZ: 20 }
     ];
     warehouseZones.forEach((zone, zoneIndex) => {
       for (let x = zone.minX; x <= zone.maxX; x += zone.stepX) {
         for (let z = zone.minZ; z <= zone.maxZ; z += zone.stepZ) {
           const hash = Math.abs(Math.sin(x * 4.71 + z * 9.13 + zoneIndex));
-          const w = 19 + hash * 5;
-          const d = 21 + (1 - hash) * 6;
-          const h = 8 + hash * 4;
+          const w = 15 + hash * 4;
+          const d = 16 + (1 - hash) * 5;
+          const h = 7.5 + hash * 3.5;
           const radius = Math.max(w, d) * 0.5;
-          const px = x + (hash - 0.5) * 4;
-          const pz = z + (((hash * 5.7) % 1) - 0.5) * 4;
+          const px = x + (hash - 0.5) * 2;
+          const pz = z + (((hash * 5.7) % 1) - 0.5) * 2;
           const roofW = w + 1.4;
           const roofD = d + 1.4;
           if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
@@ -5943,28 +5943,34 @@ export class CityScene {
     });
 
     const residentialZones = [
-      // Meruya Barat: Raden Saleh Raya s.d. KH Ahmad Dahlan.
-      { minX: -1440, maxX: -1315, minZ: -240, maxZ: 115, stepX: 16, stepZ: 16 },
-      // Kembangan Selatan / Bojong: utara koridor Daan Mogot.
-      { minX: -1350, maxX: -1000, minZ: -500, maxZ: -300, stepX: 17, stepZ: 17 },
-      // Meruya Selatan / Jeruk Joglo.
-      { minX: -1150, maxX: -1020, minZ: 90, maxZ: 330, stepX: 15, stepZ: 15 },
-      // Joglo Selatan: antara Joglo Raya dan Jl. H. Sa'aba.
-      { minX: -1300, maxX: -1020, minZ: 330, maxZ: 430, stepX: 16, stepZ: 16 },
-      // Kreo / Ciledug: blok selatan Joglo Raya.
-      { minX: -1420, maxX: -1100, minZ: 430, maxZ: 575, stepX: 16, stepZ: 16 }
+      // Meruya Barat: Raden Saleh Raya s.d. KH Ahmad Dahlan
+      { minX: -1450, maxX: -1300, minZ: -240, maxZ: 120, stepX: 7.2, stepZ: 7.2 },
+      // Kembangan Selatan / Bojong: utara koridor Daan Mogot
+      { minX: -1360, maxX: -980, minZ: -500, maxZ: -280, stepX: 7.0, stepZ: 7.0 },
+      // Meruya Selatan / Intercon
+      { minX: -1300, maxX: -1020, minZ: -120, maxZ: 100, stepX: 7.2, stepZ: 7.2 },
+      // Meruya Selatan / Jeruk Joglo
+      { minX: -1200, maxX: -1000, minZ: 90, maxZ: 330, stepX: 7.0, stepZ: 7.0 },
+      // Joglo Utara & Srengseng Barat
+      { minX: -1350, maxX: -1000, minZ: 180, maxZ: 330, stepX: 7.0, stepZ: 7.0 },
+      // Joglo Selatan: antara Joglo Raya dan Jl. H. Sa'aba
+      { minX: -1320, maxX: -1000, minZ: 330, maxZ: 440, stepX: 7.0, stepZ: 7.0 },
+      // Kreo / Ciledug: blok selatan Joglo Raya
+      { minX: -1450, maxX: -1080, minZ: 440, maxZ: 580, stepX: 7.2, stepZ: 7.2 },
+      // Larangan & Perbatasan Tangerang Selatan
+      { minX: -1450, maxX: -1200, minZ: 250, maxZ: 450, stepX: 7.2, stepZ: 7.2 }
     ];
 
     residentialZones.forEach((zone, zoneIndex) => {
       for (let x = zone.minX; x <= zone.maxX; x += zone.stepX) {
         for (let z = zone.minZ; z <= zone.maxZ; z += zone.stepZ) {
           const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233 + zoneIndex));
-          const w = 9 + hash * 3;
-          const d = 10 + (1 - hash) * 3;
-          const h = 6.5 + hash * 3.5;
+          const w = 5.6 + hash * 2.2;
+          const d = 6.2 + (1 - hash) * 2.2;
+          const h = 4.8 + hash * 2.4;
           const radius = Math.max(w, d) * 0.5;
-          const px = x + (hash - 0.5) * 2.4;
-          const pz = z + (((hash * 7.31) % 1) - 0.5) * 2.4;
+          const px = x + (hash - 0.5) * 1.8;
+          const pz = z + (((hash * 7.31) % 1) - 0.5) * 1.8;
           const roofW = w + INFILL_ROOF_EAVE * 2;
           const roofD = d + INFILL_ROOF_EAVE * 2;
           if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
