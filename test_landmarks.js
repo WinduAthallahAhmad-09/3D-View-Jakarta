@@ -2894,15 +2894,15 @@ assert.ok(
 );
 assert.ok(!rawaWaterMethod.includes('PointLight'), 'Danau Rawa Buaya water must not add PointLights');
 
-// Check 62: PJU gabungan Void B/C/D/E/F/G/H/I/J/K/L/M memberi makan pool 12 PointLight
+// Check 62: PJU gabungan Void B/C/D/E/F/G/H/I/J/K/L/M/N memberi makan pool 12 PointLight
 assert.ok(
   citySceneContent.includes('this.mergedPjuLampTransforms = [];'),
   'CityScene.js must keep merged PJU lamp heads in a dedicated transform array'
 );
 assert.strictEqual(
   (citySceneContent.match(/this\.recordMergedPjuLamp\(/g) || []).length,
-  12,
-  'Each merged PJU builder (Void B/C/D/E/F/G/H/I/J/K/L/M) must record its lamp heads exactly once'
+  13,
+  'Each merged PJU builder (Void B/C/D/E/F/G/H/I/J/K/L/M/N) must record its lamp heads exactly once'
 );
 const mergedLampHelperStart = citySceneContent.indexOf('recordMergedPjuLamp(x, z, angle, side) {');
 assert.ok(mergedLampHelperStart > 0, 'CityScene.js missing the recordMergedPjuLamp helper');
@@ -9113,8 +9113,8 @@ assert.ok(
 );
 assert.strictEqual(
   (citySceneContent.match(/this\.addBridgeDeck\(bridgeGeos, roadGeos, bridge\);/g) || []).length,
-  12,
-  'All twelve Void B-M bridge builders must call the shared deck helper'
+  13,
+  'All thirteen Void B-N bridge builders must call the shared deck helper'
 );
 const p7BridgeBuilders = [
   'buildVoidBDaanMogot() {',
@@ -9424,7 +9424,206 @@ assert.ok(
   });
 }
 
-console.log(`✅ All 143 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3, Void L Tahap 1, Void L Tahap 2, Void L Tahap 3, Void L Tahap 4, Void M Tahap 1, Void M Tahap 2, Void M Tahap 3, Void M Tahap 4, P5 Kosmetik Kanopi Halte, P6 Fakta Anchor Inti, P7 Kosmetik Dek Jembatan, P8 Kosmetik Kanopi Stasiun-Terminal + P9 Jahitan Jalan Selaras COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
+// Check 116: Void N Tahap 1 — Fabric Extension N jaringan OSM Cempaka Putih-Rawasari-Pulomas-Jatinegara.
+const voidNDatasetFile = new URL('./src/data/void_n_osm.js', import.meta.url);
+assert.ok(fs.existsSync(voidNDatasetFile), 'Void N OSM dataset src/data/void_n_osm.js is missing');
+const { VOID_N_OSM } = await import('./src/data/void_n_osm.js');
+
+assert.ok(VOID_N_OSM.meta.source.includes('OpenStreetMap'), 'Void N dataset missing OSM attribution');
+assert.ok(VOID_N_OSM.meta.source.includes('ODbL'), 'Void N dataset missing ODbL license');
+assert.strictEqual(VOID_N_OSM.meta.retrieved, '2026-11-12', 'Void N dataset retrieval date changed');
+assert.deepStrictEqual(
+  VOID_N_OSM.meta.clipBox,
+  { minX: 317, maxX: 960, minZ: -615, maxZ: 560 },
+  'Void N clip box must fill the internal hole between core, Void J, Void F, and Void L'
+);
+assert.ok(VOID_N_OSM.roads.length >= 500, `Void N dataset must carry at least 500 curated roads, got ${VOID_N_OSM.roads.length}`);
+assert.ok(
+  new Set(VOID_N_OSM.roads.map((road) => road.name).filter(Boolean)).size >= 150,
+  'Void N dataset must cover at least 150 named corridors'
+);
+assert.ok(VOID_N_OSM.waterways.length >= 40, `Void N dataset must carry at least 40 waterways, got ${VOID_N_OSM.waterways.length}`);
+assert.ok(VOID_N_OSM.waterBodies.length >= 5, 'Void N dataset must keep at least five water bodies');
+
+const voidNClip = VOID_N_OSM.meta.clipBox;
+const voidNInClip = ([x, z]) =>
+  x >= voidNClip.minX - 0.2 && x <= voidNClip.maxX + 0.2 && z >= voidNClip.minZ - 0.2 && z <= voidNClip.maxZ + 0.2;
+const voidNRoadTypes = new Set([
+  'motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'residential', 'unclassified', 'living_street',
+  'motorway_link', 'trunk_link', 'primary_link', 'secondary_link', 'tertiary_link'
+]);
+let voidNRoadPoints = 0;
+VOID_N_OSM.roads.forEach((road, index) => {
+  assert.ok(voidNRoadTypes.has(road.type), `Void N road #${index} has unexpected type ${road.type}`);
+  assert.ok(road.width >= 8 && road.width <= 18, `Void N road ${road.name} width ${road.width} outside 8-18`);
+  assert.ok(road.points.length >= 2, `Void N road ${road.name} needs at least two points`);
+  road.points.forEach((point) => {
+    assert.ok(voidNInClip(point), `Void N road ${road.name} point ${point} escapes the clip box`);
+  });
+  voidNRoadPoints += road.points.length;
+});
+assert.ok(voidNRoadPoints >= 3000, `Void N road network only has ${voidNRoadPoints} points`);
+
+VOID_N_OSM.waterways.forEach((waterway, index) => {
+  assert.ok(waterway.points.length >= 2, `Void N waterway #${index} needs at least two points`);
+  assert.ok(waterway.width >= 5 && waterway.width <= 14, `Void N waterway #${index} width ${waterway.width} outside 5-14`);
+  waterway.points.forEach((point) => {
+    assert.ok(voidNInClip(point), `Void N waterway point ${point} escapes the clip box`);
+  });
+});
+VOID_N_OSM.waterBodies.forEach((body, index) => {
+  assert.ok(body.points.length >= 4, `Void N water body #${index} needs a closed ring`);
+  const first = body.points[0];
+  const last = body.points[body.points.length - 1];
+  assert.ok(
+    Math.abs(first[0] - last[0]) <= 0.2 && Math.abs(first[1] - last[1]) <= 0.2,
+    `Void N water body #${index} ring is not closed`
+  );
+  body.points.forEach((point) => {
+    assert.ok(voidNInClip(point), `Void N water body point ${point} escapes the clip box`);
+  });
+});
+
+[/Suprapto/i, /Pemuda/i, /Rawasari/i, /Cempaka/i, /Jatinegara/i, /Sunter/i, /Cipinang/i].forEach((corridor) => {
+  assert.ok(
+    VOID_N_OSM.roads.some((road) => road.name && corridor.test(road.name)),
+    `Void N dataset must keep the ${corridor} corridor`
+  );
+});
+
+const voidNEnds = (feature) => [feature.points[0], feature.points[feature.points.length - 1]];
+const voidNWestSeam = ([x, z]) => Math.abs(x - 317) <= 14 && z >= -615 && z <= 560;
+const voidNNorthSeam = ([x, z]) => Math.abs(z + 615) <= 14 && x >= 317 && x <= 960;
+const voidNEastSeam = ([x, z]) => Math.abs(x - 960) <= 14 && z >= -150 && z <= 560;
+const voidNSeamCount = (features, test) => features.reduce((count, f) => count + voidNEnds(f).filter(test).length, 0);
+assert.ok(voidNSeamCount(VOID_N_OSM.roads, voidNWestSeam) >= 80, 'Void N must expose at least 80 road endpoints on the core seam at x=317');
+assert.ok(voidNSeamCount(VOID_N_OSM.roads, voidNNorthSeam) >= 40, 'Void N must expose at least 40 road endpoints on the Void J seam at z=-615');
+assert.ok(voidNSeamCount(VOID_N_OSM.roads, voidNEastSeam) >= 40, 'Void N must expose at least 40 road endpoints on the Void F seam at x=960');
+assert.ok(voidNSeamCount(VOID_N_OSM.waterways, voidNWestSeam) >= 5, 'Void N must expose waterway endpoints on the core seam');
+
+assert.ok(VOID_N_OSM.seamCore.roads.length >= 4, 'Void N seamCore must carry the core roads touching x=317');
+assert.ok(VOID_N_OSM.seamCore.waterways.length >= 4, 'Void N seamCore must split core waterways at x=317');
+const voidNCoreSeamEnd = ([x, z]) => Math.abs(x - 317) <= 14 && z >= -493 && z <= 560;
+[...VOID_N_OSM.seamCore.roads, ...VOID_N_OSM.seamCore.waterways].forEach((feature, index) => {
+  assert.ok(
+    voidNEnds(feature).some(voidNCoreSeamEnd),
+    `Void N seamCore feature ${index} (${feature.name}) must expose an endpoint on the core seam`
+  );
+});
+
+const voidNDistanceToRoad = (x, z) => {
+  let best = Infinity;
+  VOID_N_OSM.roads.forEach((road) => {
+    for (let i = 0; i < road.points.length - 1; i++) {
+      const [ax, az] = road.points[i];
+      const [bx, bz] = road.points[i + 1];
+      const dx = bx - ax;
+      const dz = bz - az;
+      const len2 = dx * dx + dz * dz;
+      let t = len2 ? ((x - ax) * dx + (z - az) * dz) / len2 : 0;
+      t = Math.max(0, Math.min(1, t));
+      best = Math.min(best, Math.hypot(x - (ax + dx * t), z - (az + dz * t)));
+    }
+  });
+  return best;
+};
+const voidNAnchorIds = ['menara-saidah', 'stasiun-jatinegara', 'jakarta-international-velodrome', 'wisma-atlet-kemayoran'];
+voidNAnchorIds.forEach((id) => {
+  const landmark = JAKARTA_LANDMARKS.find((l) => l.id === id);
+  assert.ok(landmark, `Void N anchor landmark ${id} must exist`);
+  const distance = voidNDistanceToRoad(landmark.position[0], landmark.position[2]);
+  assert.ok(distance <= 60, `Void N anchor ${id} sits ${distance.toFixed(1)} units from the nearest OSM road`);
+});
+
+assert.ok(
+  citySceneContent.includes("import { VOID_N_OSM } from '../data/void_n_osm.js';"),
+  'CityScene.js must import the Void N OSM dataset'
+);
+assert.ok(
+  citySceneContent.includes("const SEAM_N_CORE = { axis: 'x', value: 317, min: -493, max: 560 };"),
+  'CityScene.js missing the N-core seam definition (core clip stops at z=-493)'
+);
+assert.ok(
+  citySceneContent.includes("const SEAM_N_J = { axis: 'z', value: -615, min: 317, max: 960 };"),
+  'CityScene.js missing the N-J seam definition'
+);
+assert.ok(
+  citySceneContent.includes("const SEAM_N_F = { axis: 'x', value: 960, min: -150, max: 560 };"),
+  'CityScene.js missing the N-F seam definition (Void F clip starts at z=-150)'
+);
+assert.ok(
+  citySceneContent.includes('const VOID_N_ANCHOR_SITES = ['),
+  'CityScene must protect the four Void N anchor sites'
+);
+const voidNSitesMatch = citySceneContent.match(/const VOID_N_ANCHOR_SITES = \[([\s\S]*?)\n\];/);
+assert.ok(voidNSitesMatch, 'CityScene.js missing the Void N anchor site rectangles');
+const voidNSites = [...voidNSitesMatch[1].matchAll(/\[(-?\d+(?:\.\d+)?), (-?\d+(?:\.\d+)?), (-?\d+(?:\.\d+)?), (-?\d+(?:\.\d+)?)\]/g)]
+  .map((match) => match.slice(1, 5).map(Number));
+assert.strictEqual(voidNSites.length, 4, 'Void N must protect exactly four anchor sites');
+voidNAnchorIds.forEach((id) => {
+  const landmark = JAKARTA_LANDMARKS.find((l) => l.id === id);
+  const [x, , z] = landmark.position;
+  assert.ok(
+    voidNSites.some(([minX, maxX, minZ, maxZ]) => x >= minX && x <= maxX && z >= minZ && z <= maxZ),
+    `Void N anchor site rects must cover ${id}`
+  );
+});
+assert.ok(
+  citySceneContent.includes('isInsideVoidNAnchorSite('),
+  'CityScene must expose isInsideVoidNAnchorSite for Void N masking'
+);
+const voidNCall = citySceneContent.indexOf('this.buildVoidNFabric();');
+const voidMCallIndex = citySceneContent.indexOf('this.buildVoidM();');
+const voidNLegacyCall = citySceneContent.indexOf('this.buildVoidBInfillAndIndustry();');
+assert.ok(voidNCall > voidMCallIndex, 'buildVoidNFabric() must run after buildVoidM()');
+assert.ok(voidNLegacyCall > voidNCall, 'buildVoidNFabric() must run before the legacy Void B infill pass');
+
+const voidNBuilder = sliceCityBuilder('buildVoidNFabric() {');
+[
+  'voidn-roads',
+  'voidn-sidewalks',
+  'voidn-waterways',
+  'voidn-water-bodies',
+  'voidn-bridges',
+  'voidn-pju-poles',
+  'voidn-pju-bulbs',
+  'voidn-tree-trunks',
+  'voidn-tree-foliage'
+].forEach((meshName) => {
+  assert.ok(voidNBuilder.includes(`'${meshName}'`), `buildVoidNFabric must create the ${meshName} mesh`);
+});
+assert.ok(
+  voidNBuilder.includes('collectRoadSeamConnectors(VOID_N_OSM.seamCore.roads, VOID_N_OSM.roads, SEAM_N_CORE, SEAM_ROAD_STITCH_MAX)'),
+  'buildVoidNFabric must stitch N-core road endpoints through seamCore'
+);
+assert.ok(
+  voidNBuilder.includes('collectSeamConnectors(VOID_N_OSM.seamCore.waterways, VOID_N_OSM.waterways, SEAM_N_CORE, SEAM_WATER_STITCH_MAX)'),
+  'buildVoidNFabric must stitch N-core waterway endpoints through seamCore'
+);
+assert.ok(
+  voidNBuilder.includes('collectRoadSeamConnectors(VOID_N_OSM.roads, VOID_J_OSM.roads, SEAM_N_J, SEAM_ROAD_STITCH_MAX)'),
+  'buildVoidNFabric must stitch N-J road endpoints'
+);
+assert.ok(
+  voidNBuilder.includes('collectSeamConnectors(VOID_N_OSM.waterways, VOID_J_OSM.waterways, SEAM_N_J, SEAM_WATER_STITCH_MAX)'),
+  'buildVoidNFabric must stitch N-J waterway endpoints'
+);
+assert.ok(
+  voidNBuilder.includes('collectRoadSeamConnectors(VOID_N_OSM.roads, VOID_F_OSM.roads, SEAM_N_F, SEAM_ROAD_STITCH_MAX)'),
+  'buildVoidNFabric must stitch N-F road endpoints'
+);
+assert.ok(
+  voidNBuilder.includes('collectSeamConnectors(VOID_N_OSM.waterways, VOID_F_OSM.waterways, SEAM_N_F, SEAM_WATER_STITCH_MAX)'),
+  'buildVoidNFabric must stitch N-F waterway endpoints'
+);
+assert.ok(voidNBuilder.includes('this.isInsideVoidNAnchorSite('), 'buildVoidNFabric must mask PJU, trees, and bridges against anchor sites');
+assert.ok(voidNBuilder.includes('recordMergedPjuLamp('), 'buildVoidNFabric PJU must feed the shared PointLight pool');
+assert.ok(voidNBuilder.includes('voidNOsmStats'), 'buildVoidNFabric must expose voidNOsmStats');
+assert.ok(voidNBuilder.includes('drawCalls: 9'), 'Void N stats must report nine draw calls');
+assert.ok(voidNBuilder.includes('registerNightMaterial'), 'Void N water material must register for the night preset');
+assert.ok(!voidNBuilder.includes('new THREE.PointLight'), 'buildVoidNFabric must not add PointLights');
+
+console.log(`✅ All 143 landmarks, Quick Wins, Jakarta Timur, Void A, Tahap 1-4 Void B, Tahap 1-4 Void C, Void D Tahap 1-4, Void E Tahap 1-4, F4 Tahap 1-3, Material Malam Void C/D/E, Label Transit Void C/D, Atap Infill Void B/C/D/E, Peron KBN Cakung, Malam Mall Kelapa Gading, PJU Malam Distrik, Material Malam Badan Air, PJU Gabungan Void B/C/D/E, Void F Tahap 1, Void F Tahap 2, Void F Tahap 3, Void F Tahap 4, Viaduk LRT Cibubur, Void G Tahap 1, Void G Tahap 2, Void G Tahap 3, Void G Tahap 4, Visual P1, Visual P2, Retrofit Infill Jakarta Timur, Sambungan Air KBT-Void E, Kamera DPR/MPR, Void H Tahap 1, Void H Tahap 2, Void H Tahap 3, Void H Tahap 4, Void I Tahap 1, Void I Tahap 2, Void I Tahap 3, Void I Tahap 4, Void I Tahap 5, Void I Tahap 6, Void I Tahap 7, Void I Tahap 8, Void I Tahap 9, Void I Tahap 10, Void I Tahap 11, Void J Tahap 1, Void J Tahap 2, Void J Tahap 3, Void J Tahap 4, P2 Visual Void J, Void J Tahap 5, Void K Tahap 1, Void K Tahap 2, Void K Tahap 3, Void K Tahap 4, Jahitan S1-S3, Void L Tahap 1, Void L Tahap 2, Void L Tahap 3, Void L Tahap 4, Void M Tahap 1, Void M Tahap 2, Void M Tahap 3, Void M Tahap 4, P5 Kosmetik Kanopi Halte, P6 Fakta Anchor Inti, P7 Kosmetik Dek Jembatan, P8 Kosmetik Kanopi Stasiun-Terminal + P9 Jahitan Jalan Selaras + Void N Tahap 1 COMPLETED SUCCESSFULLY! (${assertionCount} assertions)`);
 
 
 

@@ -15,6 +15,7 @@ import { VOID_J_OSM } from '../data/void_j_osm.js';
 import { VOID_K_OSM } from '../data/void_k_osm.js';
 import { VOID_L_OSM } from '../data/void_l_osm.js';
 import { VOID_M_OSM } from '../data/void_m_osm.js';
+import { VOID_N_OSM } from '../data/void_n_osm.js';
 
 const VOID_C_CONNECTOR_PATHS = [
   [[-1043.2, -422.7], [-1030, -414.5], [-1000, -412.5], [-975, -412.5], [-955, -413.5]],
@@ -484,6 +485,19 @@ const VOID_M_TERMINAL_LINK = [
 const VOID_M_PR_PLOT = { x: 1046, z: 1264, w: 30, d: 18 };
 const VOID_M_PR_DRIVEWAY = { x: 1063, z: 1275, w: 12, d: 6 };
 
+// Kotak klip Void N (Cempaka Putih-Rawasari-Pulomas-Jatinegara): lubang internal
+// antara core OSM (barat), Void J (utara), Void F (timur), dan Void L (tenggara).
+const VOID_N_CLIP_BOX = { minX: 317, maxX: 960, minZ: -615, maxZ: 560 };
+
+// Tapak empat anchor lama yang duduk di dalam band N; PJU, pohon, dan jembatan
+// dijauhkan dari tapak agar massa anchor tidak tertimpa fabric baru.
+const VOID_N_ANCHOR_SITES = [
+  [300, 340, 486, 526],      // Menara Saidah
+  [620, 712, 250, 315],      // Stasiun Jatinegara
+  [900, 960, -100, -15],     // Jakarta International Velodrome
+  [470, 575, -615, -565]     // Wisma Atlet Kemayoran
+];
+
 // Strip seam di tepi timur clip Void F. Infill K berhenti sebelum x=2012 agar
 // deret ruko dua tahap tidak saling menimpa di sekitar x=1995.
 const VOID_K_LEGACY_INFILL_RECTS = [
@@ -511,6 +525,9 @@ const SEAM_KF_VERTICAL = { axis: 'x', value: 1995, min: -150, max: 560 };
 const SEAM_FL = { axis: 'z', value: 560, min: 960, max: 1800 };
 const SEAM_LM = { axis: 'z', value: 960, min: 960, max: 1800 };
 const SEAM_MG = { axis: 'z', value: 1375, min: 960, max: 1450 };
+const SEAM_N_CORE = { axis: 'x', value: 317, min: -493, max: 560 };
+const SEAM_N_J = { axis: 'z', value: -615, min: 317, max: 960 };
+const SEAM_N_F = { axis: 'x', value: 960, min: -150, max: 560 };
 
 // Jahit ujung utara rel Senen-Kemayoran bangun-tangan (255, -670) ke ujung
 // selatan dataset KRL Tanjung Priuk-Kemayoran (222,6, -615,2).
@@ -691,6 +708,7 @@ export class CityScene {
     this.buildVoidM();
     this.buildVoidMInfill();
     this.buildVoidMTransit();
+    this.buildVoidNFabric();
     this.buildVoidBInfillAndIndustry();
     this.buildVoidBTransit();
     this.buildEastJakartaInfrastructure();
@@ -8623,6 +8641,460 @@ export class CityScene {
   }
 
   /**
+   * Void N Tahap 1 — Fabric Extension N: jaringan OSM Cempaka Putih-Rawasari-
+   * Pulomas-Jatinegara mengisi lubang internal antara core, Void J, Void F,
+   * dan Void L. Tanpa anchor baru; tapak empat anchor lama dilindungi.
+   */
+  buildVoidNFabric() {
+    const roadMat = new THREE.MeshStandardMaterial({
+      color: 0x3b4a5f,
+      roughness: 0.78,
+      metalness: 0.12
+    });
+    const sidewalkMat = new THREE.MeshStandardMaterial({
+      map: TextureGenerator.createSidewalkTexture(),
+      color: 0xb9c4d2,
+      roughness: 0.82
+    });
+    const waterMat = new THREE.MeshStandardMaterial({
+      color: 0x075985,
+      roughness: 0.2,
+      metalness: 0.5,
+      transparent: true,
+      opacity: 0.95
+    });
+    this.registerNightMaterial(waterMat, {
+      emissive: WATER_NIGHT_EMISSIVE,
+      nightIntensity: WATER_NIGHT_INTENSITY
+    });
+    const bridgeMat = new THREE.MeshStandardMaterial({
+      color: 0x475569,
+      roughness: 0.7
+    });
+    const lampPoleMat = new THREE.MeshStandardMaterial({
+      color: 0x334155,
+      metalness: 0.7,
+      roughness: 0.4
+    });
+
+    const roadGeos = [];
+    const sidewalkGeos = [];
+    const waterGeos = [];
+    const waterBodyGeos = [];
+    const bridgeGeos = [];
+    const lampPoleGeos = [];
+    const lampBulbGeos = [];
+
+    const makeBox = (w, h, d, x, y, z, rotY = 0) => {
+      const g = new THREE.BoxGeometry(w, h, d);
+      if (rotY !== 0) g.rotateY(rotY);
+      g.translate(x, y, z);
+      return g;
+    };
+
+    const insideAnchorSite = (x, z) => this.isInsideVoidNAnchorSite(x, z);
+
+    const addRoadPolyline = (points, width, hasSidewalk = true) => {
+      for (let i = 0; i < points.length - 1; i++) {
+        const [x1, z1] = points[i];
+        const [x2, z2] = points[i + 1];
+        const len = Math.hypot(x2 - x1, z2 - z1);
+        if (len < 0.5) continue;
+        const angle = Math.atan2(x2 - x1, z2 - z1);
+        const mx = (x1 + x2) * 0.5;
+        const mz = (z1 + z2) * 0.5;
+
+        roadGeos.push(makeBox(width, 0.25, len + 0.8, mx, 0.125, mz, angle));
+        if (hasSidewalk) {
+          const sw = width >= 14 ? 2.8 : 2.2;
+          [-1, 1].forEach((dir) => {
+            const px = Math.cos(angle) * (width * 0.5 + sw * 0.5) * dir;
+            const pz = -Math.sin(angle) * (width * 0.5 + sw * 0.5) * dir;
+            sidewalkGeos.push(makeBox(sw, 0.4, len + 0.8, mx + px, 0.2, mz + pz, angle));
+          });
+        }
+      }
+    };
+
+    const samplePolyline = (points, step, offset = 0) => {
+      const samples = [];
+      let next = step * 0.5;
+      let travelled = 0;
+      for (let i = 0; i < points.length - 1; i++) {
+        const [x1, z1] = points[i];
+        const [x2, z2] = points[i + 1];
+        const dx = x2 - x1;
+        const dz = z2 - z1;
+        const len = Math.hypot(dx, dz);
+        if (len < 0.5) continue;
+        const angle = Math.atan2(dx, dz);
+        const px = Math.cos(angle) * offset;
+        const pz = -Math.sin(angle) * offset;
+        while (next <= travelled + len) {
+          const t = (next - travelled) / len;
+          samples.push({ x: x1 + dx * t + px, z: z1 + dz * t + pz, angle });
+          next += step;
+        }
+        travelled += len;
+      }
+      return samples;
+    };
+
+    const addLampPost = (x, z, angle, side) => {
+      const px = Math.cos(angle);
+      const pz = -Math.sin(angle);
+      const pole = new THREE.CylinderGeometry(0.16, 0.24, 8.5, 6);
+      pole.translate(x, 4.25, z);
+      lampPoleGeos.push(pole);
+
+      const arm = new THREE.BoxGeometry(3.2, 0.14, 0.14);
+      arm.rotateY(angle);
+      arm.translate(x - px * 1.6 * side, 8.4, z - pz * 1.6 * side);
+      lampPoleGeos.push(arm);
+
+      const bulb = new THREE.SphereGeometry(0.34, 8, 8);
+      bulb.translate(x - px * 3.2 * side, 8.15, z - pz * 3.2 * side);
+      lampBulbGeos.push(bulb);
+      this.recordMergedPjuLamp(x, z, angle, side);
+    };
+
+    const segmentIntersection = (a, b, c, d) => {
+      const rx = b[0] - a[0];
+      const rz = b[1] - a[1];
+      const sx = d[0] - c[0];
+      const sz = d[1] - c[1];
+      const den = rx * sz - rz * sx;
+      if (Math.abs(den) < 1e-9) return null;
+      const t = ((c[0] - a[0]) * sz - (c[1] - a[1]) * sx) / den;
+      const u = ((c[0] - a[0]) * rz - (c[1] - a[1]) * rx) / den;
+      if (t <= 0 || t >= 1 || u <= 0 || u >= 1) return null;
+      return [a[0] + t * rx, a[1] + t * rz];
+    };
+
+    VOID_N_OSM.roads.forEach((road) => {
+      addRoadPolyline(road.points, road.width, road.width >= 10);
+    });
+
+    const seamCoreRoadConnectors = collectRoadSeamConnectors(VOID_N_OSM.seamCore.roads, VOID_N_OSM.roads, SEAM_N_CORE, SEAM_ROAD_STITCH_MAX)
+      .filter((connector) => !insideAnchorSite(connector.from[0], connector.from[1]));
+    seamCoreRoadConnectors.forEach((connector) => {
+      addRoadPolyline([connector.from, connector.to], connector.width, connector.width >= 10);
+    });
+
+    const seamJRoadConnectors = collectRoadSeamConnectors(VOID_N_OSM.roads, VOID_J_OSM.roads, SEAM_N_J, SEAM_ROAD_STITCH_MAX)
+      .filter((connector) => !insideAnchorSite(connector.from[0], connector.from[1]));
+    seamJRoadConnectors.forEach((connector) => {
+      addRoadPolyline([connector.from, connector.to], connector.width, connector.width >= 10);
+    });
+
+    const seamFRoadConnectors = collectRoadSeamConnectors(VOID_N_OSM.roads, VOID_F_OSM.roads, SEAM_N_F, SEAM_ROAD_STITCH_MAX)
+      .filter((connector) => !insideAnchorSite(connector.from[0], connector.from[1]));
+    seamFRoadConnectors.forEach((connector) => {
+      addRoadPolyline([connector.from, connector.to], connector.width, connector.width >= 10);
+    });
+
+    VOID_N_OSM.waterways.forEach((waterway) => {
+      const points = waterway.points;
+      for (let i = 0; i < points.length - 1; i++) {
+        const [x1, z1] = points[i];
+        const [x2, z2] = points[i + 1];
+        const len = Math.hypot(x2 - x1, z2 - z1);
+        if (len < 0.5) continue;
+        const angle = Math.atan2(x2 - x1, z2 - z1);
+        waterGeos.push(
+          makeBox(waterway.width, 0.08, len + 0.6, (x1 + x2) * 0.5, 0.04, (z1 + z2) * 0.5, angle)
+        );
+      }
+    });
+
+    const addWaterConnector = (connector) => {
+      const [x1, z1] = connector.from;
+      const [x2, z2] = connector.to;
+      const length = Math.hypot(x2 - x1, z2 - z1);
+      waterGeos.push(
+        makeBox(connector.width, 0.08, length + 0.6, (x1 + x2) * 0.5, 0.04, (z1 + z2) * 0.5, Math.atan2(x2 - x1, z2 - z1))
+      );
+    };
+
+    const seamCoreWaterConnectors = collectSeamConnectors(VOID_N_OSM.seamCore.waterways, VOID_N_OSM.waterways, SEAM_N_CORE, SEAM_WATER_STITCH_MAX);
+    seamCoreWaterConnectors.forEach(addWaterConnector);
+    const seamJWaterConnectors = collectSeamConnectors(VOID_N_OSM.waterways, VOID_J_OSM.waterways, SEAM_N_J, SEAM_WATER_STITCH_MAX);
+    seamJWaterConnectors.forEach(addWaterConnector);
+    const seamFWaterConnectors = collectSeamConnectors(VOID_N_OSM.waterways, VOID_F_OSM.waterways, SEAM_N_F, SEAM_WATER_STITCH_MAX);
+    seamFWaterConnectors.forEach(addWaterConnector);
+
+    VOID_N_OSM.waterBodies.forEach((body) => {
+      if (body.points.length < 4) return;
+      const shape = new THREE.Shape();
+      shape.moveTo(body.points[0][0], -body.points[0][1]);
+      for (let i = 1; i < body.points.length; i++) {
+        shape.lineTo(body.points[i][0], -body.points[i][1]);
+      }
+      const geometry = new THREE.ShapeGeometry(shape);
+      geometry.rotateX(-Math.PI / 2);
+      geometry.translate(0, 0.045, 0);
+      waterBodyGeos.push(geometry);
+    });
+
+    const crossings = [];
+    const addCrossing = (hit, road, segmentIndex, waterWidth) => {
+      if (insideAnchorSite(hit[0], hit[1])) return;
+      if (crossings.some((c) => Math.hypot(c.x - hit[0], c.z - hit[1]) < 12)) return;
+      crossings.push({
+        x: hit[0],
+        z: hit[1],
+        angle: Math.atan2(
+          road.points[segmentIndex + 1][0] - road.points[segmentIndex][0],
+          road.points[segmentIndex + 1][1] - road.points[segmentIndex][1]
+        ),
+        width: road.width,
+        waterWidth
+      });
+    };
+
+    VOID_N_OSM.roads.forEach((road) => {
+      for (let i = 0; i < road.points.length - 1; i++) {
+        for (const waterway of VOID_N_OSM.waterways) {
+          for (let j = 0; j < waterway.points.length - 1; j++) {
+            const hit = segmentIntersection(
+              road.points[i], road.points[i + 1],
+              waterway.points[j], waterway.points[j + 1]
+            );
+            if (hit) addCrossing(hit, road, i, waterway.width);
+          }
+        }
+      }
+    });
+
+    const waterSegments = [];
+    VOID_N_OSM.waterways.forEach((waterway) => {
+      for (let i = 0; i < waterway.points.length - 1; i++) {
+        waterSegments.push({
+          ax: waterway.points[i][0],
+          az: waterway.points[i][1],
+          bx: waterway.points[i + 1][0],
+          bz: waterway.points[i + 1][1],
+          width: waterway.width
+        });
+      }
+    });
+
+    const nearestWater = (x, z) => {
+      let best = Infinity;
+      let hit = null;
+      for (let idx = 0; idx < waterSegments.length; idx++) {
+        const seg = waterSegments[idx];
+        const dx = seg.bx - seg.ax;
+        const dz = seg.bz - seg.az;
+        const len2 = dx * dx + dz * dz;
+        let t = len2 ? ((x - seg.ax) * dx + (z - seg.az) * dz) / len2 : 0;
+        t = Math.max(0, Math.min(1, t));
+        const px = seg.ax + dx * t;
+        const pz = seg.az + dz * t;
+        const dist = Math.hypot(x - px, z - pz);
+        if (dist < best) {
+          best = dist;
+          hit = { x: px, z: pz, width: seg.width, idx };
+        }
+      }
+      return { best, hit };
+    };
+
+    const bankEndpoints = [];
+    VOID_N_OSM.roads.forEach((road) => {
+      [road.points[0], road.points[road.points.length - 1]].forEach((point) => {
+        const near = nearestWater(point[0], point[1]);
+        if (!near.hit || near.best > near.hit.width * 0.5 + 3) return;
+        bankEndpoints.push({ x: point[0], z: point[1], width: road.width, waterIdx: near.hit.idx });
+      });
+    });
+
+    const bankCandidates = [];
+    for (let i = 0; i < bankEndpoints.length; i++) {
+      for (let j = i + 1; j < bankEndpoints.length; j++) {
+        const a = bankEndpoints[i];
+        const b = bankEndpoints[j];
+        const gap = Math.hypot(b.x - a.x, b.z - a.z);
+        if (gap < 3 || gap > 26) continue;
+        if (Math.abs(a.waterIdx - b.waterIdx) > 1) continue;
+        const midX = (a.x + b.x) * 0.5;
+        const midZ = (a.z + b.z) * 0.5;
+        if (insideAnchorSite(midX, midZ)) continue;
+        let crossing = null;
+        let crossingIdx = -1;
+        for (let k = 0; k < waterSegments.length; k++) {
+          const seg = waterSegments[k];
+          const hit = segmentIntersection([a.x, a.z], [b.x, b.z], [seg.ax, seg.az], [seg.bx, seg.bz]);
+          if (hit) {
+            crossing = { x: hit[0], z: hit[1], width: seg.width };
+            crossingIdx = k;
+            break;
+          }
+        }
+        if (!crossing) continue;
+        if (crossingIdx !== a.waterIdx && crossingIdx !== b.waterIdx) continue;
+        bankCandidates.push({ a, b, gap, crossing });
+      }
+    }
+    bankCandidates.sort((p, q) => p.gap - q.gap);
+
+    const usedBank = new Set();
+    let bridgeConnectors = 0;
+    for (const candidate of bankCandidates) {
+      const { a, b, crossing } = candidate;
+      const keyA = `${a.x.toFixed(1)}:${a.z.toFixed(1)}`;
+      const keyB = `${b.x.toFixed(1)}:${b.z.toFixed(1)}`;
+      if (usedBank.has(keyA) || usedBank.has(keyB)) continue;
+      usedBank.add(keyA);
+      usedBank.add(keyB);
+      const width = Math.max(6, Math.min(a.width, b.width));
+      addRoadPolyline([[a.x, a.z], [b.x, b.z]], width, width >= 10);
+      if (!crossings.some((c) => Math.hypot(c.x - crossing.x, c.z - crossing.z) < 12)) {
+        crossings.push({
+          x: crossing.x,
+          z: crossing.z,
+          angle: Math.atan2(b.x - a.x, b.z - a.z),
+          width,
+          waterWidth: crossing.width
+        });
+      }
+      bridgeConnectors++;
+    }
+
+    crossings.forEach((bridge) => {
+      this.addBridgeDeck(bridgeGeos, roadGeos, bridge);
+    });
+
+    if (!this.pjuBulbMat) {
+      this.pjuBulbMat = new THREE.MeshStandardMaterial({
+        color: 0xfef08a,
+        emissive: 0xfef08a,
+        emissiveIntensity: 0.0,
+        roughness: 0.2
+      });
+      this.pjuBulbMat.name = 'pju-bulb';
+      this.glowMaterials.push(this.pjuBulbMat);
+    }
+
+    const lampKeywords = ['Suprapto', 'Pemuda', 'Rawasari', 'Cempaka', 'Jatinegara'];
+    const lampNames = new Set(
+      VOID_N_OSM.roads
+        .filter((road) => road.name && lampKeywords.some((keyword) => road.name.includes(keyword)))
+        .map((road) => road.name)
+    );
+    let lampCount = 0;
+    VOID_N_OSM.roads.filter((road) => lampNames.has(road.name)).forEach((road) => {
+      [1, -1].forEach((side) => {
+        samplePolyline(road.points, 120, (road.width * 0.5 + 1.4) * side).forEach((p) => {
+          if (insideAnchorSite(p.x, p.z)) return;
+          addLampPost(p.x, p.z, p.angle, side);
+          lampCount++;
+        });
+      });
+    });
+
+    const treePositions = [];
+    const addTree = (x, z, scale) => {
+      if (insideAnchorSite(x, z)) return;
+      if (treePositions.some((t) => Math.hypot(t.x - x, t.z - z) < 7)) return;
+      treePositions.push({ x, z, scale });
+    };
+
+    const treeRoadKeywords = ['Suprapto', 'Pemuda', 'Rawasari'];
+    const treeRoadNames = new Set(
+      VOID_N_OSM.roads
+        .filter((road) => road.name && treeRoadKeywords.some((keyword) => road.name.includes(keyword)))
+        .map((road) => road.name)
+    );
+    VOID_N_OSM.roads.filter((road) => treeRoadNames.has(road.name)).forEach((road) => {
+      [1, -1].forEach((side) => {
+        samplePolyline(road.points, 76, (road.width * 0.5 + 6) * side).forEach((p, i) => {
+          addTree(p.x, p.z, 0.85 + (i % 4) * 0.06);
+        });
+      });
+    });
+    VOID_N_OSM.waterways
+      .filter((waterway) => /Sunter|Cipinang/.test(waterway.name))
+      .forEach((waterway) => {
+        [1, -1].forEach((side) => {
+          samplePolyline(waterway.points, 64, (waterway.width * 0.5 + 6) * side).forEach((p, i) => {
+            addTree(p.x, p.z, 0.9 + (i % 5) * 0.05);
+          });
+        });
+      });
+
+    if (treePositions.length > 0) {
+      const dummy = new THREE.Object3D();
+      const trunkGeo = new THREE.CylinderGeometry(0.26, 0.38, 4.2, 5);
+      const foliageGeo = new THREE.ConeGeometry(2.6, 6.2, 6);
+      const trunkMat = new THREE.MeshStandardMaterial({ color: 0x3e2723, roughness: 0.9 });
+      const foliageMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.85 });
+      const trunkMesh = new THREE.InstancedMesh(trunkGeo, trunkMat, treePositions.length);
+      const foliageMesh = new THREE.InstancedMesh(foliageGeo, foliageMat, treePositions.length);
+      trunkMesh.name = 'voidn-tree-trunks';
+      foliageMesh.name = 'voidn-tree-foliage';
+
+      treePositions.forEach((tree, idx) => {
+        dummy.position.set(tree.x, 2.1 * tree.scale, tree.z);
+        dummy.scale.set(tree.scale, tree.scale, tree.scale);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        trunkMesh.setMatrixAt(idx, dummy.matrix);
+
+        dummy.position.set(tree.x, (4.2 + 3.0) * tree.scale, tree.z);
+        dummy.updateMatrix();
+        foliageMesh.setMatrixAt(idx, dummy.matrix);
+      });
+
+      trunkMesh.castShadow = true;
+      trunkMesh.receiveShadow = true;
+      foliageMesh.castShadow = true;
+      foliageMesh.receiveShadow = true;
+      this.proceduralGroup.add(trunkMesh);
+      this.proceduralGroup.add(foliageMesh);
+    }
+
+    const mergeAndAdd = (geos, mat, name, receiveShadow = true, castShadow = false) => {
+      if (!geos || geos.length === 0) return;
+      const merged = BufferGeometryUtils.mergeGeometries(geos, false);
+      if (merged) {
+        const mesh = new THREE.Mesh(merged, mat);
+        mesh.name = name;
+        mesh.receiveShadow = receiveShadow;
+        mesh.castShadow = castShadow;
+        this.proceduralGroup.add(mesh);
+      }
+    };
+
+    mergeAndAdd(roadGeos, roadMat, 'voidn-roads', true, false);
+    mergeAndAdd(sidewalkGeos, sidewalkMat, 'voidn-sidewalks', true, false);
+    mergeAndAdd(waterGeos, waterMat, 'voidn-waterways', false, false);
+    mergeAndAdd(waterBodyGeos, waterMat, 'voidn-water-bodies', false, false);
+    mergeAndAdd(bridgeGeos, bridgeMat, 'voidn-bridges', true, true);
+    mergeAndAdd(lampPoleGeos, lampPoleMat, 'voidn-pju-poles', true, false);
+    mergeAndAdd(lampBulbGeos, this.pjuBulbMat, 'voidn-pju-bulbs', false, false);
+
+    this.voidNOsmStats = {
+      roads: VOID_N_OSM.roads.length,
+      roadPoints: VOID_N_OSM.roads.reduce((sum, road) => sum + road.points.length, 0),
+      waterways: VOID_N_OSM.waterways.length,
+      waterPoints: VOID_N_OSM.waterways.reduce((sum, waterway) => sum + waterway.points.length, 0),
+      waterBodies: VOID_N_OSM.waterBodies.length,
+      bridges: crossings.length,
+      lamps: lampCount,
+      trees: treePositions.length,
+      connectors: bridgeConnectors,
+      seamCoreRoads: seamCoreRoadConnectors.length,
+      seamCoreWaterways: seamCoreWaterConnectors.length,
+      seamJRoads: seamJRoadConnectors.length,
+      seamJWaterways: seamJWaterConnectors.length,
+      seamFRoads: seamFRoadConnectors.length,
+      seamFWaterways: seamFWaterConnectors.length,
+      drawCalls: 9
+    };
+  }
+
+  /**
    * Void M Tahap 3 — infill urban fabric Jatiwaringin–Pondok Gede.
    *
    * 1. Rumah kampung di dua belas kantong antara Jatiwaringin dan Pondok Gede.
@@ -10905,6 +11377,12 @@ export class CityScene {
 
   isInsideVoidMAnchorSite(x, z) {
     return VOID_M_ANCHOR_SITES.some(
+      ([x1, x2, z1, z2]) => x >= x1 - 2 && x <= x2 + 2 && z >= z1 - 2 && z <= z2 + 2
+    );
+  }
+
+  isInsideVoidNAnchorSite(x, z) {
+    return VOID_N_ANCHOR_SITES.some(
       ([x1, x2, z1, z2]) => x >= x1 - 2 && x <= x2 + 2 && z >= z1 - 2 && z <= z2 + 2
     );
   }
