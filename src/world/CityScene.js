@@ -18645,16 +18645,16 @@ export class CityScene {
     });
 
     const placeShophouseRow = (roadWidth, chain, ignoreWays) => {
-      visitChain(chain, 13, (bx, bz, angle) => {
+      visitChain(chain, 6.2, (bx, bz, angle) => {
         const nx = Math.cos(angle);
         const nz = -Math.sin(angle);
         [-1, 1].forEach((side) => {
           const hash = Math.abs(Math.sin(bx * 8.13 + bz * 4.71 + side * 3.7));
-          const w = 11 + (1 - hash) * 4;
-          const d = 10.5 + hash * 2.5;
-          const h = 9 + hash * 7;
-          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
-          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
+          const w = 7.5 + (1 - hash) * 2.0;
+          const d = 5.2 + hash * 1.5;
+          const h = 8.5 + hash * 4.0;
+          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 1.2) * side;
+          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 1.2) * side;
           const radius = Math.max(w, d) * 0.5;
           const roofW = w + INFILL_ROOF_EAVE * 2;
           if (isBlocked(px, pz, radius, ignoreWays) || isRoofOccupied(px, pz, roofW, d, angle)) return;
@@ -18691,38 +18691,38 @@ export class CityScene {
 
     const warehouseZones = [
       // KBN Cakung: blok industri di sisi barat dan timur kawasan berikat.
-      { minX: 1370, maxX: 1470, minZ: -830, maxZ: -690, stepX: 30, stepZ: 26 },
-      { minX: 1650, maxX: 1770, minZ: -810, maxZ: -700, stepX: 30, stepZ: 26 },
+      { minX: 1370, maxX: 1470, minZ: -830, maxZ: -690, stepX: 18, stepZ: 18 },
+      { minX: 1650, maxX: 1770, minZ: -810, maxZ: -700, stepX: 18, stepZ: 18 },
       // Marunda: koridor logistik di selatan tapak logistik dan timur Rusunawa.
-      { minX: 1650, maxX: 1770, minZ: -1060, maxZ: -1000, stepX: 30, stepZ: 26 },
-      { minX: 1800, maxX: 1900, minZ: -1210, maxZ: -1100, stepX: 30, stepZ: 26 },
+      { minX: 1650, maxX: 1770, minZ: -1060, maxZ: -1000, stepX: 18, stepZ: 18 },
+      { minX: 1800, maxX: 1900, minZ: -1210, maxZ: -1100, stepX: 18, stepZ: 18 },
       // Cilincing industri: tepi barat Jalan Cakung Cilincing Barat.
-      { minX: 1335, maxX: 1430, minZ: -1010, maxZ: -900, stepX: 30, stepZ: 26 },
+      { minX: 1335, maxX: 1430, minZ: -1010, maxZ: -900, stepX: 18, stepZ: 18 },
       // Cilincing industri utara: tepi utara Jalan Raya Cilincing Koja.
-      { minX: 1340, maxX: 1420, minZ: -1190, maxZ: -1030, stepX: 30, stepZ: 26 },
+      { minX: 1340, maxX: 1420, minZ: -1190, maxZ: -1030, stepX: 18, stepZ: 18 },
       // KBN Cakung utara: tepi utara kawasan berikat.
-      { minX: 1440, maxX: 1600, minZ: -652, maxZ: -600, stepX: 30, stepZ: 24 },
+      { minX: 1440, maxX: 1600, minZ: -652, maxZ: -600, stepX: 18, stepZ: 18 },
       // KBN Cakung barat: sisa blok industri tepi barat.
-      { minX: 1330, maxX: 1380, minZ: -810, maxZ: -700, stepX: 26, stepZ: 24 },
+      { minX: 1330, maxX: 1380, minZ: -810, maxZ: -700, stepX: 18, stepZ: 18 },
       // Cakung timur: gudang kecil antara Jalan Cakung Cilincing Timur dan kanal.
-      { minX: 1680, maxX: 1790, minZ: -950, maxZ: -860, stepX: 28, stepZ: 24 },
+      { minX: 1680, maxX: 1790, minZ: -950, maxZ: -860, stepX: 18, stepZ: 18 },
       // Cakung timur selatan: gudang antara Nagrak dan Marunda.
-      { minX: 1800, maxX: 1870, minZ: -1060, maxZ: -880, stepX: 28, stepZ: 24 },
+      { minX: 1800, maxX: 1870, minZ: -1060, maxZ: -880, stepX: 18, stepZ: 18 },
       // KBN Cakung timur: gudang tepi Jalan Cakung Cilincing Barat.
-      { minX: 1680, maxX: 1750, minZ: -660, maxZ: -600, stepX: 28, stepZ: 24 },
+      { minX: 1680, maxX: 1750, minZ: -660, maxZ: -600, stepX: 18, stepZ: 18 },
       // Marunda tengah: gudang antara Sungai Tiram dan Jalan Marunda Makmur.
-      { minX: 1980, maxX: 2050, minZ: -1180, maxZ: -1060, stepX: 30, stepZ: 26 }
+      { minX: 1980, maxX: 2050, minZ: -1180, maxZ: -1060, stepX: 18, stepZ: 18 }
     ];
     warehouseZones.forEach((zone, zoneIndex) => {
       for (let x = zone.minX; x <= zone.maxX; x += zone.stepX) {
         for (let z = zone.minZ; z <= zone.maxZ; z += zone.stepZ) {
           const hash = Math.abs(Math.sin(x * 4.71 + z * 9.13 + zoneIndex));
-          const w = 19 + hash * 5;
-          const d = 21 + (1 - hash) * 6;
-          const h = 8 + hash * 4;
+          const w = 15 + hash * 4;
+          const d = 16 + (1 - hash) * 5;
+          const h = 7.5 + hash * 3.5;
           const radius = Math.max(w, d) * 0.5;
-          const px = x + (hash - 0.5) * 4;
-          const pz = z + (((hash * 5.7) % 1) - 0.5) * 4;
+          const px = x + (hash - 0.5) * 2;
+          const pz = z + (((hash * 5.7) % 1) - 0.5) * 2;
           const roofW = w + 1.4;
           const roofD = d + 1.4;
           if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
@@ -18752,36 +18752,36 @@ export class CityScene {
 
     const residentialZones = [
       // Cilincing: kampung padat antara Jalan Raya Cilincing dan Kebantenan.
-      { minX: 1430, maxX: 1560, minZ: -1270, maxZ: -1155, step: 16 },
+      { minX: 1430, maxX: 1560, minZ: -1270, maxZ: -1155, step: 7.2 },
       // Kebantenan: permukiman tepi Jalan Madya Kebantenan.
-      { minX: 1440, maxX: 1570, minZ: -1145, maxZ: -1050, step: 16 },
+      { minX: 1440, maxX: 1570, minZ: -1145, maxZ: -1050, step: 7.0 },
       // Cilincing timur: rumah petak pekerja pelabuhan.
-      { minX: 1580, maxX: 1690, minZ: -1300, maxZ: -1220, step: 16 },
+      { minX: 1580, maxX: 1690, minZ: -1300, maxZ: -1220, step: 7.2 },
       // Marunda Pulo: kampung nelayan di selatan Rusunawa Marunda.
-      { minX: 1880, maxX: 1990, minZ: -1330, maxZ: -1240, step: 16 },
+      { minX: 1880, maxX: 1990, minZ: -1330, maxZ: -1240, step: 7.2 },
       // Marunda Baru: permukiman tepi Jalan Marunda Makmur.
-      { minX: 1970, maxX: 2070, minZ: -1240, maxZ: -1160, step: 16 },
+      { minX: 1970, maxX: 2070, minZ: -1240, maxZ: -1160, step: 7.0 },
       // Sekitar Rumah Si Pitung: kampung lama Marunda.
-      { minX: 1760, maxX: 1840, minZ: -1480, maxZ: -1400, step: 15 },
+      { minX: 1760, maxX: 1840, minZ: -1480, maxZ: -1400, step: 7.0 },
       // Nagrak: kampung di barat tapak Rusunawa Nagrak.
-      { minX: 1620, maxX: 1710, minZ: -1010, maxZ: -950, step: 16 },
+      { minX: 1620, maxX: 1710, minZ: -1010, maxZ: -950, step: 7.2 },
       // Sungai Tiram: deret rumah tepi Jalan Sungai Tiram.
-      { minX: 1880, maxX: 1980, minZ: -1180, maxZ: -1090, step: 16 },
+      { minX: 1880, maxX: 1980, minZ: -1180, maxZ: -1090, step: 7.2 },
       // Rorotan: kampung padat tepi Cakung Drain.
-      { minX: 1750, maxX: 1815, minZ: -790, maxZ: -690, step: 15 },
+      { minX: 1750, maxX: 1815, minZ: -790, maxZ: -690, step: 7.0 },
       // Rorotan timur: permukiman tepi Jalan Rorotan IX.
-      { minX: 1960, maxX: 2080, minZ: -760, maxZ: -660, step: 16 }
+      { minX: 1960, maxX: 2080, minZ: -760, maxZ: -660, step: 7.2 }
     ];
     residentialZones.forEach((zone, zoneIndex) => {
       for (let x = zone.minX; x <= zone.maxX; x += zone.step) {
         for (let z = zone.minZ; z <= zone.maxZ; z += zone.step) {
           const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233 + zoneIndex));
-          const w = 9 + hash * 3;
-          const d = 10 + (1 - hash) * 3;
-          const h = 6.5 + hash * 3.5;
+          const w = 5.6 + hash * 2.2;
+          const d = 6.2 + (1 - hash) * 2.2;
+          const h = 4.8 + hash * 2.4;
           const radius = Math.max(w, d) * 0.5;
-          const px = x + (hash - 0.5) * 2.4;
-          const pz = z + (((hash * 7.31) % 1) - 0.5) * 2.4;
+          const px = x + (hash - 0.5) * 1.8;
+          const pz = z + (((hash * 7.31) % 1) - 0.5) * 1.8;
           const roofW = w + INFILL_ROOF_EAVE * 2;
           const roofD = d + INFILL_ROOF_EAVE * 2;
           if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
