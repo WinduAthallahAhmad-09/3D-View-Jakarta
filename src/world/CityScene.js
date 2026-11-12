@@ -17233,16 +17233,16 @@ export class CityScene {
     });
 
     const placeShophouseRow = (roadWidth, chain, ignoreWays) => {
-      visitChain(chain, 13, (bx, bz, angle) => {
+      visitChain(chain, 6.2, (bx, bz, angle) => {
         const nx = Math.cos(angle);
         const nz = -Math.sin(angle);
         [-1, 1].forEach((side) => {
           const hash = Math.abs(Math.sin(bx * 8.13 + bz * 4.71 + side * 3.7));
-          const w = 11 + (1 - hash) * 4;
-          const d = 10.5 + hash * 2.5;
-          const h = 9 + hash * 7;
-          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
-          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
+          const w = 7.5 + (1 - hash) * 2.0;
+          const d = 5.2 + hash * 1.5;
+          const h = 8.5 + hash * 4.0;
+          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 1.2) * side;
+          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 1.2) * side;
           const radius = Math.max(w, d) * 0.5;
           const roofW = w + INFILL_ROOF_EAVE * 2;
           if (isBlocked(px, pz, radius, ignoreWays) || isRoofOccupied(px, pz, roofW, d, angle)) return;
@@ -17279,22 +17279,22 @@ export class CityScene {
 
     const warehouseZones = [
       // W1 Cakung industri utara: gudang antara JIEP dan koridor Penggilingan.
-      { minX: 1450, maxX: 1680, minZ: -140, maxZ: -60, stepX: 30, stepZ: 26 },
+      { minX: 1450, maxX: 1680, minZ: -140, maxZ: -60, stepX: 18, stepZ: 18 },
       // W2 Pulo Gebang logistik utara: pergudangan tepi Jalan Raya Bekasi.
-      { minX: 1700, maxX: 1995, minZ: -140, maxZ: -20, stepX: 30, stepZ: 26 },
+      { minX: 1700, maxX: 1995, minZ: -140, maxZ: -20, stepX: 18, stepZ: 18 },
       // W3 Pulo Gebang hinterland: gudang kecil di selatan terminal.
-      { minX: 1830, maxX: 1995, minZ: 320, maxZ: 375, stepX: 28, stepZ: 24 }
+      { minX: 1830, maxX: 1995, minZ: 320, maxZ: 375, stepX: 18, stepZ: 18 }
     ];
     warehouseZones.forEach((zone, zoneIndex) => {
       for (let x = zone.minX; x <= zone.maxX; x += zone.stepX) {
         for (let z = zone.minZ; z <= zone.maxZ; z += zone.stepZ) {
           const hash = Math.abs(Math.sin(x * 4.71 + z * 9.13 + zoneIndex));
-          const w = 19 + hash * 5;
-          const d = 21 + (1 - hash) * 6;
-          const h = 8 + hash * 4;
+          const w = 15 + hash * 4;
+          const d = 16 + (1 - hash) * 5;
+          const h = 7.5 + hash * 3.5;
           const radius = Math.max(w, d) * 0.5;
-          const px = x + (hash - 0.5) * 4;
-          const pz = z + (((hash * 5.7) % 1) - 0.5) * 4;
+          const px = x + (hash - 0.5) * 2;
+          const pz = z + (((hash * 5.7) % 1) - 0.5) * 2;
           const roofW = w + 1.4;
           const roofD = d + 1.4;
           if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
@@ -17324,36 +17324,36 @@ export class CityScene {
 
     const residentialZones = [
       // R1 Cakung barat: kampung antara JIEP dan Klender.
-      { minX: 1040, maxX: 1145, minZ: -145, maxZ: -5, step: 16 },
+      { minX: 1040, maxX: 1145, minZ: -145, maxZ: -5, step: 7.2 },
       // R2 Jatinegara Kaum: permukiman tepi Jalan Bekasi Timur.
-      { minX: 960, maxX: 1145, minZ: 40, maxZ: 195, step: 16 },
+      { minX: 960, maxX: 1145, minZ: 40, maxZ: 195, step: 7 },
       // R3 Pulogadung selatan: rumah petak pekerja industri.
-      { minX: 1150, maxX: 1295, minZ: 80, maxZ: 160, step: 16 },
+      { minX: 1150, maxX: 1295, minZ: 80, maxZ: 160, step: 7 },
       // R4 Cipinang Muara: kampung tepi Kanal Banjir Timur.
-      { minX: 960, maxX: 1080, minZ: 360, maxZ: 480, step: 16 },
+      { minX: 960, maxX: 1080, minZ: 360, maxZ: 480, step: 7.2 },
       // R5 Malaka Sari selatan: permukiman di selatan Rusun Klender.
-      { minX: 1380, maxX: 1520, minZ: 430, maxZ: 560, step: 16 },
+      { minX: 1380, maxX: 1520, minZ: 430, maxZ: 560, step: 7 },
       // R6 Pondok Kopi: kampung tepi Jalan Raya Pondok Kopi.
-      { minX: 1560, maxX: 1700, minZ: 390, maxZ: 550, step: 16 },
+      { minX: 1560, maxX: 1700, minZ: 390, maxZ: 550, step: 7 },
       // R7 Bintara: permukiman padat tepi Jalan Bintara Raya.
-      { minX: 1720, maxX: 1960, minZ: 400, maxZ: 540, step: 16 },
+      { minX: 1720, maxX: 1960, minZ: 400, maxZ: 540, step: 7.2 },
       // R8 Pulo Gebang utara: kampung antara terminal dan koridor Bekasi.
-      { minX: 1700, maxX: 1995, minZ: 0, maxZ: 145, step: 16 },
+      { minX: 1700, maxX: 1995, minZ: 0, maxZ: 145, step: 7.2 },
       // R9 Cakung timur: kampung padat antara Penggilingan dan Klender Baru.
-      { minX: 1450, maxX: 1680, minZ: -10, maxZ: 190, step: 16 },
+      { minX: 1450, maxX: 1680, minZ: -10, maxZ: 190, step: 7 },
       // R10 Buaran utara: permukiman di utara Stasiun Buaran.
-      { minX: 1380, maxX: 1520, minZ: 185, maxZ: 250, step: 16 }
+      { minX: 1380, maxX: 1520, minZ: 185, maxZ: 250, step: 7 }
     ];
     residentialZones.forEach((zone, zoneIndex) => {
       for (let x = zone.minX; x <= zone.maxX; x += zone.step) {
         for (let z = zone.minZ; z <= zone.maxZ; z += zone.step) {
           const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233 + zoneIndex));
-          const w = 9 + hash * 3;
-          const d = 10 + (1 - hash) * 3;
-          const h = 6.5 + hash * 3.5;
+          const w = 5.6 + hash * 2.2;
+          const d = 6.2 + (1 - hash) * 2.2;
+          const h = 4.8 + hash * 2.4;
           const radius = Math.max(w, d) * 0.5;
-          const px = x + (hash - 0.5) * 2.4;
-          const pz = z + (((hash * 7.31) % 1) - 0.5) * 2.4;
+          const px = x + (hash - 0.5) * 1.8;
+          const pz = z + (((hash * 7.31) % 1) - 0.5) * 1.8;
           const roofW = w + INFILL_ROOF_EAVE * 2;
           const roofD = d + INFILL_ROOF_EAVE * 2;
           if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
