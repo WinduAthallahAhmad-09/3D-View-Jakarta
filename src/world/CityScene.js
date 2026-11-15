@@ -16238,16 +16238,16 @@ export class CityScene {
     });
 
     const placeShophouseRow = (roadWidth, chain, ignoreWays) => {
-      visitChain(chain, 13, (bx, bz, angle) => {
+      visitChain(chain, 6.2, (bx, bz, angle) => {
         const nx = Math.cos(angle);
         const nz = -Math.sin(angle);
         [-1, 1].forEach((side) => {
           const hash = Math.abs(Math.sin(bx * 8.13 + bz * 4.71 + side * 3.7));
-          const w = 11 + (1 - hash) * 4;
-          const d = 10.5 + hash * 2.5;
-          const h = 9 + hash * 7;
-          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
-          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
+          const w = 7.5 + (1 - hash) * 2.0;
+          const d = 5.2 + hash * 1.5;
+          const h = 8.5 + hash * 4.0;
+          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 1.2) * side;
+          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 1.2) * side;
           const radius = Math.max(w, d) * 0.5;
           const roofW = w + INFILL_ROOF_EAVE * 2;
           if (isBlocked(px, pz, radius, ignoreWays) || isRoofOccupied(px, pz, roofW, d, angle)) return;
@@ -16284,22 +16284,22 @@ export class CityScene {
 
     const warehouseZones = [
       // W1 Petukangan: pergudangan ringan antara Tol Ulujami-Serpong dan Ciledug Raya.
-      { minX: -1000, maxX: -920, minZ: 760, maxZ: 840, stepX: 28, stepZ: 24 },
+      { minX: -1000, maxX: -920, minZ: 760, maxZ: 840, stepX: 18, stepZ: 18 },
       // W2 Pondok Betung: gudang di barat koridor RC. Veteran.
-      { minX: -1260, maxX: -1180, minZ: 700, maxZ: 780, stepX: 28, stepZ: 24 },
+      { minX: -1260, maxX: -1180, minZ: 700, maxZ: 780, stepX: 18, stepZ: 18 },
       // W3 Ulujami selatan: gudang tepi Jalan Raya Pasar Jumat.
-      { minX: -880, maxX: -820, minZ: 1000, maxZ: 1060, stepX: 28, stepZ: 24 }
+      { minX: -880, maxX: -820, minZ: 1000, maxZ: 1060, stepX: 18, stepZ: 18 }
     ];
     warehouseZones.forEach((zone, zoneIndex) => {
       for (let x = zone.minX; x <= zone.maxX; x += zone.stepX) {
         for (let z = zone.minZ; z <= zone.maxZ; z += zone.stepZ) {
           const hash = Math.abs(Math.sin(x * 4.71 + z * 9.13 + zoneIndex));
-          const w = 19 + hash * 5;
-          const d = 21 + (1 - hash) * 6;
-          const h = 8 + hash * 4;
+          const w = 15 + hash * 4;
+          const d = 16 + (1 - hash) * 5;
+          const h = 7.5 + hash * 3.5;
           const radius = Math.max(w, d) * 0.5;
-          const px = x + (hash - 0.5) * 4;
-          const pz = z + (((hash * 5.7) % 1) - 0.5) * 4;
+          const px = x + (hash - 0.5) * 2;
+          const pz = z + (((hash * 5.7) % 1) - 0.5) * 2;
           const roofW = w + 1.4;
           const roofD = d + 1.4;
           if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
@@ -16329,40 +16329,40 @@ export class CityScene {
 
     const residentialZones = [
       // R1 Bintaro Jaya barat: perumahan di barat Bintaro Jaya Xchange.
-      { minX: -1500, maxX: -1320, minZ: 1180, maxZ: 1300, step: 16 },
+      { minX: -1510, maxX: -1300, minZ: 1160, maxZ: 1310, step: 5.6 },
       // R2 Bintaro Jaya selatan: perumahan sektor selatan danau.
-      { minX: -1500, maxX: -1300, minZ: 1320, maxZ: 1450, step: 16 },
+      { minX: -1510, maxX: -1280, minZ: 1310, maxZ: 1455, step: 5.6 },
       // R3 Jurangmangu: kampung di timur Stasiun Jurangmangu.
-      { minX: -1280, maxX: -1150, minZ: 1300, maxZ: 1450, step: 16 },
+      { minX: -1280, maxX: -1100, minZ: 1250, maxZ: 1455, step: 5.6 },
       // R4 Pondok Betung: permukiman antara RC. Veteran dan Tol Ulujami-Serpong.
-      { minX: -1300, maxX: -1150, minZ: 900, maxZ: 1150, step: 16 },
+      { minX: -1320, maxX: -1120, minZ: 850, maxZ: 1240, step: 5.6 },
       // R5 Pondok Pucung: kampung di utara Universitas Budi Luhur.
-      { minX: -1150, maxX: -1020, minZ: 700, maxZ: 1100, step: 16 },
+      { minX: -1150, maxX: -1000, minZ: 620, maxZ: 1120, step: 5.6 },
       // R6 Petukangan Utara: permukiman tepi Ciledug Raya.
-      { minX: -1020, maxX: -860, minZ: 660, maxZ: 860, step: 16 },
+      { minX: -1020, maxX: -840, minZ: 580, maxZ: 880, step: 5.6 },
       // R7 Petukangan Selatan: rumah antara Ciledug Raya dan Pesanggrahan.
-      { minX: -1020, maxX: -860, minZ: 880, maxZ: 1120, step: 16 },
+      { minX: -1020, maxX: -840, minZ: 870, maxZ: 1250, step: 5.6 },
       // R8 Ulujami: kampung padat di sekitar Pasar Ulujami.
-      { minX: -860, maxX: -700, minZ: 900, maxZ: 1100, step: 16 },
+      { minX: -860, maxX: -650, minZ: 800, maxZ: 1250, step: 5.6 },
       // R9 Gandaria Selatan: permukiman di selatan Gandaria City.
-      { minX: -740, maxX: -620, minZ: 640, maxZ: 880, step: 16 },
+      { minX: -740, maxX: -590, minZ: 580, maxZ: 880, step: 5.6 },
       // R10 Cipete Utara: rumah di selatan blok Kebayoran.
-      { minX: -620, maxX: -480, minZ: 1020, maxZ: 1180, step: 16 },
+      { minX: -620, maxX: -420, minZ: 980, maxZ: 1250, step: 5.6 },
       // R11 Lebak Bulus: permukiman di ujung selatan koridor MRT.
-      { minX: -620, maxX: -460, minZ: 1080, maxZ: 1240, step: 16 },
+      { minX: -600, maxX: -250, minZ: 1100, maxZ: 1450, step: 5.6 },
       // R12 Rempoa: kampung di barat Bintaro.
-      { minX: -1340, maxX: -1200, minZ: 640, maxZ: 880, step: 16 }
+      { minX: -1360, maxX: -1150, minZ: 580, maxZ: 890, step: 5.6 }
     ];
     residentialZones.forEach((zone, zoneIndex) => {
       for (let x = zone.minX; x <= zone.maxX; x += zone.step) {
         for (let z = zone.minZ; z <= zone.maxZ; z += zone.step) {
           const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233 + zoneIndex));
-          const w = 9 + hash * 3;
-          const d = 10 + (1 - hash) * 3;
-          const h = 6.5 + hash * 3.5;
+          const w = 5.6 + hash * 2.2;
+          const d = 6.2 + (1 - hash) * 2.2;
+          const h = 4.8 + hash * 2.4;
           const radius = Math.max(w, d) * 0.5;
-          const px = x + (hash - 0.5) * 2.4;
-          const pz = z + (((hash * 7.31) % 1) - 0.5) * 2.4;
+          const px = x + (hash - 0.5) * 1.8;
+          const pz = z + (((hash * 7.31) % 1) - 0.5) * 1.8;
           const roofW = w + INFILL_ROOF_EAVE * 2;
           const roofD = d + INFILL_ROOF_EAVE * 2;
           if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
