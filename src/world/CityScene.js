@@ -12466,16 +12466,17 @@ export class CityScene {
     });
 
     const placeShophouseRow = (roadWidth, chain, ignoreRoadNames) => {
-      visitChain(chain, 13, (bx, bz, angle) => {
+      visitChain(chain, 5.2, (bx, bz, angle) => {
         const nx = Math.cos(angle);
         const nz = -Math.sin(angle);
         [-1, 1].forEach((side) => {
           const hash = Math.abs(Math.sin(bx * 8.13 + bz * 4.71 + side * 3.7));
-          const w = 11 + (1 - hash) * 4;
-          const d = 10.5 + hash * 2.5;
-          const h = 9 + hash * 7;
-          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 3.2) * side;
-          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 3.2) * side;
+          const w = 6.8 + (1 - hash) * 1.8;
+          const d = 4.8 + hash * 1.2;
+          const h = 8.5 + hash * 4.2;
+          const roadPad = 1.0;
+          const px = bx + nx * (roadWidth * 0.5 + d * 0.5 + roadPad) * side;
+          const pz = bz + nz * (roadWidth * 0.5 + d * 0.5 + roadPad) * side;
           const radius = Math.max(w, d) * 0.5;
           const roofW = w + INFILL_ROOF_EAVE * 2;
           if (isBlocked(px, pz, radius, ignoreRoadNames) || isRoofOccupied(px, pz, roofW, d, angle)) return;
@@ -12490,7 +12491,7 @@ export class CityScene {
             rotY: angle,
             color: shophouseColors[Math.floor(hash * shophouseColors.length) % shophouseColors.length]
           });
-          const roofH = 1.8 + hash * 0.8;
+          const roofH = 1.6 + hash * 0.6;
           roofItems.push({
             x: px,
             y: h,
@@ -12515,15 +12516,17 @@ export class CityScene {
       { minX: 970, maxX: 1060, minZ: 780, maxZ: 820, stepX: 28, stepZ: 26 }
     ];
     warehouseZones.forEach((zone, zoneIndex) => {
-      for (let x = zone.minX; x <= zone.maxX; x += zone.stepX) {
-        for (let z = zone.minZ; z <= zone.maxZ; z += zone.stepZ) {
+      const stepX = 14;
+      const stepZ = 14;
+      for (let x = zone.minX; x <= zone.maxX; x += stepX) {
+        for (let z = zone.minZ; z <= zone.maxZ; z += stepZ) {
           const hash = Math.abs(Math.sin(x * 4.71 + z * 9.13 + zoneIndex));
-          const w = 19 + hash * 5;
-          const d = 21 + (1 - hash) * 6;
-          const h = 8 + hash * 4;
+          const w = 13 + hash * 3;
+          const d = 14 + (1 - hash) * 4;
+          const h = 7.5 + hash * 3.5;
           const radius = Math.max(w, d) * 0.5;
-          const px = x + (hash - 0.5) * 4;
-          const pz = z + (((hash * 5.7) % 1) - 0.5) * 4;
+          const px = x + (hash - 0.5) * 1.5;
+          const pz = z + (((hash * 5.7) % 1) - 0.5) * 1.5;
           const roofW = w + 1.4;
           const roofD = d + 1.4;
           if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
@@ -12555,38 +12558,39 @@ export class CityScene {
       // R1 Cipinang Melayu selatan: kantong rumah di barat Situ Rawa Rorotan.
       { minX: 970, maxX: 1120, minZ: 820, maxZ: 955, step: 13 },
       // R2 Cipinang Melayu barat: permukiman antara Kalimalang dan waterway.
-      { minX: 1080, maxX: 1200, minZ: 780, maxZ: 920, step: 13 },
+      { minX: 1040, maxX: 1240, minZ: 740, maxZ: 950, step: 13 },
       // R3 Cipinang Melayu utara: kampung tepi Jalan Pahlawan Revolusi.
-      { minX: 980, maxX: 1100, minZ: 565, maxZ: 720, step: 13 },
+      { minX: 965, maxX: 1180, minZ: 565, maxZ: 760, step: 13 },
       // R4 Duren Sawit tenggara: rumah di selatan Jalan Swadaya Raya.
-      { minX: 1380, maxX: 1490, minZ: 825, maxZ: 915, step: 13 },
+      { minX: 1320, maxX: 1520, minZ: 780, maxZ: 950, step: 13 },
       // R5 Pondok Kelapa selatan: kampung antara Kalimalang dan Jati Utama.
-      { minX: 1490, maxX: 1580, minZ: 800, maxZ: 900, step: 13 },
+      { minX: 1460, maxX: 1620, minZ: 760, maxZ: 940, step: 13 },
       // R6 Pondok Kelapa tenggara: permukiman tepi Jalan Pondok Kelapa Timur.
-      { minX: 1580, maxX: 1690, minZ: 785, maxZ: 875, step: 13 },
+      { minX: 1550, maxX: 1740, minZ: 740, maxZ: 920, step: 13 },
       // R7 Bintara Jaya: rumah di timur Jalan Haji Naman.
-      { minX: 1700, maxX: 1790, minZ: 665, maxZ: 755, step: 13 },
+      { minX: 1660, maxX: 1795, minZ: 620, maxZ: 820, step: 13 },
       // R8 Jati Utama: rumah petak di selatan Jalan Jati Utama Raya.
-      { minX: 1460, maxX: 1680, minZ: 900, maxZ: 955, step: 13 },
+      { minX: 1420, maxX: 1720, minZ: 860, maxZ: 955, step: 13 },
       // R9 Jati Waringin selatan: permukiman di barat setu Jati Waringin.
-      { minX: 1250, maxX: 1400, minZ: 910, maxZ: 955, step: 13 },
+      { minX: 1200, maxX: 1440, minZ: 860, maxZ: 955, step: 13 },
       // R10 Cipinang Melayu timur: kampung antara Radin Inten II dan Laut Arafuru.
       { minX: 1180, maxX: 1360, minZ: 560, maxZ: 640, step: 13 },
       // R11 Pondok Bambu: rumah di barat Jalan Radin Inten II.
-      { minX: 1360, maxX: 1460, minZ: 560, maxZ: 640, step: 13 },
+      { minX: 1320, maxX: 1520, minZ: 560, maxZ: 680, step: 13 },
       // R12 Duren Sawit tengah: kantong rumah di antara koridor kolektor.
-      { minX: 1300, maxX: 1440, minZ: 660, maxZ: 760, step: 13 }
+      { minX: 1220, maxX: 1540, minZ: 620, maxZ: 820, step: 13 }
     ];
     residentialZones.forEach((zone, zoneIndex) => {
-      for (let x = zone.minX; x <= zone.maxX; x += zone.step) {
-        for (let z = zone.minZ; z <= zone.maxZ; z += zone.step) {
+      const step = 3.8;
+      for (let x = zone.minX; x <= zone.maxX; x += step) {
+        for (let z = zone.minZ; z <= zone.maxZ; z += step) {
           const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233 + zoneIndex));
-          const w = 7 + hash * 2.5;
-          const d = 8 + (1 - hash) * 2.5;
-          const h = 6.5 + hash * 3.5;
+          const w = 4.8 + hash * 1.8;
+          const d = 5.2 + (1 - hash) * 1.8;
+          const h = 4.8 + hash * 2.4;
           const radius = Math.max(w, d) * 0.5;
-          const px = x + (hash - 0.5) * 2.4;
-          const pz = z + (((hash * 7.31) % 1) - 0.5) * 2.4;
+          const px = x + (hash - 0.5) * 1.4;
+          const pz = z + (((hash * 7.31) % 1) - 0.5) * 1.4;
           const roofW = w + INFILL_ROOF_EAVE * 2;
           const roofD = d + INFILL_ROOF_EAVE * 2;
           if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
@@ -12600,7 +12604,7 @@ export class CityScene {
             d,
             color: residentialColors[Math.floor(hash * residentialColors.length) % residentialColors.length]
           });
-          const roofH = 1.5 + hash * 0.9;
+          const roofH = 1.4 + hash * 0.7;
           roofItems.push({
             x: px,
             y: h,
@@ -12680,7 +12684,7 @@ export class CityScene {
     };
   }
 
-  isNearVoidFRoad(x, z, clearance = 12) {
+    isNearVoidFRoad(x, z, clearance = 12) {
     for (const s of this.getVoidFRoadSegments()) {
       const pad = clearance + s.halfWidth;
       if (
