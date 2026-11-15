@@ -4102,22 +4102,16 @@ export class CityScene {
 
     // =========================================================================
     // 6. POROS ARTERI UTAMA JAKARTA TIMUR
+    // (Segmen di dalam koridor Void N dirender secara autentik & presisi via VOID_N_OSM;
+    // segmen luar ke arah Cawang, Pulogadung, & Duren Sawit tetap terhubung rapi di sini)
     // =========================================================================
     // A. Koridor Jl. Matraman Raya -> Jl. Jatinegara Barat/Timur -> Jl. Otista -> Cawang
-    addRoad(420, -120, 550, 80, 22, true, 3.0);   // Matraman Raya Utara (Akses Salemba)
-    addRoad(550, 80, 666, 282, 24, true, 3.5);    // Matraman ke Stasiun Jatinegara
-    addRoad(666, 282, 580, 420, 24, true, 3.5);   // Jatinegara ke Terminal Kampung Melayu
-    addRoad(580, 420, 640, 580, 22, true, 3.0);   // Kampung Melayu ke Jl. Otista
     addRoad(640, 580, 712, 724, 24, true, 3.5);   // Jl. Otista ke Simpang Susun Cawang
 
     // B. Koridor Jl. Pemuda & Jl. Pramuka (Poros Rawamangun ke Matraman)
-    addRoad(420, -120, 620, -90, 22, true, 3.0);  // Jl. Pramuka (Matraman ke Simpang By-Pass)
-    addRoad(620, -90, 945, -57, 24, true, 3.5);   // Jl. Pemuda Barat (Depan Velodrome Rawamangun)
     addRoad(945, -57, 1350, -30, 22, true, 3.0);  // Jl. Pemuda Timur (Menuju Pulogadung)
 
     // C. Koridor Jl. Kolonel Sugiono & Jl. Basuki Rahmat (Casablanca Timur / Non-Tol)
-    addRoad(450, 520, 580, 520, 22, true, 3.0);   // Sambungan Flyover Casablanca Tebet ke Kp. Melayu
-    addRoad(580, 520, 850, 520, 22, true, 3.0);   // Jl. Basuki Rahmat (Kp. Melayu ke Cipinang Besar)
     addRoad(850, 520, 1200, 520, 22, true, 3.0);  // Jl. Kolonel Sugiono (Cipinang ke Duren Sawit)
 
     // Flyover Cipinang (Jembatan Layang Non-Tol di atas perlintasan rel/simpang)
@@ -4127,7 +4121,6 @@ export class CityScene {
     // D. Koridor Jl. DI Panjaitan & Jl. Mayjen Sutoyo (Arteri By-Pass Bawah Tol)
     addRoad(720, 320, 712, 724, 22, true, 3.0);   // Kebon Nanas ke Cawang
     addRoad(712, 724, 780, 950, 22, true, 3.0);   // Cawang ke PGC Cililitan
-    addRoad(720, 320, 800, 50, 22, true, 3.0);    // Kebon Nanas ke Pramuka
 
     // E. Koridor Jl. Raya Pondok Gede & Akses Halim / TMII / Lubang Buaya
     addRoad(893, 993, 1182, 1324, 18, false);     // Akses Bandara Halim ke Monumen Pancasila Sakti
@@ -8808,63 +8801,76 @@ export class CityScene {
 
     const isTollRoad = (r) => r.type === 'motorway' || r.type === 'motorway_link' || (r.name && r.name.toLowerCase().includes('tol'));
 
-    // Koridor arteri yang sudah dibangun rapi dengan median taman & trotoar di buildEastJakartaInfrastructure
-    const isManualEastJkt = (r) => {
-      if (!r.name) return false;
-      if (r.name === 'Jalan Pemuda') return true;
-      if (r.name === 'Jalan Pramuka') {
-        const midX = r.points.reduce((s, p) => s + p[0], 0) / r.points.length;
-        if (midX <= 630) return true;
-      }
-      if (r.name === 'Jalan Matraman Raya') return true;
-      if (r.name.includes('Basuki Rahmat') || r.name.includes('Kolonel Sugiono')) return true;
-      if (r.name.includes('D. I. Panjaitan') || r.name.includes('Mayjen Sutoyo')) return true;
-      return false;
+    const normRoadName = (name) => {
+      if (!name) return '';
+      return name.toLowerCase()
+        .replace(/\b(jenderal|letnan|letjen|mayor|mayjen|kolonel|k\.?\s*haji|kh|profesor|prof|doktor|dr|sh|ir)\b/g, '')
+        .replace(/[^a-z0-9]/g, '');
     };
 
-    const renderedRoads = [];
-    VOID_N_OSM.roads.forEach((road) => {
-      if (isTollRoad(road)) return;
-      if (isManualEastJkt(road)) return;
+    const distSqToSeg = (px, pz, x1, z1, x2, z2) => {
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const l2 = dx * dx + dz * dz;
+      if (l2 === 0) return (px - x1) * (px - x1) + (pz - z1) * (pz - z1);
+      let t = ((px - x1) * dx + (pz - z1) * dz) / l2;
+      t = Math.max(0, Math.min(1, t));
+      const projX = x1 + t * dx;
+      const projZ = z1 + t * dz;
+      return (px - projX) * (px - projX) + (pz - projZ) * (pz - projZ);
+    };
 
-      // Hapus segmen mikro (< 3m) yang menghasilkan artefak balok kotak mengambang
+    const distToPoly = (px, pz, points) => {
+      let minDistSq = Infinity;
+      for (let i = 0; i < points.length - 1; i++) {
+        const dSq = distSqToSeg(px, pz, points[i][0], points[i][1], points[i + 1][0], points[i + 1][1]);
+        if (dSq < minDistSq) minDistSq = dSq;
+      }
+      return Math.sqrt(minDistSq);
+    };
+
+    // Urutkan kandidat jalan dari yang terpanjang agar koridor utama kontinu dipertahankan terlebih dahulu
+    const candidateRoads = VOID_N_OSM.roads.filter((road) => {
+      if (isTollRoad(road)) return false;
       let totalLen = 0;
       for (let i = 0; i < road.points.length - 1; i++) {
         totalLen += Math.hypot(road.points[i + 1][0] - road.points[i][0], road.points[i + 1][1] - road.points[i][1]);
       }
-      if (totalLen < 3.0) return;
+      return totalLen >= 4.0;
+    }).sort((a, b) => {
+      const lenA = a.points.reduce((s, p, i) => i === 0 ? 0 : s + Math.hypot(p[0] - a.points[i - 1][0], p[1] - a.points[i - 1][1]), 0);
+      const lenB = b.points.reduce((s, p, i) => i === 0 ? 0 : s + Math.hypot(p[0] - b.points[i - 1][0], p[1] - b.points[i - 1][1]), 0);
+      return lenB - lenA;
+    });
 
-      // Deduplikasi lajur kembar paralel (dual-carriageway, jalur busway, jalur lambat) pada koridor yang sama
-      // agar tidak bertumpuk menjadi garis barcode
-      if (road.name) {
-        const pStart = road.points[0];
-        const pEnd = road.points[road.points.length - 1];
-        const roadAngle = Math.atan2(pEnd[0] - pStart[0], pEnd[1] - pStart[1]);
-        const roadMid = [(pStart[0] + pEnd[0]) * 0.5, (pStart[1] + pEnd[1]) * 0.5];
-
-        for (const other of renderedRoads) {
-          if (other.name === road.name) {
-            const oStart = other.points[0];
-            const oEnd = other.points[other.points.length - 1];
-            const oAngle = Math.atan2(oEnd[0] - oStart[0], oEnd[1] - oStart[1]);
-            let diff = Math.abs(roadAngle - oAngle);
-            if (diff > Math.PI) diff = 2 * Math.PI - diff;
-            if (diff > Math.PI * 0.5) diff = Math.PI - diff;
-            if (diff < 0.35) {
-              const oMid = [(oStart[0] + oEnd[0]) * 0.5, (oStart[1] + oEnd[1]) * 0.5];
-              if (Math.hypot(roadMid[0] - oMid[0], roadMid[1] - oMid[1]) < 14) {
-                return;
-              }
-            }
-          }
-        }
+    const renderedRoads = [];
+    candidateRoads.forEach((road) => {
+      const kName = normRoadName(road.name);
+      if (kName) {
+        const midX = road.points.reduce((s, p) => s + p[0], 0) / road.points.length;
+        const midZ = road.points.reduce((s, p) => s + p[1], 0) / road.points.length;
+        const isDupe = renderedRoads.some((other) => {
+          if (normRoadName(other.name) !== kName) return false;
+          return distToPoly(midX, midZ, other.points) < 14;
+        });
+        if (isDupe) return;
       }
-
       renderedRoads.push(road);
     });
 
+    // Hierarki lebar jalan realistis agar permukiman tidak menjadi lelehan abu-abu dan trotoar tertata rapi
     renderedRoads.forEach((road) => {
-      addRoadPolyline(road.points, road.width, road.width >= 14);
+      let renderWidth = road.width;
+      if (road.type === 'residential' || road.type === 'living_street' || road.type === 'unclassified') {
+        renderWidth = 6.5;
+      } else if (road.type === 'tertiary') {
+        renderWidth = 8.5;
+      } else if (road.type === 'secondary') {
+        renderWidth = 13.0;
+      } else if (road.type === 'primary' || road.type === 'trunk') {
+        renderWidth = Math.min(18.0, Math.max(15.0, road.width));
+      }
+      addRoadPolyline(road.points, renderWidth, renderWidth >= 12.0);
     });
 
     const seamCoreRoadConnectors = collectRoadSeamConnectors(VOID_N_OSM.seamCore.roads, VOID_N_OSM.roads, SEAM_N_CORE, SEAM_ROAD_STITCH_MAX)
