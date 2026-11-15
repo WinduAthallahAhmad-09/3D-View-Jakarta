@@ -13716,16 +13716,16 @@ export class CityScene {
     });
 
     const placeShophouseRow = (roadWidth, chain, ignoreWays) => {
-      visitChain(chain, 13, (bx, bz, angle) => {
+      visitChain(chain, 6.2, (bx, bz, angle) => {
         const nx = Math.cos(angle);
         const nz = -Math.sin(angle);
         [-1, 1].forEach((side) => {
           const hash = Math.abs(Math.sin(bx * 8.13 + bz * 4.71 + side * 3.7));
-          const w = 11 + (1 - hash) * 4;
-          const d = 10.5 + hash * 2.5;
-          const h = 9 + hash * 7;
-          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
-          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 2.2) * side;
+          const w = 7.5 + (1 - hash) * 2.0;
+          const d = 5.2 + hash * 1.5;
+          const h = 8.5 + hash * 4.0;
+          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 1.2) * side;
+          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 1.2) * side;
           const radius = Math.max(w, d) * 0.5;
           const roofW = w + INFILL_ROOF_EAVE * 2;
           if (isBlocked(px, pz, radius, ignoreWays) || isRoofOccupied(px, pz, roofW, d, angle)) return;
@@ -13762,20 +13762,20 @@ export class CityScene {
 
     const warehouseZones = [
       // W1 Kalibata timur: gudang ringan antara Pasar Minggu dan Kalibata.
-      { minX: 300, maxX: 370, minZ: 1650, maxZ: 1720, stepX: 28, stepZ: 24 },
+      { minX: 300, maxX: 370, minZ: 1650, maxZ: 1720, stepX: 18, stepZ: 18 },
       // W2 Pasar Minggu pasar: pergudangan pasar di selatan Jalan Pasar Minggu Raya.
-      { minX: 300, maxX: 360, minZ: 1380, maxZ: 1440, stepX: 28, stepZ: 24 }
+      { minX: 300, maxX: 360, minZ: 1380, maxZ: 1440, stepX: 18, stepZ: 18 }
     ];
     warehouseZones.forEach((zone, zoneIndex) => {
       for (let x = zone.minX; x <= zone.maxX; x += zone.stepX) {
         for (let z = zone.minZ; z <= zone.maxZ; z += zone.stepZ) {
           const hash = Math.abs(Math.sin(x * 4.71 + z * 9.13 + zoneIndex));
-          const w = 19 + hash * 5;
-          const d = 21 + (1 - hash) * 6;
-          const h = 8 + hash * 4;
+          const w = 15 + hash * 4;
+          const d = 16 + (1 - hash) * 5;
+          const h = 7.5 + hash * 3.5;
           const radius = Math.max(w, d) * 0.5;
-          const px = x + (hash - 0.5) * 4;
-          const pz = z + (((hash * 5.7) % 1) - 0.5) * 4;
+          const px = x + (hash - 0.5) * 2;
+          const pz = z + (((hash * 5.7) % 1) - 0.5) * 2;
           const roofW = w + 1.4;
           const roofD = d + 1.4;
           if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
@@ -13805,40 +13805,40 @@ export class CityScene {
 
     const residentialZones = [
       // R1 Pasar Minggu barat: kampung tepi Kali Krukut.
-      { minX: -20, maxX: 100, minZ: 1140, maxZ: 1250, step: 16 },
+      { minX: -80, maxX: 120, minZ: 1130, maxZ: 1300, step: 5.6 },
       // R2 Pasar Minggu timur: permukiman padat di timur Jalan Pasar Minggu Raya.
-      { minX: 250, maxX: 375, minZ: 1300, maxZ: 1420, step: 16 },
+      { minX: 230, maxX: 375, minZ: 1260, maxZ: 1480, step: 5.6 },
       // R3 Pejaten: kampung antara Buncit Raya dan Pasar Minggu Raya.
-      { minX: 130, maxX: 250, minZ: 1140, maxZ: 1235, step: 16 },
+      { minX: 100, maxX: 260, minZ: 1130, maxZ: 1300, step: 5.6 },
       // R4 Cilandak KKO utara: permukiman tepi Jalan Cilandak KKO.
-      { minX: -200, maxX: -100, minZ: 1460, maxZ: 1540, step: 16 },
+      { minX: -230, maxX: -90, minZ: 1320, maxZ: 1540, step: 5.6 },
       // R5 Cilandak KKO selatan: rumah antara Cilandak KKO dan Warung Jati Barat.
-      { minX: -200, maxX: -100, minZ: 1570, maxZ: 1640, step: 16 },
+      { minX: -230, maxX: -80, minZ: 1550, maxZ: 1680, step: 5.6 },
       // R6 Kalibata: kampung di utara TMP Kalibata.
-      { minX: 240, maxX: 375, minZ: 1500, maxZ: 1620, step: 16 },
+      { minX: 230, maxX: 375, minZ: 1490, maxZ: 1680, step: 5.6 },
       // R7 Ragunan barat: permukiman antara Cilandak KKO dan Ragunan.
-      { minX: -190, maxX: -100, minZ: 1690, maxZ: 1840, step: 16 },
+      { minX: -230, maxX: -90, minZ: 1690, maxZ: 1890, step: 5.6 },
       // R8 Ragunan selatan: kampung di selatan Taman Margasatwa Ragunan.
-      { minX: -80, maxX: 60, minZ: 1700, maxZ: 1850, step: 16 },
+      { minX: -80, maxX: 90, minZ: 1700, maxZ: 1880, step: 5.6 },
       // R9 Jagakarsa: permukiman tepi Jalan Jagakarsa.
-      { minX: -160, maxX: -40, minZ: 1940, maxZ: 2030, step: 16 },
+      { minX: -190, maxX: -30, minZ: 1890, maxZ: 2060, step: 5.6 },
       // R10 Srengseng Sawah: kampung antara Lenteng Agung dan Srengseng Sawah.
-      { minX: -220, maxX: -80, minZ: 2070, maxZ: 2220, step: 16 },
+      { minX: -230, maxX: -60, minZ: 2060, maxZ: 2225, step: 5.6 },
       // R11 Lenteng Agung timur: rumah di timur Jalan Lenteng Agung Raya.
-      { minX: 240, maxX: 320, minZ: 1900, maxZ: 2050, step: 16 },
+      { minX: 200, maxX: 375, minZ: 1780, maxZ: 2220, step: 5.6 },
       // R12 Lenteng Agung barat: permukiman di barat Stasiun Lenteng Agung.
-      { minX: -10, maxX: 80, minZ: 1880, maxZ: 1990, step: 16 }
+      { minX: -30, maxX: 120, minZ: 1880, maxZ: 2180, step: 5.6 }
     ];
     residentialZones.forEach((zone, zoneIndex) => {
       for (let x = zone.minX; x <= zone.maxX; x += zone.step) {
         for (let z = zone.minZ; z <= zone.maxZ; z += zone.step) {
           const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233 + zoneIndex));
-          const w = 9 + hash * 3;
-          const d = 10 + (1 - hash) * 3;
-          const h = 6.5 + hash * 3.5;
+          const w = 5.6 + hash * 2.2;
+          const d = 6.2 + (1 - hash) * 2.2;
+          const h = 4.8 + hash * 2.4;
           const radius = Math.max(w, d) * 0.5;
-          const px = x + (hash - 0.5) * 2.4;
-          const pz = z + (((hash * 7.31) % 1) - 0.5) * 2.4;
+          const px = x + (hash - 0.5) * 1.8;
+          const pz = z + (((hash * 7.31) % 1) - 0.5) * 1.8;
           const roofW = w + INFILL_ROOF_EAVE * 2;
           const roofD = d + INFILL_ROOF_EAVE * 2;
           if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
