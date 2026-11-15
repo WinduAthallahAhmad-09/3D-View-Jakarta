@@ -10284,16 +10284,17 @@ export class CityScene {
     });
 
     const placeShophouseRow = (roadWidth, chain, ignoreRoadNames) => {
-      visitChain(chain, 13, (bx, bz, angle) => {
+      visitChain(chain, 5.2, (bx, bz, angle) => {
         const nx = Math.cos(angle);
         const nz = -Math.sin(angle);
         [-1, 1].forEach((side) => {
           const hash = Math.abs(Math.sin(bx * 8.13 + bz * 4.71 + side * 3.7));
-          const w = 11 + (1 - hash) * 4;
-          const d = 10.5 + hash * 2.5;
-          const h = 9 + hash * 7;
-          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 3.2) * side;
-          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 3.2) * side;
+          const w = 6.8 + (1 - hash) * 1.8;
+          const d = 4.8 + hash * 1.2;
+          const h = 8.5 + hash * 4.2;
+          const roadPad = 1.0;
+          const px = bx + nx * (roadWidth * 0.5 + d * 0.5 + roadPad) * side;
+          const pz = bz + nz * (roadWidth * 0.5 + d * 0.5 + roadPad) * side;
           const radius = Math.max(w, d) * 0.5;
           const roofW = w + INFILL_ROOF_EAVE * 2;
           if (isBlocked(px, pz, radius, ignoreRoadNames) || isRoofOccupied(px, pz, roofW, d, angle)) return;
@@ -10308,7 +10309,7 @@ export class CityScene {
             rotY: angle,
             color: shophouseColors[Math.floor(hash * shophouseColors.length) % shophouseColors.length]
           });
-          const roofH = 1.8 + hash * 0.8;
+          const roofH = 1.6 + hash * 0.6;
           roofItems.push({
             x: px,
             y: h,
@@ -10334,15 +10335,17 @@ export class CityScene {
       { minX: 680, maxX: 820, minZ: -40, maxZ: 120, stepX: 28, stepZ: 26 }
     ];
     warehouseZones.forEach((zone, zoneIndex) => {
-      for (let x = zone.minX; x <= zone.maxX; x += zone.stepX) {
-        for (let z = zone.minZ; z <= zone.maxZ; z += zone.stepZ) {
+      const stepX = 14;
+      const stepZ = 14;
+      for (let x = zone.minX; x <= zone.maxX; x += stepX) {
+        for (let z = zone.minZ; z <= zone.maxZ; z += stepZ) {
           const hash = Math.abs(Math.sin(x * 4.71 + z * 9.13 + zoneIndex));
           const w = 13 + hash * 4;
           const d = 15 + (1 - hash) * 4;
-          const h = 8 + hash * 4;
+          const h = 7.5 + hash * 3.5;
           const radius = Math.max(w, d) * 0.5;
-          const px = x + (hash - 0.5) * 4;
-          const pz = z + (((hash * 5.7) % 1) - 0.5) * 4;
+          const px = x + (hash - 0.5) * 1.5;
+          const pz = z + (((hash * 5.7) % 1) - 0.5) * 1.5;
           const roofW = w + 1.4;
           const roofD = d + 1.4;
           if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
@@ -10371,38 +10374,49 @@ export class CityScene {
     });
 
     const residentialStep = 13;
+    const subOffsets = [
+      [-3.5, -3.5],
+      [0, -3.5],
+      [3.5, -3.5],
+      [-3.5, 3.5],
+      [0, 3.5],
+      [3.5, 3.5]
+    ];
     for (let x = VOID_N_CLIP_BOX.minX + 6; x <= VOID_N_CLIP_BOX.maxX - 6; x += residentialStep) {
       for (let z = VOID_N_CLIP_BOX.minZ + 6; z <= VOID_N_CLIP_BOX.maxZ - 6; z += residentialStep) {
-        const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233));
-        const w = 7 + hash * 2.5;
-        const d = 8 + (1 - hash) * 2.5;
-        const h = 6.5 + hash * 3.5;
-        const radius = Math.max(w, d) * 0.5;
-        const px = x + (hash - 0.5) * 2.4;
-        const pz = z + (((hash * 7.31) % 1) - 0.5) * 2.4;
-        const roofW = w + INFILL_ROOF_EAVE * 2;
-        const roofD = d + INFILL_ROOF_EAVE * 2;
-        if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
-        putRoof(px, pz, roofW, roofD);
-        residentialItems.push({
-          x: px,
-          y: h * 0.5,
-          z: pz,
-          w,
-          h,
-          d,
-          color: residentialColors[Math.floor(hash * residentialColors.length) % residentialColors.length]
-        });
-        const roofH = 1.5 + hash * 0.9;
-        roofItems.push({
-          x: px,
-          y: h,
-          z: pz,
-          w: roofW,
-          h: roofH,
-          d: roofD,
-          color: roofColors[Math.floor(hash * roofColors.length) % roofColors.length]
-        });
+        for (let s = 0; s < subOffsets.length; s++) {
+          const [ox, oz] = subOffsets[s];
+          const hash = Math.abs(Math.sin((x + ox) * 12.9898 + (z + oz) * 78.233 + s * 3.7));
+          const w = 4.6 + hash * 1.6;
+          const d = 5.0 + (1 - hash) * 1.6;
+          const h = 4.8 + hash * 2.4;
+          const radius = Math.max(w, d) * 0.5;
+          const px = x + ox + (hash - 0.5) * 0.6;
+          const pz = z + oz + (((hash * 7.31) % 1) - 0.5) * 0.6;
+          const roofW = w + INFILL_ROOF_EAVE * 2;
+          const roofD = d + INFILL_ROOF_EAVE * 2;
+          if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
+          putRoof(px, pz, roofW, roofD);
+          residentialItems.push({
+            x: px,
+            y: h * 0.5,
+            z: pz,
+            w,
+            h,
+            d,
+            color: residentialColors[Math.floor(hash * residentialColors.length) % residentialColors.length]
+          });
+          const roofH = 1.4 + hash * 0.7;
+          roofItems.push({
+            x: px,
+            y: h,
+            z: pz,
+            w: roofW,
+            h: roofH,
+            d: roofD,
+            color: roofColors[Math.floor(hash * roofColors.length) % roofColors.length]
+          });
+        }
       }
     }
 
@@ -10471,15 +10485,6 @@ export class CityScene {
     };
   }
 
-  /**
-   * Void M Tahap 3 — infill urban fabric Jatiwaringin–Pondok Gede.
-   *
-   * 1. Rumah kampung di dua belas kantong antara Jatiwaringin dan Pondok Gede.
-   * 2. Ruko menyusur sembilan koridor OSM, kedua sisi jalan.
-   * 3. Gudang ringan di kantong Jatiwaringin barat.
-   *
-   * Lahan Park-and-Ride Pinang Ranti disisihkan untuk Tahap 4.
-   */
   buildVoidMInfill() {
     const dummy = new THREE.Object3D();
     const baseBoxGeo = new THREE.BoxGeometry(1, 1, 1);
