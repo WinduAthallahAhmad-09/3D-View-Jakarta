@@ -8730,18 +8730,22 @@ export class CityScene {
         const [x1, z1] = points[i];
         const [x2, z2] = points[i + 1];
         const len = Math.hypot(x2 - x1, z2 - z1);
-        if (len < 0.5) continue;
+        if (len < 0.8) continue;
         const angle = Math.atan2(x2 - x1, z2 - z1);
         const mx = (x1 + x2) * 0.5;
         const mz = (z1 + z2) * 0.5;
+        if (insideAnchorSite(mx, mz)) continue;
 
-        roadGeos.push(makeBox(width, 0.25, len + 0.8, mx, 0.125, mz, angle));
+        // Permukaan aspal jalan dinaikkan sedikit (top=0.26, tebal 0.26) agar menutup trotoar persimpangan
+        roadGeos.push(makeBox(width, 0.26, len + 0.15, mx, 0.13, mz, angle));
         if (hasSidewalk) {
           const sw = width >= 14 ? 2.8 : 2.2;
           [-1, 1].forEach((dir) => {
             const px = Math.cos(angle) * (width * 0.5 + sw * 0.5) * dir;
             const pz = -Math.sin(angle) * (width * 0.5 + sw * 0.5) * dir;
-            sidewalkGeos.push(makeBox(sw, 0.4, len + 0.8, mx + px, 0.2, mz + pz, angle));
+            // Elevasi trotoar (top=0.22, tebal 0.22) dengan panjang pas (len), sehingga aspal persimpangan
+            // secara alami menutupi trotoar dan mencegah garis putih/undakan memotong badan jalan
+            sidewalkGeos.push(makeBox(sw, 0.22, len, mx + px, 0.11, mz + pz, angle));
           });
         }
       }
@@ -8802,26 +8806,83 @@ export class CityScene {
       return [a[0] + t * rx, a[1] + t * rz];
     };
 
+    const isTollRoad = (r) => r.type === 'motorway' || r.type === 'motorway_link' || (r.name && r.name.toLowerCase().includes('tol'));
+
+    // Koridor arteri yang sudah dibangun rapi dengan median taman & trotoar di buildEastJakartaInfrastructure
+    const isManualEastJkt = (r) => {
+      if (!r.name) return false;
+      if (r.name === 'Jalan Pemuda') return true;
+      if (r.name === 'Jalan Pramuka') {
+        const midX = r.points.reduce((s, p) => s + p[0], 0) / r.points.length;
+        if (midX <= 630) return true;
+      }
+      if (r.name === 'Jalan Matraman Raya') return true;
+      if (r.name.includes('Basuki Rahmat') || r.name.includes('Kolonel Sugiono')) return true;
+      if (r.name.includes('D. I. Panjaitan') || r.name.includes('Mayjen Sutoyo')) return true;
+      return false;
+    };
+
+    const renderedRoads = [];
     VOID_N_OSM.roads.forEach((road) => {
-      addRoadPolyline(road.points, road.width, road.width >= 10);
+      if (isTollRoad(road)) return;
+      if (isManualEastJkt(road)) return;
+
+      // Hapus segmen mikro (< 3m) yang menghasilkan artefak balok kotak mengambang
+      let totalLen = 0;
+      for (let i = 0; i < road.points.length - 1; i++) {
+        totalLen += Math.hypot(road.points[i + 1][0] - road.points[i][0], road.points[i + 1][1] - road.points[i][1]);
+      }
+      if (totalLen < 3.0) return;
+
+      // Deduplikasi lajur kembar paralel (dual-carriageway, jalur busway, jalur lambat) pada koridor yang sama
+      // agar tidak bertumpuk menjadi garis barcode
+      if (road.name) {
+        const pStart = road.points[0];
+        const pEnd = road.points[road.points.length - 1];
+        const roadAngle = Math.atan2(pEnd[0] - pStart[0], pEnd[1] - pStart[1]);
+        const roadMid = [(pStart[0] + pEnd[0]) * 0.5, (pStart[1] + pEnd[1]) * 0.5];
+
+        for (const other of renderedRoads) {
+          if (other.name === road.name) {
+            const oStart = other.points[0];
+            const oEnd = other.points[other.points.length - 1];
+            const oAngle = Math.atan2(oEnd[0] - oStart[0], oEnd[1] - oStart[1]);
+            let diff = Math.abs(roadAngle - oAngle);
+            if (diff > Math.PI) diff = 2 * Math.PI - diff;
+            if (diff > Math.PI * 0.5) diff = Math.PI - diff;
+            if (diff < 0.35) {
+              const oMid = [(oStart[0] + oEnd[0]) * 0.5, (oStart[1] + oEnd[1]) * 0.5];
+              if (Math.hypot(roadMid[0] - oMid[0], roadMid[1] - oMid[1]) < 14) {
+                return;
+              }
+            }
+          }
+        }
+      }
+
+      renderedRoads.push(road);
+    });
+
+    renderedRoads.forEach((road) => {
+      addRoadPolyline(road.points, road.width, road.width >= 14);
     });
 
     const seamCoreRoadConnectors = collectRoadSeamConnectors(VOID_N_OSM.seamCore.roads, VOID_N_OSM.roads, SEAM_N_CORE, SEAM_ROAD_STITCH_MAX)
       .filter((connector) => !insideAnchorSite(connector.from[0], connector.from[1]));
     seamCoreRoadConnectors.forEach((connector) => {
-      addRoadPolyline([connector.from, connector.to], connector.width, connector.width >= 10);
+      addRoadPolyline([connector.from, connector.to], connector.width, connector.width >= 14);
     });
 
     const seamJRoadConnectors = collectRoadSeamConnectors(VOID_N_OSM.roads, VOID_J_OSM.roads, SEAM_N_J, SEAM_ROAD_STITCH_MAX)
       .filter((connector) => !insideAnchorSite(connector.from[0], connector.from[1]));
     seamJRoadConnectors.forEach((connector) => {
-      addRoadPolyline([connector.from, connector.to], connector.width, connector.width >= 10);
+      addRoadPolyline([connector.from, connector.to], connector.width, connector.width >= 14);
     });
 
     const seamFRoadConnectors = collectRoadSeamConnectors(VOID_N_OSM.roads, VOID_F_OSM.roads, SEAM_N_F, SEAM_ROAD_STITCH_MAX)
       .filter((connector) => !insideAnchorSite(connector.from[0], connector.from[1]));
     seamFRoadConnectors.forEach((connector) => {
-      addRoadPolyline([connector.from, connector.to], connector.width, connector.width >= 10);
+      addRoadPolyline([connector.from, connector.to], connector.width, connector.width >= 14);
     });
 
     VOID_N_OSM.waterways.forEach((waterway) => {
@@ -8979,7 +9040,7 @@ export class CityScene {
       usedBank.add(keyA);
       usedBank.add(keyB);
       const width = Math.max(6, Math.min(a.width, b.width));
-      addRoadPolyline([[a.x, a.z], [b.x, b.z]], width, width >= 10);
+      addRoadPolyline([[a.x, a.z], [b.x, b.z]], width, width >= 14);
       if (!crossings.some((c) => Math.hypot(c.x - crossing.x, c.z - crossing.z) < 12)) {
         crossings.push({
           x: crossing.x,
@@ -9014,7 +9075,7 @@ export class CityScene {
         .map((road) => road.name)
     );
     let lampCount = 0;
-    VOID_N_OSM.roads.filter((road) => lampNames.has(road.name)).forEach((road) => {
+    renderedRoads.filter((road) => lampNames.has(road.name)).forEach((road) => {
       [1, -1].forEach((side) => {
         samplePolyline(road.points, 120, (road.width * 0.5 + 1.4) * side).forEach((p) => {
           if (insideAnchorSite(p.x, p.z)) return;
@@ -9037,7 +9098,7 @@ export class CityScene {
         .filter((road) => road.name && treeRoadKeywords.some((keyword) => road.name.includes(keyword)))
         .map((road) => road.name)
     );
-    VOID_N_OSM.roads.filter((road) => treeRoadNames.has(road.name)).forEach((road) => {
+    renderedRoads.filter((road) => treeRoadNames.has(road.name)).forEach((road) => {
       [1, -1].forEach((side) => {
         samplePolyline(road.points, 76, (road.width * 0.5 + 6) * side).forEach((p, i) => {
           addTree(p.x, p.z, 0.85 + (i % 4) * 0.06);
