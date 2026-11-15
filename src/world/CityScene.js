@@ -10720,16 +10720,17 @@ export class CityScene {
     });
 
     const placeShophouseRow = (roadWidth, chain, ignoreRoadNames) => {
-      visitChain(chain, 13, (bx, bz, angle) => {
+      visitChain(chain, 5.2, (bx, bz, angle) => {
         const nx = Math.cos(angle);
         const nz = -Math.sin(angle);
         [-1, 1].forEach((side) => {
           const hash = Math.abs(Math.sin(bx * 8.13 + bz * 4.71 + side * 3.7));
-          const w = 11 + (1 - hash) * 4;
-          const d = 10.5 + hash * 2.5;
-          const h = 9 + hash * 7;
-          const px = bx + nx * (roadWidth * 0.5 + w * 0.5 + 3.2) * side;
-          const pz = bz + nz * (roadWidth * 0.5 + w * 0.5 + 3.2) * side;
+          const w = 6.8 + (1 - hash) * 1.8;
+          const d = 4.8 + hash * 1.2;
+          const h = 8.5 + hash * 4.2;
+          const roadPad = 1.0;
+          const px = bx + nx * (roadWidth * 0.5 + d * 0.5 + roadPad) * side;
+          const pz = bz + nz * (roadWidth * 0.5 + d * 0.5 + roadPad) * side;
           const radius = Math.max(w, d) * 0.5;
           const roofW = w + INFILL_ROOF_EAVE * 2;
           if (isBlocked(px, pz, radius, ignoreRoadNames) || isRoofOccupied(px, pz, roofW, d, angle)) return;
@@ -10744,7 +10745,7 @@ export class CityScene {
             rotY: angle,
             color: shophouseColors[Math.floor(hash * shophouseColors.length) % shophouseColors.length]
           });
-          const roofH = 1.8 + hash * 0.8;
+          const roofH = 1.6 + hash * 0.6;
           roofItems.push({
             x: px,
             y: h,
@@ -10770,15 +10771,17 @@ export class CityScene {
       { minX: 1000, maxX: 1090, minZ: 1000, maxZ: 1072, stepX: 28, stepZ: 26 }
     ];
     warehouseZones.forEach((zone, zoneIndex) => {
-      for (let x = zone.minX; x <= zone.maxX; x += zone.stepX) {
-        for (let z = zone.minZ; z <= zone.maxZ; z += zone.stepZ) {
+      const stepX = 14;
+      const stepZ = 14;
+      for (let x = zone.minX; x <= zone.maxX; x += stepX) {
+        for (let z = zone.minZ; z <= zone.maxZ; z += stepZ) {
           const hash = Math.abs(Math.sin(x * 4.71 + z * 9.13 + zoneIndex));
-          const w = 19 + hash * 5;
-          const d = 21 + (1 - hash) * 6;
-          const h = 8 + hash * 4;
+          const w = 13 + hash * 3;
+          const d = 14 + (1 - hash) * 4;
+          const h = 7.5 + hash * 3.5;
           const radius = Math.max(w, d) * 0.5;
-          const px = x + (hash - 0.5) * 4;
-          const pz = z + (((hash * 5.7) % 1) - 0.5) * 4;
+          const px = x + (hash - 0.5) * 1.5;
+          const pz = z + (((hash * 5.7) % 1) - 0.5) * 1.5;
           const roofW = w + 1.4;
           const roofD = d + 1.4;
           if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
@@ -10808,40 +10811,41 @@ export class CityScene {
 
     const residentialZones = [
       // R1 Jatiwaringin utara: rumah di timur koridor Jati Waringin.
-      { minX: 1180, maxX: 1310, minZ: 1000, maxZ: 1100, step: 13 },
+      { minX: 1120, maxX: 1330, minZ: 975, maxZ: 1110, step: 13 },
       // R2 Klamono utara: kampung antara Jalan Klamono dan clip utara.
       { minX: 1320, maxX: 1450, minZ: 972, maxZ: 1060, step: 13 },
       // R3 Jatikramat utara: permukiman di utara Jalan Raya Jatikramat.
-      { minX: 1600, maxX: 1740, minZ: 972, maxZ: 1080, step: 13 },
+      { minX: 1440, maxX: 1790, minZ: 972, maxZ: 1110, step: 13 },
       // R4 Bumi Jatiwaringin: kantong rumah di barat Jalan Raya Jati Makmur.
-      { minX: 1170, maxX: 1330, minZ: 1100, maxZ: 1180, step: 13 },
+      { minX: 1100, maxX: 1360, minZ: 1090, maxZ: 1210, step: 13 },
       // R5 Jati Makmur tengah: rumah petak antara Kemang Sari dan Jatikramat.
-      { minX: 1600, maxX: 1680, minZ: 1120, maxZ: 1200, step: 13 },
+      { minX: 1350, maxX: 1690, minZ: 1100, maxZ: 1220, step: 13 },
       // R6 Ratna utara: permukiman tepi barat Jalan Dokter Ratna.
-      { minX: 1690, maxX: 1780, minZ: 1120, maxZ: 1200, step: 13 },
+      { minX: 1680, maxX: 1795, minZ: 1100, maxZ: 1220, step: 13 },
       // R7 Jatikramat selatan: kampung di selatan Jalan Raya Jatikramat.
-      { minX: 1600, maxX: 1740, minZ: 1200, maxZ: 1280, step: 13 },
+      { minX: 1560, maxX: 1795, minZ: 1200, maxZ: 1365, step: 13 },
       // R8 Hankam selatan: rumah di timur Jalan Hankam Raya.
-      { minX: 1345, maxX: 1450, minZ: 1280, maxZ: 1360, step: 13 },
+      { minX: 1330, maxX: 1560, minZ: 1220, maxZ: 1365, step: 13 },
       // R9 Pinang Ranti timur: permukiman antara Pondok Gede dan Pasar Gardu.
-      { minX: 1040, maxX: 1150, minZ: 1230, maxZ: 1300, step: 13 },
+      { minX: 1030, maxX: 1210, minZ: 1200, maxZ: 1365, step: 13 },
       // R10 Pasar Gardu utara: kantong rumah di barat Jalan Pondok Gede.
       { minX: 970, maxX: 1035, minZ: 1230, maxZ: 1300, step: 13 },
       // R11 Pondok Gede selatan: rumah petak di selatan koridor utama.
-      { minX: 1200, maxX: 1320, minZ: 1300, maxZ: 1360, step: 13 },
+      { minX: 1190, maxX: 1340, minZ: 1260, maxZ: 1365, step: 13 },
       // R12 Jati Makmur tenggara: kampung di selatan Jalan Raya Jati Makmur.
-      { minX: 1460, maxX: 1580, minZ: 1300, maxZ: 1360, step: 13 }
+      { minX: 965, maxX: 1130, minZ: 1070, maxZ: 1220, step: 13 }
     ];
     residentialZones.forEach((zone, zoneIndex) => {
-      for (let x = zone.minX; x <= zone.maxX; x += zone.step) {
-        for (let z = zone.minZ; z <= zone.maxZ; z += zone.step) {
+      const step = 3.8;
+      for (let x = zone.minX; x <= zone.maxX; x += step) {
+        for (let z = zone.minZ; z <= zone.maxZ; z += step) {
           const hash = Math.abs(Math.sin(x * 12.9898 + z * 78.233 + zoneIndex));
-          const w = 7 + hash * 2.5;
-          const d = 8 + (1 - hash) * 2.5;
-          const h = 6.5 + hash * 3.5;
+          const w = 4.8 + hash * 1.8;
+          const d = 5.2 + (1 - hash) * 1.8;
+          const h = 4.8 + hash * 2.4;
           const radius = Math.max(w, d) * 0.5;
-          const px = x + (hash - 0.5) * 2.4;
-          const pz = z + (((hash * 7.31) % 1) - 0.5) * 2.4;
+          const px = x + (hash - 0.5) * 1.4;
+          const pz = z + (((hash * 7.31) % 1) - 0.5) * 1.4;
           const roofW = w + INFILL_ROOF_EAVE * 2;
           const roofD = d + INFILL_ROOF_EAVE * 2;
           if (isBlocked(px, pz, radius) || isRoofOccupied(px, pz, roofW, roofD, 0)) continue;
@@ -10855,7 +10859,7 @@ export class CityScene {
             d,
             color: residentialColors[Math.floor(hash * residentialColors.length) % residentialColors.length]
           });
-          const roofH = 1.5 + hash * 0.9;
+          const roofH = 1.4 + hash * 0.7;
           roofItems.push({
             x: px,
             y: h,
@@ -10935,17 +10939,7 @@ export class CityScene {
     };
   }
 
-  /**
-   * Void M Tahap 4 — transit Jatiwaringin–Pondok Gede.
-   *
-   * 1. Park-and-Ride Pinang Ranti pada lahan 30x18 yang sudah dipesan infill;
-   *    driveway menyentuh Jalan Gatotkaca Dirgantara II.
-   * 2. Enam feeder halte: tiga gerbang anchor, satu di akses Terminal Pinang
-   *    Ranti, dan dua simpul kawasan. Titik diaudit agar peron tidak menembus
-   *    tapak anchor, waterway, atau badan air.
-   * 3. Lima draw call, papan menyala malam, tanpa PointLight baru.
-   */
-  buildVoidMTransit() {
+    buildVoidMTransit() {
     const concreteGeos = [];
     const steelGeos = [];
     const signGeos = [];
